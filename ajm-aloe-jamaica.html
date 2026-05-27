@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AJM - Aloe Jamaica | Organic Design. Digital Growth. Authentic Identity.</title>
+    <link rel="icon" href="Aloe%20Favicon.png" type="image/png" />
+    <meta name="description"
+        content="AJM - Aloe Jamaica is a full-service creative agency specializing in brand design, digital asset development, and niche marketing materials for modern businesses." />
+
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=Syne:wght@700;800&display=swap");
+
+        :root {
+            --dark: #05070d;
+            --dark-soft: #0d111c;
+            --white: #ffffff;
+            --muted: #b9c0d4;
+            --green: #17d66f;
+            --red: #ff2b4f;
+            --yellow: #ffcf33;
+            --blue: #0d6efd;
+            --glass-border: rgba(255, 255, 255, 0.16);
+            --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+            --radius: 30px;
+            --max: 1180px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: "Space Grotesk", "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(23, 214, 111, 0.16), transparent 28%),
+                radial-gradient(circle at 82% 0%, rgba(255, 43, 79, 0.16), transparent 34%),
+                radial-gradient(circle at 80% 72%, rgba(255, 207, 51, 0.12), transparent 28%),
+                var(--dark);
+            color: var(--white);
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page-noise {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.08;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, .14) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .14) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+        }
+
+        .container {
+            width: min(var(--max), calc(100% - 36px));
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .topbar {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(var(--max), calc(100% - 28px));
+            z-index: 50;
+            border: 1px solid var(--glass-border);
+            background: rgba(5, 7, 13, 0.76);
+            backdrop-filter: blur(18px);
+            border-radius: 999px;
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px 12px 18px;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 220px;
+        }
+
+        .brand-mark {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            color: white;
+            background: linear-gradient(135deg, rgba(23, 214, 111, 0.95), rgba(255, 43, 79, 0.88), rgba(255, 207, 51, 0.9));
+            box-shadow: 0 0 30px rgba(23, 214, 111, 0.3);
+        }
+
+        .brand-text strong {
+            display: block;
+            font-size: 0.95rem;
+            letter-spacing: 0.12em;
+        }
+
+        .brand-text span {
+            color: var(--muted);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .brand-text {
+            min-width: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-links a {
+            color: #e8ecff;
+            font-size: 0.88rem;
+            padding: 10px 12px;
+            border-radius: 999px;
+            transition: 0.25s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-toggle {
+            display: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            font-size: 1.3rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            border: 0;
+            cursor: pointer;
+            padding: 13px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            letter-spacing: 0.01em;
+            transition: 0.28s ease;
+            font-size: 0.92rem;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            color: #120607;
+            background: linear-gradient(135deg, var(--green), var(--yellow));
+            box-shadow: 0 14px 36px rgba(23, 214, 111, 0.24);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 48px rgba(23, 214, 111, 0.34);
+        }
+
+        .btn-ghost {
+            color: white;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.14);
+            transform: translateY(-3px);
+        }
+
+        .hero {
+            min-height: 100vh;
+            padding: 154px 0 84px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.03fr 0.97fr;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #f5f7ff;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px 13px;
+            border-radius: 999px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 0.86rem;
+        }
+
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 0 0 rgba(23, 214, 111, 0.7);
+            animation: pulse 1.7s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(23, 214, 111, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(23, 214, 111, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(23, 214, 111, 0);
+            }
+        }
+
+        .hero h1,
+        .section h2,
+        .panel-card h3,
+        .service-card h3,
+        .pricing-card h3,
+        .contact-info h3,
+        .contact-form h3,
+        .ajm-panel h3,
+        .asset-card h3 {
+            font-family: "Syne", "Trebuchet MS", sans-serif;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.8rem, 7vw, 6rem);
+            line-height: 0.95;
+            letter-spacing: -0.07em;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 span {
+            display: block;
+            background: linear-gradient(90deg, var(--white), var(--green), var(--yellow), var(--red));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: clamp(1.02rem, 1.7vw, 1.2rem);
+            line-height: 1.8;
+            max-width: 680px;
+            margin-bottom: 28px;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 13px;
+            margin-bottom: 34px;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat {
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 22px;
+            padding: 18px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 6px;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 0.86rem;
+            line-height: 1.4;
+        }
+
+        .ajm-panel {
+            border-radius: 36px;
+            border: 1px solid var(--glass-border);
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
+                rgba(255, 255, 255, 0.05);
+            box-shadow: var(--shadow);
+            padding: 26px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ajm-panel::before {
+            content: "";
+            position: absolute;
+            inset: -10% auto auto -10%;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: rgba(23, 214, 111, 0.22);
+            filter: blur(14px);
+        }
+
+        .ajm-panel::after {
+            content: "";
+            position: absolute;
+            right: -80px;
+            bottom: -80px;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: rgba(255, 43, 79, 0.18);
+            filter: blur(16px);
+        }
+
+        .ajm-panel>* {
+            position: relative;
+            z-index: 2;
+        }
+
+        .ajm-panel h3 {
+            font-size: 2rem;
+            margin-bottom: 14px;
+            letter-spacing: -0.05em;
+        }
+
+        .ajm-panel p {
+            color: var(--muted);
+            line-height: 1.8;
+            margin-bottom: 18px;
+        }
+
+        .panel-stack {
+            display: grid;
+            gap: 14px;
+        }
+
+        .stack-card {
+            border-radius: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.07);
+            padding: 18px;
+        }
+
+        .stack-card strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .stack-card span {
+            color: var(--muted);
+            line-height: 1.65;
+            font-size: 0.92rem;
+        }
+
+        .section {
+            padding: 92px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 780px;
+            margin: 0 auto 46px;
+        }
+
+        .section-kicker {
+            color: var(--green);
+            font-size: 0.86rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .section h2 {
+            font-size: clamp(2rem, 4vw, 4rem);
+            line-height: 1;
+            letter-spacing: -0.055em;
+            margin-bottom: 18px;
+        }
+
+        .section-header p {
+            color: var(--muted);
+            line-height: 1.8;
+            font-size: 1.04rem;
+        }
+
+        .intro-grid,
+        .contact-wrap {
+            display: grid;
+            grid-template-columns: 0.95fr 1.05fr;
+            gap: 22px;
+            align-items: stretch;
+        }
+
+        .panel-card,
+        .contact-info,
+        .contact-form {
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+        }
+
+        .visual-banner {
+            width: 100%;
+            height: 380px;
+            border-radius: var(--radius);
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .visual-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(0deg, rgba(5, 7, 13, 0.8) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .panel-card h3 {
+            font-size: 1.65rem;
+            margin-bottom: 14px;
+        }
+
+        .panel-card p,
+        .contact-info p,
+        .contact-form p {
+            color: var(--muted);
+            line-height: 1.78;
+            margin-bottom: 18px;
+        }
+
+        .check-list {
+            list-style: none;
+            display: grid;
+            gap: 12px;
+        }
+
+        .check-list li {
+            position: relative;
+            padding-left: 34px;
+            color: #e9eeff;
+            line-height: 1.55;
+        }
+
+        .check-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+            color: #04110b;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--green), var(--yellow));
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .pricing-grid,
+        .assets-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .service-card,
+        .pricing-card,
+        .asset-card {
+            border-radius: 28px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.07);
+            padding: 24px;
+            min-height: 230px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.28s ease;
+        }
+
+        .service-card::before,
+        .pricing-card::before,
+        .asset-card::before {
+            content: "";
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: var(--accent, var(--green));
+            opacity: 0.16;
+            filter: blur(16px);
+            position: absolute;
+            right: -20px;
+            top: -20px;
+        }
+
+        .service-card:hover,
+        .pricing-card:hover,
+        .asset-card:hover {
+            transform: translateY(-7px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .service-icon,
+        .pricing-icon,
+        .asset-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 19px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            margin-bottom: 22px;
+            font-size: 1.18rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            position: relative;
+            z-index: 2;
+        }
+
+        .service-card h3,
+        .pricing-card h3,
+        .asset-card h3 {
+            position: relative;
+            z-index: 2;
+            font-size: 1.28rem;
+            margin-bottom: 12px;
+        }
+
+        .service-card p,
+        .pricing-card p,
+        .asset-card p {
+            position: relative;
+            z-index: 2;
+            color: var(--muted);
+            line-height: 1.72;
+            font-size: 0.96rem;
+        }
+
+        .note-pill {
+            display: inline-flex;
+            padding: 8px 11px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 0.82rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .contact-info {
+            background:
+                radial-gradient(circle at 0% 0%, rgba(23, 214, 111, 0.18), transparent 40%),
+                rgba(255, 255, 255, 0.07);
+        }
+
+        .contact-info h3,
+        .contact-form h3 {
+            font-size: 2rem;
+            margin-bottom: 14px;
+            letter-spacing: -0.04em;
+        }
+
+        .contact-lines {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .contact-line {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.13);
+        }
+
+        .contact-line span:first-child {
+            width: 36px;
+            height: 36px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-line span:last-child {
+            flex: 1;
+            overflow-wrap: anywhere;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            color: #eef2ff;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.09);
+            color: white;
+            border-radius: 17px;
+            padding: 14px 15px;
+            outline: none;
+            font: inherit;
+        }
+
+        select option {
+            color: #111827;
+        }
+
+        textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: rgba(23, 214, 111, 0.7);
+            box-shadow: 0 0 0 4px rgba(23, 214, 111, 0.12);
+        }
+
+        .form-note {
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            margin-top: 14px;
+        }
+
+        /* --- Floating WhatsApp Button --- */
+        .wa-float {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #25D366;
+            color: #fff;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 0.9rem;
+            font-weight: 800;
+            padding: 13px 20px 13px 16px;
+            border-radius: 999px;
+            box-shadow: 0 8px 32px rgba(37, 211, 102, 0.38);
+            text-decoration: none;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            animation: waFloat 3s ease-in-out infinite;
+        }
+        .wa-float:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 14px 44px rgba(37, 211, 102, 0.52);
+        }
+        .wa-float svg { flex-shrink: 0; }
+        @keyframes waFloat {
+            0%, 100% { box-shadow: 0 8px 32px rgba(37, 211, 102, 0.38); }
+            50% { box-shadow: 0 12px 44px rgba(37, 211, 102, 0.58); }
+        }
+        @media (max-width: 640px) {
+            .wa-float {
+                bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+                right: 16px;
+                width: 54px;
+                height: 54px;
+                padding: 0;
+                border-radius: 50%;
+                font-size: 0;
+                gap: 0;
+                justify-content: center;
+                align-items: center;
+            }
+            .wa-float svg {
+                width: 28px;
+                height: 28px;
+            }
+        }
+        .submit-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 4px;
+        }
+        .btn-whatsapp {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 13px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.92rem;
+            transition: 0.28s ease;
+            white-space: nowrap;
+            cursor: pointer;
+            background: #25D366;
+            color: white;
+            border: none;
+            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.28);
+        }
+        .btn-whatsapp:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 36px rgba(37, 211, 102, 0.42);
+        }
+        .footer {
+            border-top: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.22);
+            padding: 34px 0;
+        }
+
+        .footer-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #e9eeff;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: 0.7s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 980px) {
+            .nav-links,
+            .nav-actions {
+                display: none;
+            }
+
+            .mobile-toggle {
+                display: grid;
+                place-items: center;
+            }
+
+            .topbar.open {
+                border-radius: 26px;
+            }
+
+            .topbar.open .nav {
+                align-items: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .topbar.open .nav-links,
+            .topbar.open .nav-actions {
+                display: flex;
+                position: static;
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                background: rgba(5, 7, 13, 0.96);
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                padding: 14px;
+                backdrop-filter: blur(18px);
+                margin-top: 14px;
+            }
+
+            .topbar.open .nav-actions {
+                margin-top: 12px;
+            }
+
+            .topbar.open .nav-links a,
+            .topbar.open .nav-actions .btn {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .hero {
+                padding-top: 130px;
+            }
+
+            .hero-grid,
+            .intro-grid,
+            .contact-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            .services-grid,
+            .pricing-grid,
+            .assets-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                width: min(100% - 24px, var(--max));
+            }
+
+            .topbar {
+                top: 10px;
+                width: calc(100% - 18px);
+            }
+
+            .nav {
+                padding: 10px 12px 10px 14px;
+            }
+
+            .brand-text strong {
+                font-size: 0.78rem;
+            }
+
+            .brand {
+                min-width: auto;
+            }
+
+            .brand-text span {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 118px;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .hero-actions .btn {
+                width: 100%;
+            }
+
+            .hero-stats,
+            .services-grid,
+            .pricing-grid,
+            .assets-grid,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ajm-panel,
+            .panel-card,
+            .service-card,
+            .pricing-card,
+            .asset-card,
+            .contact-info,
+            .contact-form {
+                padding: 22px;
+            }
+
+            .service-card,
+            .pricing-card,
+            .asset-card {
+                min-height: auto;
+            }
+
+            .contact-line {
+                align-items: flex-start;
+            }
+
+            .footer-inner {
+                align-items: flex-start;
+            }
+
+            .section {
+                padding: 68px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-noise"></div>
+
+    <header class="topbar" id="topbar">
+        <nav class="nav">
+            <a href="index.html" class="brand" aria-label="Back to USSE Home">
+                <img src="Aloe%20Logo.png" alt="Aloe Logo" style="height: 68px; width: auto; border-radius: 12px;">
+                <div class="brand-text">
+                    <strong>AJM - ALOE JAMAICA</strong>
+                    <span>Organic Design. Digital Growth.</span>
+                </div>
+            </a>
+
+            <div class="nav-links">
+                <a href="#overview">Overview</a>
+                <a href="#services">Services</a>
+                <a href="ajm-advertising-hub.html" style="color: var(--yellow);">Ad Hub</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#assets">Assets</a>
+                <a href="#contact">Contact</a>
+            </div>
+
+            <div class="nav-actions">
+                <a class="btn btn-ghost" href="index.html">Back to USSE Hub</a>
+                <a class="btn btn-primary" href="#contact">Start a Brand Launch</a>
+            </div>
+
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Open menu">☰</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="container hero-grid">
+                <div class="hero-copy reveal">
+                    <div class="eyebrow">
+                        <span class="pulse-dot"></span>
+                        Creative & Brand Development &mdash; Digital-First Studio, Jamaica
+                    </div>
+                    <h1>
+                        AJM - Aloe Jamaica
+                        <span>Organic Design. Digital Growth. Authentic Identity.</span>
+                    </h1>
+
+                    <p>
+                        AJM turns brand complexity into clarity. From bold visual identities to polished digital platforms, we give modern businesses a look and presence that actually works.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a class="btn btn-primary" href="#contact">Launch My Brand</a>
+                        <a class="btn btn-ghost" href="ajm-advertising-hub.html" style="border-color: var(--yellow);">Visit Advertising Hub</a>
+                        <a class="btn btn-ghost" href="index.html#branches">Back to the Hub</a>
+                    </div>
+
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <strong>Creative Design</strong>
+                            <span>Customized artwork, illustrations, floor plans, and signage for brands that need visual distinction.</span>
+                        </div>
+                        <div class="stat">
+                            <strong>Digital Development</strong>
+                            <span>Web page design, database platforms, and banner campaigns built for digital-first growth.</span>
+                        </div>
+                        <div class="stat">
+                            <strong>Brand Collateral</strong>
+                            <span>Launch-ready flyers, brochures, menu presentations, stationery, and operational design assets.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-logo reveal" style="display: flex; align-items: center; justify-content: center;">
+                    <img src="Aloe%20Logo.png" alt="AJM Aloe Jamaica Logo" style="width: 100%; max-width: 500px; height: auto; object-fit: contain; filter: drop-shadow(0 30px 60px rgba(0,0,0,0.6));">
+                </div>
+            </div>
+        </section>
+
+        <section class="section" style="padding-top: 0; padding-bottom: 20px;">
+            <div class="container">
+                <div class="ajm-panel reveal">
+                    <h3>Where brand complexity comes to breathe</h3>
+                    <p>
+                        Aloe Jamaica. The name says it all. We soothe the chaos of building a brand and bring something coherent, beautiful, and digitally fluent out the other side.
+                    </p>
+
+                    <div class="panel-stack">
+                        <div class="stack-card">
+                            <strong>Digital-first, always</strong>
+                            <span>Our strongest work lives online — banners, web platforms, illustrations, and visual systems that perform in a digital economy.</span>
+                        </div>
+
+                        <div class="stack-card">
+                            <strong>Physical collateral, when it matters</strong>
+                            <span>High-quality, limited-run printed pieces and stationery for clients who need tangible brand presence alongside their digital footprint.</span>
+                        </div>
+
+                        <div class="stack-card">
+                            <strong>Identity that feels like you</strong>
+                            <span>AJM builds visual infrastructure that's authentic, not templated. Brands that look like themselves, and stand out because of it.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="overview">
+            <div class="container">
+                <div class="section-header reveal">
+                    <div class="section-kicker">Overview</div>
+                    <h2>Concepts become visuals. Visuals become brands.</h2>
+                    <p>
+                        AJM doesn't just make things look nice — we build cohesive brand systems that help businesses show up clearly, consistently, and with genuine visual authority.
+                    </p>
+                </div>
+
+                <div class="intro-grid">
+                    <div class="visual-banner reveal" style="background-image: url('assets/ajm_visual_1778518681297.png'); grid-column: 1 / -1;"></div>
+                    <div class="panel-card reveal">
+                        <h3>The AJM approach</h3>
+                        <p>
+                            We specialize in turning a rough concept — a name, an idea, a direction — into a visual reality. Digital-first, but never digital-only. We do the work properly so the brand holds up everywhere.
+                        </p>
+
+                        <ul class="check-list">
+                            <li>Creative and brand development for the wider USSE ecosystem and public clients.</li>
+                            <li>Strong emphasis on digital assets, web visibility, and online brand expression.</li>
+                            <li>Flexible enough for startups, hospitality brands, retailers, and digital-first businesses.</li>
+                            <li>Built to convert vague ideas into coherent visual systems and launch-ready output.</li>
+                        </ul>
+                    </div>
+
+                    <div class="panel-card reveal">
+                        <h3>Who AJM works best with</h3>
+                        <p>
+                            If you're building something new, refreshing something tired, or just need your brand to finally look as good as your product — AJM is the right call.
+                        </p>
+
+                        <ul class="check-list">
+                            <li>Startups that need a name, a look, launch assets, and a digital presence from scratch.</li>
+                            <li>Established brands migrating from traditional operations into more digital spaces.</li>
+                            <li>Hospitality and retail clients needing menus, signage, lookbooks, and customer-facing presentation.</li>
+                            <li>Public clients and USSE subsidiaries needing visual infrastructure that supports growth.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="services">
+            <div class="container">
+                <div class="section-header reveal">
+                    <div class="section-kicker">Service Scope</div>
+                    <h2>Four service areas. One creative engine.</h2>
+                    <p>
+                        AJM's four core categories cover the full range of modern brand building — from concept to launch, from digital platforms to physical materials.
+                    </p>
+                </div>
+
+                <div class="services-grid">
+                    <div class="service-card reveal" style="--accent: var(--green);">
+                        <div class="service-icon">CD</div>
+                        <h3>Creative Design</h3>
+                        <p>
+                            Customized artwork, illustrations, floor plans, and signage developed to give brands a more
+                            recognizable and polished visual identity.
+                        </p>
+                    </div>
+
+                    <div class="service-card reveal" style="--accent: var(--red);">
+                        <div class="service-icon">DD</div>
+                        <h3>Digital Development</h3>
+                        <p>
+                            Web page design, database platforms, and digital banner campaigns built to shape how a
+                            brand performs and appears online.
+                        </p>
+                    </div>
+
+                    <div class="service-card reveal" style="--accent: var(--yellow);">
+                        <div class="service-icon">BC</div>
+                        <h3>Brand Collateral</h3>
+                        <p>
+                            Limited-physical and heavy-digital collateral including flyers, brochures, menu
+                            presentations, and printed stationery.
+                        </p>
+                    </div>
+
+                    <div class="service-card reveal" style="--accent: var(--green);">
+                        <div class="service-icon">OD</div>
+                        <h3>Operational Design</h3>
+                        <p>
+                            Manual and digital forms, accounting reports, and data visualization tools that turn
+                            internal information into clearer branded assets.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="pricing">
+            <div class="container">
+                <div class="section-header reveal">
+                    <div class="section-kicker">Pricing &amp; Booking</div>
+                    <h2>Launch packages, hourly support, or something in between.</h2>
+                    <p>
+                        Whether you're building from zero or refreshing what already exists, AJM has a pricing model to match your stage and scope.
+                    </p>
+                </div>
+
+                <div class="pricing-grid">
+                    <div class="pricing-card reveal" style="--accent: var(--green);">
+                        <div class="pricing-icon">BL</div>
+                        <h3>Brand Launch Packages</h3>
+                        <p>
+                            Package-based pricing for startups and repositioning brands that need identity systems,
+                            digital presence, collateral, and launch-ready design support.
+                        </p>
+                    </div>
+
+                    <div class="pricing-card reveal" style="--accent: var(--red);">
+                        <div class="pricing-icon">DG</div>
+                        <h3>Digital Growth Support</h3>
+                        <p>
+                            Hourly rates for ongoing digital maintenance, graphic refreshes, banner updates, and
+                            day-to-day design continuity.
+                        </p>
+                    </div>
+
+                    <div class="pricing-card reveal" style="--accent: var(--yellow);">
+                        <div class="pricing-icon">VI</div>
+                        <h3>Visual Infrastructure</h3>
+                        <p>
+                            Scoped work for brand systems, signage, menus, reports, and design frameworks that support
+                            longer-term operational presentation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="assets">
+            <div class="container">
+                <div class="section-header reveal">
+                    <div class="section-kicker">Brand Assets</div>
+                    <h2>A visual identity as organic and distinct as the name.</h2>
+                    <p>
+                        AJM’s brand direction combines green and red with black, white, and yellow anchors to create a
+                        look that feels organic, modern, and digitally fluent.
+                    </p>
+                </div>
+
+                <div class="assets-grid">
+                    <div class="asset-card reveal" style="--accent: var(--green);">
+                        <span class="note-pill">Logo Direction</span>
+                        <div class="asset-icon">AL</div>
+                        <h3>Minimal Aloe Leaf + Pixel Cursor</h3>
+                        <p>
+                            Recommended logo concept: a stylized minimalist aloe leaf integrated with a digital pixel or
+                            pen-tool cursor to reflect both natural identity and design precision.
+                        </p>
+                    </div>
+
+                    <div class="asset-card reveal" style="--accent: var(--red);">
+                        <span class="note-pill">Portfolio Media</span>
+                        <div class="asset-icon">LB</div>
+                        <h3>Lookbooks and Platform Walkthroughs</h3>
+                        <p>
+                            AJM should showcase digital portfolio lookbooks, video walkthroughs of designed platforms,
+                            and presentation-led portfolio media that helps clients imagine the final output.
+                        </p>
+                    </div>
+
+                    <div class="asset-card reveal" style="--accent: var(--yellow);">
+                        <span class="note-pill">Print Proof</span>
+                        <div class="asset-icon">PH</div>
+                        <h3>High-Resolution Sample Photography</h3>
+                        <p>
+                            High-resolution photography of printed samples, stationery, menus, and signage should
+                            support the digital-first brand story with selective physical proof.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="contact">
+            <div class="container">
+                <div class="section-header reveal">
+                    <div class="section-kicker">Contact AJM</div>
+                    <h2>Ready to build something that actually looks like your business?</h2>
+                    <p>
+                        Whether you're launching, refreshing, or finally investing in a real brand presence — AJM is where the visual work gets done properly.
+                    </p>
+                </div>
+
+                <div class="contact-wrap">
+                    <div class="contact-info reveal">
+                        <h3>Say hello to the studio</h3>
+                        <p>
+                            AJM operates from a digital-first studio hub in Jamaica. Email, Instagram, Behance — pick whatever feels right and we'll take it from there.
+                        </p>
+
+                        <div class="contact-lines">
+                            <div class="contact-line">
+                                <span>☎</span>
+                                <span>Dedicated Creative Studio Line</span>
+                            </div>
+
+                            <a class="contact-line" href="mailto:create@aloejamaica.com">
+                                <span>✉</span>
+                                <span>create@aloejamaica.com</span>
+                            </a>
+
+                            <div class="contact-line">
+                                <span>⌂</span>
+                                <span>Digital-First / Studio Hub in Jamaica</span>
+                            </div>
+
+                            <div class="contact-line">
+                                <span>IG</span>
+                                <span>Instagram: @AloeJamaica_Design</span>
+                            </div>
+
+                            <div class="contact-line">
+                                <span>Be</span>
+                                <span>Behance: AJM-Portfolio</span>
+                            </div>
+                        </div>
+
+                        <a class="btn btn-primary" href="mailto:create@aloejamaica.com">
+                            Email the Creative Studio
+                        </a>
+                    </div>
+
+                    <form class="contact-form reveal" id="ajmForm">
+                        <h3>What are we building?</h3>
+                        <p>
+                            Fill this in and the studio will come back with a plan. This opens a prefilled email so we have everything we need to get started.
+                        </p>
+
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="name">Full Name</label>
+                                <input id="name" name="name" type="text" required />
+                            </div>
+
+                            <div class="field">
+                                <label for="business">Business / Brand Name</label>
+                                <input id="business" name="business" type="text" />
+                            </div>
+
+                            <div class="field">
+                                <label for="email">Email Address</label>
+                                <input id="email" name="email" type="email" required />
+                            </div>
+
+                            <div class="field">
+                                <label for="phase">Project Phase</label>
+                                <select id="phase" name="phase" required>
+                                    <option value="">Select a project phase</option>
+                                    <option value="New Brand Launch">New Brand Launch</option>
+                                    <option value="Digital Migration">Digital Migration</option>
+                                    <option value="Hospitality / Retail Upgrade">Hospitality / Retail Upgrade</option>
+                                    <option value="Ongoing Graphic Support">Ongoing Graphic Support</option>
+                                </select>
+                            </div>
+
+                            <div class="field full">
+                                <label for="service">Service Focus</label>
+                                <select id="service" name="service" required>
+                                    <option value="">Select a service focus</option>
+                                    <option value="Creative Design">Creative Design</option>
+                                    <option value="Digital Development">Digital Development</option>
+                                    <option value="Brand Collateral">Brand Collateral</option>
+                                    <option value="Operational Design">Operational Design</option>
+                                    <option value="Not sure yet">I need guidance</option>
+                                </select>
+                            </div>
+
+                            <div class="field full">
+                                <label for="message">Project Brief</label>
+                                <textarea id="message" name="message"
+                                    placeholder="Describe the brand, platform, collateral, or operational design system you want AJM to develop..."
+                                    required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="submit-group">
+                            <button class="btn btn-primary" type="submit" id="submitEmail">✉ Send via Email</button>
+                            <button class="btn-whatsapp" type="button" id="submitWhatsApp">💬 Send via WhatsApp</button>
+                        </div>
+
+                        <p class="form-note">
+                            Email opens your mail client pre-filled, or hit WhatsApp to chat directly with the AJM studio.
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating WhatsApp Button -->
+    <a class="wa-float"
+        href="https://wa.me/18764271661?text=Hello%20AJM%20-%20Aloe%20Jamaica!%20I%27d%20like%20to%20discuss%20a%20branding%20or%20creative%20project."
+        target="_blank" rel="noopener" aria-label="Chat with AJM Studio on WhatsApp">
+        <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M16 2C8.268 2 2 8.268 2 16c0 2.48.67 4.8 1.84 6.8L2 30l7.38-1.82A13.93 13.93 0 0016 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.2a11.2 11.2 0 01-5.7-1.55l-.41-.24-4.38 1.08 1.1-4.27-.27-.44A11.2 11.2 0 014.8 16C4.8 9.815 9.815 4.8 16 4.8S27.2 9.815 27.2 16 22.185 27.2 16 27.2zm6.13-8.4c-.34-.17-2-1-2.31-1.11-.31-.11-.53-.17-.75.17-.22.34-.86 1.11-1.05 1.34-.19.23-.39.25-.73.08-.34-.17-1.44-.53-2.74-1.69-1.01-.9-1.7-2.01-1.9-2.35-.2-.34-.02-.52.15-.69.15-.15.34-.39.51-.58.17-.19.22-.34.34-.57.11-.23.06-.43-.03-.6-.09-.17-.75-1.8-1.02-2.47-.27-.65-.54-.56-.75-.57h-.64c-.22 0-.57.08-.87.4-.3.33-1.14 1.11-1.14 2.7s1.17 3.14 1.33 3.36c.17.22 2.3 3.5 5.57 4.91.78.34 1.39.54 1.86.69.78.25 1.49.21 2.05.13.63-.09 2-.82 2.28-1.61.28-.79.28-1.47.19-1.61-.09-.14-.31-.22-.65-.39z"/></svg>
+        AJM Studio on WhatsApp
+    </a>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <p>© <span id="year"></span> AJM - Aloe Jamaica | A subsidiary of USSE.</p>
+
+            <div class="footer-links">
+                <a href="#overview">Overview</a>
+                <a href="#services">Services</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#assets">Assets</a>
+                <a href="#contact">Contact</a>
+                <a href="index.html">USSE Hub</a>
+                <a href="usse-consultancy.html">USSE Consultancy</a>
+                <a href="pistol-operations-logistics.html">PISTOL</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const topbar = document.getElementById("topbar");
+        const mobileToggle = document.getElementById("mobileToggle");
+        const revealItems = document.querySelectorAll(".reveal");
+
+        document.getElementById("year").textContent = new Date().getFullYear();
+
+        mobileToggle.addEventListener("click", () => {
+            topbar.classList.toggle("open");
+            mobileToggle.textContent = topbar.classList.contains("open") ? "×" : "☰";
+        });
+
+        document.querySelectorAll(".nav-links a, .nav-actions a").forEach(link => {
+            link.addEventListener("click", () => {
+                topbar.classList.remove("open");
+                mobileToggle.textContent = "☰";
+            });
+        });
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
+                }
+            });
+        }, { threshold: 0.14 });
+
+        revealItems.forEach(item => observer.observe(item));
+
+        document.getElementById("ajmForm").addEventListener("submit", event => {
+            event.preventDefault();
+            const name = document.getElementById("name").value.trim();
+            const business = document.getElementById("business").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const phase = document.getElementById("phase").value;
+            const service = document.getElementById("service").value;
+            const message = document.getElementById("message").value.trim();
+            const subject = encodeURIComponent("AJM Enquiry");
+            const body =
+                "Hello AJM - Aloe Jamaica,%0A%0A" +
+                "I would like to make a creative enquiry.%0A%0A" +
+                "Name: " + encodeURIComponent(name) + "%0A" +
+                "Business / Brand: " + encodeURIComponent(business || "Not provided") + "%0A" +
+                "Email: " + encodeURIComponent(email) + "%0A" +
+                "Project Phase: " + encodeURIComponent(phase) + "%0A" +
+                "Service Focus: " + encodeURIComponent(service) + "%0A%0A" +
+                "Project Brief:%0A" + encodeURIComponent(message);
+            window.location.href = "mailto:create@aloejamaica.com?subject=" + subject + "&body=" + body;
+        });
+
+        document.getElementById("submitWhatsApp").addEventListener("click", function () {
+            const form = document.getElementById("ajmForm");
+            if (!form.checkValidity()) { form.reportValidity(); return; }
+            const name = document.getElementById("name").value.trim();
+            const business = document.getElementById("business").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const phase = document.getElementById("phase").value;
+            const service = document.getElementById("service").value;
+            const message = document.getElementById("message").value.trim();
+            const msg =
+                "Hello AJM - Aloe Jamaica,%0A%0A" +
+                "I would like to make a creative enquiry.%0A%0A" +
+                "Name: " + encodeURIComponent(name) + "%0A" +
+                "Business / Brand: " + encodeURIComponent(business || "Not provided") + "%0A" +
+                "Email: " + encodeURIComponent(email) + "%0A" +
+                "Project Phase: " + encodeURIComponent(phase) + "%0A" +
+                "Service Focus: " + encodeURIComponent(service) + "%0A%0A" +
+                "Project Brief:%0A" + encodeURIComponent(message);
+            window.open("https://wa.me/18764271661?text=" + msg, "_blank");
+        });
+    </script>
+</body>
+
+</html>
