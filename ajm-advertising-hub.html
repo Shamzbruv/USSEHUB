@@ -1,13 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-JM">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AJM - Aloe Jamaica | Advertising & Classifieds Hub</title>
-    <link rel="icon" href="Aloe%20Favicon.png" type="image/png" />
+    <title>AJM Advertising Hub Jamaica | Classifieds, Promotions &amp; Business Listings</title>
+    <link rel="icon" href="aloe%20favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="aloe%20logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <meta name="description"
-        content="The official advertising and classifieds hub for AJM Aloe Jamaica. Browse verified services, real estate, farming, and retail listings." />
+        content="Browse the AJM Advertising Hub for Jamaica business listings, promotions, classified advertising, services, spaces, retail, food, and commercial opportunities." />
+    <link rel="canonical" href="ajm-advertising-hub.html" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <meta name="theme-color" content="#05070d" />
+    <meta name="author" content="AJM - Aloe Jamaica" />
+    <meta property="og:locale" content="en_JM" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AJM Advertising Hub" />
+    <meta property="og:title" content="AJM Advertising Hub Jamaica | Classifieds, Promotions &amp; Business Listings" />
+    <meta property="og:description"
+        content="Discover Jamaica business listings, promotions, classified advertising, services, spaces, retail, food, and commercial opportunities in the AJM Advertising Hub." />
+    <meta property="og:image" content="assets/hub_ad_promo_1778519645791.png" />
+    <meta property="og:image:alt" content="AJM Advertising Hub promotional visual" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AJM Advertising Hub Jamaica | Classifieds, Promotions &amp; Business Listings" />
+    <meta name="twitter:description"
+        content="Discover Jamaica business listings, promotions, classified advertising, services, spaces, retail, food, and commercial opportunities in the AJM Advertising Hub." />
+    <meta name="twitter:image" content="assets/hub_ad_promo_1778519645791.png" />
+    <meta name="twitter:image:alt" content="AJM Advertising Hub promotional visual" />
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {
+                    "@type": "Organization",
+                    "@id": "#hub-owner",
+                    "name": "AJM - Aloe Jamaica",
+                    "logo": "aloe%20logo.png",
+                    "email": "create@aloejamaica.com",
+                    "parentOrganization": {
+                        "@type": "Organization",
+                        "name": "USSE"
+                    },
+                    "areaServed": {
+                        "@type": "Country",
+                        "name": "Jamaica"
+                    }
+                },
+                {
+                    "@type": "CollectionPage",
+                    "name": "AJM Advertising Hub Jamaica | Classifieds, Promotions & Business Listings",
+                    "description": "Advertising and classifieds hub for Jamaica business listings, promotions, services, spaces, retail, food, and commercial opportunities.",
+                    "about": {
+                        "@id": "#hub-owner"
+                    },
+                    "primaryImageOfPage": "assets/hub_ad_promo_1778519645791.png",
+                    "inLanguage": "en-JM"
+                }
+            ]
+        }
+    </script>
 
     <style>
         @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=Syne:wght@700;800&display=swap");
@@ -36,7 +90,6 @@
 
         html {
             scroll-behavior: smooth;
-            overflow-x: hidden;
         }
 
         body {
@@ -188,6 +241,45 @@
             box-shadow: 0 20px 48px rgba(23, 214, 111, 0.34);
         }
 
+        .floating-whatsapp {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 80;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            border-radius: 999px;
+            color: #04110a;
+            font-weight: 900;
+            background: linear-gradient(135deg, #25d366, #9df47b);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 18px 42px rgba(37, 211, 102, 0.32);
+        }
+
+        .floating-whatsapp:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 24px 48px rgba(37, 211, 102, 0.4);
+        }
+
+        .floating-whatsapp-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: rgba(4, 17, 10, 0.12);
+            font-size: 0.82rem;
+            font-weight: 900;
+        }
+
+        .floating-whatsapp-label {
+            font-size: 0.92rem;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
         /* --- Hero --- */
         .hero {
             padding: 160px 0 60px;
@@ -199,7 +291,6 @@
             margin-bottom: 16px;
             background: linear-gradient(to right, #fff, #b9c0d4);
             -webkit-background-clip: text;
-            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -519,52 +610,52 @@
                 padding: 4px 16px;
             }
         }
-        /* --- Floating WhatsApp Button --- */
-        .wa-float {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #25D366;
-            color: #fff;
-            font-family: "Space Grotesk", sans-serif;
-            font-size: 0.9rem;
-            font-weight: 800;
-            padding: 13px 20px 13px 16px;
-            border-radius: 999px;
-            box-shadow: 0 8px 32px rgba(37, 211, 102, 0.38);
-            text-decoration: none;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-            animation: waFloat 3s ease-in-out infinite;
-        }
-        .wa-float:hover {
-            transform: translateY(-4px) scale(1.04);
-            box-shadow: 0 14px 44px rgba(37, 211, 102, 0.52);
-        }
-        .wa-float svg { flex-shrink: 0; }
-        @keyframes waFloat {
-            0%, 100% { box-shadow: 0 8px 32px rgba(37, 211, 102, 0.38); }
-            50% { box-shadow: 0 12px 44px rgba(37, 211, 102, 0.58); }
-        }
+
         @media (max-width: 640px) {
-            .wa-float {
-                bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-                right: 16px;
-                width: 54px;
-                height: 54px;
-                padding: 0;
-                border-radius: 50%;
-                font-size: 0;
-                gap: 0;
-                justify-content: center;
-                align-items: center;
+            .container {
+                width: min(100% - 24px, var(--max));
             }
-            .wa-float svg {
-                width: 28px;
-                height: 28px;
+
+            .topbar {
+                top: 10px;
+                width: calc(100% - 18px);
+            }
+
+            .nav {
+                padding: 10px 12px 10px 14px;
+            }
+
+            .brand-text strong {
+                font-size: 0.78rem;
+            }
+
+            .brand-text span {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 124px;
+            }
+
+            .hero h1 {
+                font-size: 2.4rem;
+            }
+
+            .floating-whatsapp {
+                right: 12px;
+                bottom: 12px;
+                padding: 12px 14px;
+                gap: 8px;
+                max-width: calc(100% - 24px);
+            }
+
+            .floating-whatsapp-mark {
+                width: 30px;
+                height: 30px;
+            }
+
+            .floating-whatsapp-label {
+                font-size: 0.84rem;
             }
         }
     </style>
@@ -576,7 +667,7 @@
     <div class="topbar">
         <div class="nav">
             <a class="brand" href="index.html">
-                <img src="Aloe%20Logo.png" alt="Aloe Logo" style="height: 68px; width: auto; border-radius: 12px;">
+                <img src="aloe%20logo.png" alt="Aloe Logo" style="height: 68px; width: auto; border-radius: 12px;">
                 <div class="brand-text">
                     <strong>ALOE JAMAICA</strong>
                     <span>Advertising Hub</span>
@@ -596,7 +687,7 @@
     </div>
 
     <section class="hero container">
-        <img src="Aloe%20Logo.png" alt="AJM Advertising Hub Logo" style="height: 160px; width: auto; margin-bottom: 24px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4));">
+        <img src="aloe%20logo.png" alt="AJM Advertising Hub Logo" style="height: 160px; width: auto; margin-bottom: 24px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4));">
         <h1>Discover Jamaica</h1>
         <p>The premium advertising and classifieds hub. Find verified services, beautiful spaces, and commercial opportunities across the island.</p>
 
@@ -809,13 +900,9 @@
         </div>
     </div>
 
-    <!-- Floating WhatsApp Button -->
-    <a class="wa-float"
-        href="https://wa.me/18764271661?text=Hello%20AJM%20Hub!%20I%27d%20like%20to%20post%20a%20listing%20or%20learn%20more%20about%20advertising%20on%20the%20Jamaica%20Hub."
-        target="_blank" rel="noopener" aria-label="Chat with AJM Advertising Hub on WhatsApp">
-        <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M16 2C8.268 2 2 8.268 2 16c0 2.48.67 4.8 1.84 6.8L2 30l7.38-1.82A13.93 13.93 0 0016 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.2a11.2 11.2 0 01-5.7-1.55l-.41-.24-4.38 1.08 1.1-4.27-.27-.44A11.2 11.2 0 014.8 16C4.8 9.815 9.815 4.8 16 4.8S27.2 9.815 27.2 16 22.185 27.2 16 27.2zm6.13-8.4c-.34-.17-2-1-2.31-1.11-.31-.11-.53-.17-.75.17-.22.34-.86 1.11-1.05 1.34-.19.23-.39.25-.73.08-.34-.17-1.44-.53-2.74-1.69-1.01-.9-1.7-2.01-1.9-2.35-.2-.34-.02-.52.15-.69.15-.15.34-.39.51-.58.17-.19.22-.34.34-.57.11-.23.06-.43-.03-.6-.09-.17-.75-1.8-1.02-2.47-.27-.65-.54-.56-.75-.57h-.64c-.22 0-.57.08-.87.4-.3.33-1.14 1.11-1.14 2.7s1.17 3.14 1.33 3.36c.17.22 2.3 3.5 5.57 4.91.78.34 1.39.54 1.86.69.78.25 1.49.21 2.05.13.63-.09 2-.82 2.28-1.61.28-.79.28-1.47.19-1.61-.09-.14-.31-.22-.65-.39z"/></svg>
-        Post a Listing
+    <a class="floating-whatsapp" href="https://wa.me/18764271661?text=Hello%20AJM%20Advertising%20Hub,%0A%0AI%20would%20like%20to%20enquire%20about%20advertising%20or%20posting%20a%20listing." target="_blank" rel="noopener" aria-label="Chat with AJM Advertising Hub on WhatsApp">
+        <span class="floating-whatsapp-mark">WA</span>
+        <span class="floating-whatsapp-label">WhatsApp Ad Hub</span>
     </a>
-
 </body>
 </html>
