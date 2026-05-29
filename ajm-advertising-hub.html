@@ -1161,6 +1161,10 @@
                     <label for="modal-reg-password">Password</label>
                     <input type="password" id="modal-reg-password" placeholder="Min. 6 characters" autocomplete="new-password" />
                 </div>
+                <div class="form-group">
+                    <label for="modal-reg-password-confirm">Confirm Password</label>
+                    <input type="password" id="modal-reg-password-confirm" placeholder="Re-enter password" autocomplete="new-password" />
+                </div>
                 <button class="btn btn-primary" style="width:100%;border-radius:12px;margin-top:8px;" id="modal-reg-btn" onclick="handleRegister()">
                     <span id="reg-btn-text">Create Account</span>
                     <span id="reg-spinner" class="spinner"></span>
@@ -2173,6 +2177,7 @@
             const name = document.getElementById('modal-reg-name').value.trim();
             const email = document.getElementById('modal-reg-email').value.trim();
             const password = document.getElementById('modal-reg-password').value;
+            const confirmPassword = document.getElementById('modal-reg-password-confirm').value;
             const errBox = document.getElementById('register-error');
             const successBox = document.getElementById('register-success');
 
@@ -2180,8 +2185,13 @@
             successBox.classList.remove('show');
             setLoading('reg-btn-text', 'reg-spinner', true);
 
-            if (!name || !email || !password) {
+            if (!name || !email || !password || !confirmPassword) {
                 showErrBox(errBox, 'Please fill in all fields.');
+                setLoading('reg-btn-text', 'reg-spinner', false);
+                return;
+            }
+            if (password !== confirmPassword) {
+                showErrBox(errBox, 'Passwords do not match.');
                 setLoading('reg-btn-text', 'reg-spinner', false);
                 return;
             }
