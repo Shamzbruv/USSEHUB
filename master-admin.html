@@ -416,14 +416,13 @@
 
 <!-- TOPBAR -->
 <div class="topbar">
-    <div class="nav">
-        <a class="brand" href="ajm-advertising-hub.html">
-            <img src="aloe%20logo.png" alt="AJM" style="height:40px;width:auto;border-radius:8px;">
+        <div class="header-left">
+            <a href="index.html" style="text-decoration:none;"><img src="aloe%20logo.png" alt="Logo" style="height:48px;width:auto;border-radius:10px;"></a>
             <div>
-                <strong>Admin Panel</strong><br>
-                <span style="font-size:0.75rem;color:var(--muted);">AJM Advertising Hub</span>
+                <h2>Master Admin Hub</h2>
+                <p>Complete system oversight & management</p>
             </div>
-        </a>
+        </div>
         <div class="nav-right">
             <span class="admin-badge">🛡️ ADMIN</span>
             <span id="admin-name" style="font-size:0.86rem;color:var(--muted);">Loading...</span>
@@ -462,12 +461,58 @@
 
     <!-- Tabs -->
     <div class="tab-bar" role="tablist">
-        <button class="tab-btn active" id="tab-pending" onclick="switchTab('pending')" role="tab">⏳ Pending</button>
-        <button class="tab-btn" id="tab-approved" onclick="switchTab('approved')" role="tab">✅ Approved</button>
-        <button class="tab-btn" id="tab-rejected" onclick="switchTab('rejected')" role="tab">❌ Rejected</button>
-        <button class="tab-btn" id="tab-expired" onclick="switchTab('expired')" role="tab">🕰️ Expired</button>
-        <button class="tab-btn" id="tab-all" onclick="switchTab('all')" role="tab">📋 All</button>
+        <button class="tab-btn active" id="tab-dashboard" onclick="switchTab('dashboard')" role="tab">📊 Overview</button>
+        <button class="tab-btn" id="tab-consultations" onclick="switchTab('consultations')" role="tab">💬 Consultations</button>
+        <button class="tab-btn" id="tab-subscriptions" onclick="switchTab('subscriptions')" role="tab">💳 Ad Subs</button>
+        <button class="tab-btn" id="tab-pending" onclick="switchTab('pending')" role="tab">⏳ Pending Listings</button>
+        <button class="tab-btn" id="tab-approved" onclick="switchTab('approved')" role="tab">✅ Active Listings</button>
         <button class="tab-btn" id="tab-members" onclick="switchTab('members')" role="tab">👥 Members</button>
+    </div>
+
+    <!-- Dashboard Panel -->
+    <div id="dashboard-panel">
+        <div style="background:var(--glass-bg);padding:24px;border-radius:var(--radius);border:1px solid var(--glass-border);margin-bottom:24px;">
+            <h3>System Health & Analytics</h3>
+            <p style="color:var(--muted);margin-top:8px;">Real-time metrics will be displayed here.</p>
+        </div>
+    </div>
+
+    <!-- Consultations Panel -->
+    <div class="admin-table-wrap" id="consultations-panel" style="display:none;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Lead Name</th>
+                    <th>Contact</th>
+                    <th>Source</th>
+                    <th>Listing ID</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="admin-consultations-tbody">
+                <tr class="loading-row"><td colspan="6">Loading consultations...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Subscriptions Panel -->
+    <div class="admin-table-wrap" id="subscriptions-panel" style="display:none;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Package</th>
+                    <th>Listing ID</th>
+                    <th>Status</th>
+                    <th>Expires</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="admin-subscriptions-tbody">
+                <tr class="loading-row"><td colspan="6">Loading subscriptions...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- Filter bar (listings tabs) -->
@@ -554,7 +599,7 @@
     // State
     let currentUser = null;
     let currentProfile = null;
-    let currentTab = 'pending';
+    let currentTab = 'dashboard';
     let currentPage = 0;
     const PAGE_SIZE = 20;
     let totalCount = 0;
@@ -641,24 +686,109 @@
         }
     }
 
-    // ── TABS ──
-    function switchTab(tab) {
-        currentTab = tab;
-        currentPage = 0;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(`tab-${tab}`).classList.add('active');
+    // ── TABS & NAV ──
+    function switchTab(tabId) {
+        currentTab = tabId;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
 
-        const isMembers = tab === 'members';
-        document.getElementById('listings-panel').style.display = isMembers ? 'none' : '';
-        document.getElementById('members-panel').style.display = isMembers ? '' : 'none';
-        document.getElementById('listings-filter').style.display = isMembers ? 'none' : '';
-        document.getElementById('pagination-row').style.display = isMembers ? 'none' : '';
+        const isListings = ['pending', 'approved', 'rejected', 'expired', 'all'].includes(tabId);
+        
+        document.getElementById('dashboard-panel').style.display = tabId === 'dashboard' ? 'block' : 'none';
+        document.getElementById('consultations-panel').style.display = tabId === 'consultations' ? 'block' : 'none';
+        document.getElementById('subscriptions-panel').style.display = tabId === 'subscriptions' ? 'block' : 'none';
+        document.getElementById('listings-panel').style.display = isListings ? 'block' : 'none';
+        document.getElementById('members-panel').style.display = tabId === 'members' ? 'block' : 'none';
+        
+        document.getElementById('listings-filter').style.display = isListings ? 'flex' : 'none';
+        document.getElementById('pagination-row').style.display = isListings ? 'flex' : 'none';
 
-        if (isMembers) {
+        if (tabId === 'members') {
             loadMembers();
+        } else if (tabId === 'consultations') {
+            loadConsultations();
+        } else if (tabId === 'subscriptions') {
+            loadSubscriptions();
+        } else if (tabId === 'dashboard') {
+            loadDashboard();
         } else {
             reloadListings();
         }
+    }
+
+    async function loadDashboard() {
+        // Fetch top level stats
+        const { count: cCount } = await supabase.from('consultations').select('*', { count: 'exact', head: true });
+        const { count: sCount } = await supabase.from('ad_subscriptions').select('*', { count: 'exact', head: true });
+        
+        document.getElementById('dashboard-panel').innerHTML = `
+            <div style="background:var(--glass-bg);padding:24px;border-radius:var(--radius);border:1px solid var(--glass-border);margin-bottom:24px;">
+                <h3>System Health & Analytics</h3>
+                <div style="display:flex;gap:24px;margin-top:16px;flex-wrap:wrap;">
+                    <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;flex:1;min-width:200px;">
+                        <h4 style="color:var(--muted);margin-bottom:8px;">Total Consultations Tracked</h4>
+                        <div style="font-size:2.4rem;font-weight:700;">${cCount || 0}</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;flex:1;min-width:200px;">
+                        <h4 style="color:var(--muted);margin-bottom:8px;">Active Ad Subscriptions</h4>
+                        <div style="font-size:2.4rem;font-weight:700;">${sCount || 0}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    async function loadConsultations() {
+        const tbody = document.getElementById('admin-consultations-tbody');
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Loading...</td></tr>';
+        const { data, error } = await supabase.from('consultations').select('*, listings(business_name)').order('created_at', { ascending: false }).limit(50);
+        
+        if (error) {
+            tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red);">Error: ${error.message}</td></tr>`;
+            return;
+        }
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6">No consultations tracked yet.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.map(c => `
+            <tr>
+                <td><strong>${escHtml(c.customer_name)}</strong></td>
+                <td>${escHtml(c.phone)}<br><small style="color:var(--muted);">${escHtml(c.email || '')}</small></td>
+                <td><span class="badge" style="background:var(--glass-bg);">${escHtml(c.source)}</span></td>
+                <td>${c.listings ? escHtml(c.listings.business_name) : c.listing_id}</td>
+                <td><small>${new Date(c.created_at).toLocaleDateString()}</small></td>
+                <td><span class="badge badge-pending">${escHtml(c.status)}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    async function loadSubscriptions() {
+        const tbody = document.getElementById('admin-subscriptions-tbody');
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Loading...</td></tr>';
+        // Need to join user to profiles via user_id, but profiles might not match foreign key constraints easily in this shorthand if not explicitly foreign keyed. Let's do a basic fetch.
+        const { data, error } = await supabase.from('ad_subscriptions').select('*, listings(business_name)').order('created_at', { ascending: false }).limit(50);
+        
+        if (error) {
+            tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red);">Error: ${error.message}</td></tr>`;
+            return;
+        }
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6">No ad subscriptions yet.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.map(s => `
+            <tr>
+                <td><strong>User ID:</strong><br><small>${s.user_id ? s.user_id.slice(0,8) : 'Unknown'}</small></td>
+                <td>Package: ${s.package_id}</td>
+                <td>${s.listings ? escHtml(s.listings.business_name) : s.listing_id}</td>
+                <td><span class="badge badge-${s.status}">${escHtml(s.status)}</span></td>
+                <td><small>${s.expires_at ? new Date(s.expires_at).toLocaleDateString() : '—'}</small></td>
+                <td><button class="btn btn-primary btn-sm">Manage</button></td>
+            </tr>
+        `).join('');
     }
 
     // ── LISTINGS ──

@@ -1105,6 +1105,7 @@
             .listing-type-grid { grid-template-columns: 1fr; }
         }
     </style>
+    <script src="taxonomy.js"></script>
 </head>
 
 <body>
@@ -1226,25 +1227,17 @@
                     </div>
                     <div class="form-group">
                         <label for="lf-category">Category *</label>
-                        <select id="lf-category" required>
+                        <select id="lf-category" required onchange="populateSubcategorySelect('lf-category', 'lf-subcategory')">
                             <option value="">Select category</option>
-                            <option value="services">Services</option>
-                            <option value="rooms">Rooms &amp; Spaces</option>
-                            <option value="farming">Farming</option>
-                            <option value="retail">Retail Shopping</option>
-                            <option value="food">Drink &amp; Eat</option>
-                            <option value="health">Health &amp; Wellness</option>
-                            <option value="finance">Financial Services</option>
-                            <option value="tech">Technology</option>
-                            <option value="education">Education</option>
-                            <option value="other">Other</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="lf-subcategory">Subcategory</label>
-                    <input type="text" id="lf-subcategory" placeholder="e.g. Ice Delivery, Yoga Retreats" />
+                    <select id="lf-subcategory">
+                        <option value="">Select subcategory (Optional)</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -1401,16 +1394,6 @@
             <div class="search-field">
                 <select id="search-category" aria-label="Filter by category">
                     <option value="">Category Type</option>
-                    <option value="services">Services</option>
-                    <option value="rooms">Rooms &amp; Spaces</option>
-                    <option value="farming">Farming</option>
-                    <option value="retail">Retail Shopping</option>
-                    <option value="food">Drink &amp; Eat</option>
-                    <option value="health">Health &amp; Wellness</option>
-                    <option value="finance">Financial Services</option>
-                    <option value="tech">Technology</option>
-                    <option value="education">Education</option>
-                    <option value="other">Other</option>
                 </select>
             </div>
             <button class="btn btn-primary" id="search-btn" onclick="performSearch()" aria-label="Search listings">Search</button>
@@ -1439,6 +1422,36 @@
             </div>
         </div>
     </section>
+
+    <!-- Consultation Modal -->
+    <div id="consultation-modal" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeConsultationModal()" aria-label="Close">&times;</button>
+            <h2 class="modal-title" style="color:var(--white);">Contact Business</h2>
+            <p style="color:var(--muted);font-size:0.9rem;margin-bottom:16px;">Please provide your details so the business knows who is reaching out.</p>
+            <input type="hidden" id="cons-listing-id" />
+            <input type="hidden" id="cons-source" />
+            <input type="hidden" id="cons-target" />
+
+            <div class="form-group">
+                <label>Your Name *</label>
+                <input type="text" id="cons-name" required />
+            </div>
+            <div class="form-group">
+                <label>Your Phone *</label>
+                <input type="tel" id="cons-phone" required />
+            </div>
+            <div class="form-group">
+                <label>Your Email (Optional)</label>
+                <input type="email" id="cons-email" />
+            </div>
+
+            <button class="btn btn-primary" onclick="submitConsultation()" style="width:100%;margin-top:8px;">
+                <span id="cons-submit-text">Continue to Connect</span>
+                <span id="cons-spinner" class="spinner" style="display:none;"></span>
+            </button>
+        </div>
+    </div>
 
     <!-- =============================================
          MAIN CONTENT + SIDEBAR
@@ -1537,14 +1550,7 @@
                 </div>
                 <!-- Unlocked state (subscribed members) -->
                 <div id="stats-unlocked" class="stats-widget" style="display:none;">
-                    <div class="stat-item">
-                        <span>Users Online</span>
-                        <strong id="stat-online">—</strong>
-                    </div>
-                    <div class="stat-item">
-                        <span>Total Guests</span>
-                        <strong id="stat-guests">—</strong>
-                    </div>
+                    <!-- Users Online & Total Guests removed until Realtime Presence is implemented -->
                     <div class="stat-item">
                         <span>Total Members</span>
                         <strong style="color: var(--yellow);" id="stat-members">—</strong>
@@ -1634,6 +1640,12 @@
             // NOTE: Tables are pre-created via server-side script. No DB creation in frontend.
             setupSearchListeners();
             setupImagePreview();
+            
+            // Populate Taxonomy
+            if (window.populateCategorySelect) {
+                window.populateCategorySelect('search-category');
+                window.populateCategorySelect('lf-category');
+            }
 
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.user) {
@@ -1792,8 +1804,7 @@
                     // Call DB-level admin stats function (access verified server-side)
                     const { data, error } = await supabase.rpc('get_admin_stats');
                     if (error) throw error;
-                    document.getElementById('stat-online').textContent = Math.floor(Math.random() * 50) + 10;
-                    document.getElementById('stat-guests').textContent = Math.floor(Math.random() * 200) + 100;
+                    // Realtime stats removed pending implementation
                     document.getElementById('stat-members').textContent = data.total_members ?? '—';
                     document.getElementById('stat-listings').textContent = data.active_listings ?? '—';
                     document.getElementById('stat-membership').textContent = '🛡️ Admin';
@@ -1803,8 +1814,7 @@
                     // Call DB-level member stats function (access verified server-side)
                     const { data, error } = await supabase.rpc('get_member_stats');
                     if (error) throw error;
-                    document.getElementById('stat-online').textContent = '—';
-                    document.getElementById('stat-guests').textContent = '—';
+                    // Realtime stats removed pending implementation
                     document.getElementById('stat-members').textContent = data.total_members ?? '—';
                     document.getElementById('stat-listings').textContent = data.active_listings ?? '—';
                     document.getElementById('stat-membership').textContent = subStatus === 'active' ? '✓ Active' : 'Member';
@@ -2117,9 +2127,9 @@
                     </div>
                     <div class="listing-contact">
                         ${l.phone ? `<span>Tel: ${escHtml(l.phone)}</span>` : ''}
-                        ${l.email ? `<a href="mailto:${escHtml(l.email)}">${escHtml(l.email)}</a>` : ''}
+                        ${l.email ? `<a href="javascript:void(0)" onclick="openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" style="color:var(--blue);">Email</a>` : ''}
                         ${l.website ? `<a href="${escHtml(l.website)}" target="_blank" rel="noopener">${escHtml(l.website.replace(/^https?:\/\//, ''))}</a>` : ''}
-                        ${l.whatsapp ? `<a href="https://wa.me/${l.whatsapp.replace(/\D/g,'')}" target="_blank" rel="noopener" style="color:var(--green);">WhatsApp</a>` : ''}
+                        ${l.whatsapp ? `<a href="javascript:void(0)" onclick="openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" style="color:var(--green);">WhatsApp</a>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -2131,7 +2141,7 @@
                     <td><strong>${escHtml(l.business_name)}</strong>${l.status === 'pending' ? ' <span style="font-size:0.7rem;color:var(--yellow);">(pending)</span>' : ''}</td>
                     <td>${escHtml(l.subcategory || formatCategory(l.category) || '—')}</td>
                     <td>${escHtml(formatLocation(l.location))}</td>
-                    <td>${l.email ? `<a href="mailto:${escHtml(l.email)}" style="color:var(--blue);">${escHtml(l.email)}</a>` : l.phone ? escHtml(l.phone) : '—'}</td>
+                    <td>${l.email ? `<a href="javascript:void(0)" onclick="openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" style="color:var(--blue);">Email</a>` : l.phone ? escHtml(l.phone) : '—'}</td>
                 </tr>`;
         }
 
@@ -2375,21 +2385,76 @@
         // WHATSAPP
         // ==========================================
         function updateWhatsAppLink() {
-            // Message is built dynamically on click
+            // Keep FAB generic or maybe we can make it trackable too later
         }
 
         function handleWhatsAppClick() {
-            let message;
-            if (currentUser) {
-                const name = currentProfile?.full_name || currentUser.email?.split('@')[0] || 'a member';
-                const email = currentUser.email || '';
-                message = `Hi, I am ${name} (${email}) and I am interested in advertising on Aloe Jamaica Advertising Hub. Please send me more information about the available ad packages.`;
-            } else {
-                message = `Hi, I am interested in advertising on Aloe Jamaica Advertising Hub. Please send me more information about the available ad packages.`;
-            }
+            const message = "Hi! I'm interested in advertising my business on AJM Advertising Hub.";
             const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-            window.open(url, '_blank', 'noopener');
+            window.open(url, '_blank');
         }
+
+        // CONSULTATION TRACKING
+        window.openConsultationModal = function(listingId, source, target) {
+            document.getElementById('cons-listing-id').value = listingId;
+            document.getElementById('cons-source').value = source;
+            document.getElementById('cons-target').value = target;
+            document.getElementById('cons-name').value = '';
+            document.getElementById('cons-phone').value = '';
+            document.getElementById('cons-email').value = '';
+            document.getElementById('consultation-modal').classList.add('open');
+        };
+
+        window.closeConsultationModal = function() {
+            document.getElementById('consultation-modal').classList.remove('open');
+        };
+
+        window.submitConsultation = async function() {
+            const listingId = document.getElementById('cons-listing-id').value;
+            const source = document.getElementById('cons-source').value;
+            const target = document.getElementById('cons-target').value;
+            const name = document.getElementById('cons-name').value.trim();
+            const phone = document.getElementById('cons-phone').value.trim();
+            const email = document.getElementById('cons-email').value.trim();
+
+            if (!name || !phone) {
+                showToast('Please provide your name and phone number.', 'error');
+                return;
+            }
+
+            const btnText = document.getElementById('cons-submit-text');
+            const spinner = document.getElementById('cons-spinner');
+            btnText.style.display = 'none';
+            spinner.style.display = 'inline-block';
+
+            // Insert to Supabase
+            const { error } = await supabase.from('consultations').insert([{
+                listing_id: listingId,
+                customer_name: name,
+                phone: phone,
+                email: email,
+                source: source
+            }]);
+
+            btnText.style.display = 'inline-block';
+            spinner.style.display = 'none';
+
+            if (error) {
+                console.error('Error saving consultation:', error);
+                showToast('Connection error. Please try again.', 'error');
+                return;
+            }
+
+            closeConsultationModal();
+            showToast('Redirecting...', 'success');
+
+            // Redirect
+            if (source === 'whatsapp') {
+                window.open(`https://wa.me/${target}?text=Hi, I found your listing on AJM Advertising Hub! My name is ${encodeURIComponent(name)}.`, '_blank');
+            } else {
+                window.location.href = `mailto:${target}?subject=Inquiry from AJM Hub - ${encodeURIComponent(name)}`;
+            }
+        };
 
         // ==========================================
         // MODAL HELPERS
