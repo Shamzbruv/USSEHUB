@@ -3,7 +3,8 @@
 import pg from 'pg';
 const { Client } = pg;
 
-const DB_URL = 'postgresql://postgres.zcptuqrlovflcpqszery:ussehub2026@aws-1-us-east-1.pooler.supabase.com:6543/postgres';
+const DB_URL = process.env.DATABASE_URL;
+if (!DB_URL) throw new Error('DATABASE_URL is required');
 
 const SQL = `
 -- ============================================

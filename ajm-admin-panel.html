@@ -226,6 +226,8 @@
             padding: 32px;
             width: 100%;
             max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
             position: relative;
         }
         .modal-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; }
@@ -311,6 +313,16 @@
             <label>Business Name</label>
             <input type="text" id="edit-business-name" />
         </div>
+        <div style="display:flex;gap:12px;">
+            <div class="form-group" style="flex:1;">
+                <label>Category</label>
+                <input type="text" id="edit-category" />
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Subcategory</label>
+                <input type="text" id="edit-subcategory" />
+            </div>
+        </div>
         <div class="form-group">
             <label>Status</label>
             <select id="edit-status">
@@ -321,16 +333,40 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Category</label>
-            <input type="text" id="edit-category" />
+            <label>Listing Type</label>
+            <input type="text" id="edit-listing-type" placeholder="e.g. Standard, Premium" />
         </div>
         <div class="form-group">
             <label>Location</label>
             <input type="text" id="edit-location" />
         </div>
+        <div style="display:flex;gap:12px;">
+            <div class="form-group" style="flex:1;">
+                <label>Phone</label>
+                <input type="text" id="edit-phone" />
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>WhatsApp</label>
+                <input type="text" id="edit-whatsapp" />
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;">
+            <div class="form-group" style="flex:1;">
+                <label>Email</label>
+                <input type="email" id="edit-email" />
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Website</label>
+                <input type="text" id="edit-website" />
+            </div>
+        </div>
         <div class="form-group">
             <label>Description</label>
             <textarea id="edit-description" style="min-height:80px;"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Extra Notes (Admin only)</label>
+            <textarea id="edit-extra-notes" style="min-height:60px;"></textarea>
         </div>
         <div style="display:flex;gap:10px;margin-top:8px;">
             <label style="display:flex;align-items:center;gap:6px;font-size:0.86rem;cursor:pointer;">
@@ -642,29 +678,19 @@
         const offset = currentPage * PAGE_SIZE;
 
         try {
-            const { data, error, count } = await supabase.rpc('admin_get_listings', {
+            const { data, error } = await supabase.rpc('admin_get_listings', {
                 p_status: statusFilter,
+                p_keyword: keyword || null,
+                p_category: category || null,
                 p_limit: PAGE_SIZE,
                 p_offset: offset
             });
 
             if (error) throw error;
 
-            // Filter client-side by keyword and category (RPC returns all for status)
-            let filtered = data || [];
-            if (keyword) {
-                const kw = keyword.toLowerCase();
-                filtered = filtered.filter(l =>
-                    (l.business_name || '').toLowerCase().includes(kw) ||
-                    (l.description || '').toLowerCase().includes(kw) ||
-                    (l.email || '').toLowerCase().includes(kw)
-                );
-            }
-            if (category) {
-                filtered = filtered.filter(l => l.category === category);
-            }
-
-            totalCount = filtered.length;
+            const filtered = data || [];
+            
+            totalCount = filtered.length > 0 ? parseInt(filtered[0].total_count || filtered[0].full_count || 0) : 0;
             updatePagination(totalCount);
 
             if (filtered.length === 0) {
@@ -753,8 +779,15 @@
         document.getElementById('edit-business-name').value = listing.business_name || '';
         document.getElementById('edit-status').value = listing.status || 'pending';
         document.getElementById('edit-category').value = listing.category || '';
+        document.getElementById('edit-subcategory').value = listing.subcategory || '';
+        document.getElementById('edit-listing-type').value = listing.listing_type || '';
         document.getElementById('edit-location').value = listing.location || '';
+        document.getElementById('edit-phone').value = listing.phone || '';
+        document.getElementById('edit-whatsapp').value = listing.whatsapp || '';
+        document.getElementById('edit-email').value = listing.email || '';
+        document.getElementById('edit-website').value = listing.website || '';
         document.getElementById('edit-description').value = listing.description || '';
+        document.getElementById('edit-extra-notes').value = listing.extra_notes || '';
         document.getElementById('edit-featured').checked = listing.is_featured || false;
         document.getElementById('edit-modal').classList.add('open');
     }
@@ -768,16 +801,39 @@
         const status = document.getElementById('edit-status').value;
         const isFeatured = document.getElementById('edit-featured').checked;
 
+        const business_name = document.getElementById('edit-business-name').value;
+        const category = document.getElementById('edit-category').value;
+        const subcategory = document.getElementById('edit-subcategory').value;
+        const listing_type = document.getElementById('edit-listing-type').value;
+        const location = document.getElementById('edit-location').value;
+        const phone = document.getElementById('edit-phone').value;
+        const whatsapp = document.getElementById('edit-whatsapp').value;
+        const email = document.getElementById('edit-email').value;
+        const website = document.getElementById('edit-website').value;
+        const description = document.getElementById('edit-description').value;
+        const extra_notes = document.getElementById('edit-extra-notes').value;
+
         const spinner = document.getElementById('edit-save-spinner');
         const text = document.getElementById('edit-save-text');
         spinner.style.display = 'inline-block';
         text.textContent = 'Saving...';
 
-        // Update status and featured via RPC
+        // Update all fields via RPC
         const { error: rpcError } = await supabase.rpc('admin_update_listing', {
             p_listing_id: id,
             p_status: status,
-            p_is_featured: isFeatured
+            p_is_featured: isFeatured,
+            p_business_name: business_name || null,
+            p_category: category || null,
+            p_subcategory: subcategory || null,
+            p_description: description || null,
+            p_location: location || null,
+            p_phone: phone || null,
+            p_whatsapp: whatsapp || null,
+            p_email: email || null,
+            p_website: website || null,
+            p_listing_type: listing_type || null,
+            p_extra_notes: extra_notes || null
         });
 
         spinner.style.display = 'none';

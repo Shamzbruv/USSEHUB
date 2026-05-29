@@ -1,7 +1,8 @@
 // create-bucket.mjs — Create the listing-images storage bucket via Supabase Management API
 // Using service role to call the storage management endpoint
-const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
-const SVC_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDAwMzEzNywiZXhwIjoyMDk1NTc5MTM3fQ.bstDgIr-f6MpqOxKAUuexH7TYBKDgR5Un8uYqfX58Lc';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zcptuqrlovflcpqszery.supabase.co';
+const SVC_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!SVC_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
 
 async function main() {
     console.log('Creating listing-images storage bucket...');
