@@ -416,13 +416,14 @@
 
 <!-- TOPBAR -->
 <div class="topbar">
-        <div class="header-left">
-            <a href="index.html" style="text-decoration:none;"><img src="aloe%20logo.png" alt="Logo" style="height:48px;width:auto;border-radius:10px;"></a>
+    <div class="nav">
+        <a class="brand" href="ajm-advertising-hub.html">
+            <img src="aloe%20logo.png" alt="AJM" style="height:40px;width:auto;border-radius:8px;">
             <div>
-                <h2>Master Admin Hub</h2>
-                <p>Complete system oversight & management</p>
+                <strong>Master Admin</strong><br>
+                <span style="font-size:0.75rem;color:var(--muted);">AJM Hub</span>
             </div>
-        </div>
+        </a>
         <div class="nav-right">
             <span class="admin-badge">🛡️ ADMIN</span>
             <span id="admin-name" style="font-size:0.86rem;color:var(--muted);">Loading...</span>
@@ -434,9 +435,12 @@
 <!-- MAIN -->
 <div class="container" id="admin-content" style="display:none;">
 
-    <div class="page-header">
-        <h1>🛡️ Admin Dashboard</h1>
-        <p>Manage listings, members, and platform stats.</p>
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+        <div>
+            <h1>🛡️ Master Admin Hub</h1>
+            <p>Complete system oversight, analytics, and CRM management.</p>
+        </div>
+        <a href="ajm-admin-panel.html" class="btn btn-ghost">← Switch to Standard Admin</a>
     </div>
 
     <!-- Stats -->
