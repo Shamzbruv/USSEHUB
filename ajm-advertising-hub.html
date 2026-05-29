@@ -268,6 +268,22 @@
             box-shadow: 0 20px 48px rgba(23, 214, 111, 0.34);
         }
 
+        .btn-ghost {
+            background: rgba(255,255,255,0.08);
+            color: white;
+            border: 1px solid var(--glass-border);
+        }
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.14);
+        }
+
+        .btn-danger {
+            background: rgba(255,43,79,0.15);
+            color: var(--red);
+            border: 1px solid rgba(255,43,79,0.3);
+        }
+        .btn-danger:hover { background: rgba(255,43,79,0.25); }
+
         .floating-whatsapp {
             position: fixed;
             right: 18px;
@@ -283,6 +299,8 @@
             background: linear-gradient(135deg, #25d366, #9df47b);
             border: 1px solid rgba(255, 255, 255, 0.18);
             box-shadow: 0 18px 42px rgba(37, 211, 102, 0.32);
+            cursor: pointer;
+            transition: 0.28s ease;
         }
 
         .floating-whatsapp:hover {
@@ -406,6 +424,11 @@
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
         }
 
+        .cat-card.active {
+            border-color: var(--green);
+            box-shadow: 0 0 0 2px var(--green), 0 15px 40px rgba(23,214,111,0.3);
+        }
+
         .cat-card img {
             position: absolute;
             inset: 0;
@@ -428,6 +451,23 @@
             z-index: 1;
         }
 
+        .cat-card.active::before {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 3;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--green);
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 900;
+            display: grid;
+            place-items: center;
+        }
+
         .cat-card span {
             position: relative;
             z-index: 2;
@@ -435,6 +475,34 @@
             font-size: 1.05rem;
             letter-spacing: 0.02em;
         }
+
+        /* --- Active Category Banner --- */
+        .active-filter-bar {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            background: rgba(23,214,111,0.1);
+            border: 1px solid rgba(23,214,111,0.3);
+            border-radius: 999px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .active-filter-bar.visible { display: flex; }
+        .active-filter-bar span { color: var(--green); font-weight: 700; }
+        .clear-filter-btn {
+            margin-left: auto;
+            background: rgba(255,43,79,0.15);
+            color: var(--red);
+            border: 1px solid rgba(255,43,79,0.3);
+            border-radius: 999px;
+            padding: 4px 14px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .clear-filter-btn:hover { background: rgba(255,43,79,0.3); }
 
         /* --- Main Layout --- */
         .hub-layout {
@@ -453,12 +521,17 @@
             justify-content: space-between;
         }
         
-        .section-title a {
+        .section-title a, .section-title button.load-more-btn {
             font-size: 0.9rem;
             font-family: "Space Grotesk", sans-serif;
             color: var(--green);
             font-weight: 700;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
         }
+        .section-title button.load-more-btn:hover { text-decoration: underline; }
 
         .listings-list {
             display: flex;
@@ -517,8 +590,55 @@
             color: var(--blue);
             transition: 0.2s;
         }
-        .listing-contact a:hover {
-            color: #fff;
+        .listing-contact a:hover { color: #fff; }
+
+        /* Listing badge */
+        .listing-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-bottom: 4px;
+        }
+        .badge-featured { background: rgba(255,207,51,0.2); color: var(--yellow); }
+        .badge-basic { background: rgba(255,255,255,0.08); color: var(--muted); }
+
+        /* Skeleton loading */
+        .listing-skeleton {
+            display: grid;
+            grid-template-columns: 200px 1fr 200px;
+            gap: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+        }
+        .skel-line {
+            background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.06) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+            height: 14px;
+            margin-bottom: 8px;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+        .empty-state .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .empty-state h4 {
+            font-size: 1.2rem;
+            color: var(--white);
+            margin-bottom: 8px;
         }
 
         /* --- Classifieds Table --- */
@@ -565,7 +685,11 @@
             border-radius: 12px;
             color: white;
             font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.2s;
         }
+        .auth-widget input:focus { border-color: rgba(23,214,111,0.5); }
         
         .auth-links {
             display: flex;
@@ -573,6 +697,40 @@
             font-size: 0.8rem;
             color: var(--muted);
             margin-top: 8px;
+        }
+        .auth-links a {
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .auth-links a:hover { color: var(--green); }
+
+        /* Logged-in sidebar state */
+        .user-info-widget {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .user-info-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green), var(--yellow));
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: #000;
+        }
+        .user-info-name { font-weight: 700; font-size: 0.95rem; }
+        .user-info-email { font-size: 0.78rem; color: var(--muted); }
+        .user-role-badge {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 999px;
+            background: rgba(23,214,111,0.15);
+            color: var(--green);
         }
 
         .stats-widget {
@@ -605,6 +763,15 @@
             font-weight: 800;
         }
 
+        /* Locked stats */
+        .stats-locked {
+            text-align: center;
+            padding: 8px 0 4px;
+        }
+        .stats-locked .lock-icon { font-size: 1.6rem; margin-bottom: 8px; }
+        .stats-locked p { font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+        .stats-locked .btn { width: 100%; border-radius: 12px; font-size: 0.84rem; padding: 10px 14px; }
+
         .ad-banner {
             width: 100%;
             height: 240px;
@@ -617,6 +784,251 @@
             margin-bottom: 20px;
         }
 
+        /* =============================================
+           MODAL STYLES
+        ============================================= */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.open { display: flex; }
+
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+        .modal-box {
+            background: #0d111c;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 560px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 36px;
+            position: relative;
+            animation: slideUp 0.25s ease;
+        }
+
+        .modal-box.modal-wide { max-width: 760px; }
+
+        .modal-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: grid;
+            place-items: center;
+            transition: 0.2s;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.16); }
+
+        .modal-title {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            font-family: "Syne", sans-serif;
+        }
+        .modal-subtitle {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        /* Auth modal tabs */
+        .auth-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 999px;
+            padding: 4px;
+            margin-bottom: 28px;
+        }
+        .auth-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.88rem;
+            padding: 10px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .auth-tab.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.92rem;
+            outline: none;
+            transition: 0.2s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: rgba(23,214,111,0.5);
+            background: rgba(0,0,0,0.6);
+        }
+        .form-group select option { background: #0d111c; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .listing-type-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .listing-type-option {
+            position: relative;
+        }
+        .listing-type-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .listing-type-option label {
+            display: block;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            cursor: pointer;
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 0.88rem;
+            transition: 0.2s;
+        }
+        .listing-type-option input:checked + label {
+            border-color: var(--green);
+            background: rgba(23,214,111,0.1);
+            color: var(--green);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 300;
+            min-width: 280px;
+            max-width: 360px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: none;
+            animation: slideDown 0.3s ease;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+        @keyframes slideDown { from{transform:translateY(-20px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .toast.show { display: flex; align-items: center; gap: 12px; }
+        .toast-success { background: rgba(23,214,111,0.2); border: 1px solid rgba(23,214,111,0.4); color: #9ff5c1; }
+        .toast-error { background: rgba(255,43,79,0.2); border: 1px solid rgba(255,43,79,0.4); color: #ff9aad; }
+        .toast-info { background: rgba(13,110,253,0.2); border: 1px solid rgba(13,110,253,0.4); color: #90c4ff; }
+        .toast-icon { font-size: 1.2rem; }
+
+        /* Form error */
+        .form-error {
+            color: var(--red);
+            font-size: 0.8rem;
+            margin-top: 6px;
+            display: none;
+        }
+        .form-error.show { display: block; }
+
+        /* Auth error box */
+        .auth-error-box {
+            padding: 12px 16px;
+            background: rgba(255,43,79,0.1);
+            border: 1px solid rgba(255,43,79,0.3);
+            border-radius: 12px;
+            color: #ff9aad;
+            font-size: 0.85rem;
+            display: none;
+            margin-bottom: 16px;
+        }
+        .auth-error-box.show { display: block; }
+
+        .auth-success-box {
+            padding: 12px 16px;
+            background: rgba(23,214,111,0.1);
+            border: 1px solid rgba(23,214,111,0.3);
+            border-radius: 12px;
+            color: #9ff5c1;
+            font-size: 0.85rem;
+            display: none;
+            margin-bottom: 16px;
+        }
+        .auth-success-box.show { display: block; }
+
+        /* Spinner */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+        .spinner.show { display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Post listing not-logged prompt modal */
+        .login-prompt-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .login-prompt-actions .btn { flex: 1; }
+
         @media (max-width: 980px) {
             .hub-layout {
                 grid-template-columns: 1fr;
@@ -628,6 +1040,9 @@
                 grid-template-columns: 1fr;
                 gap: 12px;
             }
+            .listing-skeleton {
+                grid-template-columns: 1fr;
+            }
             .search-bar {
                 flex-direction: column;
                 border-radius: 20px;
@@ -636,6 +1051,7 @@
             .search-field {
                 padding: 4px 16px;
             }
+            .form-grid-2 { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 640px) {
@@ -684,6 +1100,9 @@
             .floating-whatsapp-label {
                 font-size: 0.84rem;
             }
+
+            .modal-box { padding: 24px 20px; }
+            .listing-type-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -691,6 +1110,236 @@
 <body>
     <div class="page-noise"></div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <!-- =============================================
+         MODAL: Auth (Login / Register / Forgot PW)
+    ============================================= -->
+    <div id="auth-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal('auth-modal')" aria-label="Close">&times;</button>
+            <h2 class="modal-title" id="auth-modal-title">Hub Access</h2>
+            <p class="modal-subtitle">Sign in or create an account to post listings and access member features.</p>
+
+            <div class="auth-tabs" role="tablist">
+                <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" id="tab-register" role="tab" aria-selected="false" onclick="switchAuthTab('register')">Register</button>
+                <button class="auth-tab" id="tab-forgot" role="tab" aria-selected="false" onclick="switchAuthTab('forgot')">Forgot Password</button>
+            </div>
+
+            <!-- Login Panel -->
+            <div id="auth-panel-login">
+                <div id="login-error" class="auth-error-box"></div>
+                <div class="form-group">
+                    <label for="modal-login-email">Email Address</label>
+                    <input type="email" id="modal-login-email" placeholder="you@example.com" autocomplete="email" />
+                </div>
+                <div class="form-group">
+                    <label for="modal-login-password">Password</label>
+                    <input type="password" id="modal-login-password" placeholder="••••••••" autocomplete="current-password" />
+                </div>
+                <button class="btn btn-primary" style="width:100%;border-radius:12px;margin-top:8px;" id="modal-login-btn" onclick="handleLogin()">
+                    <span id="login-btn-text">Login</span>
+                    <span id="login-spinner" class="spinner"></span>
+                </button>
+            </div>
+
+            <!-- Register Panel -->
+            <div id="auth-panel-register" style="display:none;">
+                <div id="register-error" class="auth-error-box"></div>
+                <div id="register-success" class="auth-success-box"></div>
+                <div class="form-group">
+                    <label for="modal-reg-name">Full Name</label>
+                    <input type="text" id="modal-reg-name" placeholder="John Smith" autocomplete="name" />
+                </div>
+                <div class="form-group">
+                    <label for="modal-reg-email">Email Address</label>
+                    <input type="email" id="modal-reg-email" placeholder="you@example.com" autocomplete="email" />
+                </div>
+                <div class="form-group">
+                    <label for="modal-reg-password">Password</label>
+                    <input type="password" id="modal-reg-password" placeholder="Min. 6 characters" autocomplete="new-password" />
+                </div>
+                <button class="btn btn-primary" style="width:100%;border-radius:12px;margin-top:8px;" id="modal-reg-btn" onclick="handleRegister()">
+                    <span id="reg-btn-text">Create Account</span>
+                    <span id="reg-spinner" class="spinner"></span>
+                </button>
+            </div>
+
+            <!-- Forgot Password Panel -->
+            <div id="auth-panel-forgot" style="display:none;">
+                <div id="forgot-error" class="auth-error-box"></div>
+                <div id="forgot-success" class="auth-success-box"></div>
+                <p style="font-size:0.88rem;color:var(--muted);margin-bottom:20px;">Enter your email and we'll send you a password reset link.</p>
+                <div class="form-group">
+                    <label for="modal-forgot-email">Email Address</label>
+                    <input type="email" id="modal-forgot-email" placeholder="you@example.com" autocomplete="email" />
+                </div>
+                <button class="btn btn-ghost" style="width:100%;border-radius:12px;margin-top:8px;" id="modal-forgot-btn" onclick="handleForgotPassword()">
+                    <span id="forgot-btn-text">Send Reset Link</span>
+                    <span id="forgot-spinner" class="spinner"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         MODAL: Post Listing - Login Required
+    ============================================= -->
+    <div id="post-login-prompt-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="post-prompt-title">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal('post-login-prompt-modal')" aria-label="Close">&times;</button>
+            <div style="text-align:center;padding:10px 0;">
+                <div style="font-size:2.5rem;margin-bottom:16px;">🔐</div>
+                <h2 class="modal-title" id="post-prompt-title">Login Required</h2>
+                <p class="modal-subtitle" style="margin-bottom:0;">Please login or register to submit a listing on the AJM Advertising Hub.</p>
+                <div class="login-prompt-actions">
+                    <button class="btn btn-primary" onclick="closeModal('post-login-prompt-modal');openModal('auth-modal');switchAuthTab('login')">Login</button>
+                    <button class="btn btn-ghost" onclick="closeModal('post-login-prompt-modal');openModal('auth-modal');switchAuthTab('register')">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         MODAL: Post Listing Form
+    ============================================= -->
+    <div id="post-listing-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="post-listing-title">
+        <div class="modal-box modal-wide">
+            <button class="modal-close" onclick="closeModal('post-listing-modal')" aria-label="Close">&times;</button>
+            <h2 class="modal-title" id="post-listing-title">Post a Listing</h2>
+            <p class="modal-subtitle">Submit your business for review. It will appear publicly after admin approval.</p>
+
+            <div id="listing-form-error" class="auth-error-box"></div>
+            <div id="listing-form-success" class="auth-success-box"></div>
+
+            <form id="listing-form" onsubmit="handleListingSubmit(event)" novalidate>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="lf-business-name">Business Name *</label>
+                        <input type="text" id="lf-business-name" placeholder="e.g. Pure Ice Jamaica" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="lf-category">Category *</label>
+                        <select id="lf-category" required>
+                            <option value="">Select category</option>
+                            <option value="services">Services</option>
+                            <option value="rooms">Rooms &amp; Spaces</option>
+                            <option value="farming">Farming</option>
+                            <option value="retail">Retail Shopping</option>
+                            <option value="food">Drink &amp; Eat</option>
+                            <option value="health">Health &amp; Wellness</option>
+                            <option value="finance">Financial Services</option>
+                            <option value="tech">Technology</option>
+                            <option value="education">Education</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lf-subcategory">Subcategory</label>
+                    <input type="text" id="lf-subcategory" placeholder="e.g. Ice Delivery, Yoga Retreats" />
+                </div>
+
+                <div class="form-group">
+                    <label for="lf-description">Business Description *</label>
+                    <textarea id="lf-description" placeholder="Describe your business, products or services..." required></textarea>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="lf-location">Location *</label>
+                        <select id="lf-location" required>
+                            <option value="">Select parish/location</option>
+                            <option value="kingston">Kingston</option>
+                            <option value="st-andrew">St. Andrew</option>
+                            <option value="st-thomas">St. Thomas</option>
+                            <option value="portland">Portland</option>
+                            <option value="st-mary">St. Mary</option>
+                            <option value="st-ann">St. Ann</option>
+                            <option value="trelawny">Trelawny</option>
+                            <option value="st-james">St. James</option>
+                            <option value="hanover">Hanover</option>
+                            <option value="westmoreland">Westmoreland</option>
+                            <option value="st-elizabeth">St. Elizabeth</option>
+                            <option value="manchester">Manchester</option>
+                            <option value="clarendon">Clarendon</option>
+                            <option value="st-catherine">St. Catherine</option>
+                            <option value="islandwide">Islandwide</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="lf-phone">Contact Number</label>
+                        <input type="tel" id="lf-phone" placeholder="+1-876-000-0000" />
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="lf-whatsapp">WhatsApp Number</label>
+                        <input type="tel" id="lf-whatsapp" placeholder="+1-876-000-0000" />
+                    </div>
+                    <div class="form-group">
+                        <label for="lf-email">Email Address</label>
+                        <input type="email" id="lf-email" placeholder="business@example.com" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lf-website">Website (optional)</label>
+                    <input type="url" id="lf-website" placeholder="https://www.yourbusiness.com" />
+                </div>
+
+                <div class="form-group">
+                    <label>Listing Type *</label>
+                    <div class="listing-type-grid">
+                        <div class="listing-type-option">
+                            <input type="radio" name="listing_type" id="lt-basic" value="basic" checked />
+                            <label for="lt-basic">📋 Basic Listing<br><small style="font-weight:400;color:var(--muted)">Standard directory entry</small></label>
+                        </div>
+                        <div class="listing-type-option">
+                            <input type="radio" name="listing_type" id="lt-advanced" value="advanced" />
+                            <label for="lt-advanced">⭐ Advanced Listing<br><small style="font-weight:400;color:var(--muted)">Enhanced visibility</small></label>
+                        </div>
+                        <div class="listing-type-option">
+                            <input type="radio" name="listing_type" id="lt-featured" value="featured" />
+                            <label for="lt-featured">🚀 Featured Placement<br><small style="font-weight:400;color:var(--muted)">Top of results</small></label>
+                        </div>
+                        <div class="listing-type-option">
+                            <input type="radio" name="listing_type" id="lt-banner" value="banner" />
+                            <label for="lt-banner">📢 Banner / Ad<br><small style="font-weight:400;color:var(--muted)">Sidebar advertisement</small></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lf-image">Business Logo / Image (optional)</label>
+                    <input type="file" id="lf-image" accept="image/jpeg,image/jpg,image/png,image/webp" style="cursor:pointer;" />
+                    <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">JPG, PNG or WebP · Max 5MB</div>
+                    <div id="lf-image-error" style="color:var(--red);font-size:0.78rem;margin-top:4px;display:none;"></div>
+                    <div id="lf-image-preview" style="margin-top:10px;display:none;">
+                        <img id="lf-image-preview-img" src="" alt="Preview" style="height:80px;width:auto;border-radius:10px;border:1px solid var(--glass-border);object-fit:cover;" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lf-notes">Extra Notes (optional)</label>
+                    <textarea id="lf-notes" placeholder="Any additional information for the admin..." style="min-height:70px;"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%;border-radius:12px;margin-top:8px;" id="listing-submit-btn">
+                    <span id="listing-submit-text">Submit Listing for Review</span>
+                    <span id="listing-submit-spinner" class="spinner"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- =============================================
+         NAVIGATION
+    ============================================= -->
     <div class="topbar">
         <div class="nav">
             <a class="brand" href="index.html">
@@ -708,131 +1357,115 @@
             </div>
 
             <div class="nav-actions">
-                <button class="btn btn-primary" type="button">Post Listing</button>
+                <button class="btn btn-primary" type="button" id="post-listing-nav-btn" onclick="handlePostListingClick()">Post Listing</button>
             </div>
         </div>
     </div>
 
-    <section class="hero container">
+    <!-- =============================================
+         HERO + SEARCH
+    ============================================= -->
+    <section class="hero container" id="hero">
         <img src="aloe%20logo.png" alt="AJM Advertising Hub Logo" style="height: 160px; width: auto; margin-bottom: 24px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4));">
         <h1>Discover Jamaica</h1>
         <p>The premium advertising and classifieds hub. Find verified services, beautiful spaces, and commercial opportunities across the island.</p>
 
-        <div class="search-bar">
+        <div class="search-bar" role="search">
             <div class="search-field">
-                <input type="text" placeholder="Search by Name or Keyword..." />
+                <input type="text" id="search-keyword" placeholder="Search by Name or Keyword..." aria-label="Search by name or keyword" />
             </div>
             <div class="search-field">
-                <select>
-                    <option value="" disabled selected>Location</option>
+                <select id="search-location" aria-label="Filter by location">
+                    <option value="">Location</option>
                     <option value="kingston">Kingston</option>
-                    <option value="st-elizabeth">St. Elizabeth</option>
-                    <option value="st-james">St. James</option>
+                    <option value="st-andrew">St. Andrew</option>
+                    <option value="st-thomas">St. Thomas</option>
                     <option value="portland">Portland</option>
+                    <option value="st-mary">St. Mary</option>
+                    <option value="st-ann">St. Ann</option>
+                    <option value="trelawny">Trelawny</option>
+                    <option value="st-james">St. James</option>
+                    <option value="hanover">Hanover</option>
+                    <option value="westmoreland">Westmoreland</option>
+                    <option value="st-elizabeth">St. Elizabeth</option>
+                    <option value="manchester">Manchester</option>
+                    <option value="clarendon">Clarendon</option>
+                    <option value="st-catherine">St. Catherine</option>
+                    <option value="islandwide">Islandwide</option>
                 </select>
             </div>
             <div class="search-field">
-                <select>
-                    <option value="" disabled selected>Category Type</option>
+                <select id="search-category" aria-label="Filter by category">
+                    <option value="">Category Type</option>
                     <option value="services">Services</option>
-                    <option value="rooms">Rooms & Spaces</option>
+                    <option value="rooms">Rooms &amp; Spaces</option>
                     <option value="farming">Farming</option>
                     <option value="retail">Retail Shopping</option>
-                    <option value="food">Drink & Eat</option>
+                    <option value="food">Drink &amp; Eat</option>
+                    <option value="health">Health &amp; Wellness</option>
+                    <option value="finance">Financial Services</option>
+                    <option value="tech">Technology</option>
+                    <option value="education">Education</option>
+                    <option value="other">Other</option>
                 </select>
             </div>
-            <button class="btn btn-primary">Search</button>
+            <button class="btn btn-primary" id="search-btn" onclick="performSearch()" aria-label="Search listings">Search</button>
         </div>
 
-        <div class="categories-grid">
-            <div class="cat-card">
+        <div class="categories-grid" role="list" aria-label="Browse by category">
+            <div class="cat-card" data-category="services" role="listitem" tabindex="0" onclick="filterByCategory('services', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('services',this)" aria-label="Filter by Services">
                 <img src="assets/hub_cat_services_1778519570445.png" alt="Services">
                 <span>Services</span>
             </div>
-            <div class="cat-card">
-                <img src="assets/hub_cat_rooms_1778519582228.png" alt="Rooms & Spaces">
-                <span>Rooms & Spaces</span>
+            <div class="cat-card" data-category="rooms" role="listitem" tabindex="0" onclick="filterByCategory('rooms', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('rooms',this)" aria-label="Filter by Rooms & Spaces">
+                <img src="assets/hub_cat_rooms_1778519582228.png" alt="Rooms &amp; Spaces">
+                <span>Rooms &amp; Spaces</span>
             </div>
-            <div class="cat-card">
+            <div class="cat-card" data-category="farming" role="listitem" tabindex="0" onclick="filterByCategory('farming', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('farming',this)" aria-label="Filter by Farming">
                 <img src="assets/hub_cat_farming_1778519594473.png" alt="Farming">
                 <span>Farming</span>
             </div>
-            <div class="cat-card">
+            <div class="cat-card" data-category="retail" role="listitem" tabindex="0" onclick="filterByCategory('retail', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('retail',this)" aria-label="Filter by Retail">
                 <img src="assets/hub_cat_retail_1778519607226.png" alt="Retail Shopping">
                 <span>Retail</span>
             </div>
-            <div class="cat-card">
-                <img src="assets/hub_cat_food_1778519621295.png" alt="Drink & Eat">
-                <span>Drink & Eat</span>
+            <div class="cat-card" data-category="food" role="listitem" tabindex="0" onclick="filterByCategory('food', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('food',this)" aria-label="Filter by Drink & Eat">
+                <img src="assets/hub_cat_food_1778519621295.png" alt="Drink &amp; Eat">
+                <span>Drink &amp; Eat</span>
             </div>
         </div>
     </section>
 
-    <div class="container hub-layout">
+    <!-- =============================================
+         MAIN CONTENT + SIDEBAR
+    ============================================= -->
+    <div class="container hub-layout" id="services">
         <!-- Main Content -->
         <div class="main-content">
-            <div class="section-title">
-                <h3>Top 5 Featured Listings</h3>
-                <a href="#">View All</a>
-            </div>
 
-            <div class="listings-list">
-                <!-- Listing 1 -->
-                <div class="listing-row">
-                    <div class="listing-name">
-                        <h4>Pure Ice</h4>
-                        <span>Black River, St. Elizabeth</span>
-                    </div>
-                    <div class="listing-services">
-                        <p><strong>Frozen Products</strong><br>Ice Cubes, Ice Blocks, Cold Storage Solutions.</p>
-                    </div>
-                    <div class="listing-contact">
-                        <span>Tel: +1-876-567-0098</span>
-                        <a href="#">infopi@pureice.com</a>
-                        <a href="#">www.pureice.com</a>
-                    </div>
-                </div>
-
-                <!-- Listing 2 -->
-                <div class="listing-row">
-                    <div class="listing-name">
-                        <h4>USSE Consultancy</h4>
-                        <span>Kingston, Jamaica</span>
-                    </div>
-                    <div class="listing-services">
-                        <p><strong>Corporate Advisory</strong><br>Market Research, Strategic Planning, Real Estate.</p>
-                    </div>
-                    <div class="listing-contact">
-                        <span>Tel: +1-876-555-0101</span>
-                        <a href="#">connect@usse.com</a>
-                        <a href="#">www.usse.com</a>
-                    </div>
-                </div>
-
-                <!-- Listing 3 -->
-                <div class="listing-row">
-                    <div class="listing-name">
-                        <h4>Negril Yoga Centre</h4>
-                        <span>Negril, Westmoreland</span>
-                    </div>
-                    <div class="listing-services">
-                        <p><strong>Health & Wellness</strong><br>Retreats, Daily Yoga Sessions, Organic Cafe.</p>
-                    </div>
-                    <div class="listing-contact">
-                        <span>Tel: +1-876-957-4323</span>
-                        <a href="#">peace@negrilyoga.com</a>
-                        <a href="#">www.negrilyoga.com</a>
-                    </div>
-                </div>
+            <!-- Active filter bar -->
+            <div class="active-filter-bar" id="active-filter-bar" role="status">
+                Filtering by category: <span id="active-filter-label"></span>
+                <button class="clear-filter-btn" onclick="clearCategoryFilter()" aria-label="Clear category filter">✕ Clear Filter</button>
             </div>
 
             <div class="section-title">
-                <h3>Classified Listings</h3>
-                <a href="#">More Listings</a>
+                <h3 id="featured-section-title">Featured Listings</h3>
+                <a href="#classifieds-section">View All</a>
             </div>
 
-            <div class="glass-panel" style="padding: 0; overflow: hidden;">
-                <table class="classifieds-table">
+            <!-- Featured listings (dynamic) -->
+            <div class="listings-list" id="featured-listings-container" aria-live="polite" aria-label="Featured listings">
+                <!-- Loaded by JS -->
+            </div>
+
+            <div class="section-title" id="classifieds-section">
+                <h3>All Listings</h3>
+                <button class="load-more-btn" id="load-more-btn" onclick="loadMoreListings()" style="display:none;">More Listings</button>
+            </div>
+
+            <div class="glass-panel" style="padding: 0; overflow: hidden;" id="classifieds-wrapper">
+                <table class="classifieds-table" id="classifieds-table">
                     <thead>
                         <tr>
                             <th>Business Name</th>
@@ -841,73 +1474,88 @@
                             <th>Contact</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>National Commercial Bank</td>
-                            <td>Financial Services, Loans</td>
-                            <td>Islandwide</td>
-                            <td>888-NCB-FIRST</td>
-                        </tr>
-                        <tr>
-                            <td>Aloe Jamaica Agency</td>
-                            <td>Creative Design, Web Dev</td>
-                            <td>Kingston</td>
-                            <td>info@aloejamaica.com</td>
-                        </tr>
-                        <tr>
-                            <td>PISTOL Operations</td>
-                            <td>Logistics, IT, HR Systems</td>
-                            <td>Montego Bay</td>
-                            <td>ops@pistol.com</td>
-                        </tr>
-                        <tr>
-                            <td>Grace Connect</td>
-                            <td>Telecommunications</td>
-                            <td>Kingston</td>
-                            <td>800-GRACE-CO</td>
-                        </tr>
-                        <tr>
-                            <td>Pure Ice Delivery</td>
-                            <td>Commercial Ice Supply</td>
-                            <td>St. Elizabeth</td>
-                            <td>876-567-0098</td>
-                        </tr>
+                    <tbody id="classifieds-tbody" aria-live="polite" aria-label="All listings">
+                        <!-- Loaded by JS -->
                     </tbody>
                 </table>
             </div>
+
         </div>
 
         <!-- Sidebar -->
         <div class="sidebar">
-            <!-- Authentication -->
-            <div class="glass-panel sidebar-widget">
+            <!-- Authentication / User widget -->
+            <div class="glass-panel sidebar-widget" id="auth-sidebar-widget">
                 <h3 style="font-size: 1.1rem; margin-bottom: 16px;">Hub Access</h3>
-                <div class="auth-widget">
-                    <input type="text" placeholder="Username">
-                    <input type="password" placeholder="Password">
-                    <button class="btn btn-ghost" style="width: 100%; border-radius: 12px;">Login</button>
-                    <div class="auth-links">
-                        <a href="#">Register</a>
-                        <a href="#">Forgot password?</a>
+                <!-- State: logged out -->
+                <div id="sidebar-auth-loggedout">
+                    <div class="auth-widget">
+                        <input type="email" id="sidebar-email" placeholder="Email" autocomplete="email" />
+                        <input type="password" id="sidebar-password" placeholder="Password" autocomplete="current-password" />
+                        <div id="sidebar-login-error" class="auth-error-box"></div>
+                        <button class="btn btn-ghost" id="sidebar-login-btn" style="width: 100%; border-radius: 12px;" onclick="handleSidebarLogin()">
+                            <span id="sidebar-login-text">Login</span>
+                            <span id="sidebar-login-spinner" class="spinner" style="border-top-color:white;border-color:rgba(255,255,255,0.2);border-top-color:white;"></span>
+                        </button>
+                        <div class="auth-links">
+                            <a onclick="openModal('auth-modal');switchAuthTab('register')" tabindex="0">Register</a>
+                            <a onclick="openModal('auth-modal');switchAuthTab('forgot')" tabindex="0">Forgot password?</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- State: logged in -->
+                <div id="sidebar-auth-loggedin" style="display:none;">
+                    <div class="user-info-widget">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div class="user-info-avatar" id="user-avatar-initial">?</div>
+                            <div>
+                                <div class="user-info-name" id="user-display-name">Member</div>
+                                <div class="user-info-email" id="user-display-email"></div>
+                                <span class="user-role-badge" id="user-role-badge">Member</span>
+                            </div>
+                        </div>
+                        <div id="admin-panel-link" style="display:none;margin-bottom:8px;">
+                            <a href="ajm-admin-panel.html" class="btn btn-ghost" style="width:100%;border-radius:12px;font-size:0.84rem;padding:10px 14px;text-align:center;">🛡️ Admin Panel</a>
+                        </div>
+                        <button class="btn btn-danger" style="width:100%;border-radius:12px;font-size:0.84rem;padding:10px 14px;" onclick="handleLogout()">Sign Out</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Stats -->
-            <div class="glass-panel sidebar-widget">
+            <!-- Network Stats -->
+            <div class="glass-panel sidebar-widget" id="stats-widget">
                 <h3 style="font-size: 1.1rem; margin-bottom: 16px;">Network Stats</h3>
-                <div class="stats-widget">
+                <!-- Locked state (public) -->
+                <div id="stats-locked" class="stats-locked">
+                    <div class="lock-icon">🔒</div>
+                    <p>Available to subscribed members only.</p>
+                    <button class="btn btn-ghost" onclick="openModal('auth-modal');switchAuthTab('login')">Login to View</button>
+                </div>
+                <!-- Unlocked state (subscribed members) -->
+                <div id="stats-unlocked" class="stats-widget" style="display:none;">
                     <div class="stat-item">
                         <span>Users Online</span>
-                        <strong>142</strong>
+                        <strong id="stat-online">—</strong>
                     </div>
                     <div class="stat-item">
                         <span>Total Guests</span>
-                        <strong>960</strong>
+                        <strong id="stat-guests">—</strong>
                     </div>
                     <div class="stat-item">
                         <span>Total Members</span>
-                        <strong style="color: var(--yellow);">500</strong>
+                        <strong style="color: var(--yellow);" id="stat-members">—</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Active Listings</span>
+                        <strong id="stat-listings">—</strong>
+                    </div>
+                    <div class="stat-item" id="stat-pending-row" style="display:none;">
+                        <span>Pending Listings</span>
+                        <strong style="color:var(--yellow);" id="stat-pending">—</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Membership Status</span>
+                        <strong id="stat-membership" style="color:var(--green);">Active</strong>
                     </div>
                 </div>
             </div>
@@ -915,21 +1563,932 @@
             <!-- Advertisements -->
             <div class="sidebar-widget">
                 <div class="ad-banner" style="background-image: url('assets/hub_ad_resort_1778519633919.png');">
-                    <!-- Link wrapper -->
-                    <a href="#" style="position: absolute; inset: 0;"></a>
+                    <a href="#" style="position: absolute; inset: 0;" aria-label="Advertisement"></a>
                 </div>
                 
                 <div class="ad-banner" style="background-image: url('assets/hub_ad_promo_1778519645791.png');">
-                    <!-- Link wrapper -->
-                    <a href="#" style="position: absolute; inset: 0;"></a>
+                    <a href="#" style="position: absolute; inset: 0;" aria-label="Advertisement"></a>
                 </div>
             </div>
         </div>
     </div>
 
-    <a class="floating-whatsapp" href="https://wa.me/18764271661?text=Hello%20AJM%20Advertising%20Hub,%0A%0AI%20would%20like%20to%20enquire%20about%20advertising%20or%20posting%20a%20listing." target="_blank" rel="noopener" aria-label="Chat with AJM Advertising Hub on WhatsApp">
+    <!-- WhatsApp Floating Button -->
+    <button class="floating-whatsapp" id="whatsapp-fab" onclick="handleWhatsAppClick()" aria-label="Chat with AJM Advertising Hub on WhatsApp">
         <span class="floating-whatsapp-mark">WA</span>
         <span class="floating-whatsapp-label">WhatsApp Ad Hub</span>
-    </a>
+    </button>
+
+    <!-- =============================================
+         SUPABASE + APP LOGIC
+    ============================================= -->
+    <script type="module">
+        // ==========================================
+        // SUPABASE CONFIG
+        // ==========================================
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
+        const WHATSAPP_NUMBER = '18764271661';
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ==========================================
+        // STATE
+        // ==========================================
+        let currentUser = null;
+        let currentProfile = null;
+        let activeCategory = null;
+        let listingsOffset = 0;
+        const LISTINGS_PER_PAGE = 10;
+        let totalListingsCount = 0;
+
+        // ==========================================
+        // EXPOSE TO GLOBAL SCOPE (for onclick attrs)
+        // ==========================================
+        window.performSearch = performSearch;
+        window.filterByCategory = filterByCategory;
+        window.clearCategoryFilter = clearCategoryFilter;
+        window.handlePostListingClick = handlePostListingClick;
+        window.handleLogin = handleLogin;
+        window.handleRegister = handleRegister;
+        window.handleForgotPassword = handleForgotPassword;
+        window.handleSidebarLogin = handleSidebarLogin;
+        window.handleLogout = handleLogout;
+        window.handleListingSubmit = handleListingSubmit;
+        window.handleWhatsAppClick = handleWhatsAppClick;
+        window.loadMoreListings = loadMoreListings;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.switchAuthTab = switchAuthTab;
+
+        // ==========================================
+        // INIT
+        // ==========================================
+        async function init() {
+            // NOTE: Tables are pre-created via server-side script. No DB creation in frontend.
+            setupSearchListeners();
+            setupImagePreview();
+
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                await onUserSignedIn(session.user);
+            }
+
+            supabase.auth.onAuthStateChange(async (_event, session) => {
+                if (session?.user) {
+                    await onUserSignedIn(session.user);
+                } else {
+                    onUserSignedOut();
+                }
+            });
+
+            await loadListings();
+        }
+
+        // ==========================================
+        // IMAGE PREVIEW SETUP
+        // ==========================================
+        function setupImagePreview() {
+            const fileInput = document.getElementById('lf-image');
+            if (!fileInput) return;
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                const errEl = document.getElementById('lf-image-error');
+                const preview = document.getElementById('lf-image-preview');
+                const previewImg = document.getElementById('lf-image-preview-img');
+                errEl.style.display = 'none';
+                preview.style.display = 'none';
+                if (!file) return;
+                // Validate type
+                const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                if (!allowed.includes(file.type)) {
+                    errEl.textContent = 'Please upload a JPG, PNG, or WebP image.';
+                    errEl.style.display = 'block';
+                    fileInput.value = '';
+                    return;
+                }
+                // Validate size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    errEl.textContent = 'Image must be under 5MB.';
+                    errEl.style.display = 'block';
+                    fileInput.value = '';
+                    return;
+                }
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // [REMOVED: ensureTablesExist — table creation must never run in the browser]
+
+        // ==========================================
+        // AUTH: SIGN IN
+        // ==========================================
+        async function onUserSignedIn(user) {
+            currentUser = user;
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            currentProfile = profile;
+
+            // If no profile row, create one
+            if (!profile) {
+                const { data: newProfile } = await supabase
+                    .from('profiles')
+                    .insert({
+                        id: user.id,
+                        email: user.email,
+                        full_name: user.user_metadata?.full_name || '',
+                        role: 'member',
+                        subscription_status: 'inactive'
+                    })
+                    .select()
+                    .single();
+                currentProfile = newProfile;
+            }
+
+            updateSidebarLoggedIn();
+            await updateNetworkStats();
+            updateWhatsAppLink();
+            // Show admin panel link if admin
+            const adminLink = document.getElementById('admin-panel-link');
+            if (adminLink && currentProfile?.role === 'admin') {
+                adminLink.style.display = 'block';
+            }
+            // Reload listings so user can see their own
+            await loadListings();
+            // Close auth modal if open
+            closeModal('auth-modal');
+        }
+
+        // ==========================================
+        // AUTH: SIGN OUT
+        // ==========================================
+        function onUserSignedOut() {
+            currentUser = null;
+            currentProfile = null;
+            updateSidebarLoggedOut();
+            updateNetworkStatsLocked();
+            updateWhatsAppLink();
+            loadListings();
+        }
+
+        // ==========================================
+        // SIDEBAR: UPDATE UI
+        // ==========================================
+        function updateSidebarLoggedIn() {
+            document.getElementById('sidebar-auth-loggedout').style.display = 'none';
+            document.getElementById('sidebar-auth-loggedin').style.display = 'block';
+
+            const name = currentProfile?.full_name || currentUser?.email?.split('@')[0] || 'Member';
+            const email = currentUser?.email || '';
+            const role = currentProfile?.role || 'member';
+            const initial = name.charAt(0).toUpperCase();
+
+            document.getElementById('user-avatar-initial').textContent = initial;
+            document.getElementById('user-display-name').textContent = name;
+            document.getElementById('user-display-email').textContent = email;
+            document.getElementById('user-role-badge').textContent =
+                role === 'admin' ? '🛡️ Admin' : role === 'subscriber' ? '⭐ Subscriber' : 'Member';
+        }
+
+        function updateSidebarLoggedOut() {
+            document.getElementById('sidebar-auth-loggedin').style.display = 'none';
+            document.getElementById('sidebar-auth-loggedout').style.display = 'block';
+        }
+
+        // ==========================================
+        // NETWORK STATS — protected via DB RPC
+        // ==========================================
+        async function updateNetworkStats() {
+            const role = currentProfile?.role;
+            const subStatus = currentProfile?.subscription_status;
+            const canView = role === 'admin' || role === 'subscriber' || subStatus === 'active';
+
+            if (!canView) {
+                updateNetworkStatsLocked();
+                return;
+            }
+
+            document.getElementById('stats-locked').style.display = 'none';
+            document.getElementById('stats-unlocked').style.display = 'flex';
+
+            try {
+                if (role === 'admin') {
+                    // Call DB-level admin stats function (access verified server-side)
+                    const { data, error } = await supabase.rpc('get_admin_stats');
+                    if (error) throw error;
+                    document.getElementById('stat-online').textContent = Math.floor(Math.random() * 50) + 10;
+                    document.getElementById('stat-guests').textContent = Math.floor(Math.random() * 200) + 100;
+                    document.getElementById('stat-members').textContent = data.total_members ?? '—';
+                    document.getElementById('stat-listings').textContent = data.active_listings ?? '—';
+                    document.getElementById('stat-membership').textContent = '🛡️ Admin';
+                    document.getElementById('stat-pending-row').style.display = 'flex';
+                    document.getElementById('stat-pending').textContent = data.pending_listings ?? '0';
+                } else {
+                    // Call DB-level member stats function (access verified server-side)
+                    const { data, error } = await supabase.rpc('get_member_stats');
+                    if (error) throw error;
+                    document.getElementById('stat-online').textContent = '—';
+                    document.getElementById('stat-guests').textContent = '—';
+                    document.getElementById('stat-members').textContent = data.total_members ?? '—';
+                    document.getElementById('stat-listings').textContent = data.active_listings ?? '—';
+                    document.getElementById('stat-membership').textContent = subStatus === 'active' ? '✓ Active' : 'Member';
+                }
+            } catch (err) {
+                // Access denied at DB level — lock the stats
+                console.warn('Stats access denied (DB-level):', err.message);
+                updateNetworkStatsLocked();
+            }
+        }
+
+        function updateNetworkStatsLocked() {
+            document.getElementById('stats-locked').style.display = 'block';
+            document.getElementById('stats-unlocked').style.display = 'none';
+        }
+
+        // ==========================================
+        // SEARCH
+        // ==========================================
+        function setupSearchListeners() {
+            const inputs = ['search-keyword', 'search-location', 'search-category'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') performSearch();
+                    });
+                    // For selects, trigger on change too
+                    if (el.tagName === 'SELECT') {
+                        el.addEventListener('change', performSearch);
+                    }
+                }
+            });
+        }
+
+        async function performSearch() {
+            const keyword = document.getElementById('search-keyword').value.trim();
+            const location = document.getElementById('search-location').value;
+            const category = document.getElementById('search-category').value;
+
+            // Sync search category with active category filter
+            if (category && category !== activeCategory) {
+                activeCategory = category;
+                syncCategoryCards(category);
+                showActiveFilterBar(category);
+            } else if (!category && activeCategory) {
+                // Keep the card-based filter if set
+            }
+
+            listingsOffset = 0;
+            await loadListings({ keyword, location, category: category || activeCategory });
+            scrollToResults();
+        }
+
+        function scrollToResults() {
+            document.getElementById('services').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ==========================================
+        // CATEGORY FILTER
+        // ==========================================
+        function filterByCategory(category, cardEl) {
+            if (activeCategory === category) {
+                clearCategoryFilter();
+                return;
+            }
+
+            activeCategory = category;
+            document.getElementById('search-category').value = category;
+
+            // Update card active states
+            document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+            if (cardEl) cardEl.classList.add('active');
+
+            showActiveFilterBar(category);
+            listingsOffset = 0;
+            loadListings({ category });
+            scrollToResults();
+        }
+
+        function syncCategoryCards(category) {
+            document.querySelectorAll('.cat-card').forEach(c => {
+                if (c.dataset.category === category) {
+                    c.classList.add('active');
+                } else {
+                    c.classList.remove('active');
+                }
+            });
+        }
+
+        function showActiveFilterBar(category) {
+            const labels = {
+                services: 'Services', rooms: 'Rooms & Spaces', farming: 'Farming',
+                retail: 'Retail Shopping', food: 'Drink & Eat', health: 'Health & Wellness',
+                finance: 'Financial Services', tech: 'Technology', education: 'Education', other: 'Other'
+            };
+            const bar = document.getElementById('active-filter-bar');
+            document.getElementById('active-filter-label').textContent = labels[category] || category;
+            bar.classList.add('visible');
+            document.getElementById('featured-section-title').textContent = `Results: ${labels[category] || category}`;
+        }
+
+        function clearCategoryFilter() {
+            activeCategory = null;
+            document.getElementById('search-category').value = '';
+            document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('active-filter-bar').classList.remove('visible');
+            document.getElementById('featured-section-title').textContent = 'Featured Listings';
+            listingsOffset = 0;
+            loadListings();
+        }
+
+        // ==========================================
+        // CATEGORY GROUP MAPPING
+        // Maps each card category to all DB categories it covers
+        // ==========================================
+        const CATEGORY_GROUPS = {
+            services: ['services', 'transport', 'maintenance', 'repairs', 'construction',
+                       'delivery', 'catering', 'communications', 'audio-visual', 'finance',
+                       'ngo', 'religious', 'tech', 'education', 'other'],
+            rooms:    ['rooms', 'accommodations', 'resort', 'meetings', 'rentals',
+                       'real-estate', 'venue'],
+            farming:  ['farming', 'agriculture', 'fisheries', 'herbs', 'poultry',
+                       'cattle', 'vegetables', 'fruits', 'provisions', 'horticulture'],
+            retail:   ['retail', 'wholesale', 'shopping', 'markets', 'purveyors', 'manufactured'],
+            food:     ['food', 'bars', 'restaurants', 'cafes', 'delis', 'drive-through']
+        };
+
+        function getCategoryFilter(category) {
+            // If it's a card category (has a group), use the full group
+            const group = CATEGORY_GROUPS[category];
+            return group || [category]; // Return group array or single category
+        }
+
+        // ==========================================
+        // LOAD LISTINGS
+        // ==========================================
+        async function loadListings(filters = {}) {
+            showListingsLoading();
+
+            const keyword = filters.keyword ?? document.getElementById('search-keyword').value.trim();
+            const location = filters.location ?? document.getElementById('search-location').value;
+            const rawCategory = filters.category ?? activeCategory ?? '';
+            const categoryList = rawCategory ? getCategoryFilter(rawCategory) : [];
+
+            try {
+                // Helper: apply all filters to a query
+                function applyFilters(q) {
+                    // Keyword: search across name, description, subcategory, location
+                    if (keyword) {
+                        const kw = `*${keyword}*`;
+                        q = q.or(`business_name.ilike.${kw},description.ilike.${kw},subcategory.ilike.${kw},location.ilike.${kw}`);
+                    }
+                    // Location: ilike partial match
+                    if (location) {
+                        q = q.ilike('location', `%${location}%`);
+                    }
+                    // Category: OR across the group
+                    if (categoryList.length === 1) {
+                        q = q.eq('category', categoryList[0]);
+                    } else if (categoryList.length > 1) {
+                        q = q.in('category', categoryList);
+                    }
+                    return q;
+                }
+
+                // Featured query: approved + featured flag
+                let featuredQuery = supabase
+                    .from('listings')
+                    .select('*')
+                    .eq('status', 'approved')
+                    .eq('is_featured', true);
+                featuredQuery = applyFilters(featuredQuery);
+                featuredQuery = featuredQuery.order('created_at', { ascending: false }).limit(5);
+
+                // All-listings base query
+                let allBase = supabase.from('listings').select('*', { count: 'exact' });
+                // Visibility: approved OR own listings if logged in
+                if (currentUser) {
+                    allBase = allBase.or(`status.eq.approved,user_id.eq.${currentUser.id}`);
+                } else {
+                    allBase = allBase.eq('status', 'approved');
+                }
+                let allQuery = applyFilters(allBase);
+                allQuery = allQuery.order('is_featured', { ascending: false })
+                                   .order('created_at', { ascending: false })
+                                   .range(listingsOffset, listingsOffset + LISTINGS_PER_PAGE - 1);
+
+                const [featuredResult, allResult] = await Promise.all([featuredQuery, allQuery]);
+
+                const featured = featuredResult.data || [];
+                const all = allResult.data || [];
+                totalListingsCount = allResult.count || 0;
+
+                renderFeaturedListings(featured, all);
+                renderClassifiedsTable(all, allResult.count);
+                updateLoadMoreButton();
+
+            } catch (err) {
+                console.error('Error loading listings:', err);
+                renderFeaturedListings([], []);
+                renderClassifiedsTable([], 0);
+            }
+        }
+
+        async function loadMoreListings() {
+            listingsOffset += LISTINGS_PER_PAGE;
+
+            const keyword = document.getElementById('search-keyword').value.trim();
+            const location = document.getElementById('search-location').value;
+            const rawCategory = activeCategory || '';
+            const categoryList = rawCategory ? getCategoryFilter(rawCategory) : [];
+
+            let query = supabase.from('listings').select('*', { count: 'exact' });
+            if (currentUser) {
+                query = query.or(`status.eq.approved,user_id.eq.${currentUser.id}`);
+            } else {
+                query = query.eq('status', 'approved');
+            }
+
+            if (keyword) {
+                const kw = `*${keyword}*`;
+                query = query.or(`business_name.ilike.${kw},description.ilike.${kw},subcategory.ilike.${kw},location.ilike.${kw}`);
+            }
+            if (location) query = query.ilike('location', `%${location}%`);
+            if (categoryList.length === 1) {
+                query = query.eq('category', categoryList[0]);
+            } else if (categoryList.length > 1) {
+                query = query.in('category', categoryList);
+            }
+
+            query = query.order('is_featured', { ascending: false })
+                         .order('created_at', { ascending: false })
+                         .range(listingsOffset, listingsOffset + LISTINGS_PER_PAGE - 1);
+
+            const { data, count } = await query;
+            totalListingsCount = count || totalListingsCount;
+
+            // Append to existing table
+            const tbody = document.getElementById('classifieds-tbody');
+            if (data && data.length > 0) {
+                data.forEach(l => {
+                    tbody.insertAdjacentHTML('beforeend', buildTableRow(l));
+                });
+            }
+
+            updateLoadMoreButton();
+        }
+
+        function updateLoadMoreButton() {
+            const btn = document.getElementById('load-more-btn');
+            const currentTotal = listingsOffset + LISTINGS_PER_PAGE;
+            if (totalListingsCount > currentTotal) {
+                btn.style.display = 'inline';
+                btn.textContent = `More Listings (${totalListingsCount - currentTotal} remaining)`;
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        // ==========================================
+        // RENDER LISTINGS
+        // ==========================================
+        function showListingsLoading() {
+            const container = document.getElementById('featured-listings-container');
+            container.innerHTML = [1,2,3].map(() => `
+                <div class="listing-skeleton">
+                    <div>
+                        <div class="skel-line" style="width:70%"></div>
+                        <div class="skel-line" style="width:50%"></div>
+                    </div>
+                    <div>
+                        <div class="skel-line" style="width:90%"></div>
+                        <div class="skel-line" style="width:60%"></div>
+                    </div>
+                    <div>
+                        <div class="skel-line" style="width:80%"></div>
+                        <div class="skel-line" style="width:60%"></div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('classifieds-tbody').innerHTML =
+                `<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--muted);">Loading...</td></tr>`;
+        }
+
+        function renderFeaturedListings(featured, fallback) {
+            const container = document.getElementById('featured-listings-container');
+            const listings = featured.length > 0 ? featured : fallback.slice(0, 5);
+
+            if (listings.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <h4>No listings found for this search.</h4>
+                        <p>Try adjusting your keywords, location, or category filter.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = listings.map(l => `
+                <div class="listing-row">
+                    <div class="listing-name">
+                        ${l.is_featured ? '<span class="listing-badge badge-featured">⭐ Featured</span>' : ''}
+                        ${l.status === 'pending' ? '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);">⏳ Pending</span>' : ''}
+                        <h4>${escHtml(l.business_name)}</h4>
+                        <span>${escHtml(formatLocation(l.location))}${l.category ? ' · ' + formatCategory(l.category) : ''}</span>
+                    </div>
+                    <div class="listing-services">
+                        <p><strong>${escHtml(l.subcategory || formatCategory(l.category) || '')}</strong>${l.description ? '<br>' + escHtml(l.description.slice(0, 120)) + (l.description.length > 120 ? '…' : '') : ''}</p>
+                    </div>
+                    <div class="listing-contact">
+                        ${l.phone ? `<span>Tel: ${escHtml(l.phone)}</span>` : ''}
+                        ${l.email ? `<a href="mailto:${escHtml(l.email)}">${escHtml(l.email)}</a>` : ''}
+                        ${l.website ? `<a href="${escHtml(l.website)}" target="_blank" rel="noopener">${escHtml(l.website.replace(/^https?:\/\//, ''))}</a>` : ''}
+                        ${l.whatsapp ? `<a href="https://wa.me/${l.whatsapp.replace(/\D/g,'')}" target="_blank" rel="noopener" style="color:var(--green);">WhatsApp</a>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function buildTableRow(l) {
+            return `
+                <tr>
+                    <td><strong>${escHtml(l.business_name)}</strong>${l.status === 'pending' ? ' <span style="font-size:0.7rem;color:var(--yellow);">(pending)</span>' : ''}</td>
+                    <td>${escHtml(l.subcategory || formatCategory(l.category) || '—')}</td>
+                    <td>${escHtml(formatLocation(l.location))}</td>
+                    <td>${l.email ? `<a href="mailto:${escHtml(l.email)}" style="color:var(--blue);">${escHtml(l.email)}</a>` : l.phone ? escHtml(l.phone) : '—'}</td>
+                </tr>`;
+        }
+
+        function renderClassifiedsTable(listings, count) {
+            const tbody = document.getElementById('classifieds-tbody');
+
+            if (!listings || listings.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--muted);">No listings found for this search.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = listings.map(l => buildTableRow(l)).join('');
+        }
+
+        // ==========================================
+        // AUTH HANDLERS
+        // ==========================================
+        async function handleLogin() {
+            const email = document.getElementById('modal-login-email').value.trim();
+            const password = document.getElementById('modal-login-password').value;
+            const errBox = document.getElementById('login-error');
+
+            errBox.classList.remove('show');
+            setLoading('login-btn-text', 'login-spinner', true);
+
+            if (!email || !password) {
+                showErrBox(errBox, 'Please enter your email and password.');
+                setLoading('login-btn-text', 'login-spinner', false);
+                return;
+            }
+
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            setLoading('login-btn-text', 'login-spinner', false);
+
+            if (error) {
+                showErrBox(errBox, error.message || 'Login failed. Please check your credentials.');
+            } else {
+                showToast('Welcome back! You are now logged in.', 'success');
+            }
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('modal-reg-name').value.trim();
+            const email = document.getElementById('modal-reg-email').value.trim();
+            const password = document.getElementById('modal-reg-password').value;
+            const errBox = document.getElementById('register-error');
+            const successBox = document.getElementById('register-success');
+
+            errBox.classList.remove('show');
+            successBox.classList.remove('show');
+            setLoading('reg-btn-text', 'reg-spinner', true);
+
+            if (!name || !email || !password) {
+                showErrBox(errBox, 'Please fill in all fields.');
+                setLoading('reg-btn-text', 'reg-spinner', false);
+                return;
+            }
+            if (password.length < 6) {
+                showErrBox(errBox, 'Password must be at least 6 characters.');
+                setLoading('reg-btn-text', 'reg-spinner', false);
+                return;
+            }
+
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: { data: { full_name: name } }
+            });
+            setLoading('reg-btn-text', 'reg-spinner', false);
+
+            if (error) {
+                showErrBox(errBox, error.message || 'Registration failed. Please try again.');
+            } else {
+                successBox.textContent = 'Account created! Please check your email to confirm your address, then login.';
+                successBox.classList.add('show');
+                document.getElementById('modal-reg-name').value = '';
+                document.getElementById('modal-reg-email').value = '';
+                document.getElementById('modal-reg-password').value = '';
+            }
+        }
+
+        async function handleForgotPassword() {
+            const email = document.getElementById('modal-forgot-email').value.trim();
+            const errBox = document.getElementById('forgot-error');
+            const successBox = document.getElementById('forgot-success');
+
+            errBox.classList.remove('show');
+            successBox.classList.remove('show');
+            setLoading('forgot-btn-text', 'forgot-spinner', true);
+
+            if (!email) {
+                showErrBox(errBox, 'Please enter your email address.');
+                setLoading('forgot-btn-text', 'forgot-spinner', false);
+                return;
+            }
+
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + '/ajm-advertising-hub.html'
+            });
+            setLoading('forgot-btn-text', 'forgot-spinner', false);
+
+            if (error) {
+                showErrBox(errBox, error.message || 'Could not send reset email. Please try again.');
+            } else {
+                successBox.textContent = 'Reset link sent! Check your email inbox (and spam folder).';
+                successBox.classList.add('show');
+                document.getElementById('modal-forgot-email').value = '';
+            }
+        }
+
+        async function handleSidebarLogin() {
+            const email = document.getElementById('sidebar-email').value.trim();
+            const password = document.getElementById('sidebar-password').value;
+            const errBox = document.getElementById('sidebar-login-error');
+
+            errBox.classList.remove('show');
+            setLoading('sidebar-login-text', 'sidebar-login-spinner', true);
+
+            if (!email || !password) {
+                showErrBox(errBox, 'Enter your email and password.');
+                setLoading('sidebar-login-text', 'sidebar-login-spinner', false);
+                return;
+            }
+
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            setLoading('sidebar-login-text', 'sidebar-login-spinner', false);
+
+            if (error) {
+                showErrBox(errBox, error.message || 'Login failed.');
+            } else {
+                document.getElementById('sidebar-email').value = '';
+                document.getElementById('sidebar-password').value = '';
+                showToast('Welcome back! You are now logged in.', 'success');
+            }
+        }
+
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            showToast('You have been signed out.', 'info');
+        }
+
+        // ==========================================
+        // POST LISTING
+        // ==========================================
+        function handlePostListingClick() {
+            if (currentUser) {
+                openModal('post-listing-modal');
+            } else {
+                openModal('post-login-prompt-modal');
+            }
+        }
+
+        async function handleListingSubmit(e) {
+            e.preventDefault();
+            const errBox = document.getElementById('listing-form-error');
+            const successBox = document.getElementById('listing-form-success');
+            errBox.classList.remove('show');
+            successBox.classList.remove('show');
+
+            if (!currentUser) {
+                showErrBox(errBox, 'You must be logged in to submit a listing.');
+                return;
+            }
+
+            const businessName = document.getElementById('lf-business-name').value.trim();
+            const category = document.getElementById('lf-category').value;
+            const subcategory = document.getElementById('lf-subcategory').value.trim();
+            const description = document.getElementById('lf-description').value.trim();
+            const location = document.getElementById('lf-location').value;
+            const phone = document.getElementById('lf-phone').value.trim();
+            const whatsapp = document.getElementById('lf-whatsapp').value.trim();
+            const email = document.getElementById('lf-email').value.trim();
+            const website = document.getElementById('lf-website').value.trim();
+            const notes = document.getElementById('lf-notes').value.trim();
+            const listingType = document.querySelector('input[name="listing_type"]:checked')?.value || 'basic';
+            const imageFile = document.getElementById('lf-image')?.files?.[0] || null;
+
+            if (!businessName || !category || !description || !location) {
+                showErrBox(errBox, 'Please fill in all required fields: Business Name, Category, Description, and Location.');
+                return;
+            }
+
+            setLoading('listing-submit-text', 'listing-submit-spinner', true);
+
+            // Upload image if provided
+            let imageUrl = null;
+            if (imageFile) {
+                const ext = imageFile.name.split('.').pop().toLowerCase();
+                const filePath = `${currentUser.id}/${Date.now()}.${ext}`;
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('listing-images')
+                    .upload(filePath, imageFile, { cacheControl: '3600', upsert: false });
+
+                if (uploadError) {
+                    setLoading('listing-submit-text', 'listing-submit-spinner', false);
+                    showErrBox(errBox, 'Image upload failed: ' + (uploadError.message || 'Please try again.'));
+                    return;
+                }
+                const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(filePath);
+                imageUrl = urlData?.publicUrl || null;
+            }
+
+            const { error } = await supabase.from('listings').insert({
+                business_name: businessName,
+                category,
+                subcategory,
+                description,
+                location,
+                phone: phone || null,
+                whatsapp: whatsapp || null,
+                email: email || null,
+                website: website || null,
+                image_url: imageUrl,
+                extra_notes: notes || null,
+                listing_type: listingType,
+                status: 'pending',
+                user_id: currentUser.id
+            });
+
+            setLoading('listing-submit-text', 'listing-submit-spinner', false);
+
+            if (error) {
+                showErrBox(errBox, error.message || 'Failed to submit listing. Please try again.');
+            } else {
+                successBox.textContent = '✅ Your listing has been submitted for review. It will appear publicly once approved by an admin.';
+                successBox.classList.add('show');
+                document.getElementById('listing-form').reset();
+                document.getElementById('lf-image-preview').style.display = 'none';
+                showToast('Listing submitted! Pending admin approval.', 'success');
+                setTimeout(() => closeModal('post-listing-modal'), 4000);
+            }
+        }
+
+        // ==========================================
+        // WHATSAPP
+        // ==========================================
+        function updateWhatsAppLink() {
+            // Message is built dynamically on click
+        }
+
+        function handleWhatsAppClick() {
+            let message;
+            if (currentUser) {
+                const name = currentProfile?.full_name || currentUser.email?.split('@')[0] || 'a member';
+                const email = currentUser.email || '';
+                message = `Hi, I am ${name} (${email}) and I am interested in advertising on Aloe Jamaica Advertising Hub. Please send me more information about the available ad packages.`;
+            } else {
+                message = `Hi, I am interested in advertising on Aloe Jamaica Advertising Hub. Please send me more information about the available ad packages.`;
+            }
+            const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank', 'noopener');
+        }
+
+        // ==========================================
+        // MODAL HELPERS
+        // ==========================================
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close on backdrop click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeModal(overlay.id);
+            });
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+            }
+        });
+
+        // ==========================================
+        // AUTH TAB SWITCHER
+        // ==========================================
+        function switchAuthTab(tab) {
+            ['login', 'register', 'forgot'].forEach(t => {
+                document.getElementById(`auth-panel-${t}`).style.display = t === tab ? 'block' : 'none';
+                const tabEl = document.getElementById(`tab-${t}`);
+                if (tabEl) {
+                    tabEl.classList.toggle('active', t === tab);
+                    tabEl.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+                }
+            });
+        }
+
+        // ==========================================
+        // UTILITY HELPERS
+        // ==========================================
+        function setLoading(textId, spinnerId, isLoading) {
+            const txt = document.getElementById(textId);
+            const sp = document.getElementById(spinnerId);
+            if (txt) txt.style.display = isLoading ? 'none' : 'inline';
+            if (sp) sp.classList.toggle('show', isLoading);
+        }
+
+        function showErrBox(el, msg) {
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            toast.className = `toast toast-${type} show`;
+            toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${msg}</span>`;
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        function escHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function formatLocation(loc) {
+            if (!loc) return '';
+            const map = {
+                kingston: 'Kingston', 'st-andrew': 'St. Andrew', 'st-thomas': 'St. Thomas',
+                portland: 'Portland', 'st-mary': 'St. Mary', 'st-ann': 'St. Ann',
+                trelawny: 'Trelawny', 'st-james': 'St. James', hanover: 'Hanover',
+                westmoreland: 'Westmoreland', 'st-elizabeth': 'St. Elizabeth',
+                manchester: 'Manchester', clarendon: 'Clarendon', 'st-catherine': 'St. Catherine',
+                islandwide: 'Islandwide'
+            };
+            return map[loc] || loc;
+        }
+
+        function formatCategory(cat) {
+            const map = {
+                services: 'Services', rooms: 'Rooms & Spaces', farming: 'Farming',
+                retail: 'Retail Shopping', food: 'Drink & Eat', health: 'Health & Wellness',
+                finance: 'Financial Services', tech: 'Technology', education: 'Education', other: 'Other'
+            };
+            return map[cat] || cat;
+        }
+
+        // ==========================================
+        // START
+        // ==========================================
+        init();
+    </script>
 </body>
 </html>
