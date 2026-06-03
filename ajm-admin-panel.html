@@ -389,6 +389,86 @@
     </div>
 </div>
 
+<!-- Add Modal -->
+<div id="add-modal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeAddModal()" aria-label="Close">&times;</button>
+        <h2 class="modal-title">➕ Add New Listing</h2>
+        <div class="form-group">
+            <label>Business Name*</label>
+            <input type="text" id="add-business-name" required />
+        </div>
+        <div style="display:flex;gap:12px;">
+            <div class="form-group" style="flex:1;">
+                <label>Category*</label>
+                <select id="add-category" onchange="if(window.populateSubcategorySelect) window.populateSubcategorySelect('add-category', 'add-subcategory')" required></select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Subcategory</label>
+                <select id="add-subcategory"></select>
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;">
+            <div class="form-group" style="flex:1;">
+                <label>Status*</label>
+                <select id="add-status">
+                    <option value="pending">Pending</option>
+                    <option value="approved" selected>Approved</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Listing Type</label>
+                <input type="text" id="add-listing-type" placeholder="basic, premium" value="basic" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Location (Parish/Town)*</label>
+            <input type="text" id="add-location" required />
+        </div>
+        <div style="display:flex;gap:12px;">
+            <div class="form-group" style="flex:1;">
+                <label>Phone</label>
+                <input type="text" id="add-phone" />
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>WhatsApp</label>
+                <input type="text" id="add-whatsapp" />
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;">
+            <div class="form-group" style="flex:1;">
+                <label>Email</label>
+                <input type="email" id="add-email" />
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Website</label>
+                <input type="text" id="add-website" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Description*</label>
+            <textarea id="add-description" style="min-height:80px;" required></textarea>
+        </div>
+        <div class="form-group">
+            <label>Extra Notes (Admin only)</label>
+            <textarea id="add-extra-notes" style="min-height:60px;"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.86rem;cursor:pointer;">
+                <input type="checkbox" id="add-featured" style="width:auto;" />
+                Mark as Featured
+            </label>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="btn btn-primary" style="flex:1;border-radius:12px;" onclick="saveNewListing()">
+                <span id="add-save-text">Add Listing</span>
+                <span id="add-save-spinner" class="spinner"></span>
+            </button>
+            <button class="btn btn-ghost" style="border-radius:12px;" onclick="closeAddModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <!-- Role Modal -->
 <div id="role-modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-box">
@@ -440,7 +520,10 @@
             <h1>🛡️ Admin Dashboard</h1>
             <p>Manage listings, members, and platform stats.</p>
         </div>
-        <a href="master-admin.html" class="btn btn-primary" style="background: linear-gradient(135deg, var(--green) 0%, #17b07f 100%); color: #000; font-weight: 800;">👑 Switch to Master Admin Hub</a>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-primary" style="background:var(--blue);color:var(--white);font-weight:800;" onclick="openAddModal()">➕ Add Listing</button>
+            <a href="master-admin.html" class="btn btn-primary" style="background: linear-gradient(135deg, var(--green) 0%, #17b07f 100%); color: #000; font-weight: 800;">👑 Switch to Master Admin Hub</a>
+        </div>
     </div>
 
     <!-- Stats -->
@@ -579,6 +662,9 @@
     window.openRoleModal = openRoleModal;
     window.closeRoleModal = closeRoleModal;
     window.saveUserRole = saveUserRole;
+    window.openAddModal = openAddModal;
+    window.closeAddModal = closeAddModal;
+    window.saveNewListing = saveNewListing;
 
     // ── INIT ──
     async function init() {
@@ -631,14 +717,18 @@
     // ── STATS ──
     async function loadStats() {
         try {
-            const { data } = await supabase.rpc('get_admin_stats');
-            if (data) {
-                document.getElementById('stat-pending').textContent = data.pending_listings ?? '0';
-                document.getElementById('stat-approved').textContent = data.active_listings ?? '0';
-                document.getElementById('stat-rejected').textContent =
-                    (parseInt(data.rejected_listings || 0) + parseInt(data.expired_listings || 0));
-                document.getElementById('stat-members').textContent = data.total_members ?? '0';
-            }
+            const [{ count: activeListings }, { count: pendingListings }, { count: rejectedListings }, { count: expiredListings }, { count: totalMembers }] = await Promise.all([
+                supabase.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
+                supabase.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+                supabase.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'rejected'),
+                supabase.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'expired'),
+                supabase.from('profiles').select('*', { count: 'exact', head: true })
+            ]);
+
+            document.getElementById('stat-pending').textContent = pendingListings ?? '0';
+            document.getElementById('stat-approved').textContent = activeListings ?? '0';
+            document.getElementById('stat-rejected').textContent = (rejectedListings || 0) + (expiredListings || 0);
+            document.getElementById('stat-members').textContent = totalMembers ?? '0';
         } catch (err) {
             console.error('Stats error:', err);
         }
@@ -685,19 +775,23 @@
         const offset = currentPage * PAGE_SIZE;
 
         try {
-            const { data, error } = await supabase.rpc('admin_get_listings', {
-                p_status: statusFilter,
-                p_keyword: keyword || null,
-                p_category: category || null,
-                p_limit: PAGE_SIZE,
-                p_offset: offset
-            });
+            let query = supabase.from('listings').select('*, profiles!listings_owner_user_id_fkey(email, full_name)', { count: 'exact' });
+            if (statusFilter) query = query.eq('status', statusFilter);
+            if (category) query = query.eq('category', category);
+            if (keyword) {
+                const kw = `%${keyword}%`;
+                query = query.or(`business_name.ilike.${kw},description.ilike.${kw},subcategory.ilike.${kw},location.ilike.${kw}`);
+            }
+
+            const { data, error, count } = await query
+                .order('created_at', { ascending: false })
+                .range(offset, offset + PAGE_SIZE - 1);
 
             if (error) throw error;
 
             const filtered = data || [];
             
-            totalCount = filtered.length > 0 ? parseInt(filtered[0].total_count || filtered[0].full_count || 0) : 0;
+            totalCount = count || 0;
             updatePagination(totalCount);
 
             if (filtered.length === 0) {
@@ -709,7 +803,7 @@
                 <tr>
                     <td>
                         <strong>${escHtml(l.business_name)}</strong>
-                        <small>${escHtml(l.email || '')}${l.phone ? ' · ' + escHtml(l.phone) : ''}</small>
+                        <small>${escHtml(l.profiles?.email || '')}${l.contact_phone ? ' · ' + escHtml(l.contact_phone) : ''}</small>
                         ${l.image_url ? `<br><img src="${escHtml(l.image_url)}" alt="Logo" style="height:32px;width:auto;border-radius:6px;margin-top:4px;">` : ''}
                     </td>
                     <td>
@@ -717,7 +811,7 @@
                         <small>${escHtml(l.subcategory || '')}</small>
                     </td>
                     <td>${escHtml(fmtLoc(l.location))}</td>
-                    <td><small style="color:var(--muted)">${escHtml(l.user_id ? l.user_id.slice(0,8) + '…' : 'anonymous')}</small></td>
+                    <td><small style="color:var(--muted)">${escHtml(l.owner_user_id ? l.owner_user_id.slice(0,8) + '…' : 'anonymous')}</small></td>
                     <td><small>${fmtDate(l.created_at)}</small></td>
                     <td>
                         <span class="badge badge-${l.status}">${l.status}</span>
@@ -729,7 +823,7 @@
                             ${l.status !== 'rejected' ? `<button class="btn btn-danger btn-sm" onclick="rejectListing('${l.id}')">✗ Reject</button>` : ''}
                             ${l.status !== 'expired' ? `<button class="btn btn-warning btn-sm" onclick="expireListing('${l.id}')">🕰 Expire</button>` : ''}
                             <button class="btn btn-ghost btn-sm" onclick="toggleFeatured('${l.id}', ${l.is_featured})">${l.is_featured ? '★ Unfeature' : '☆ Feature'}</button>
-                            <button class="btn btn-ghost btn-sm" onclick="openEditModal(${JSON.stringify(l).replace(/"/g,'&quot;')})">✎ Edit</button>
+                            <button class="btn btn-ghost btn-sm" onclick='openEditModal(${JSON.stringify(l).replace(/'/g, "&#39;").replace(/"/g, "&quot;")})'>✎ Edit</button>
                         </div>
                     </td>
                 </tr>
@@ -752,11 +846,7 @@
     }
 
     async function updateListingStatus(id, status) {
-        const { error } = await supabase.rpc('admin_update_listing', {
-            p_listing_id: id,
-            p_status: status,
-            p_is_featured: null
-        });
+        const { error } = await supabase.from('listings').update({ status }).eq('id', id);
         if (error) {
             showToast('Error: ' + error.message, 'error');
         } else {
@@ -767,11 +857,7 @@
     }
 
     async function toggleFeatured(id, currently) {
-        const { error } = await supabase.rpc('admin_update_listing', {
-            p_listing_id: id,
-            p_status: null,
-            p_is_featured: !currently
-        });
+        const { error } = await supabase.from('listings').update({ is_featured: !currently }).eq('id', id);
         if (error) {
             showToast('Error: ' + error.message, 'error');
         } else {
@@ -819,7 +905,7 @@
         const subcategory = document.getElementById('edit-subcategory').value;
         const listing_type = document.getElementById('edit-listing-type').value;
         const location = document.getElementById('edit-location').value;
-        const phone = document.getElementById('edit-phone').value;
+        const contact_phone = document.getElementById('edit-phone').value;
         const whatsapp = document.getElementById('edit-whatsapp').value;
         const email = document.getElementById('edit-email').value;
         const website = document.getElementById('edit-website').value;
@@ -831,23 +917,22 @@
         spinner.style.display = 'inline-block';
         text.textContent = 'Saving...';
 
-        // Update all fields via RPC
-        const { error: rpcError } = await supabase.rpc('admin_update_listing', {
-            p_listing_id: id,
-            p_status: status,
-            p_is_featured: isFeatured,
-            p_business_name: business_name || null,
-            p_category: category || null,
-            p_subcategory: subcategory || null,
-            p_description: description || null,
-            p_location: location || null,
-            p_phone: phone || null,
-            p_whatsapp: whatsapp || null,
-            p_email: email || null,
-            p_website: website || null,
-            p_listing_type: listing_type || null,
-            p_extra_notes: extra_notes || null
-        });
+        // Update all fields directly
+        const { error: rpcError } = await supabase.from('listings').update({
+            status,
+            is_featured: isFeatured,
+            business_name: business_name || null,
+            category: category || null,
+            subcategory: subcategory || null,
+            description: description || null,
+            location: location || null,
+            contact_phone: contact_phone || null,
+            whatsapp: whatsapp || null,
+            email: email || null,
+            website: website || null,
+            listing_type: listing_type || null,
+            extra_notes: extra_notes || null
+        }).eq('id', id);
 
         spinner.style.display = 'none';
         text.textContent = 'Save Changes';
@@ -857,6 +942,87 @@
         } else {
             showToast('Listing updated!', 'success');
             closeEditModal();
+            await loadListings();
+            await loadStats();
+        }
+    }
+
+    // ── ADD MODAL ──
+    function openAddModal() {
+        if (window.populateCategorySelect) {
+            window.populateCategorySelect('add-category');
+        }
+        document.getElementById('add-business-name').value = '';
+        document.getElementById('add-category').value = '';
+        document.getElementById('add-subcategory').value = '';
+        document.getElementById('add-status').value = 'approved';
+        document.getElementById('add-listing-type').value = 'basic';
+        document.getElementById('add-location').value = '';
+        document.getElementById('add-phone').value = '';
+        document.getElementById('add-whatsapp').value = '';
+        document.getElementById('add-email').value = '';
+        document.getElementById('add-website').value = '';
+        document.getElementById('add-description').value = '';
+        document.getElementById('add-extra-notes').value = '';
+        document.getElementById('add-featured').checked = false;
+        document.getElementById('add-modal').classList.add('open');
+    }
+
+    function closeAddModal() {
+        document.getElementById('add-modal').classList.remove('open');
+    }
+
+    async function saveNewListing() {
+        const status = document.getElementById('add-status').value;
+        const isFeatured = document.getElementById('add-featured').checked;
+
+        const business_name = document.getElementById('add-business-name').value.trim();
+        const category = document.getElementById('add-category').value;
+        const subcategory = document.getElementById('add-subcategory').value.trim();
+        const listing_type = document.getElementById('add-listing-type').value.trim();
+        const location = document.getElementById('add-location').value.trim();
+        const contact_phone = document.getElementById('add-phone').value.trim();
+        const whatsapp = document.getElementById('add-whatsapp').value.trim();
+        const email = document.getElementById('add-email').value.trim();
+        const website = document.getElementById('add-website').value.trim();
+        const description = document.getElementById('add-description').value.trim();
+        const extra_notes = document.getElementById('add-extra-notes').value.trim();
+
+        if (!business_name || !category || !location || !description) {
+            showToast('Business Name, Category, Location, and Description are required', 'error');
+            return;
+        }
+
+        const spinner = document.getElementById('add-save-spinner');
+        const text = document.getElementById('add-save-text');
+        spinner.style.display = 'inline-block';
+        text.textContent = 'Saving...';
+
+        const { error } = await supabase.from('listings').insert({
+            owner_user_id: currentUser.id,
+            status,
+            is_featured: isFeatured,
+            business_name,
+            category,
+            subcategory: subcategory || null,
+            description,
+            location,
+            contact_phone: contact_phone || null,
+            whatsapp: whatsapp || null,
+            email: email || null,
+            website: website || null,
+            listing_type: listing_type || 'basic',
+            extra_notes: extra_notes || null
+        });
+
+        spinner.style.display = 'none';
+        text.textContent = 'Add Listing';
+
+        if (error) {
+            showToast('Error saving: ' + error.message, 'error');
+        } else {
+            showToast('Listing added successfully!', 'success');
+            closeAddModal();
             await loadListings();
             await loadStats();
         }
@@ -923,10 +1089,7 @@
         spinner.style.display = 'inline-block';
         text.textContent = 'Updating...';
 
-        const { error } = await supabase.rpc('admin_set_user_role', {
-            p_user_id: userId,
-            p_role: role
-        });
+        const { error } = await supabase.from('profiles').update({ role }).eq('id', userId);
 
         spinner.style.display = 'none';
         text.textContent = 'Update Role';

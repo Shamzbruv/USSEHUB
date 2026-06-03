@@ -1784,7 +1784,7 @@
         }
 
         // ==========================================
-        // NETWORK STATS — protected via DB RPC
+        // NETWORK STATS — direct DB querying
         // ==========================================
         async function updateNetworkStats() {
             const role = currentProfile?.role;
@@ -1800,28 +1800,26 @@
             document.getElementById('stats-unlocked').style.display = 'flex';
 
             try {
+                // Fetch stats directly from tables (RLS allows admins to count, and members to count public listings)
+                const [{ count: activeListings }, { count: totalMembers }] = await Promise.all([
+                    supabase.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
+                    supabase.from('profiles').select('*', { count: 'exact', head: true })
+                ]);
+
+                document.getElementById('stat-members').textContent = totalMembers ?? '—';
+                document.getElementById('stat-listings').textContent = activeListings ?? '—';
+
                 if (role === 'admin') {
-                    // Call DB-level admin stats function (access verified server-side)
-                    const { data, error } = await supabase.rpc('get_admin_stats');
-                    if (error) throw error;
-                    // Realtime stats removed pending implementation
-                    document.getElementById('stat-members').textContent = data.total_members ?? '—';
-                    document.getElementById('stat-listings').textContent = data.active_listings ?? '—';
                     document.getElementById('stat-membership').textContent = '🛡️ Admin';
                     document.getElementById('stat-pending-row').style.display = 'flex';
-                    document.getElementById('stat-pending').textContent = data.pending_listings ?? '0';
+                    
+                    const { count: pendingListings } = await supabase.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'pending');
+                    document.getElementById('stat-pending').textContent = pendingListings ?? '0';
                 } else {
-                    // Call DB-level member stats function (access verified server-side)
-                    const { data, error } = await supabase.rpc('get_member_stats');
-                    if (error) throw error;
-                    // Realtime stats removed pending implementation
-                    document.getElementById('stat-members').textContent = data.total_members ?? '—';
-                    document.getElementById('stat-listings').textContent = data.active_listings ?? '—';
                     document.getElementById('stat-membership').textContent = subStatus === 'active' ? '✓ Active' : 'Member';
                 }
             } catch (err) {
-                // Access denied at DB level — lock the stats
-                console.warn('Stats access denied (DB-level):', err.message);
+                console.warn('Stats error:', err.message);
                 updateNetworkStatsLocked();
             }
         }
@@ -1830,6 +1828,7 @@
             document.getElementById('stats-locked').style.display = 'block';
             document.getElementById('stats-unlocked').style.display = 'none';
         }
+
 
         // ==========================================
         // SEARCH
@@ -1994,7 +1993,7 @@
                 let allBase = supabase.from('listings').select('*', { count: 'exact' });
                 // Visibility: approved OR own listings if logged in
                 if (currentUser) {
-                    allBase = allBase.or(`status.eq.approved,user_id.eq.${currentUser.id}`);
+                    allBase = allBase.or(`status.eq.approved,owner_user_id.eq.${currentUser.id}`);
                 } else {
                     allBase = allBase.eq('status', 'approved');
                 }
@@ -2030,7 +2029,7 @@
 
             let query = supabase.from('listings').select('*', { count: 'exact' });
             if (currentUser) {
-                query = query.or(`status.eq.approved,user_id.eq.${currentUser.id}`);
+                query = query.or(`status.eq.approved,owner_user_id.eq.${currentUser.id}`);
             } else {
                 query = query.eq('status', 'approved');
             }
@@ -2364,7 +2363,7 @@
                 extra_notes: notes || null,
                 listing_type: listingType,
                 status: 'pending',
-                user_id: currentUser.id
+                owner_user_id: currentUser.id
             });
 
             setLoading('listing-submit-text', 'listing-submit-spinner', false);
