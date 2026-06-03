@@ -820,7 +820,7 @@
         const offset = currentPage * PAGE_SIZE;
 
         try {
-            let query = supabase.from('listings').select('*, profiles!listings_owner_user_id_fkey(email, full_name)', { count: 'exact' });
+            let query = supabase.from('listings').select('*, profiles(email, full_name)', { count: 'exact' });
             if (statusFilter) query = query.eq('status', statusFilter);
             if (category) query = query.eq('category', category);
             if (keyword) {
