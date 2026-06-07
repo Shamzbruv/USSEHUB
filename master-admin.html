@@ -668,17 +668,23 @@
     }
 
     function updateLabels(mode) {
-        const isJob = document.getElementById(mode + '-category').value === 'JOBS & CAREERS';
+        const category = document.getElementById(mode + '-category').value;
+        const labels = window.getLabelsForCategory ? window.getLabelsForCategory(category) : {
+            name: 'Business Name*',
+            subcat: 'Subcategory',
+            loc: 'Location (Parish/Town)*',
+            desc: 'Description*'
+        };
         
         const nameLabel = document.getElementById(mode + '-business-name').previousElementSibling;
         const subcatLabel = document.getElementById(mode + '-subcategory').previousElementSibling;
         const locLabel = document.getElementById(mode + '-location').previousElementSibling;
         const descLabel = document.getElementById(mode + '-description').previousElementSibling;
 
-        if (nameLabel) nameLabel.textContent = isJob ? 'Company Name*' : 'Business Name*';
-        if (subcatLabel) subcatLabel.textContent = isJob ? 'Job Type' : 'Subcategory';
-        if (locLabel) locLabel.textContent = isJob ? 'Job Location / Remote*' : 'Location (Parish/Town)*';
-        if (descLabel) descLabel.textContent = isJob ? 'Job Description & Requirements*' : 'Description*';
+        if (nameLabel) nameLabel.textContent = labels.name;
+        if (subcatLabel) subcatLabel.textContent = labels.subcat;
+        if (locLabel) locLabel.textContent = labels.loc;
+        if (descLabel) descLabel.textContent = labels.desc;
     }
 
     function showAdmin() {

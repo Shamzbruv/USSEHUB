@@ -35,6 +35,61 @@ const TAXONOMY = {
 
 window.TAXONOMY = TAXONOMY;
 
+window.getLabelsForCategory = function(category) {
+    switch (category) {
+        case 'JOBS & CAREERS':
+            return {
+                name: 'Company Name*',
+                subcat: 'Job Type',
+                loc: 'Job Location / Remote*',
+                desc: 'Job Description & Requirements*'
+            };
+        case 'ROOMS & VENUE - RENTALS AND REAL ESTATES SALES':
+            return {
+                name: 'Property / Venue Name*',
+                subcat: 'Property Type',
+                loc: 'Property Location*',
+                desc: 'Property Details & Amenities*'
+            };
+        case 'FARMING':
+            return {
+                name: 'Farm / Business Name*',
+                subcat: 'Produce / Farm Type',
+                loc: 'Farm Location*',
+                desc: 'Produce / Service Description*'
+            };
+        case 'RETAIL & WHOLESALE TRADE':
+            return {
+                name: 'Store / Business Name*',
+                subcat: 'Store / Product Type',
+                loc: 'Store Location*',
+                desc: 'Products / Services Description*'
+            };
+        case 'FOOD & BEVERAGE':
+            return {
+                name: 'Restaurant / Outlet Name*',
+                subcat: 'Outlet Type',
+                loc: 'Outlet Location*',
+                desc: 'Menu / Outlet Description*'
+            };
+        case 'EVENTS & ENTERTAINMENT':
+            return {
+                name: 'Event / Venue Name*',
+                subcat: 'Event / Venue Type',
+                loc: 'Event Location*',
+                desc: 'Event Details / Venue Description*'
+            };
+        case 'SERVICES':
+        default:
+            return {
+                name: 'Business / Service Name*',
+                subcat: 'Subcategory',
+                loc: 'Location (Parish/Town)*',
+                desc: 'Business Description*'
+            };
+    }
+};
+
 window.populateCategorySelect = function(selectElementId) {
     const select = document.getElementById(selectElementId);
     if (!select) return;

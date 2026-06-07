@@ -1270,7 +1270,7 @@
                     </div>
                     <div class="form-group">
                         <label for="lf-category">Category *</label>
-                        <select id="lf-category" required onchange="populateSubcategorySelect('lf-category', 'lf-subcategory')">
+                        <select id="lf-category" required onchange="populateSubcategorySelect('lf-category', 'lf-subcategory'); updateHubLabels()">
                             <option value="">Select category</option>
                         </select>
                     </div>
@@ -1713,6 +1713,25 @@
                 window.populateCategorySelect('search-category');
                 window.populateCategorySelect('lf-category');
             }
+            window.updateHubLabels = function() {
+                const category = document.getElementById('lf-category').value;
+                const labels = window.getLabelsForCategory ? window.getLabelsForCategory(category) : {
+                    name: 'Business Name*',
+                    subcat: 'Subcategory',
+                    loc: 'Location*',
+                    desc: 'Business Description*'
+                };
+                
+                const nameLabel = document.querySelector('label[for="lf-business-name"]');
+                const subcatLabel = document.querySelector('label[for="lf-subcategory"]');
+                const locLabel = document.querySelector('label[for="lf-location"]');
+                const descLabel = document.querySelector('label[for="lf-description"]');
+
+                if (nameLabel) nameLabel.textContent = labels.name;
+                if (subcatLabel) subcatLabel.textContent = labels.subcat;
+                if (locLabel) locLabel.textContent = labels.loc;
+                if (descLabel) descLabel.textContent = labels.desc;
+            };
 
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.user) {
