@@ -9,17 +9,17 @@ async function main() {
         await client.connect();
         
         const sql = `
-            -- Create the private bucket
+            -- Create the public bucket
             INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
             VALUES (
                 'listing-images',
                 'listing-images',
-                false, -- PRIVATE BUCKET
+                true, -- PUBLIC BUCKET
                 5242880,  -- 5MB
                 ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif']
             )
             ON CONFLICT (id) DO UPDATE SET
-                public = false,
+                public = true,
                 file_size_limit = 5242880,
                 allowed_mime_types = ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
 
