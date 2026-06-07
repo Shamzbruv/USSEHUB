@@ -317,7 +317,7 @@
         <div style="display:flex;gap:12px;">
             <div class="form-group" style="flex:1;">
                 <label>Category</label>
-                <select id="edit-category" onchange="populateSubcategorySelect('edit-category', 'edit-subcategory')">
+                <select id="edit-category" onchange="populateSubcategorySelect('edit-category', 'edit-subcategory'); updateLabels('edit')">
                     <option value="">Select Category</option>
                 </select>
             </div>
@@ -336,6 +336,10 @@
                 <option value="rejected">Rejected</option>
                 <option value="expired">Expired</option>
             </select>
+        </div>
+        <div class="form-group">
+            <label>Business Logo / Image (Square Recommended)</label>
+            <input type="file" id="edit-image" accept="image/jpeg,image/jpg,image/png,image/webp" style="cursor:pointer;" />
         </div>
         <div class="form-group">
             <label>Listing Type</label>
@@ -401,7 +405,7 @@
         <div style="display:flex;gap:12px;">
             <div class="form-group" style="flex:1;">
                 <label>Category*</label>
-                <select id="add-category" onchange="if(window.populateSubcategorySelect) window.populateSubcategorySelect('add-category', 'add-subcategory')" required></select>
+                <select id="add-category" onchange="if(window.populateSubcategorySelect) window.populateSubcategorySelect('add-category', 'add-subcategory'); updateLabels('add')" required></select>
             </div>
             <div class="form-group" style="flex:1;">
                 <label>Subcategory</label>
@@ -444,6 +448,10 @@
                 <label>Website</label>
                 <input type="text" id="add-website" />
             </div>
+        </div>
+        <div class="form-group">
+            <label>Business Logo / Image (Square Recommended)</label>
+            <input type="file" id="add-image" accept="image/jpeg,image/jpg,image/png,image/webp" style="cursor:pointer;" />
         </div>
         <div class="form-group">
             <label>Description*</label>
@@ -662,6 +670,7 @@
     window.openRoleModal = openRoleModal;
     window.closeRoleModal = closeRoleModal;
     window.saveUserRole = saveUserRole;
+    window.updateLabels = updateLabels;
     window.openAddModal = openAddModal;
     window.closeAddModal = closeAddModal;
     window.saveNewListing = saveNewListing;
@@ -700,6 +709,20 @@
         showAdmin();
         await loadStats();
         await reloadListings();
+    }
+
+    function updateLabels(mode) {
+        const isJob = document.getElementById(mode + '-category').value === 'JOBS & CAREERS';
+        
+        const nameLabel = document.getElementById(mode + '-business-name').previousElementSibling;
+        const subcatLabel = document.getElementById(mode + '-subcategory').previousElementSibling;
+        const locLabel = document.getElementById(mode + '-location').previousElementSibling;
+        const descLabel = document.getElementById(mode + '-description').previousElementSibling;
+
+        if (nameLabel) nameLabel.textContent = isJob ? 'Company Name*' : 'Business Name*';
+        if (subcatLabel) subcatLabel.textContent = isJob ? 'Job Type' : 'Subcategory';
+        if (locLabel) locLabel.textContent = isJob ? 'Job Location / Remote*' : 'Location (Parish/Town)*';
+        if (descLabel) descLabel.textContent = isJob ? 'Job Description & Requirements*' : 'Description*';
     }
 
     function showAdmin() {
@@ -818,12 +841,12 @@
                         ${l.is_featured ? '<br><span class="badge badge-featured" style="margin-top:4px;">⭐ featured</span>' : ''}
                     </td>
                     <td>
-                        <div class="action-row">
-                            ${l.status !== 'approved' ? `<button class="btn btn-primary btn-sm" onclick="approveListing('${l.id}')">✓ Approve</button>` : ''}
-                            ${l.status !== 'rejected' ? `<button class="btn btn-danger btn-sm" onclick="rejectListing('${l.id}')">✗ Reject</button>` : ''}
-                            ${l.status !== 'expired' ? `<button class="btn btn-warning btn-sm" onclick="expireListing('${l.id}')">🕰 Expire</button>` : ''}
-                            <button class="btn btn-ghost btn-sm" onclick="toggleFeatured('${l.id}', ${l.is_featured})">${l.is_featured ? '★ Unfeature' : '☆ Feature'}</button>
-                            <button class="btn btn-ghost btn-sm" onclick='openEditModal(${JSON.stringify(l).replace(/'/g, "&#39;").replace(/"/g, "&quot;")})'>✎ Edit</button>
+                        <div class="action-row" style="gap: 4px; margin-top: 4px;">
+                            ${l.status !== 'approved' ? `<button class="btn btn-primary btn-sm" style="padding: 4px 8px;" onclick="approveListing('${l.id}')" title="Approve">✓</button>` : ''}
+                            ${l.status !== 'rejected' ? `<button class="btn btn-danger btn-sm" style="padding: 4px 8px;" onclick="rejectListing('${l.id}')" title="Reject">✗</button>` : ''}
+                            ${l.status !== 'expired' ? `<button class="btn btn-warning btn-sm" style="padding: 4px 8px;" onclick="expireListing('${l.id}')" title="Expire">🕰</button>` : ''}
+                            <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick="toggleFeatured('${l.id}', ${l.is_featured})" title="${l.is_featured ? 'Unfeature' : 'Feature'}">${l.is_featured ? '★' : '☆'}</button>
+                            <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick='openEditModal(${JSON.stringify(l).replace(/'/g, "&#39;").replace(/"/g, "&quot;")})' title="Edit">✎</button>
                         </div>
                     </td>
                 </tr>
@@ -867,10 +890,11 @@
     }
 
     // ── EDIT MODAL ──
-    function openEditModal(listing) {
+    async function openEditModal(listing) {
         document.getElementById('edit-listing-id').value = listing.id;
         document.getElementById('edit-business-name').value = listing.business_name || '';
         document.getElementById('edit-status').value = listing.status || 'pending';
+        document.getElementById('edit-image').value = ''; // Reset file input
         
         const catSelect = document.getElementById('edit-category');
         catSelect.value = listing.category || '';
@@ -879,6 +903,8 @@
         }
         document.getElementById('edit-subcategory').value = listing.subcategory || '';
         
+        updateLabels('edit');
+
         document.getElementById('edit-listing-type').value = listing.listing_type || '';
         document.getElementById('edit-location').value = listing.location || '';
         document.getElementById('edit-phone').value = listing.phone || '';
@@ -911,14 +937,27 @@
         const website = document.getElementById('edit-website').value;
         const description = document.getElementById('edit-description').value;
         const extra_notes = document.getElementById('edit-extra-notes').value;
+        const imageFile = document.getElementById('edit-image').files[0];
 
         const spinner = document.getElementById('edit-save-spinner');
         const text = document.getElementById('edit-save-text');
         spinner.style.display = 'inline-block';
         text.textContent = 'Saving...';
 
+        // Upload image if provided
+        let imageUrl = undefined;
+        if (imageFile) {
+            const ext = imageFile.name.split('.').pop().toLowerCase();
+            const filePath = `${currentUser.id}/${Date.now()}.${ext}`;
+            const { error: uploadError } = await supabase.storage.from('listing-images').upload(filePath, imageFile, { cacheControl: '3600', upsert: false });
+            if (!uploadError) {
+                const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(filePath);
+                imageUrl = urlData?.publicUrl || null;
+            }
+        }
+
         // Update all fields directly
-        const { error: rpcError } = await supabase.from('listings').update({
+        const updateData = {
             status,
             is_featured: isFeatured,
             business_name: business_name || null,
@@ -932,7 +971,12 @@
             website: website || null,
             listing_type: listing_type || null,
             extra_notes: extra_notes || null
-        }).eq('id', id);
+        };
+        if (imageUrl !== undefined) {
+            updateData.image_url = imageUrl;
+        }
+
+        const { error: rpcError } = await supabase.from('listings').update(updateData).eq('id', id);
 
         spinner.style.display = 'none';
         text.textContent = 'Save Changes';
@@ -965,6 +1009,8 @@
         document.getElementById('add-description').value = '';
         document.getElementById('add-extra-notes').value = '';
         document.getElementById('add-featured').checked = false;
+        document.getElementById('add-image').value = '';
+        updateLabels('add');
         document.getElementById('add-modal').classList.add('open');
     }
 
@@ -987,6 +1033,7 @@
         const website = document.getElementById('add-website').value.trim();
         const description = document.getElementById('add-description').value.trim();
         const extra_notes = document.getElementById('add-extra-notes').value.trim();
+        const imageFile = document.getElementById('add-image').files[0];
 
         if (!business_name || !category || !location || !description) {
             showToast('Business Name, Category, Location, and Description are required', 'error');
@@ -997,6 +1044,18 @@
         const text = document.getElementById('add-save-text');
         spinner.style.display = 'inline-block';
         text.textContent = 'Saving...';
+
+        // Upload image if provided
+        let imageUrl = null;
+        if (imageFile) {
+            const ext = imageFile.name.split('.').pop().toLowerCase();
+            const filePath = `${currentUser.id}/${Date.now()}.${ext}`;
+            const { error: uploadError } = await supabase.storage.from('listing-images').upload(filePath, imageFile, { cacheControl: '3600', upsert: false });
+            if (!uploadError) {
+                const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(filePath);
+                imageUrl = urlData?.publicUrl || null;
+            }
+        }
 
         const { error } = await supabase.from('listings').insert({
             owner_user_id: currentUser.id,
@@ -1012,7 +1071,8 @@
             email: email || null,
             website: website || null,
             listing_type: listing_type || 'basic',
-            extra_notes: extra_notes || null
+            extra_notes: extra_notes || null,
+            image_url: imageUrl
         });
 
         spinner.style.display = 'none';

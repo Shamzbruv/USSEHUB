@@ -135,7 +135,50 @@
             text-decoration: none;
         }
 
-        /* --- Global Patterns & Utilities --- */
+        // Global exposure for dynamically created elements
+        window.openConsultationModal = openConsultationModal;
+        window.closeModal = closeModal;
+        window.handleLogout = handleLogout;
+        window.openAuthModal = openAuthModal;
+
+        window.openListingDetailsModal = function(listingJson) {
+            const l = JSON.parse(decodeURIComponent(listingJson));
+            const content = document.getElementById('ld-content');
+            
+            const isJob = l.category === 'JOBS & CAREERS';
+            
+            content.innerHTML = `
+                <div style="display:flex; gap: 16px; margin-bottom: 20px;">
+                    ${l.image_url ? `<img src="${escHtml(l.image_url)}" style="width:100px; height:100px; object-fit:cover; border-radius:12px; border:1px solid var(--glass-border); flex-shrink:0;">` : `<div style="width:100px; height:100px; background:var(--glass-bg); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--muted); border:1px solid var(--glass-border);">🏢</div>`}
+                    <div>
+                        <h2 style="margin:0 0 8px 0; font-size:1.5rem;">${escHtml(l.business_name)}</h2>
+                        <div style="color:var(--muted); font-size:0.9rem; margin-bottom: 4px;">
+                            <strong>${isJob ? 'Industry' : 'Category'}:</strong> ${escHtml(l.category)} 
+                            ${l.subcategory ? ` &bull; <strong>${isJob ? 'Job Type' : 'Subcategory'}:</strong> ${escHtml(l.subcategory)}` : ''}
+                        </div>
+                        <div style="color:var(--muted); font-size:0.9rem;">
+                            <strong>Location:</strong> ${escHtml(formatLocation(l.location))}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background:var(--glass-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 20px;">
+                    <h3 style="margin-top:0; margin-bottom:12px; font-size:1.1rem;">${isJob ? 'Job Description & Requirements' : 'Description'}</h3>
+                    <p style="white-space: pre-wrap; font-size:0.95rem; line-height:1.6; color:var(--text); margin:0;">${escHtml(l.description)}</p>
+                </div>
+                
+                <div style="display:flex; gap: 12px; flex-wrap:wrap; justify-content: flex-end; align-items:center; border-top: 1px solid var(--glass-border); padding-top:16px;">
+                    <span style="color:var(--muted); font-size:0.85rem; margin-right:auto;">Posted: ${new Date(l.created_at).toLocaleDateString()}</span>
+                    ${l.phone ? `<a href="tel:${escHtml(l.phone).replace(/\D/g,'')}" class="btn btn-ghost" style="border:1px solid var(--glass-border); padding:6px 12px;">📞 ${escHtml(l.phone)}</a>` : ''}
+                    ${l.whatsapp ? `<a href="javascript:void(0)" onclick="closeModal('listing-details-modal'); openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" class="btn btn-ghost" style="border:1px solid var(--green); color:var(--green); padding:6px 12px;">💬 WhatsApp</a>` : ''}
+                    ${l.email ? `<a href="javascript:void(0)" onclick="closeModal('listing-details-modal'); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" class="btn btn-ghost" style="border:1px solid var(--blue); color:var(--blue); padding:6px 12px;">✉️ Email</a>` : ''}
+                    ${l.website ? `<a href="${escHtml(l.website.startsWith('http') ? l.website : 'https://'+l.website)}" target="_blank" class="btn btn-primary" style="padding:6px 12px;">🌐 Visit Website</a>` : ''}
+                </div>
+            `;
+            openModal('listing-details-modal');
+        };
+
+        // ── INIT ──Patterns & Utilities --- */
         .page-noise {
             position: fixed;
             inset: 0;
@@ -1312,7 +1355,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="lf-image">Business Logo / Image (optional)</label>
+                    <label for="lf-image">Business Logo / Image (Square Recommended)</label>
                     <input type="file" id="lf-image" accept="image/jpeg,image/jpg,image/png,image/webp" style="cursor:pointer;" />
                     <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">JPG, PNG or WebP · Max 5MB</div>
                     <div id="lf-image-error" style="color:var(--red);font-size:0.78rem;margin-top:4px;display:none;"></div>
@@ -1399,29 +1442,51 @@
             <button class="btn btn-primary" id="search-btn" onclick="performSearch()" aria-label="Search listings">Search</button>
         </div>
 
-        <div class="categories-grid" role="list" aria-label="Browse by category">
-            <div class="cat-card" data-category="services" role="listitem" tabindex="0" onclick="filterByCategory('services', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('services',this)" aria-label="Filter by Services">
-                <img src="assets/hub_cat_services_1778519570445.png" alt="Services">
-                <span>Services</span>
+        <div class="categories-scroll-wrapper">
+            <button class="scroll-arrow left-arrow" onclick="scrollCategories(-1)" aria-label="Scroll left">&#10094;</button>
+            <div class="categories-grid" id="categories-grid" role="list" aria-label="Browse by category">
+                <div class="cat-card" data-category="services" role="listitem" tabindex="0" onclick="filterByCategory('services', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('services',this)" aria-label="Filter by Services">
+                    <img src="assets/hub_cat_services_1778519570445.png" alt="Services">
+                    <span>Services</span>
+                </div>
+                <div class="cat-card" data-category="rooms" role="listitem" tabindex="0" onclick="filterByCategory('rooms', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('rooms',this)" aria-label="Filter by Rooms & Venue">
+                    <img src="assets/hub_cat_rooms_1778519582228.png" alt="Rooms &amp; Venue">
+                    <span>Rooms &amp; Venue</span>
+                </div>
+                <div class="cat-card" data-category="farming" role="listitem" tabindex="0" onclick="filterByCategory('farming', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('farming',this)" aria-label="Filter by Farming">
+                    <img src="assets/hub_cat_farming_1778519594473.png" alt="Farming">
+                    <span>Farming</span>
+                </div>
+                <div class="cat-card" data-category="retail" role="listitem" tabindex="0" onclick="filterByCategory('retail', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('retail',this)" aria-label="Filter by Retail & Wholesale">
+                    <img src="assets/hub_cat_retail_1778519607226.png" alt="Retail &amp; Wholesale">
+                    <span>Retail &amp; Wholesale</span>
+                </div>
+                <div class="cat-card" data-category="food" role="listitem" tabindex="0" onclick="filterByCategory('food', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('food',this)" aria-label="Filter by Food & Beverage">
+                    <img src="assets/hub_cat_food_1778519621295.png" alt="Food &amp; Beverage">
+                    <span>Food &amp; Beverage</span>
+                </div>
+                <div class="cat-card" data-category="events" role="listitem" tabindex="0" onclick="filterByCategory('events', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('events',this)" aria-label="Filter by Events & Entertainment">
+                    <div style="font-size: 2.5rem; filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.4));">🎉</div>
+                    <span>Events &amp; Entertainment</span>
+                </div>
+                <div class="cat-card" data-category="jobs" role="listitem" tabindex="0" onclick="filterByCategory('jobs', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('jobs',this)" aria-label="Filter by Jobs & Careers">
+                    <div style="font-size: 2.5rem; filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.4));">💼</div>
+                    <span>Jobs &amp; Careers</span>
+                </div>
             </div>
-            <div class="cat-card" data-category="rooms" role="listitem" tabindex="0" onclick="filterByCategory('rooms', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('rooms',this)" aria-label="Filter by Rooms & Spaces">
-                <img src="assets/hub_cat_rooms_1778519582228.png" alt="Rooms &amp; Spaces">
-                <span>Rooms &amp; Spaces</span>
-            </div>
-            <div class="cat-card" data-category="farming" role="listitem" tabindex="0" onclick="filterByCategory('farming', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('farming',this)" aria-label="Filter by Farming">
-                <img src="assets/hub_cat_farming_1778519594473.png" alt="Farming">
-                <span>Farming</span>
-            </div>
-            <div class="cat-card" data-category="retail" role="listitem" tabindex="0" onclick="filterByCategory('retail', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('retail',this)" aria-label="Filter by Retail">
-                <img src="assets/hub_cat_retail_1778519607226.png" alt="Retail Shopping">
-                <span>Retail</span>
-            </div>
-            <div class="cat-card" data-category="food" role="listitem" tabindex="0" onclick="filterByCategory('food', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('food',this)" aria-label="Filter by Drink & Eat">
-                <img src="assets/hub_cat_food_1778519621295.png" alt="Drink &amp; Eat">
-                <span>Drink &amp; Eat</span>
-            </div>
+            <button class="scroll-arrow right-arrow" onclick="scrollCategories(1)" aria-label="Scroll right">&#10095;</button>
         </div>
     </section>
+
+    <!-- Listing Details Modal -->
+    <div id="listing-details-modal" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="modal-box" style="max-width: 600px;">
+            <button class="modal-close" onclick="closeModal('listing-details-modal')" aria-label="Close">&times;</button>
+            <div id="ld-content">
+                <!-- dynamic content -->
+            </div>
+        </div>
+    </div>
 
     <!-- Consultation Modal -->
     <div id="consultation-modal" class="modal-overlay" role="dialog" aria-modal="true">
@@ -1545,12 +1610,11 @@
                 <!-- Locked state (public) -->
                 <div id="stats-locked" class="stats-locked">
                     <div class="lock-icon">🔒</div>
-                    <p>Available to subscribed members only.</p>
+                    <p>Available to registered users only.</p>
                     <button class="btn btn-ghost" onclick="openModal('auth-modal');switchAuthTab('login')">Login to View</button>
                 </div>
-                <!-- Unlocked state (subscribed members) -->
+                <!-- Unlocked state (logged in members) -->
                 <div id="stats-unlocked" class="stats-widget" style="display:none;">
-                    <!-- Users Online & Total Guests removed until Realtime Presence is implemented -->
                     <div class="stat-item">
                         <span>Total Members</span>
                         <strong style="color: var(--yellow);" id="stat-members">—</strong>
@@ -1563,9 +1627,12 @@
                         <span>Pending Listings</span>
                         <strong style="color:var(--yellow);" id="stat-pending">—</strong>
                     </div>
-                    <div class="stat-item">
-                        <span>Membership Status</span>
-                        <strong id="stat-membership" style="color:var(--green);">Active</strong>
+                    <div class="stat-item" id="stat-your-listings-row">
+                        <span>Your Listings</span>
+                        <strong style="color:var(--green);" id="stat-your-listings">—</strong>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <button class="btn btn-primary" style="width:100%; border-radius:12px; font-size:0.85rem;" onclick="handlePostListingClick()">➕ Post New Listing</button>
                     </div>
                 </div>
             </div>
@@ -1787,36 +1854,31 @@
         // NETWORK STATS — direct DB querying
         // ==========================================
         async function updateNetworkStats() {
-            const role = currentProfile?.role;
-            const subStatus = currentProfile?.subscription_status;
-            const canView = role === 'admin' || role === 'subscriber' || subStatus === 'active';
-
-            if (!canView) {
+            if (!currentUser) {
                 updateNetworkStatsLocked();
                 return;
             }
 
             document.getElementById('stats-locked').style.display = 'none';
             document.getElementById('stats-unlocked').style.display = 'flex';
+            document.getElementById('stats-unlocked').style.flexDirection = 'column';
 
             try {
-                // Fetch stats directly from tables (RLS allows admins to count, and members to count public listings)
-                const [{ count: activeListings }, { count: totalMembers }] = await Promise.all([
+                const role = currentProfile?.role;
+                const [{ count: activeListings }, { count: totalMembers }, { count: yourListings }] = await Promise.all([
                     supabase.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
-                    supabase.from('profiles').select('*', { count: 'exact', head: true })
+                    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+                    supabase.from('listings').select('*', { count: 'exact', head: true }).eq('owner_user_id', currentUser.id)
                 ]);
 
                 document.getElementById('stat-members').textContent = totalMembers ?? '—';
                 document.getElementById('stat-listings').textContent = activeListings ?? '—';
+                document.getElementById('stat-your-listings').textContent = yourListings ?? '0';
 
                 if (role === 'admin') {
-                    document.getElementById('stat-membership').textContent = '🛡️ Admin';
                     document.getElementById('stat-pending-row').style.display = 'flex';
-                    
                     const { count: pendingListings } = await supabase.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'pending');
                     document.getElementById('stat-pending').textContent = pendingListings ?? '0';
-                } else {
-                    document.getElementById('stat-membership').textContent = subStatus === 'active' ? '✓ Active' : 'Member';
                 }
             } catch (err) {
                 console.warn('Stats error:', err.message);
@@ -1875,24 +1937,26 @@
         // ==========================================
         // CATEGORY FILTER
         // ==========================================
-        function filterByCategory(category, cardEl) {
+        function filterByCategory(category, el) {
             if (activeCategory === category) {
                 clearCategoryFilter();
                 return;
             }
 
             activeCategory = category;
-            document.getElementById('search-category').value = category;
-
-            // Update card active states
-            document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
-            if (cardEl) cardEl.classList.add('active');
-
+            document.getElementById('search-category').value = '';
+            syncCategoryCards(category);
             showActiveFilterBar(category);
             listingsOffset = 0;
             loadListings({ category });
             scrollToResults();
         }
+
+        window.scrollCategories = function(direction) {
+            const container = document.getElementById('categories-grid');
+            const scrollAmount = 200;
+            container.scrollBy({ left: scrollAmount * direction, behavior: 'smooth' });
+        };
 
         function syncCategoryCards(category) {
             document.querySelectorAll('.cat-card').forEach(c => {
@@ -1906,9 +1970,8 @@
 
         function showActiveFilterBar(category) {
             const labels = {
-                services: 'Services', rooms: 'Rooms & Spaces', farming: 'Farming',
-                retail: 'Retail Shopping', food: 'Drink & Eat', health: 'Health & Wellness',
-                finance: 'Financial Services', tech: 'Technology', education: 'Education', other: 'Other'
+                services: 'Services', rooms: 'Rooms & Venue', farming: 'Farming',
+                retail: 'Retail & Wholesale', food: 'Food & Beverage', events: 'Events & Entertainment', jobs: 'Jobs & Careers'
             };
             const bar = document.getElementById('active-filter-bar');
             document.getElementById('active-filter-label').textContent = labels[category] || category;
@@ -1931,15 +1994,13 @@
         // Maps each card category to all DB categories it covers
         // ==========================================
         const CATEGORY_GROUPS = {
-            services: ['services', 'transport', 'maintenance', 'repairs', 'construction',
-                       'delivery', 'catering', 'communications', 'audio-visual', 'finance',
-                       'ngo', 'religious', 'tech', 'education', 'other'],
-            rooms:    ['rooms', 'accommodations', 'resort', 'meetings', 'rentals',
-                       'real-estate', 'venue'],
-            farming:  ['farming', 'agriculture', 'fisheries', 'herbs', 'poultry',
-                       'cattle', 'vegetables', 'fruits', 'provisions', 'horticulture'],
-            retail:   ['retail', 'wholesale', 'shopping', 'markets', 'purveyors', 'manufactured'],
-            food:     ['food', 'bars', 'restaurants', 'cafes', 'delis', 'drive-through']
+            services: ['SERVICES'],
+            rooms:    ['ROOMS & VENUE - RENTALS AND REAL ESTATES SALES'],
+            farming:  ['FARMING'],
+            retail:   ['RETAIL & WHOLESALE TRADE'],
+            food:     ['FOOD & BEVERAGE'],
+            events:   ['EVENTS & ENTERTAINMENT'],
+            jobs:     ['JOBS & CAREERS']
         };
 
         function getCategoryFilter(category) {
@@ -2113,34 +2174,46 @@
                 return;
             }
 
-            container.innerHTML = listings.map(l => `
-                <div class="listing-row">
-                    <div class="listing-name">
-                        ${l.is_featured ? '<span class="listing-badge badge-featured">⭐ Featured</span>' : ''}
-                        ${l.status === 'pending' ? '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);">⏳ Pending</span>' : ''}
-                        <h4>${escHtml(l.business_name)}</h4>
-                        <span>${escHtml(formatLocation(l.location))}${l.category ? ' · ' + formatCategory(l.category) : ''}</span>
+            container.innerHTML = listings.map(l => {
+                const lJson = encodeURIComponent(JSON.stringify(l));
+                return `
+                <div class="listing-row" style="cursor: pointer;" onclick="openListingDetailsModal('${lJson}')">
+                    <div class="listing-name" style="display: flex; align-items: center; gap: 16px;">
+                        ${l.image_url ? `<img src="${escHtml(l.image_url)}" alt="Logo" style="width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex-shrink: 0; background: var(--glass-bg); border: 1px solid var(--glass-border);">` : `<div style="width: 64px; height: 64px; border-radius: 8px; flex-shrink: 0; background: var(--glass-bg); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.5rem;">🏢</div>`}
+                        <div>
+                            ${l.is_featured ? '<span class="listing-badge badge-featured">⭐ Featured</span>' : ''}
+                            ${l.status === 'pending' ? '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);">⏳ Pending</span>' : ''}
+                            <h4 style="margin: 0 0 4px 0;">${escHtml(l.business_name)}</h4>
+                            <span>${escHtml(formatLocation(l.location))}${l.category ? ' · ' + formatCategory(l.category) : ''}</span>
+                        </div>
                     </div>
                     <div class="listing-services">
                         <p><strong>${escHtml(l.subcategory || formatCategory(l.category) || '')}</strong>${l.description ? '<br>' + escHtml(l.description.slice(0, 120)) + (l.description.length > 120 ? '…' : '') : ''}</p>
                     </div>
                     <div class="listing-contact">
                         ${l.phone ? `<span>Tel: ${escHtml(l.phone)}</span>` : ''}
-                        ${l.email ? `<a href="javascript:void(0)" onclick="openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" style="color:var(--blue);">Email</a>` : ''}
-                        ${l.website ? `<a href="${escHtml(l.website)}" target="_blank" rel="noopener">${escHtml(l.website.replace(/^https?:\/\//, ''))}</a>` : ''}
-                        ${l.whatsapp ? `<a href="javascript:void(0)" onclick="openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" style="color:var(--green);">WhatsApp</a>` : ''}
+                        ${l.email ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" style="color:var(--blue);">Email</a>` : ''}
+                        ${l.website ? `<a href="${escHtml(l.website)}" target="_blank" rel="noopener" onclick="event.stopPropagation();">${escHtml(l.website.replace(/^https?:\/\//, ''))}</a>` : ''}
+                        ${l.whatsapp ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" style="color:var(--green);">WhatsApp</a>` : ''}
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function buildTableRow(l) {
+            const lJson = encodeURIComponent(JSON.stringify(l));
             return `
-                <tr>
-                    <td><strong>${escHtml(l.business_name)}</strong>${l.status === 'pending' ? ' <span style="font-size:0.7rem;color:var(--yellow);">(pending)</span>' : ''}</td>
+                <tr style="cursor: pointer;" onclick="openListingDetailsModal('${lJson}')">
+                    <td style="display:flex; align-items:center; gap:12px;">
+                        ${l.image_url ? `<img src="${escHtml(l.image_url)}" alt="Logo" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: var(--glass-bg); border: 1px solid var(--glass-border);">` : `<div style="width: 48px; height: 48px; border-radius: 6px; flex-shrink: 0; background: var(--glass-bg); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.2rem;">🏢</div>`}
+                        <div>
+                            <strong>${escHtml(l.business_name)}</strong>${l.status === 'pending' ? ' <span style="font-size:0.7rem;color:var(--yellow);">(pending)</span>' : ''}
+                        </div>
+                    </td>
                     <td>${escHtml(l.subcategory || formatCategory(l.category) || '—')}</td>
                     <td>${escHtml(formatLocation(l.location))}</td>
-                    <td>${l.email ? `<a href="javascript:void(0)" onclick="openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" style="color:var(--blue);">Email</a>` : l.phone ? escHtml(l.phone) : '—'}</td>
+                    <td>${l.email ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" style="color:var(--blue);">Email</a>` : l.phone ? escHtml(l.phone) : '—'}</td>
                 </tr>`;
         }
 
@@ -2355,7 +2428,7 @@
                 subcategory,
                 description,
                 location,
-                phone: phone || null,
+                contact_phone: phone || null,
                 whatsapp: whatsapp || null,
                 email: email || null,
                 website: website || null,
