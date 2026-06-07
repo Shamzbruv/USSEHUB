@@ -2002,8 +2002,8 @@
             updateWhatsAppLink();
             // Show admin panel link if admin
             const adminLink = document.getElementById('admin-panel-link');
-            if (adminLink && currentProfile?.role === 'admin') {
-                adminLink.style.display = 'block';
+            if (adminLink) {
+                adminLink.style.display = (currentProfile?.role === 'admin') ? 'block' : 'none';
             }
             // Reload listings so user can see their own
             await loadListings();
