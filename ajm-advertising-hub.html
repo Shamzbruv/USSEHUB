@@ -1862,7 +1862,7 @@
                             <td style="padding:12px 10px;">${statusHtml}</td>
                             <td style="padding:12px 10px;">${typeHtml}</td>
                             <td style="padding:12px 10px;">
-                                <a href="javascript:void(0)" onclick="closeModal('member-dashboard-modal'); openListingDetailsModal('${encodeURIComponent(JSON.stringify(l))}');" style="color:var(--blue); font-size:0.85rem;">View</a>
+                                <a href="javascript:void(0)" onclick="closeModal('member-dashboard-modal'); openListingDetailsModal('${encodeURIComponent(JSON.stringify(l)).replace(/'/g, "%27")}');" style="color:var(--blue); font-size:0.85rem;">View</a>
                             </td>
                         </tr>
                     `;
@@ -2107,6 +2107,8 @@
                     }
                 }
             });
+        }
+
         function clearCategoryFilterUIOnly() {
             activeCategory = null;
             document.getElementById('search-category').value = '';
@@ -2384,7 +2386,7 @@
             }
 
             container.innerHTML = listings.map(l => {
-                const lJson = encodeURIComponent(JSON.stringify(l));
+                const lJson = encodeURIComponent(JSON.stringify(l)).replace(/'/g, "%27");
                 return `
                 <div class="listing-row" style="cursor: pointer;" onclick="openListingDetailsModal('${lJson}')">
                     ${l.image_url 
@@ -2413,7 +2415,7 @@
         }
 
         function buildTableRow(l) {
-            const lJson = encodeURIComponent(JSON.stringify(l));
+            const lJson = encodeURIComponent(JSON.stringify(l)).replace(/'/g, "%27");
             return `
                 <tr style="cursor: pointer;" onclick="openListingDetailsModal('${lJson}')">
                     <td style="display:flex; align-items:center; gap:12px;">
