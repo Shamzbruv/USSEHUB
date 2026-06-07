@@ -803,7 +803,7 @@
         `).join('');
     }
 
-    async function deleteConsultation(id) {
+    window.deleteConsultation = async function(id) {
         if (!confirm('Are you sure you want to delete this consultation?')) return;
         const { error } = await supabase.from('consultations').delete().eq('id', id);
         if (error) {
@@ -813,7 +813,7 @@
             loadConsultations();
             loadStats();
         }
-    }
+    };
 
     async function loadSubscriptions() {
         const tbody = document.getElementById('admin-subscriptions-tbody');
