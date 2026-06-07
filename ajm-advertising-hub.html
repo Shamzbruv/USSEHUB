@@ -2581,6 +2581,30 @@
         function handlePostListingClick() {
             if (currentUser) {
                 openModal('post-listing-modal');
+                
+                // Lock premium options for free members
+                const isPremium = currentProfile?.role === 'admin' || currentProfile?.role === 'subscriber';
+                ['lt-advanced', 'lt-featured', 'lt-banner'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        const wrapper = el.closest('.listing-type-option');
+                        if (!isPremium) {
+                            el.disabled = true;
+                            wrapper.style.opacity = '0.5';
+                            wrapper.style.cursor = 'not-allowed';
+                            wrapper.onclick = (e) => {
+                                e.preventDefault();
+                                document.getElementById('lt-basic').checked = true;
+                                showToast('This is a paid feature! Please upgrade to access special listings.', 'error');
+                            };
+                        } else {
+                            el.disabled = false;
+                            wrapper.style.opacity = '1';
+                            wrapper.style.cursor = 'pointer';
+                            wrapper.onclick = null;
+                        }
+                    }
+                });
             } else {
                 openModal('post-login-prompt-modal');
             }
