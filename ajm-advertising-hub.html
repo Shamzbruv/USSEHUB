@@ -1581,6 +1581,10 @@
                 <label>Your Email (Optional)</label>
                 <input type="email" id="cons-email" />
             </div>
+            <div class="form-group">
+                <label>Message / Query *</label>
+                <textarea id="cons-query" placeholder="How can the business help you?" style="min-height: 80px;" required></textarea>
+            </div>
 
             <button class="btn btn-primary" onclick="submitConsultation()" style="width:100%;margin-top:8px;">
                 <span id="cons-submit-text">Continue to Connect</span>
@@ -2726,9 +2730,10 @@
             const name = document.getElementById('cons-name').value.trim();
             const phone = document.getElementById('cons-phone').value.trim();
             const email = document.getElementById('cons-email').value.trim();
+            const query = document.getElementById('cons-query').value.trim();
 
-            if (!name || !phone) {
-                showToast('Please provide your name and phone number.', 'error');
+            if (!name || !phone || !query) {
+                showToast('Please provide your name, phone number, and a message.', 'error');
                 return;
             }
 
@@ -2743,7 +2748,8 @@
                 customer_name: name,
                 phone: phone,
                 email: email,
-                source: source
+                source: source,
+                notes: query
             }]);
 
             btnText.style.display = 'inline-block';

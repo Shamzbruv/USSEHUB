@@ -1,0 +1,677 @@
+[
+  {
+    "table_name": "ad_packages",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "ad_packages",
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "table_name": "ad_packages",
+    "column_name": "price",
+    "data_type": "numeric"
+  },
+  {
+    "table_name": "ad_packages",
+    "column_name": "duration_days",
+    "data_type": "integer"
+  },
+  {
+    "table_name": "ad_packages",
+    "column_name": "features",
+    "data_type": "jsonb"
+  },
+  {
+    "table_name": "ad_packages",
+    "column_name": "is_active",
+    "data_type": "boolean"
+  },
+  {
+    "table_name": "ad_packages",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "ad_subscriptions",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "ad_subscriptions",
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "ad_subscriptions",
+    "column_name": "listing_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "ad_subscriptions",
+    "column_name": "package_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "ad_subscriptions",
+    "column_name": "status",
+    "data_type": "text"
+  },
+  {
+    "table_name": "ad_subscriptions",
+    "column_name": "payment_method",
+    "data_type": "text"
+  },
+  {
+    "table_name": "ad_subscriptions",
+    "column_name": "payment_reference",
+    "data_type": "text"
+  },
+  {
+    "table_name": "ad_subscriptions",
+    "column_name": "expires_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "ad_subscriptions",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "ad_subscriptions",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "admin_audit_log",
+    "column_name": "id",
+    "data_type": "bigint"
+  },
+  {
+    "table_name": "admin_audit_log",
+    "column_name": "actor_user_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "admin_audit_log",
+    "column_name": "entity_type",
+    "data_type": "text"
+  },
+  {
+    "table_name": "admin_audit_log",
+    "column_name": "entity_id",
+    "data_type": "text"
+  },
+  {
+    "table_name": "admin_audit_log",
+    "column_name": "action",
+    "data_type": "text"
+  },
+  {
+    "table_name": "admin_audit_log",
+    "column_name": "before_state",
+    "data_type": "jsonb"
+  },
+  {
+    "table_name": "admin_audit_log",
+    "column_name": "after_state",
+    "data_type": "jsonb"
+  },
+  {
+    "table_name": "admin_audit_log",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "category_groups",
+    "column_name": "id",
+    "data_type": "bigint"
+  },
+  {
+    "table_name": "category_groups",
+    "column_name": "slug",
+    "data_type": "text"
+  },
+  {
+    "table_name": "category_groups",
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "table_name": "category_groups",
+    "column_name": "sort_order",
+    "data_type": "integer"
+  },
+  {
+    "table_name": "category_groups",
+    "column_name": "is_active",
+    "data_type": "boolean"
+  },
+  {
+    "table_name": "category_options",
+    "column_name": "id",
+    "data_type": "bigint"
+  },
+  {
+    "table_name": "category_options",
+    "column_name": "group_id",
+    "data_type": "bigint"
+  },
+  {
+    "table_name": "category_options",
+    "column_name": "slug",
+    "data_type": "text"
+  },
+  {
+    "table_name": "category_options",
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "table_name": "category_options",
+    "column_name": "search_aliases",
+    "data_type": "ARRAY"
+  },
+  {
+    "table_name": "category_options",
+    "column_name": "sort_order",
+    "data_type": "integer"
+  },
+  {
+    "table_name": "category_options",
+    "column_name": "is_active",
+    "data_type": "boolean"
+  },
+  {
+    "table_name": "consultations",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "consultations",
+    "column_name": "listing_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "consultations",
+    "column_name": "customer_name",
+    "data_type": "text"
+  },
+  {
+    "table_name": "consultations",
+    "column_name": "phone",
+    "data_type": "text"
+  },
+  {
+    "table_name": "consultations",
+    "column_name": "email",
+    "data_type": "text"
+  },
+  {
+    "table_name": "consultations",
+    "column_name": "source",
+    "data_type": "text"
+  },
+  {
+    "table_name": "consultations",
+    "column_name": "status",
+    "data_type": "text"
+  },
+  {
+    "table_name": "consultations",
+    "column_name": "notes",
+    "data_type": "text"
+  },
+  {
+    "table_name": "consultations",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "consultations",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "listing_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "storage_path",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "mime_type",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "file_size_bytes",
+    "data_type": "bigint"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "alt_text",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "sort_order",
+    "data_type": "integer"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "is_primary",
+    "data_type": "boolean"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "created_by",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "listing_media",
+    "column_name": "deleted_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "listing_status_history",
+    "column_name": "id",
+    "data_type": "bigint"
+  },
+  {
+    "table_name": "listing_status_history",
+    "column_name": "listing_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "listing_status_history",
+    "column_name": "old_status",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listing_status_history",
+    "column_name": "new_status",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listing_status_history",
+    "column_name": "changed_by",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "listing_status_history",
+    "column_name": "reason",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listing_status_history",
+    "column_name": "snapshot",
+    "data_type": "jsonb"
+  },
+  {
+    "table_name": "listing_status_history",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "business_name",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "category",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "subcategory",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "description",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "location",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "contact_phone",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "whatsapp",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "email",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "website",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "image_url",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "listing_type",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "status",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "is_featured",
+    "data_type": "boolean"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "owner_user_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "extra_notes",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "search_vector",
+    "data_type": "tsvector"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "slug",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "category_group_id",
+    "data_type": "bigint"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "category_option_id",
+    "data_type": "bigint"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "parish",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "location_display",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "requested_tier",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "admin_note",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "rejection_reason",
+    "data_type": "text"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "featured_until",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "published_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "approved_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "approved_by",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "expires_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "listings",
+    "column_name": "search_document",
+    "data_type": "tsvector"
+  },
+  {
+    "table_name": "membership_plans",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "membership_plans",
+    "column_name": "code",
+    "data_type": "text"
+  },
+  {
+    "table_name": "membership_plans",
+    "column_name": "name",
+    "data_type": "text"
+  },
+  {
+    "table_name": "membership_plans",
+    "column_name": "member_stats_access",
+    "data_type": "boolean"
+  },
+  {
+    "table_name": "membership_plans",
+    "column_name": "price_amount",
+    "data_type": "numeric"
+  },
+  {
+    "table_name": "membership_plans",
+    "column_name": "billing_interval",
+    "data_type": "text"
+  },
+  {
+    "table_name": "membership_plans",
+    "column_name": "is_active",
+    "data_type": "boolean"
+  },
+  {
+    "table_name": "membership_plans",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "plan_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "status",
+    "data_type": "text"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "starts_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "ends_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "source",
+    "data_type": "text"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "provider",
+    "data_type": "text"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "provider_customer_id",
+    "data_type": "text"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "provider_subscription_id",
+    "data_type": "text"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "metadata",
+    "data_type": "jsonb"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "memberships",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "full_name",
+    "data_type": "text"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "email",
+    "data_type": "text"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "role",
+    "data_type": "text"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "subscription_status",
+    "data_type": "text"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "account_status",
+    "data_type": "text"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "site_presence_sessions",
+    "column_name": "session_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "site_presence_sessions",
+    "column_name": "user_id",
+    "data_type": "uuid"
+  },
+  {
+    "table_name": "site_presence_sessions",
+    "column_name": "session_kind",
+    "data_type": "text"
+  },
+  {
+    "table_name": "site_presence_sessions",
+    "column_name": "started_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "site_presence_sessions",
+    "column_name": "last_seen_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_name": "site_presence_sessions",
+    "column_name": "user_agent_hash",
+    "data_type": "text"
+  },
+  {
+    "table_name": "site_presence_sessions",
+    "column_name": "ip_hash",
+    "data_type": "text"
+  }
+]

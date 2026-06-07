@@ -493,13 +493,14 @@
                     <th>Lead Name</th>
                     <th>Contact</th>
                     <th>Source</th>
+                    <th>Query</th>
                     <th>Listing ID</th>
                     <th>Date</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody id="admin-consultations-tbody">
-                <tr class="loading-row"><td colspan="6">Loading consultations...</td></tr>
+                <tr class="loading-row"><td colspan="7">Loading consultations...</td></tr>
             </tbody>
         </table>
     </div>
@@ -773,15 +774,15 @@
 
     async function loadConsultations() {
         const tbody = document.getElementById('admin-consultations-tbody');
-        tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Loading...</td></tr>';
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="7">Loading...</td></tr>';
         const { data, error } = await supabase.from('consultations').select('*, listings(business_name)').order('created_at', { ascending: false }).limit(50);
         
         if (error) {
-            tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red);">Error: ${error.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red);">Error: ${error.message}</td></tr>`;
             return;
         }
         if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6">No consultations tracked yet.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7">No consultations tracked yet.</td></tr>`;
             return;
         }
 
@@ -790,6 +791,7 @@
                 <td><strong>${escHtml(c.customer_name)}</strong></td>
                 <td>${escHtml(c.phone)}<br><small style="color:var(--muted);">${escHtml(c.email || '')}</small></td>
                 <td><span class="badge" style="background:var(--glass-bg);">${escHtml(c.source)}</span></td>
+                <td><small>${escHtml(c.notes || '—')}</small></td>
                 <td>${c.listings ? escHtml(c.listings.business_name) : c.listing_id}</td>
                 <td><small>${new Date(c.created_at).toLocaleDateString()}</small></td>
                 <td><span class="badge badge-pending">${escHtml(c.status)}</span></td>
