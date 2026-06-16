@@ -57,6 +57,23 @@ serve(async (req) => {
       updatePayload = { ...updatePayload, is_featured: true, featured_until: new Date(Date.now() + 30*24*60*60*1000).toISOString() }
     } else if (action === 'unfeature') {
       updatePayload = { ...updatePayload, is_featured: false, featured_until: null }
+    } else if (action === 'update_listing') {
+      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes } = await req.json();
+      updatePayload = {
+        ...updatePayload,
+        business_name,
+        category,
+        subcategory,
+        description,
+        location,
+        contact_phone,
+        whatsapp,
+        email,
+        website,
+        listing_type,
+        extra_notes,
+        ...(image_url !== undefined && { image_url })
+      }
     } else {
       throw new Error('Invalid action')
     }

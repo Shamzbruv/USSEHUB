@@ -1817,7 +1817,7 @@
                 
                 <div style="display:flex; gap: 12px; flex-wrap:wrap; justify-content: flex-end; align-items:center; border-top: 1px solid var(--glass-border); padding-top:16px;">
                     <span style="color:var(--muted); font-size:0.85rem; margin-right:auto;">Posted: ${new Date(l.created_at).toLocaleDateString()}</span>
-                    ${l.phone ? `<a href="tel:${escHtml(l.phone).replace(/\D/g,'')}" class="btn btn-ghost" style="border:1px solid var(--glass-border); padding:6px 12px;">📞 ${escHtml(l.phone)}</a>` : ''}
+                    ${l.contact_phone ? `<a href="tel:${escHtml(l.contact_phone).replace(/\D/g,'')}" class="btn btn-ghost" style="border:1px solid var(--glass-border); padding:6px 12px;">📞 ${escHtml(l.contact_phone)}</a>` : ''}
                     ${l.whatsapp ? `<a href="javascript:void(0)" onclick="closeModal('listing-details-modal'); openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" class="btn btn-ghost" style="border:1px solid var(--green); color:var(--green); padding:6px 12px;">💬 WhatsApp</a>` : ''}
                     ${l.email ? `<a href="javascript:void(0)" onclick="closeModal('listing-details-modal'); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" class="btn btn-ghost" style="border:1px solid var(--blue); color:var(--blue); padding:6px 12px;">✉️ Email</a>` : ''}
                     ${l.website ? `<a href="${escHtml(l.website.startsWith('http') ? l.website : 'https://'+l.website)}" target="_blank" class="btn btn-primary" style="padding:6px 12px;">🌐 Visit Website</a>` : ''}
@@ -2250,7 +2250,7 @@
                 function applyFilters(q) {
                     // Keyword: search across name, description, subcategory, location
                     if (keyword) {
-                        const kw = `*${keyword}*`;
+                        const kw = `%${keyword}%`;
                         q = q.or(`business_name.ilike.${kw},description.ilike.${kw},subcategory.ilike.${kw},location.ilike.${kw}`);
                     }
                     // Location: ilike partial match
@@ -2321,7 +2321,7 @@
             }
 
             if (keyword) {
-                const kw = `*${keyword}*`;
+                const kw = `%${keyword}%`;
                 query = query.or(`business_name.ilike.${kw},description.ilike.${kw},subcategory.ilike.${kw},location.ilike.${kw}`);
             }
             if (location) query = query.ilike('location', `%${location}%`);
@@ -2416,9 +2416,9 @@
                         <p style="margin: 4px 0 0 0; font-size: 0.95rem; line-height: 1.5; color: #ddd;">
                             <strong>${escHtml(l.subcategory || '')}</strong> ${l.description ? ' - ' + escHtml(l.description.slice(0, 160)) + (l.description.length > 160 ? '…' : '') : ''}
                         </p>
+                        ${l.contact_phone ? `<span style="font-size:0.95rem; font-weight:600; margin-bottom: 4px;">📞 ${escHtml(l.contact_phone)}</span>` : ''}
                     </div>
                     <div class="listing-contact">
-                        ${l.phone ? `<span style="font-size:0.95rem; font-weight:600; margin-bottom: 4px;">📞 ${escHtml(l.phone)}</span>` : ''}
                         ${l.email ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Email</a>` : ''}
                         ${l.website ? `<a href="${escHtml(l.website)}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Website</a>` : ''}
                         ${l.whatsapp ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" class="btn btn-primary" style="padding: 6px 16px; font-size: 0.85rem; width: 100%; text-align: center;">WhatsApp</a>` : ''}

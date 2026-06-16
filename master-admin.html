@@ -675,7 +675,7 @@
         document.getElementById('admin-name').textContent = profile.full_name || currentUser.email;
         showAdmin();
         await loadStats();
-        await reloadListings();
+        switchTab('dashboard');
     }
 
     function updateLabels(mode) {
@@ -816,7 +816,7 @@
         if (!confirm('Are you sure you want to delete this consultation?')) return;
         const { error } = await supabase.from('consultations').delete().eq('id', id);
         if (error) {
-            showToast('Error deleting: ' + error.message, 'error');
+            showToast('Error: ' + error.message, 'error');
         } else {
             showToast('Consultation deleted.', 'success');
             loadConsultations();
@@ -933,28 +933,34 @@
 
     // ── LISTING ACTIONS (all via DB RPC for security) ──
     async function approveListing(id) {
-        await updateListingStatus(id, 'approved');
+        await updateListingStatus(id, 'approve');
     }
     async function rejectListing(id) {
-        await updateListingStatus(id, 'rejected');
+        const reason = prompt('Enter rejection reason:');
+        if (!reason) return;
+        await updateListingStatus(id, 'reject', { rejection_reason: reason });
     }
     async function expireListing(id) {
-        await updateListingStatus(id, 'expired');
+        await updateListingStatus(id, 'expire');
     }
 
-    async function updateListingStatus(id, status) {
-        const { error } = await supabase.from('listings').update({ status }).eq('id', id);
+    async function updateListingStatus(id, action, extraPayload = {}) {
+        const { error } = await supabase.functions.invoke('admin-listings', {
+            body: { action, listing_id: id, ...extraPayload }
+        });
         if (error) {
             showToast('Error: ' + error.message, 'error');
         } else {
-            showToast(`Listing ${status}!`, 'success');
+            showToast(`Listing updated!`, 'success');
             await loadListings();
             await loadStats();
         }
     }
 
     async function toggleFeatured(id, currently) {
-        const { error } = await supabase.from('listings').update({ is_featured: !currently }).eq('id', id);
+        const { error } = await supabase.functions.invoke('admin-listings', {
+            body: { action: currently ? 'unfeature' : 'feature', listing_id: id }
+        });
         if (error) {
             showToast('Error: ' + error.message, 'error');
         } else {
@@ -1032,6 +1038,8 @@
 
         // Update all fields directly
         const updateData = {
+            action: 'update_listing',
+            listing_id: id,
             status,
             is_featured: isFeatured,
             business_name: business_name || null,
@@ -1050,12 +1058,13 @@
             updateData.image_url = imageUrl;
         }
 
-        const { error: rpcError } = await supabase.from('listings').update(updateData).eq('id', id);
+        const { error } = await supabase.functions.invoke('admin-listings', {
+            body: updateData
+        });
 
         spinner.style.display = 'none';
         text.textContent = 'Save Changes';
 
-        if (rpcError) {
             showToast('Error saving: ' + rpcError.message, 'error');
         } else {
             showToast('Listing updated!', 'success');
@@ -1126,7 +1135,9 @@
         spinner.style.display = 'inline-block';
         text.textContent = 'Updating...';
 
-        const { error } = await supabase.from('profiles').update({ role }).eq('id', userId);
+        const { error } = await supabase.functions.invoke('admin-memberships', {
+            body: { action: 'assign_role', target_user_id: userId, role }
+        });
 
         spinner.style.display = 'none';
         text.textContent = 'Update Role';

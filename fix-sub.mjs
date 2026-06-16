@@ -1,6 +1,6 @@
 import pg from 'pg';
 const { Client } = pg;
-const DB_URL = process.env.DATABASE_URL || 'postgresql://postgres.zcptuqrlovflcpqszery:Shambizonly1@@aws-1-us-east-1.pooler.supabase.com:6543/postgres';
+const DB_URL = process.env.DATABASE_URL;
 async function main() {
     const client = new Client({ connectionString: DB_URL, ssl: { rejectUnauthorized: false } });
     await client.connect();
