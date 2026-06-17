@@ -33,7 +33,8 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { action, listing_id, rejection_reason, admin_note } = await req.json()
+    const body = await req.json()
+    const { action, listing_id, rejection_reason, admin_note } = body
     if (!listing_id) throw new Error('listing_id is required')
 
     let updatePayload: any = { updated_at: new Date().toISOString() }
@@ -58,7 +59,7 @@ serve(async (req) => {
     } else if (action === 'unfeature') {
       updatePayload = { ...updatePayload, is_featured: false, featured_until: null }
     } else if (action === 'update_listing') {
-      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes } = await req.json();
+      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes, status, is_featured } = body;
       updatePayload = {
         ...updatePayload,
         business_name,
@@ -72,6 +73,8 @@ serve(async (req) => {
         website,
         listing_type,
         extra_notes,
+        ...(status !== undefined && { status }),
+        ...(is_featured !== undefined && { is_featured }),
         ...(image_url !== undefined && { image_url })
       }
     } else {

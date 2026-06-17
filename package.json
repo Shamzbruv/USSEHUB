@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Warning: no test specified. To test RLS, run npm run test:rls\" && exit 0",
-    "test:rls": "echo \"RLS tests placeholder...\" && exit 0",
+    "test:rls": "node test-rls.mjs",
     "lint": "echo \"Linting placeholder...\" && exit 0",
     "start": "serve -l tcp://0.0.0.0:${PORT:-3000} ."
   },
@@ -13,7 +13,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
     "pg": "^8.21.0",
-    "serve": "^14.2.6"
+    "serve": "^14.2.6",
+    "ws": "^8.21.0"
   }
 }

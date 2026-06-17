@@ -2753,7 +2753,7 @@
 
             // Insert to Supabase
             const { error } = await supabase.from('consultations').insert([{
-                listing_id: listingId,
+                listing_id: listingId === 'subscription' ? null : listingId,
                 customer_name: name,
                 phone: phone,
                 email: email,
