@@ -2440,7 +2440,7 @@
                     </td>
                     <td>${escHtml(l.subcategory || formatCategory(l.category) || '—')}</td>
                     <td>${escHtml(formatLocation(l.location))}</td>
-                    <td>${l.email ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" style="color:var(--blue);">Email</a>` : l.phone ? escHtml(l.phone) : '—'}</td>
+                    <td>${l.email ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" style="color:var(--blue);">Email</a>` : l.contact_phone ? escHtml(l.contact_phone) : '—'}</td>
                 </tr>`;
         }
 

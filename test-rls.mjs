@@ -9,6 +9,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function runTests() {
   console.log('Testing RLS rules from anonymous client...');
+  let failed = false;
   
   // Test: Should not be able to read all profiles
   const { data: profiles, error: profileErr } = await supabase.from('profiles').select('*');
@@ -16,16 +17,19 @@ async function runTests() {
     console.log('✅ Profiles read blocked as expected.');
   } else if (profiles && profiles.length > 0) {
     console.error('❌ Security risk: Profiles are publicly readable!');
+    failed = true;
   }
 
   // Test: Should only see active ad packages
   const { data: packages, error: packageErr } = await supabase.from('ad_packages').select('*');
   if (packageErr) {
     console.error('❌ Error reading ad_packages:', packageErr.message);
+    failed = true;
   } else {
     const inactive = packages.filter(p => !p.is_active);
     if (inactive.length > 0) {
       console.error('❌ Security risk: Inactive packages are publicly visible!');
+      failed = true;
     } else {
       console.log('✅ Only active ad_packages are publicly visible.');
     }
@@ -37,9 +41,13 @@ async function runTests() {
     console.log('✅ Consultations read blocked as expected.');
   } else if (consultations && consultations.length > 0) {
     console.error('❌ Security risk: Consultations are publicly readable!');
+    failed = true;
   }
 
   console.log('RLS tests complete.');
+  if (failed) {
+    process.exit(1);
+  }
 }
 
 runTests();

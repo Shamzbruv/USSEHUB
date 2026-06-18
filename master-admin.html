@@ -338,15 +338,6 @@
             </div>
         </div>
         <div class="form-group">
-            <label>Status</label>
-            <select id="edit-status">
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-                <option value="expired">Expired</option>
-            </select>
-        </div>
-        <div class="form-group">
             <label>Business Logo / Image (Square Recommended)</label>
             <input type="file" id="edit-image" accept="image/jpeg,image/jpg,image/png,image/webp" style="cursor:pointer;" />
         </div>
@@ -385,12 +376,6 @@
         <div class="form-group">
             <label>Extra Notes (Admin only)</label>
             <textarea id="edit-extra-notes" style="min-height:60px;"></textarea>
-        </div>
-        <div style="display:flex;gap:10px;margin-top:8px;">
-            <label style="display:flex;align-items:center;gap:6px;font-size:0.86rem;cursor:pointer;">
-                <input type="checkbox" id="edit-featured" style="width:auto;" />
-                Mark as Featured
-            </label>
         </div>
         <div style="display:flex;gap:10px;margin-top:20px;">
             <button class="btn btn-primary" style="flex:1;border-radius:12px;" onclick="saveListingEdit()">
@@ -973,7 +958,6 @@
     function openEditModal(listing) {
         document.getElementById('edit-listing-id').value = listing.id;
         document.getElementById('edit-business-name').value = listing.business_name || '';
-        document.getElementById('edit-status').value = listing.status || 'pending';
         document.getElementById('edit-image').value = '';
         
         const catSelect = document.getElementById('edit-category');
@@ -993,7 +977,6 @@
         document.getElementById('edit-website').value = listing.website || '';
         document.getElementById('edit-description').value = listing.description || '';
         document.getElementById('edit-extra-notes').value = listing.extra_notes || '';
-        document.getElementById('edit-featured').checked = listing.is_featured || false;
         document.getElementById('edit-modal').classList.add('open');
     }
 
@@ -1003,8 +986,6 @@
 
     async function saveListingEdit() {
         const id = document.getElementById('edit-listing-id').value;
-        const status = document.getElementById('edit-status').value;
-        const isFeatured = document.getElementById('edit-featured').checked;
 
         const business_name = document.getElementById('edit-business-name').value;
         const category = document.getElementById('edit-category').value;
@@ -1040,8 +1021,6 @@
         const updateData = {
             action: 'update_listing',
             listing_id: id,
-            status,
-            is_featured: isFeatured,
             business_name: business_name || null,
             category: category || null,
             subcategory: subcategory || null,

@@ -35,7 +35,7 @@ serve(async (req) => {
 
     const body = await req.json()
     const { action, listing_id, rejection_reason, admin_note } = body
-    if (!listing_id) throw new Error('listing_id is required')
+    if (action !== 'create_listing' && !listing_id) throw new Error('listing_id is required')
 
     let updatePayload: any = { updated_at: new Date().toISOString() }
     let newStatus = ''
@@ -59,7 +59,7 @@ serve(async (req) => {
     } else if (action === 'unfeature') {
       updatePayload = { ...updatePayload, is_featured: false, featured_until: null }
     } else if (action === 'update_listing') {
-      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes, status, is_featured } = body;
+      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes } = body;
       updatePayload = {
         ...updatePayload,
         business_name,
@@ -73,10 +73,29 @@ serve(async (req) => {
         website,
         listing_type,
         extra_notes,
-        ...(status !== undefined && { status }),
-        ...(is_featured !== undefined && { is_featured }),
         ...(image_url !== undefined && { image_url })
       }
+    } else if (action === 'create_listing') {
+      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes, status, is_featured, owner_user_id } = body;
+      const insertStatus = status || 'pending';
+      const insertPayload = {
+        owner_user_id: owner_user_id || user.id,
+        business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, extra_notes, image_url,
+        status: insertStatus,
+        is_featured: is_featured || false,
+        ...(insertStatus === 'approved' && { approved_at: new Date().toISOString(), approved_by: user.id, published_at: new Date().toISOString() })
+      };
+      const { data: newListing, error: insertError } = await supabaseAdmin.from('listings').insert([insertPayload]).select().single();
+      if (insertError) throw insertError;
+      
+      await supabaseAdmin.from('admin_audit_log').insert({
+        actor_user_id: user.id,
+        entity_type: 'listing',
+        entity_id: newListing.id,
+        action: 'admin_create_listing',
+        after_state: newListing
+      });
+      return new Response(JSON.stringify(newListing), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     } else {
       throw new Error('Invalid action')
     }
