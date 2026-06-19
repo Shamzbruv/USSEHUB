@@ -59,7 +59,7 @@ serve(async (req) => {
     } else if (action === 'unfeature') {
       updatePayload = { ...updatePayload, is_featured: false, featured_until: null }
     } else if (action === 'update_listing') {
-      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes } = body;
+      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes, status, is_featured } = body;
       updatePayload = {
         ...updatePayload,
         business_name,
@@ -73,8 +73,11 @@ serve(async (req) => {
         website,
         listing_type,
         extra_notes,
-        ...(image_url !== undefined && { image_url })
-      }
+        ...(image_url !== undefined && { image_url }),
+        ...(status !== undefined && { status }),
+        ...(is_featured !== undefined && { is_featured })
+      };
+      if (status) newStatus = status;
     } else if (action === 'create_listing') {
       const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes, status, is_featured, owner_user_id } = body;
       const insertStatus = status || 'pending';
@@ -83,6 +86,7 @@ serve(async (req) => {
         business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, extra_notes, image_url,
         status: insertStatus,
         is_featured: is_featured || false,
+        ...(is_featured && { featured_until: new Date(Date.now() + 30*24*60*60*1000).toISOString() }),
         ...(insertStatus === 'approved' && { approved_at: new Date().toISOString(), approved_by: user.id, published_at: new Date().toISOString() })
       };
       const { data: newListing, error: insertError } = await supabaseAdmin.from('listings').insert([insertPayload]).select().single();

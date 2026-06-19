@@ -299,15 +299,7 @@
         }
     </style>
     <script src="taxonomy.js"></script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-LSFXN90KHS"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-LSFXN90KHS');
-</script>
 </head>
 <body>
 
@@ -748,7 +740,7 @@
     async function loadDashboard() {
         // Fetch top level stats
         const { count: cCount } = await supabase.from('consultations').select('*', { count: 'exact', head: true });
-        const { count: sCount } = await supabase.from('ad_subscriptions').select('*', { count: 'exact', head: true });
+        const { count: sCount } = await supabase.from('ad_subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active');
         
         document.getElementById('dashboard-panel').innerHTML = `
             <div style="background:var(--glass-bg);padding:24px;border-radius:var(--radius);border:1px solid var(--glass-border);margin-bottom:24px;">
@@ -799,7 +791,9 @@
 
     window.deleteConsultation = async function(id) {
         if (!confirm('Are you sure you want to delete this consultation?')) return;
-        const { error } = await supabase.from('consultations').delete().eq('id', id);
+        const { error } = await supabase.functions.invoke('admin-consultations', {
+            body: { action: 'delete_consultation', consultation_id: id }
+        });
         if (error) {
             showToast('Error: ' + error.message, 'error');
         } else {
@@ -831,7 +825,7 @@
                 <td>${s.listings ? escHtml(s.listings.business_name) : s.listing_id}</td>
                 <td><span class="badge badge-${s.status}">${escHtml(s.status)}</span></td>
                 <td><small>${s.expires_at ? new Date(s.expires_at).toLocaleDateString() : '—'}</small></td>
-                <td><button class="btn btn-primary btn-sm">Manage</button></td>
+                <td>—</td>
             </tr>
         `).join('');
     }
@@ -881,7 +875,10 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(l => `
+            window.listingCache = window.listingCache || {};
+            tbody.innerHTML = filtered.map(l => {
+                window.listingCache[l.id] = l;
+                return `
                 <tr>
                     <td>
                         <strong>${escHtml(l.business_name)}</strong>
@@ -905,11 +902,11 @@
                             ${l.status !== 'rejected' ? `<button class="btn btn-danger btn-sm" style="padding: 4px 8px;" onclick="rejectListing('${l.id}')" title="Reject">✗</button>` : ''}
                             ${l.status !== 'expired' ? `<button class="btn btn-warning btn-sm" style="padding: 4px 8px;" onclick="expireListing('${l.id}')" title="Expire">🕰</button>` : ''}
                             <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick="toggleFeatured('${l.id}', ${l.is_featured})" title="${l.is_featured ? 'Unfeature' : 'Feature'}">${l.is_featured ? '★' : '☆'}</button>
-                            <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick='openEditModal(${JSON.stringify(l).replace(/'/g, "&#39;").replace(/"/g, "&quot;")})' title="Edit">✎</button>
+                            <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick="openEditModal(window.listingCache['${l.id}'])" title="Edit">✎</button>
                         </div>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         } catch (err) {
             console.error('Load listings error:', err);
             tbody.innerHTML = `<tr class="loading-row"><td colspan="7" style="color:var(--red);">Error: ${escHtml(err.message)}</td></tr>`;
@@ -1011,10 +1008,14 @@
             const ext = imageFile.name.split('.').pop().toLowerCase();
             const filePath = `${currentUser.id}/${Date.now()}.${ext}`;
             const { error: uploadError } = await supabase.storage.from('listing-images').upload(filePath, imageFile, { cacheControl: '3600', upsert: false });
-            if (!uploadError) {
-                const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(filePath);
-                imageUrl = urlData?.publicUrl || null;
+            if (uploadError) {
+                spinner.style.display = 'none';
+                text.textContent = 'Save Changes';
+                showToast('Image upload failed: ' + uploadError.message, 'error');
+                return;
             }
+            const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(filePath);
+            imageUrl = urlData?.publicUrl || null;
         }
 
         // Update all fields directly

@@ -299,15 +299,7 @@
         }
     </style>
     <script src="taxonomy.js"></script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-LSFXN90KHS"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-LSFXN90KHS');
-</script>
 </head>
 <body>
 
@@ -822,7 +814,10 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(l => `
+            window.listingCache = window.listingCache || {};
+            tbody.innerHTML = filtered.map(l => {
+                window.listingCache[l.id] = l;
+                return `
                 <tr>
                     <td>
                         <strong>${escHtml(l.business_name)}</strong>
@@ -846,11 +841,11 @@
                             ${l.status !== 'rejected' ? `<button class="btn btn-danger btn-sm" style="padding: 4px 8px;" onclick="rejectListing('${l.id}')" title="Reject">✗</button>` : ''}
                             ${l.status !== 'expired' ? `<button class="btn btn-warning btn-sm" style="padding: 4px 8px;" onclick="expireListing('${l.id}')" title="Expire">🕰</button>` : ''}
                             <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick="toggleFeatured('${l.id}', ${l.is_featured})" title="${l.is_featured ? 'Unfeature' : 'Feature'}">${l.is_featured ? '★' : '☆'}</button>
-                            <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick='openEditModal(${JSON.stringify(l).replace(/'/g, "&#39;").replace(/"/g, "&quot;")})' title="Edit">✎</button>
+                            <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick="openEditModal(window.listingCache['${l.id}'])" title="Edit">✎</button>
                         </div>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         } catch (err) {
             console.error('Load listings error:', err);
             tbody.innerHTML = `<tr class="loading-row"><td colspan="7" style="color:var(--red);">Error: ${escHtml(err.message)}</td></tr>`;
@@ -951,10 +946,14 @@
             const ext = imageFile.name.split('.').pop().toLowerCase();
             const filePath = `${currentUser.id}/${Date.now()}.${ext}`;
             const { error: uploadError } = await supabase.storage.from('listing-images').upload(filePath, imageFile, { cacheControl: '3600', upsert: false });
-            if (!uploadError) {
-                const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(filePath);
-                imageUrl = urlData?.publicUrl || null;
+            if (uploadError) {
+                spinner.style.display = 'none';
+                text.textContent = 'Save Changes';
+                showToast('Image upload failed: ' + uploadError.message, 'error');
+                return;
             }
+            const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(filePath);
+            imageUrl = urlData?.publicUrl || null;
         }
 
         // Update all fields directly
@@ -1054,10 +1053,14 @@
             const ext = imageFile.name.split('.').pop().toLowerCase();
             const filePath = `${currentUser.id}/${Date.now()}.${ext}`;
             const { error: uploadError } = await supabase.storage.from('listing-images').upload(filePath, imageFile, { cacheControl: '3600', upsert: false });
-            if (!uploadError) {
-                const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(filePath);
-                imageUrl = urlData?.publicUrl || null;
+            if (uploadError) {
+                spinner.style.display = 'none';
+                text.textContent = 'Add Listing';
+                showToast('Image upload failed: ' + uploadError.message, 'error');
+                return;
             }
+            const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(filePath);
+            imageUrl = urlData?.publicUrl || null;
         }
 
         const { error } = await supabase.functions.invoke('admin-listings', {

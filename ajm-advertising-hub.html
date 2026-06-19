@@ -9,6 +9,7 @@
     <link rel="apple-touch-icon" href="aloe%20logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <meta name="description"
         content="Browse the AJM Advertising Hub for Jamaica business listings, classifieds, and promotions. Find services, real estate, accommodations, farming, retail & wholesale, food & beverage, and events. Discover health & wellness, construction, dining, shopping, and commercial opportunities across Jamaica." />
     <meta name="keywords" content="AJM Advertising Hub, Jamaica business directory, classifieds, promotions, services, transport rentals, maintenance, auto repairs, construction, delivery, catering, health & wellness, medical clinics, gyms, educational services, communications, audio visual, graphic design, event planning, finances, banking, NGO, rooms, venue rentals, real estate sales, residential, commercial leasing, farming, agriculture, fisheries, poultry, horticulture, retail trade, wholesale, supermarkets, craft markets, purveyors, food & beverage, dining outlets, restaurants, cafes, events, entertainment, live shows, festivals, parties, clubs, Jamaica" />
@@ -1595,6 +1596,9 @@
                 <textarea id="cons-query" placeholder="How can the business help you?" style="min-height: 80px;" required></textarea>
             </div>
 
+            <!-- Turnstile Widget Placeholder -->
+            <div id="turnstile-widget" class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin-bottom: 16px;"></div>
+
             <button class="btn btn-primary" onclick="submitConsultation()" style="width:100%;margin-top:8px;">
                 <span id="cons-submit-text">Continue to Connect</span>
                 <span id="cons-spinner" class="spinner" style="display:none;"></span>
@@ -1782,12 +1786,7 @@
         window.closeModal = closeModal;
         window.switchAuthTab = switchAuthTab;
         
-        window.openConsultationModal = function(listingId, method, contact) {
-            document.getElementById('consultation-listing-id').value = listingId;
-            document.getElementById('consultation-method').value = method;
-            document.getElementById('consultation-contact').value = contact;
-            openModal('consultation-modal');
-        };
+
         
         window.openListingDetailsModal = function(listingJson) {
             const l = JSON.parse(decodeURIComponent(listingJson));
@@ -1820,7 +1819,7 @@
                     ${l.contact_phone ? `<a href="tel:${escHtml(l.contact_phone).replace(/\D/g,'')}" class="btn btn-ghost" style="border:1px solid var(--glass-border); padding:6px 12px;">📞 ${escHtml(l.contact_phone)}</a>` : ''}
                     ${l.whatsapp ? `<a href="javascript:void(0)" onclick="closeModal('listing-details-modal'); openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" class="btn btn-ghost" style="border:1px solid var(--green); color:var(--green); padding:6px 12px;">💬 WhatsApp</a>` : ''}
                     ${l.email ? `<a href="javascript:void(0)" onclick="closeModal('listing-details-modal'); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" class="btn btn-ghost" style="border:1px solid var(--blue); color:var(--blue); padding:6px 12px;">✉️ Email</a>` : ''}
-                    ${l.website ? `<a href="${escHtml(l.website.startsWith('http') ? l.website : 'https://'+l.website)}" target="_blank" class="btn btn-primary" style="padding:6px 12px;">🌐 Visit Website</a>` : ''}
+                    ${l.website ? `<a href="${escHtml(normalizeWebsiteUrl(l.website))}" target="_blank" class="btn btn-primary" style="padding:6px 12px;">🌐 Visit Website</a>` : ''}
                 </div>
             `;
             openModal('listing-details-modal');
@@ -2420,7 +2419,7 @@
                     </div>
                     <div class="listing-contact">
                         ${l.email ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Email</a>` : ''}
-                        ${l.website ? `<a href="${escHtml(l.website)}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Website</a>` : ''}
+                        ${l.website ? `<a href="${escHtml(normalizeWebsiteUrl(l.website))}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Website</a>` : ''}
                         ${l.whatsapp ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" class="btn btn-primary" style="padding: 6px 16px; font-size: 0.85rem; width: 100%; text-align: center;">WhatsApp</a>` : ''}
                     </div>
                 </div>
@@ -2746,6 +2745,20 @@
                 return;
             }
 
+            const lastSub = localStorage.getItem('last_consultation_time');
+            if (lastSub && Date.now() - parseInt(lastSub) < 60000) {
+                showToast('Please wait a minute before submitting another query.', 'error');
+                return;
+            }
+
+            const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+            // Note: In a production environment with a real sitekey, you'd want to verify this token via an Edge Function
+            // For now, we enforce that the widget was interacted with on the client side.
+            if (turnstileResponse === '') {
+                 showToast('Please complete the security check.', 'error');
+                 return;
+            }
+
             const btnText = document.getElementById('cons-submit-text');
             const spinner = document.getElementById('cons-spinner');
             btnText.style.display = 'none';
@@ -2760,6 +2773,10 @@
                 source: source,
                 notes: query
             }]);
+
+            if (!error) {
+                localStorage.setItem('last_consultation_time', Date.now().toString());
+            }
 
             btnText.style.display = 'inline-block';
             spinner.style.display = 'none';
@@ -2847,11 +2864,25 @@
             const toast = document.getElementById('toast');
             const icons = { success: '✅', error: '❌', info: 'ℹ️' };
             toast.className = `toast toast-${type} show`;
-            toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${msg}</span>`;
+            toast.textContent = '';
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'toast-icon';
+            iconSpan.textContent = icons[type];
+            const msgSpan = document.createElement('span');
+            msgSpan.textContent = msg;
+            toast.appendChild(iconSpan);
+            toast.appendChild(msgSpan);
             clearTimeout(toast._timer);
             toast._timer = setTimeout(() => {
                 toast.classList.remove('show');
             }, 5000);
+        }
+
+        function normalizeWebsiteUrl(url) {
+            if (!url) return '';
+            const lower = url.trim().toLowerCase();
+            if (lower.startsWith('http://') || lower.startsWith('https://')) return url.trim();
+            return `https://${url.trim()}`;
         }
 
         function escHtml(str) {

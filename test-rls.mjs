@@ -44,6 +44,17 @@ async function runTests() {
     failed = true;
   }
 
+  // Test: Should not be able to insert listing without being logged in
+  const { error: insertErr } = await supabase.from('listings').insert([
+    { business_name: 'Hacked', location: 'kingston', category: 'SERVICES', status: 'approved' }
+  ]);
+  if (insertErr) {
+    console.log('✅ Anonymous listing insert blocked as expected.');
+  } else {
+    console.error('❌ Security risk: Anonymous users can insert listings!');
+    failed = true;
+  }
+
   console.log('RLS tests complete.');
   if (failed) {
     process.exit(1);

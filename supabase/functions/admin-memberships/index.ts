@@ -55,6 +55,7 @@ serve(async (req) => {
       
     } else if (action === 'manage_membership') {
       if (!plan_id) throw new Error('plan_id required')
+      if (!['pending','active','inactive','expired','cancelled','past_due'].includes(status)) throw new Error('Invalid membership status')
       
       const { data: existing } = await supabaseAdmin.from('memberships').select('*').eq('user_id', target_user_id).eq('plan_id', plan_id).maybeSingle()
       
