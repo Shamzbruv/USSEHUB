@@ -1,15 +1,26 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
+function escHtml(value: unknown) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
 serve(async (req) => {
   try {
     const webhookSecret = Deno.env.get('NOTIFY_WEBHOOK_SECRET')
-    if (webhookSecret) {
-      const authHeader = req.headers.get('X-Webhook-Secret')
-      if (authHeader !== webhookSecret) {
-        return new Response('Unauthorized', { status: 401 })
-      }
-    } else {
-      console.warn('NOTIFY_WEBHOOK_SECRET is not set. Webhook is unprotected!')
+    
+    // Fail closed: Webhook secret MUST be configured
+    if (!webhookSecret) {
+      return new Response('Webhook secret not configured', { status: 500 })
+    }
+
+    const authHeader = req.headers.get('X-Webhook-Secret')
+    if (authHeader !== webhookSecret) {
+      return new Response('Unauthorized', { status: 401 })
     }
 
     const payload = await req.json()
@@ -30,23 +41,26 @@ serve(async (req) => {
     let subject = ''
     let html = ''
 
+    // Note: Consultations are explicitly NOT handled here.
+    // Consultations are handled directly by the submit-consultation Edge Function,
+    // which does its own specialized validation and emailing.
     if (table === 'profiles') {
-      subject = `New Account Signup: ${record.email}`
+      subject = `New Account Signup: ${escHtml(record.email)}`
       html = `
         <h2>New Account Signup</h2>
-        <p><strong>Email:</strong> ${record.email}</p>
-        <p><strong>Role:</strong> ${record.role}</p>
-        <p><strong>User ID:</strong> ${record.id}</p>
+        <p><strong>Email:</strong> ${escHtml(record.email)}</p>
+        <p><strong>Role:</strong> ${escHtml(record.role)}</p>
+        <p><strong>User ID:</strong> ${escHtml(record.id)}</p>
       `
     } else if (table === 'listings') {
-      subject = `New Listing Submitted: ${record.business_name}`
+      subject = `New Listing Submitted: ${escHtml(record.business_name)}`
       html = `
         <h2>New Listing Submitted</h2>
-        <p><strong>Business Name:</strong> ${record.business_name}</p>
-        <p><strong>Category:</strong> ${record.category}</p>
-        <p><strong>Location:</strong> ${record.location}</p>
-        <p><strong>Status:</strong> ${record.status}</p>
-        <p><strong>Owner ID:</strong> ${record.owner_user_id}</p>
+        <p><strong>Business Name:</strong> ${escHtml(record.business_name)}</p>
+        <p><strong>Category:</strong> ${escHtml(record.category)}</p>
+        <p><strong>Location:</strong> ${escHtml(record.location)}</p>
+        <p><strong>Status:</strong> ${escHtml(record.status)}</p>
+        <p><strong>Owner ID:</strong> ${escHtml(record.owner_user_id)}</p>
       `
     } else {
       return new Response('Ignored Table', { status: 200 })

@@ -59,6 +59,8 @@ serve(async (req) => {
     } else if (action === 'unfeature') {
       updatePayload = { ...updatePayload, is_featured: false, featured_until: null }
     } else if (action === 'update_listing') {
+      // NOTE: status and is_featured are intentionally omitted from update_listing 
+      // and must be managed via explicit actions (approve, reject, feature, etc.)
       const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes } = body;
       updatePayload = {
         ...updatePayload,

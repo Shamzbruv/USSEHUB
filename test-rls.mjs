@@ -2,8 +2,13 @@ import { createClient } from '@supabase/supabase-js';
 import ws from 'ws';
 globalThis.WebSocket = ws;
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://zcptuqrlovflcpqszery.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('❌ Error: SUPABASE_URL and SUPABASE_ANON_KEY environment variables are required.');
+  process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -90,6 +95,19 @@ async function runTests() {
     } else {
       console.error('❌ Security risk: Authenticated users can insert featured listings!');
       failed = true;
+    }
+    // Test cleanup
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.log('Cleaning up test user...');
+      const adminSupabase = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+      const { error: deleteErr } = await adminSupabase.auth.admin.deleteUser(userId);
+      if (deleteErr) {
+        console.error('⚠️ Could not clean up test user:', deleteErr.message);
+      } else {
+        console.log('✅ Test user cleaned up successfully.');
+      }
+    } else {
+      console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY not provided. Skipping test user cleanup.');
     }
   }
 
