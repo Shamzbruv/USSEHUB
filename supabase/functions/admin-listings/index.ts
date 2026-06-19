@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
 
-serve(async (req) => {
+serve(async (req: Request) => {
   const corsResponse = handleCors(req)
   if (corsResponse) return corsResponse
 
@@ -132,7 +132,7 @@ serve(async (req) => {
       actor_user_id: user.id,
       entity_type: 'listing',
       entity_id: listing_id,
-      action: \`admin_\${action}\`,
+      action: `admin_${action}`,
       before_state: oldListing,
       after_state: newListing
     })

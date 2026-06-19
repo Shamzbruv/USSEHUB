@@ -9,7 +9,7 @@ function escHtml(value: unknown) {
     .replaceAll("'", '&#039;');
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   try {
     const webhookSecret = Deno.env.get('NOTIFY_WEBHOOK_SECRET')
     

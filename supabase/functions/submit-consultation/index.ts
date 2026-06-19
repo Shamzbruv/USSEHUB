@@ -22,7 +22,7 @@ function escHtml(value: unknown) {
     .replaceAll("'", '&#039;');
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   const corsResponse = handleCors(req)
   if (corsResponse) return corsResponse
 
