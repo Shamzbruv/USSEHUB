@@ -53,8 +53,8 @@ CREATE POLICY "Public can insert consultations" ON consultations
 FOR INSERT
 WITH CHECK (
   source IN ('email', 'whatsapp', 'subscription', 'website')
-  AND char_length(COALESCE(name, '')) <= 100
+  AND char_length(COALESCE(customer_name, '')) BETWEEN 1 AND 100
   AND char_length(COALESCE(email, '')) <= 255
-  AND char_length(COALESCE(phone, '')) <= 50
-  AND char_length(COALESCE(notes, '')) <= 2000
+  AND char_length(COALESCE(phone, '')) BETWEEN 7 AND 50
+  AND char_length(COALESCE(notes, '')) BETWEEN 1 AND 2000
 );

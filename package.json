@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Warning: no test specified. To test RLS, run npm run test:rls\" && exit 0",
+    "test": "npm run test:rls",
     "test:rls": "node test-rls.mjs",
     "lint": "echo \"Linting placeholder...\" && exit 0",
     "start": "serve -l tcp://0.0.0.0:${PORT:-3000} ."

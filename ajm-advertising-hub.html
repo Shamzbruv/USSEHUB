@@ -337,6 +337,7 @@
             margin-bottom: 16px;
             background: linear-gradient(to right, #fff, #b9c0d4);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -1597,7 +1598,7 @@
             </div>
 
             <!-- Turnstile Widget Placeholder -->
-            <div id="turnstile-widget" class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="margin-bottom: 16px;"></div>
+            <div id="turnstile-widget" class="cf-turnstile" data-sitekey="0x4AAAAAADny2ngXsIdv_Ak0" style="margin-bottom: 16px;"></div>
 
             <button class="btn btn-primary" onclick="submitConsultation()" style="width:100%;margin-top:8px;">
                 <span id="cons-submit-text">Continue to Connect</span>
@@ -1888,7 +1889,7 @@
 
         window.handleSubscribeClick = function() {
             closeModal('member-dashboard-modal');
-            openConsultationModal('subscription', 'email', 'admin@aloejamaica.com');
+            openConsultationModal('subscription', 'email', 'info@ussehub.com');
         };
         // ==========================================
         // INIT
@@ -2764,15 +2765,18 @@
             btnText.style.display = 'none';
             spinner.style.display = 'inline-block';
 
-            // Insert to Supabase
-            const { error } = await supabase.from('consultations').insert([{
-                listing_id: listingId === 'subscription' ? null : listingId,
-                customer_name: name,
-                phone: phone,
-                email: email,
-                source: source,
-                notes: query
-            }]);
+            // Invoke Edge Function
+            const { data, error } = await supabase.functions.invoke('submit-consultation', {
+                body: {
+                    listing_id: listingId === 'subscription' ? null : listingId,
+                    customer_name: name,
+                    phone: phone,
+                    email: email,
+                    source: source,
+                    notes: query,
+                    turnstile_token: turnstileResponse
+                }
+            });
 
             if (!error) {
                 localStorage.setItem('last_consultation_time', Date.now().toString());
@@ -2794,7 +2798,8 @@
             if (source === 'whatsapp') {
                 window.open(`https://wa.me/${target}?text=Hi, I found your listing on AJM Advertising Hub! My name is ${encodeURIComponent(name)}.`, '_blank');
             } else {
-                window.location.href = `mailto:${target}?subject=Inquiry from AJM Hub - ${encodeURIComponent(name)}`;
+                const bodyText = `Listing ID: ${listingId}\nTarget Email: ${target}\n\nNotes:\n${query}`;
+                window.location.href = `mailto:info@ussehub.com?subject=Inquiry from AJM Hub - ${encodeURIComponent(name)}&body=${encodeURIComponent(bodyText)}`;
             }
         };
 

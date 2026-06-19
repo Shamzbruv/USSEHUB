@@ -56,6 +56,43 @@ async function runTests() {
   }
 
   console.log('RLS tests complete.');
+  
+  console.log('Testing authenticated RLS rules...');
+  const testEmail = `test_${Date.now()}@example.com`;
+  const { data: authData, error: authErr } = await supabase.auth.signUp({
+    email: testEmail,
+    password: 'TestPassword123!'
+  });
+
+  if (authErr) {
+    console.warn('⚠️ Could not sign up test user. Make sure Email Auth is enabled and allows signups.');
+    console.warn('Auth Error:', authErr.message);
+  } else if (authData.user) {
+    const userId = authData.user.id;
+    
+    // Test: Authenticated user cannot insert an approved listing
+    const { error: insertApprovedErr } = await supabase.from('listings').insert([
+      { business_name: 'Auth Hacked', location: 'kingston', category: 'SERVICES', status: 'approved', owner_user_id: userId }
+    ]);
+    if (insertApprovedErr) {
+      console.log('✅ Authenticated insert of approved listing blocked as expected.');
+    } else {
+      console.error('❌ Security risk: Authenticated users can insert approved listings!');
+      failed = true;
+    }
+
+    // Test: Authenticated user cannot insert a featured listing
+    const { error: insertFeaturedErr } = await supabase.from('listings').insert([
+      { business_name: 'Auth Hacked 2', location: 'kingston', category: 'SERVICES', status: 'pending', is_featured: true, owner_user_id: userId }
+    ]);
+    if (insertFeaturedErr) {
+      console.log('✅ Authenticated insert of featured listing blocked as expected.');
+    } else {
+      console.error('❌ Security risk: Authenticated users can insert featured listings!');
+      failed = true;
+    }
+  }
+
   if (failed) {
     process.exit(1);
   }
