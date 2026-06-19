@@ -1,4 +1,4 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from 'server'
 
 function escHtml(value: unknown) {
   return String(value ?? '')
@@ -87,8 +87,8 @@ serve(async (req: Request) => {
     }
 
     return new Response('Notification sent', { status: 200 })
-  } catch (error: any) {
-    console.error('Webhook processing error:', error.message)
-    return new Response(JSON.stringify({ error: error.message }), { status: 400 })
+  } catch (error: unknown) {
+    console.error('Webhook processing error:', (error as Error).message)
+    return new Response(JSON.stringify({ error: (error as Error).message }), { status: 400 })
   }
 })

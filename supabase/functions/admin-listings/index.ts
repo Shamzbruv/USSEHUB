@@ -1,5 +1,5 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from 'server'
+import { createClient } from '@supabase/supabase-js'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
 
 serve(async (req: Request) => {
@@ -37,7 +37,7 @@ serve(async (req: Request) => {
     const { action, listing_id, rejection_reason, admin_note } = body
     if (action !== 'create_listing' && !listing_id) throw new Error('listing_id is required')
 
-    let updatePayload: any = { updated_at: new Date().toISOString() }
+    let updatePayload: Record<string, unknown> = { updated_at: new Date().toISOString() }
     let newStatus = ''
 
     if (action === 'approve') {
@@ -138,7 +138,7 @@ serve(async (req: Request) => {
     })
 
     return new Response(JSON.stringify(newListing), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  } catch (error: unknown) {
+    return new Response(JSON.stringify({ error: (error as Error).message }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 })
