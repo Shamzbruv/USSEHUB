@@ -58,6 +58,20 @@ serve(async (req: Request) => {
       updatePayload = { ...updatePayload, is_featured: true, featured_until: new Date(Date.now() + 30*24*60*60*1000).toISOString() }
     } else if (action === 'unfeature') {
       updatePayload = { ...updatePayload, is_featured: false, featured_until: null }
+    } else if (action === 'delete') {
+      // Just delete it immediately using the admin client
+      const { data: deletedData, error: deleteError } = await supabaseAdmin.from('listings').delete().eq('id', listing_id).select().single()
+      if (deleteError) throw new Error(`Delete failed: ${JSON.stringify(deleteError)}`)
+      
+      await supabaseAdmin.from('admin_audit_log').insert({
+        actor_user_id: user.id,
+        entity_type: 'listing',
+        entity_id: listing_id,
+        action: 'admin_delete',
+        before_state: deletedData,
+        after_state: null
+      })
+      return new Response(JSON.stringify({ success: true, deleted_id: listing_id }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     } else if (action === 'update_listing') {
       // NOTE: status and is_featured are intentionally omitted from update_listing 
       // and must be managed via explicit actions (approve, reject, feature, etc.)
@@ -106,14 +120,16 @@ serve(async (req: Request) => {
     // Get old listing for audit
     const { data: oldListing } = await supabaseAdmin.from('listings').select('*').eq('id', listing_id).single()
 
-    const { data: newListing, error: updateError } = await supabaseAdmin
+    // Update using supabaseClient so that postgres triggers (like protect_listing_privileged_columns)
+    // can properly read auth.uid() and recognize the user as an admin.
+    const { data: newListing, error: updateError } = await supabaseClient
       .from('listings')
       .update(updatePayload)
       .eq('id', listing_id)
       .select()
       .single()
 
-    if (updateError) throw updateError
+    if (updateError) throw new Error(`DB Update Failed: ${JSON.stringify(updateError)}`)
 
     // Log status change if status changed
     if (newStatus && oldListing?.status !== newStatus) {

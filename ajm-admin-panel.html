@@ -839,6 +839,7 @@
                         <div class="action-row" style="gap: 4px; margin-top: 4px;">
                             ${l.status !== 'approved' ? `<button class="btn btn-primary btn-sm" style="padding: 4px 8px;" onclick="approveListing('${l.id}')" title="Approve">✓</button>` : ''}
                             ${l.status !== 'rejected' ? `<button class="btn btn-danger btn-sm" style="padding: 4px 8px;" onclick="rejectListing('${l.id}')" title="Reject">✗</button>` : ''}
+                            <button class="btn btn-danger btn-sm" style="padding: 4px 8px; margin-left: 4px; background: #6c757d;" onclick="deleteListing('${l.id}')" title="Delete">🗑</button>
                             ${l.status !== 'expired' ? `<button class="btn btn-warning btn-sm" style="padding: 4px 8px;" onclick="expireListing('${l.id}')" title="Expire">🕰</button>` : ''}
                             <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick="toggleFeatured('${l.id}', ${l.is_featured})" title="${l.is_featured ? 'Unfeature' : 'Feature'}">${l.is_featured ? '★' : '☆'}</button>
                             <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick="openEditModal(window.listingCache['${l.id}'])" title="Edit">✎</button>
@@ -860,6 +861,12 @@
         if (!reason) return;
         await updateListingStatus(id, 'reject', { rejection_reason: reason });
     }
+
+    async function deleteListing(id) {
+        const confirmDelete = confirm('Are you sure you want to completely delete this listing? This action cannot be undone.');
+        if (!confirmDelete) return;
+        await updateListingStatus(id, 'delete');
+    }
     async function expireListing(id) {
         await updateListingStatus(id, 'expire');
     }
@@ -869,7 +876,8 @@
             body: { action, listing_id: id, ...extraPayload }
         });
         if (error) {
-            showToast('Error: ' + error.message, 'error');
+            console.error('Edge Function Error:', error);
+            showToast('Error: ' + (error.context || error.message), 'error');
         } else {
             showToast(`Listing updated!`, 'success');
             await loadListings();
