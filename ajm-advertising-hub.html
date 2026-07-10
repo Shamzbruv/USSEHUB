@@ -9,7 +9,7 @@
     <link rel="apple-touch-icon" href="aloe%20logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
     <meta name="description"
         content="Browse the AJM Advertising Hub for Jamaica business listings, classifieds, and promotions. Find services, real estate, accommodations, farming, retail & wholesale, food & beverage, and events. Discover health & wellness, construction, dining, shopping, and commercial opportunities across Jamaica." />
     <meta name="keywords" content="AJM Advertising Hub, Jamaica business directory, classifieds, promotions, services, transport rentals, maintenance, auto repairs, construction, delivery, catering, health & wellness, medical clinics, gyms, educational services, communications, audio visual, graphic design, event planning, finances, banking, NGO, rooms, venue rentals, real estate sales, residential, commercial leasing, farming, agriculture, fisheries, poultry, horticulture, retail trade, wholesale, supermarkets, craft markets, purveyors, food & beverage, dining outlets, restaurants, cafes, events, entertainment, live shows, festivals, parties, clubs, Jamaica" />
@@ -1598,7 +1598,7 @@
             </div>
 
             <!-- Turnstile Widget Placeholder -->
-            <div id="turnstile-widget" class="cf-turnstile" data-sitekey="0x4AAAAAADny2ngXsIdv_Ak0" style="margin-bottom: 16px;"></div>
+            <div id="turnstile-widget" style="margin-bottom: 16px;"></div>
 
             <button class="btn btn-primary" onclick="submitConsultation()" style="width:100%;margin-top:8px;">
                 <span id="cons-submit-text">Continue to Connect</span>
@@ -1767,6 +1767,11 @@
         let listingsOffset = 0;
         const LISTINGS_PER_PAGE = 10;
         let totalListingsCount = 0;
+        const TURNSTILE_SITE_KEY = '0x4AAAAAADny2ngXsIdv_AkO';
+        let consultationTurnstileWidgetId = null;
+        let consultationTurnstileToken = '';
+        let consultationTurnstileTimer = null;
+        let consultationTurnstileLoadFailed = false;
 
         // ==========================================
         // EXPOSE TO GLOBAL SCOPE (for onclick attrs)
@@ -2726,11 +2731,93 @@
             document.getElementById('cons-phone').value = '';
             document.getElementById('cons-email').value = '';
             document.getElementById('consultation-modal').classList.add('open');
+            ensureConsultationTurnstile();
         };
 
         window.closeConsultationModal = function() {
             document.getElementById('consultation-modal').classList.remove('open');
+            removeConsultationTurnstile();
         };
+
+        function renderConsultationTurnstile() {
+            const container = document.getElementById('turnstile-widget');
+            if (!container || !window.turnstile?.render) return false;
+
+            consultationTurnstileToken = '';
+            consultationTurnstileLoadFailed = false;
+
+            if (consultationTurnstileWidgetId !== null) {
+                window.turnstile.reset(consultationTurnstileWidgetId);
+                return true;
+            }
+
+            try {
+                consultationTurnstileWidgetId = window.turnstile.render(container, {
+                    sitekey: TURNSTILE_SITE_KEY,
+                    theme: 'dark',
+                    size: 'flexible',
+                    callback: (token) => {
+                        consultationTurnstileToken = token;
+                    },
+                    'expired-callback': () => {
+                        consultationTurnstileToken = '';
+                        if (consultationTurnstileWidgetId !== null && window.turnstile?.reset) {
+                            window.turnstile.reset(consultationTurnstileWidgetId);
+                        }
+                    },
+                    'error-callback': () => {
+                        consultationTurnstileToken = '';
+                        consultationTurnstileLoadFailed = true;
+                        return true;
+                    }
+                });
+            } catch (_) {
+                consultationTurnstileWidgetId = null;
+                consultationTurnstileLoadFailed = true;
+                return true;
+            }
+
+            return consultationTurnstileWidgetId !== null && consultationTurnstileWidgetId !== undefined;
+        }
+
+        function ensureConsultationTurnstile() {
+            if (renderConsultationTurnstile()) return;
+
+            clearInterval(consultationTurnstileTimer);
+            let attempts = 0;
+            consultationTurnstileTimer = setInterval(() => {
+                attempts += 1;
+                if (renderConsultationTurnstile() || attempts >= 60) {
+                    clearInterval(consultationTurnstileTimer);
+                    consultationTurnstileTimer = null;
+                    if (attempts >= 60 && consultationTurnstileWidgetId === null) {
+                        consultationTurnstileLoadFailed = true;
+                    }
+                }
+            }, 100);
+        }
+
+        function removeConsultationTurnstile() {
+            clearInterval(consultationTurnstileTimer);
+            consultationTurnstileTimer = null;
+            consultationTurnstileToken = '';
+            consultationTurnstileLoadFailed = false;
+
+            if (consultationTurnstileWidgetId !== null && window.turnstile?.remove) {
+                window.turnstile.remove(consultationTurnstileWidgetId);
+            }
+
+            consultationTurnstileWidgetId = null;
+            const container = document.getElementById('turnstile-widget');
+            if (container) container.innerHTML = '';
+        }
+
+        function getConsultationTurnstileToken() {
+            if (consultationTurnstileWidgetId !== null && window.turnstile?.getResponse) {
+                return window.turnstile.getResponse(consultationTurnstileWidgetId) || consultationTurnstileToken;
+            }
+            return consultationTurnstileToken;
+        }
 
         window.submitConsultation = async function() {
             const listingId = document.getElementById('cons-listing-id').value;
@@ -2752,12 +2839,16 @@
                 return;
             }
 
-            const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
-            // Note: In a production environment with a real sitekey, you'd want to verify this token via an Edge Function
-            // For now, we enforce that the widget was interacted with on the client side.
-            if (turnstileResponse === '') {
-                 showToast('Please complete the security check.', 'error');
-                 return;
+            const turnstileResponse = getConsultationTurnstileToken();
+            if (!turnstileResponse) {
+                ensureConsultationTurnstile();
+                showToast(
+                    consultationTurnstileLoadFailed
+                        ? 'Security check could not load. Please refresh and try again.'
+                        : 'Please complete the security check.',
+                    'error'
+                );
+                return;
             }
 
             const btnText = document.getElementById('cons-submit-text');
