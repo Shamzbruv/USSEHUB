@@ -1568,30 +1568,37 @@
         </div>
     </section>
 
-    <section class="container webpage-packages" id="webpage-packages">
-        <div class="packages-head">
-            <div><div class="packages-kicker">For paying AJM clients</div><h2>Your own business webpage</h2></div>
-            <p>Free members can keep a standard directory listing. Paying clients can upgrade that listing into a managed mini-website, choose the market segment that fits their business, and update the content through their account after AJM activates the package.</p>
+    <!-- Webpage Packages Modal (Hidden by default, opened by Advertise Here FAB) -->
+    <div id="webpage-packages-modal" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="modal-box" style="max-width: 1100px; padding: 40px; background: #05070d; border: 1px solid var(--glass-border);">
+            <button class="modal-close" onclick="closeModal('webpage-packages-modal')" aria-label="Close modal" style="top: 20px; right: 20px; z-index: 10;">×</button>
+            
+            <section class="webpage-packages" id="webpage-packages" style="padding: 0; border: none; margin: 0; max-width: 100%;">
+                <div class="packages-head">
+                    <div><div class="packages-kicker">For paying AJM clients</div><h2 style="font-size:2.4rem;">Your own business webpage</h2></div>
+                    <p style="font-size:1rem; max-width:600px;">Free members can keep a standard directory listing. Paying clients can upgrade that listing into a managed mini-website, choose the market segment that fits their business, and update the content through their account after AJM activates the package.</p>
+                </div>
+                <div class="package-grid">
+                    <article class="package-card silver">
+                        <div class="package-tier">Silver</div><h3>Business Essentials</h3><div class="package-price">Contact AJM for pricing</div>
+                        <ul><li>Business logo and contact details</li><li>About section and services</li><li>Operating hours</li><li>Up to 3 gallery photos</li></ul>
+                        <button class="btn btn-ghost" style="width:100%;" onclick="closeModal('webpage-packages-modal'); handlePostListingClick('silver');">Choose Silver</button>
+                    </article>
+                    <article class="package-card gold">
+                        <div class="package-tier">Gold</div><h3>Lead Generator</h3><div class="package-price">Contact AJM for pricing</div>
+                        <ul><li>Everything in Silver</li><li>Hero image and video gallery</li><li>Google Map and customer reviews</li><li>Lead form, offers and coupons</li></ul>
+                        <button class="btn btn-primary" style="width:100%;" onclick="closeModal('webpage-packages-modal'); handlePostListingClick('gold');">Choose Gold</button>
+                    </article>
+                    <article class="package-card platinum">
+                        <div class="package-tier">Platinum</div><h3>Premier Experience</h3><div class="package-price">Contact AJM for pricing</div>
+                        <ul><li>Everything in Gold</li><li>Cinematic cover and virtual tour</li><li>Booking and featured testimonials</li><li>Tracked calls and live chat</li></ul>
+                        <button class="btn btn-ghost" style="width:100%;border-color:rgba(98,183,255,.4);" onclick="closeModal('webpage-packages-modal'); handlePostListingClick('platinum');">Choose Platinum</button>
+                    </article>
+                </div>
+                <div class="segment-strip"><strong>Available market segments</strong><div class="segment-pills"><span class="segment-pill">Local businesses & directories</span><span class="segment-pill">Professional & niche services</span><span class="segment-pill">B2B suppliers & wholesale</span><span class="segment-pill">Hospitality, accommodation, weddings & events</span><span class="segment-pill">Automotive, collectibles & precious metals</span></div></div>
+            </section>
         </div>
-        <div class="package-grid">
-            <article class="package-card silver">
-                <div class="package-tier">Silver</div><h3>Business Essentials</h3><div class="package-price">Contact AJM for pricing</div>
-                <ul><li>Business logo and contact details</li><li>About section and services</li><li>Operating hours</li><li>Up to 3 gallery photos</li></ul>
-                <button class="btn btn-ghost" style="width:100%;" onclick="handlePostListingClick('silver')">Choose Silver</button>
-            </article>
-            <article class="package-card gold">
-                <div class="package-tier">Gold</div><h3>Lead Generator</h3><div class="package-price">Contact AJM for pricing</div>
-                <ul><li>Everything in Silver</li><li>Hero image and video gallery</li><li>Google Map and customer reviews</li><li>Lead form, offers and coupons</li></ul>
-                <button class="btn btn-primary" style="width:100%;" onclick="handlePostListingClick('gold')">Choose Gold</button>
-            </article>
-            <article class="package-card platinum">
-                <div class="package-tier">Platinum</div><h3>Premier Experience</h3><div class="package-price">Contact AJM for pricing</div>
-                <ul><li>Everything in Gold</li><li>Cinematic cover and virtual tour</li><li>Booking and featured testimonials</li><li>Tracked calls and live chat</li></ul>
-                <button class="btn btn-ghost" style="width:100%;border-color:rgba(98,183,255,.4);" onclick="handlePostListingClick('platinum')">Choose Platinum</button>
-            </article>
-        </div>
-        <div class="segment-strip"><strong>Available market segments</strong><div class="segment-pills"><span class="segment-pill">Local businesses & directories</span><span class="segment-pill">Professional & niche services</span><span class="segment-pill">B2B suppliers & wholesale</span><span class="segment-pill">Hospitality, accommodation, weddings & events</span><span class="segment-pill">Automotive, collectibles & precious metals</span></div></div>
-    </section>
+    </div>
 
     <!-- Member Dashboard Modal -->
     <div id="member-dashboard-modal" class="modal-overlay" role="dialog" aria-modal="true">
@@ -3281,7 +3288,7 @@
 <style>
     /* FAB */
     #advertise-fab {
-        position: fixed; bottom: 28px; right: 28px; z-index: 990;
+        position: fixed; bottom: 28px; left: 28px; z-index: 990;
         display: flex; align-items: center; gap: 10px;
         background: linear-gradient(135deg, #17d66f, #22d3ee);
         color: #05070d; border: none; border-radius: 56px;
@@ -3359,7 +3366,7 @@
 </style>
 
 <!-- FAB -->
-<button id="advertise-fab" onclick="openAdvertiseModal()" aria-label="Advertise your business">
+<button id="advertise-fab" onclick="openModal('webpage-packages-modal')" aria-label="Advertise your business">
     <span class="fab-icon">📢</span> Advertise Here
 </button>
 
