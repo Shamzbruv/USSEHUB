@@ -60,6 +60,23 @@ ALTER TABLE public.listings
 ADD CONSTRAINT listings_requested_tier_check
 CHECK (requested_tier IS NULL OR requested_tier IN ('silver', 'gold', 'platinum'));
 
+-- Paid webpage requests use `listing_type = 'webpage'` in the customer form.
+-- Preserve every legacy value while making that new value valid.
+ALTER TABLE public.listings
+DROP CONSTRAINT IF EXISTS listings_listing_type_check;
+
+ALTER TABLE public.listings
+ADD CONSTRAINT listings_listing_type_check
+CHECK (
+  listing_type IS NULL OR listing_type IN (
+    'basic',
+    'advanced',
+    'featured',
+    'banner',
+    'webpage'
+  )
+);
+
 CREATE TABLE IF NOT EXISTS public.listing_webpages (
   listing_id uuid PRIMARY KEY REFERENCES public.listings(id) ON DELETE CASCADE,
   tier text NOT NULL CHECK (tier IN ('silver', 'gold', 'platinum')),
@@ -77,6 +94,7 @@ CREATE TABLE IF NOT EXISTS public.listing_webpages (
   logo_url text,
   address text,
   about_text text,
+  segment_content jsonb NOT NULL DEFAULT '{}'::jsonb,
   business_hours jsonb NOT NULL DEFAULT '{}'::jsonb,
   gallery_urls text[] NOT NULL DEFAULT '{}'::text[],
   hero_media_url text,
@@ -98,11 +116,95 @@ CREATE TABLE IF NOT EXISTS public.listing_webpages (
 );
 
 ALTER TABLE public.listing_webpages
+ADD COLUMN IF NOT EXISTS segment_content jsonb NOT NULL DEFAULT '{}'::jsonb;
+
+CREATE OR REPLACE FUNCTION private.is_valid_ajm_segment_content(
+  p_content jsonb,
+  p_market_segment text
+)
+RETURNS boolean
+LANGUAGE sql
+IMMUTABLE
+SET search_path = ''
+AS $$
+  SELECT
+    jsonb_typeof(p_content) = 'object'
+    AND octet_length(p_content::text) <= 20000
+    AND NOT EXISTS (
+      SELECT 1
+      FROM jsonb_each(p_content) segment
+      WHERE segment.key <> p_market_segment
+        OR jsonb_typeof(segment.value) <> 'object'
+        OR CASE segment.key
+          WHEN 'local-business' THEN
+            segment.value - ARRAY['service_area', 'directory_focus']::text[] <> '{}'::jsonb
+            OR EXISTS (
+              SELECT 1
+              FROM jsonb_each(segment.value) field
+              WHERE jsonb_typeof(field.value) <> 'string'
+                OR octet_length(field.value #>> '{}') > 2048
+            )
+          WHEN 'professional-services' THEN
+            segment.value - ARRAY['credentials', 'intake_url']::text[] <> '{}'::jsonb
+            OR EXISTS (
+              SELECT 1
+              FROM jsonb_each(segment.value) field
+              WHERE jsonb_typeof(field.value) <> 'string'
+                OR octet_length(field.value #>> '{}') > 2048
+            )
+          WHEN 'b2b-supplier' THEN
+            segment.value - ARRAY['catalog_url', 'rfq_email', 'currencies']::text[] <> '{}'::jsonb
+            OR (
+              segment.value ? 'catalog_url'
+              AND jsonb_typeof(segment.value->'catalog_url') <> 'string'
+            )
+            OR (
+              segment.value ? 'rfq_email'
+              AND jsonb_typeof(segment.value->'rfq_email') <> 'string'
+            )
+            OR (
+              segment.value ? 'currencies'
+              AND (
+                jsonb_typeof(segment.value->'currencies') <> 'array'
+                OR jsonb_array_length(segment.value->'currencies') > 20
+                OR EXISTS (
+                  SELECT 1
+                  FROM jsonb_array_elements(segment.value->'currencies') currency
+                  WHERE jsonb_typeof(currency) <> 'string'
+                    OR octet_length(currency #>> '{}') > 12
+                )
+              )
+            )
+          WHEN 'hospitality-events' THEN
+            segment.value - ARRAY['availability_url', 'portfolio_url']::text[] <> '{}'::jsonb
+            OR EXISTS (
+              SELECT 1
+              FROM jsonb_each(segment.value) field
+              WHERE jsonb_typeof(field.value) <> 'string'
+                OR octet_length(field.value #>> '{}') > 2048
+            )
+          WHEN 'automotive-collectibles' THEN
+            segment.value - ARRAY['inventory_url', 'financing_url']::text[] <> '{}'::jsonb
+            OR EXISTS (
+              SELECT 1
+              FROM jsonb_each(segment.value) field
+              WHERE jsonb_typeof(field.value) <> 'string'
+                OR octet_length(field.value #>> '{}') > 2048
+            )
+          ELSE true
+        END
+    );
+$$;
+
+ALTER TABLE public.listing_webpages
 DROP CONSTRAINT IF EXISTS listing_webpages_content_shape_check;
 
 ALTER TABLE public.listing_webpages
 ADD CONSTRAINT listing_webpages_content_shape_check
 CHECK (
+  jsonb_typeof(segment_content) = 'object'
+  AND private.is_valid_ajm_segment_content(segment_content, market_segment)
+  AND
   jsonb_typeof(business_hours) = 'object'
   AND jsonb_typeof(testimonials) = 'array'
 );
@@ -319,7 +421,7 @@ VALUES
   (
     'ajm-webpage-silver',
     'AJM Silver Webpage',
-    NULL,
+    0,
     30,
     '["Business profile", "Contact and address", "About section", "Business hours", "Up to 3 photos"]'::jsonb,
     true,
@@ -329,7 +431,7 @@ VALUES
   (
     'ajm-webpage-gold',
     'AJM Gold Webpage',
-    NULL,
+    0,
     30,
     '["Everything in Silver", "Hero and video gallery", "Google Map", "Reviews", "Lead form", "Offers and coupons"]'::jsonb,
     true,
@@ -339,7 +441,7 @@ VALUES
   (
     'ajm-webpage-platinum',
     'AJM Platinum Webpage',
-    NULL,
+    0,
     30,
     '["Everything in Gold", "Cinematic cover", "Virtual tour", "Booking", "Featured testimonials", "Tracked calls", "Live chat"]'::jsonb,
     true,

@@ -1235,6 +1235,136 @@
             margin: 0 0 20px;
         }
 
+        .home-ad-network {
+            margin-top: 24px;
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 26px;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(255, 207, 51, 0.13), transparent 34%),
+                radial-gradient(circle at 100% 100%, rgba(23, 214, 111, 0.12), transparent 38%),
+                rgba(255, 255, 255, 0.055);
+            box-shadow: var(--shadow);
+        }
+
+        .home-ad-network-head {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .home-ad-network-head h3 {
+            font-family: "Syne", "Trebuchet MS", sans-serif;
+            font-size: clamp(1.55rem, 3vw, 2.3rem);
+            margin: 7px 0 0;
+        }
+
+        .home-ad-network-head p {
+            max-width: 560px;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .home-ad-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+        }
+
+        .home-ad-card {
+            position: relative;
+            min-height: 230px;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            background: linear-gradient(145deg, rgba(13, 17, 28, 0.92), rgba(5, 7, 13, 0.98));
+            isolation: isolate;
+        }
+
+        .home-ad-card-media {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        .home-ad-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background: linear-gradient(to top, rgba(5, 7, 13, 0.98), rgba(5, 7, 13, 0.08) 78%);
+        }
+
+        .home-ad-card-copy {
+            width: 100%;
+            padding: 20px;
+        }
+
+        .home-ad-card-copy small {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--yellow);
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .home-ad-card-copy strong {
+            display: block;
+            font-family: "Syne", "Trebuchet MS", sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 5px;
+        }
+
+        .home-ad-card-copy span {
+            display: block;
+            color: #dbe2f4;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .home-ad-placeholder {
+            min-height: 180px;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            padding: 28px;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            color: var(--muted);
+            background: rgba(0, 0, 0, 0.18);
+        }
+
+        .floating-advertise {
+            position: fixed;
+            right: 18px;
+            bottom: 92px;
+            z-index: 79;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 12px 17px;
+            border-radius: 999px;
+            color: #100b02;
+            font-size: 0.86rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--yellow), var(--green));
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 18px 42px rgba(255, 207, 51, 0.22);
+        }
+
+        .floating-advertise:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 24px 48px rgba(23, 214, 111, 0.28);
+        }
+
         .contact-wrap {
             display: grid;
             grid-template-columns: 0.9fr 1.1fr;
@@ -1511,6 +1641,11 @@
                 grid-template-columns: 1fr;
             }
 
+            .home-ad-network-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
             .hero-card {
                 max-width: 620px;
                 margin: 0 auto;
@@ -1593,6 +1728,13 @@
                 padding: 12px 14px;
                 gap: 8px;
                 max-width: calc(100% - 24px);
+            }
+
+            .floating-advertise {
+                right: 12px;
+                bottom: 82px;
+                max-width: calc(100% - 24px);
+                padding: 11px 14px;
             }
 
             .floating-whatsapp-mark {
@@ -1729,6 +1871,7 @@
                 <a href="#about">About</a>
                 <a href="#branches">Subsidiaries</a>
                 <a href="#services">Services</a>
+                <a href="#advertising">Advertise</a>
                 <a href="#difference">Advantage</a>
                 <a href="#gallery">Showcase</a>
                 <a href="#contact">Contact</a>
@@ -1946,7 +2089,31 @@
                             <span class="chip">Commercial Visibility</span>
                         </div>
 
-                        <a class="btn btn-primary" href="ajm-advertising-hub.html">Visit the Advertising Hub</a>
+                        <div class="hero-actions">
+                            <a class="btn btn-primary" href="ajm-advertising-hub.html">Visit the Advertising Hub</a>
+                            <a class="btn btn-ghost" href="ajm-advertising-hub.html?advertise=1">Post an Advertisement</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="home-ad-network reveal" id="advertising">
+                    <div class="home-ad-network-head">
+                        <div>
+                            <span class="mini-label">AJM Advertising Network</span>
+                            <h3>Featured businesses and campaigns</h3>
+                        </div>
+                        <div>
+                            <p>Put your offer in front of visitors across the USSE homepage and AJM directory. Packages, pricing, durations, and placement options are available in the Advertising Hub.</p>
+                            <a class="btn btn-primary" style="margin-top:14px;" href="ajm-advertising-hub.html?advertise=1">Advertise on USSE</a>
+                        </div>
+                    </div>
+                    <div class="home-ad-grid" id="homepage-ad-grid" aria-live="polite">
+                        <div class="home-ad-placeholder">
+                            <div>
+                                <strong style="display:block;color:white;margin-bottom:7px;">Your business could be featured here.</strong>
+                                <span>Choose a homepage advertising package and submit your creative for approval.</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2231,11 +2398,17 @@
                 <a href="#about">About</a>
                 <a href="usse-consultancy.html" data-branch-nav="consultancy">USSE Consultancy</a>
                 <a href="ajm-aloe-jamaica.html" data-branch-nav="ajm">AJM</a>
+                <a href="ajm-advertising-hub.html?advertise=1">Advertise</a>
                 <a href="pistol-operations-logistics.html" data-branch-nav="pistol">PISTOL</a>
                 <a href="#contact">Contact</a>
             </div>
         </div>
     </footer>
+
+    <a class="floating-advertise" href="ajm-advertising-hub.html?advertise=1" aria-label="View AJM advertising packages">
+        <span aria-hidden="true">📣</span>
+        <span>Advertise Here</span>
+    </a>
 
     <a class="floating-whatsapp" href="https://wa.me/18764271661?text=Hello%20USSE%20Hub,%0A%0AI%20would%20like%20help%20finding%20the%20right%20subsidiary%20for%20my%20project." target="_blank" rel="noopener" aria-label="Chat with USSE Hub on WhatsApp">
         <span class="floating-whatsapp-mark">WA</span>
@@ -2470,6 +2643,76 @@
             window.location.href = "mailto:info@ussehub.com?subject=" + enquiry.subject + "&body=" + enquiry.body;
         });
     </script>
+
+<!-- ═══ HOMEPAGE LIVE AD PACKAGES SECTION ═══ -->
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const sb = createClient(
+        'https://zcptuqrlovflcpqszery.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw'
+    );
+
+    // Inject a live package pricing strip just before the "home-ad-network" div if not already present
+    async function renderHomePackagePricing() {
+        // Only render if we haven't already and the section exists
+        if (document.getElementById('home-pkg-strip')) return;
+
+        const adNetwork = document.getElementById('advertising');
+        if (!adNetwork) return;
+
+        try {
+            const { data: pkgs } = await sb.from('ad_packages')
+                .select('id,name,code,price,currency,duration_days,features,is_active')
+                .eq('is_active', true)
+                .order('price')
+                .limit(6);
+
+            if (!pkgs || pkgs.length === 0) return;
+
+            const tierGrad = (code) => {
+                const c = (code||'').toLowerCase();
+                if (c.includes('platinum')) return 'linear-gradient(135deg,rgba(91,156,246,0.15),rgba(91,156,246,0.06))';
+                if (c.includes('gold')) return 'linear-gradient(135deg,rgba(255,207,51,0.12),rgba(255,207,51,0.04))';
+                if (c.includes('banner')) return 'linear-gradient(135deg,rgba(255,77,94,0.12),rgba(255,77,94,0.04))';
+                if (c.includes('advanced')) return 'linear-gradient(135deg,rgba(23,214,111,0.12),rgba(23,214,111,0.04))';
+                return 'linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))';
+            };
+
+            const strip = document.createElement('div');
+            strip.id = 'home-pkg-strip';
+            strip.style.cssText = 'margin-bottom:40px;';
+            strip.innerHTML = `
+                <div style="text-align:center;margin-bottom:24px;">
+                    <span style="font-size:0.78rem;font-weight:700;letter-spacing:1.5px;color:#17d66f;text-transform:uppercase;">Advertising Packages</span>
+                    <h3 style="font-size:1.6rem;font-weight:800;margin:8px 0 4px;">Get Your Business Seen</h3>
+                    <p style="color:#b9c0d4;font-size:0.9rem;">Choose a package and advertise across the USSE &amp; AJM network</p>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
+                    ${pkgs.map(p => `
+                        <a href="ajm-advertising-hub.html" style="text-decoration:none;color:inherit;display:block;background:${tierGrad(p.code)};border:1px solid rgba(255,255,255,0.09);border-radius:18px;padding:20px;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;"
+                            onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 40px rgba(0,0,0,0.3)'"
+                            onmouseout="this.style.transform='';this.style.boxShadow=''">
+                            <div style="font-size:1rem;font-weight:800;margin-bottom:4px;">${p.name}</div>
+                            <div style="font-size:1.4rem;font-weight:800;color:#17d66f;">${p.currency} ${Number(p.price).toLocaleString()}</div>
+                            <div style="font-size:0.75rem;color:#b9c0d4;margin-top:2px;">${p.duration_days} days</div>
+                        </a>
+                    `).join('')}
+                </div>
+                <div style="text-align:center;">
+                    <a href="ajm-advertising-hub.html" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#17d66f,#22d3ee);color:#05070d;border:none;border-radius:56px;padding:13px 28px;font-family:'Space Grotesk',sans-serif;font-size:0.92rem;font-weight:800;text-decoration:none;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 6px 24px rgba(23,214,111,0.35);"
+                        onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform=''">
+                        📢 View All Packages &amp; Advertise Now
+                    </a>
+                </div>
+            `;
+
+            adNetwork.insertAdjacentElement('beforebegin', strip);
+        } catch(_) { /* fail silently on homepage */ }
+    }
+
+    renderHomePackagePricing();
+</script>
 </body>
 
 </html>
+

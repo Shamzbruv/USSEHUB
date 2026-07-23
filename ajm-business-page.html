@@ -73,6 +73,9 @@
         .gallery img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border: 1px solid var(--line); border-radius: 20px; transition: .25s ease; }
         .gallery img:hover { transform: translateY(-4px); }
         .feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px; }
+        .segment-tools { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+        .segment-tool-value { color: var(--muted); line-height: 1.7; white-space: pre-wrap; }
+        .segment-actions { display: flex; flex-wrap: wrap; gap: 10px; grid-column: 1 / -1; }
         .media-frame { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 20px; background: #000; }
         .offer { border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, transparent), rgba(255,255,255,.025)); }
         .offer-code { display: inline-block; margin-top: 12px; padding: 8px 12px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 9px; font-weight: 800; letter-spacing: .08em; }
@@ -115,7 +118,7 @@
             .spacer { display: none; }
             main { padding-top: 64px; }
             .section { padding: 34px 0; }
-            .feature-grid, .gallery, .reviews { grid-template-columns: 1fr; }
+            .feature-grid, .segment-tools, .gallery, .reviews { grid-template-columns: 1fr; }
             .card, .platinum-band { padding: 20px; border-radius: 20px; }
             .footer-row { align-items: flex-start; flex-direction: column; }
         }
@@ -168,6 +171,14 @@
                 </div>
             </section>
 
+            <section class="shell section hidden" id="segment-section">
+                <div class="section-head">
+                    <div><div class="kicker" id="segment-kicker">Business focus</div><h2 id="segment-title">Built for this market</h2></div>
+                    <p id="segment-copy"></p>
+                </div>
+                <div class="segment-tools" id="segment-tools"></div>
+            </section>
+
             <section class="shell section hidden" id="gallery-section">
                 <div class="section-head"><div><div class="kicker">Gallery</div><h2>A closer look</h2></div><p>Explore products, services and the customer experience.</p></div>
                 <div class="gallery" id="gallery"></div>
@@ -176,8 +187,8 @@
             <section class="shell section hidden" id="gold-section">
                 <div class="section-head"><div><div class="kicker">Gold features</div><h2>See more. Connect faster.</h2></div><p>Rich media, directions, customer feedback and current promotions in one place.</p></div>
                 <div class="feature-grid">
-                    <div class="card hidden" id="video-card"><h3>Business video</h3><iframe id="video-frame" class="media-frame" title="Business video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
-                    <div class="card hidden" id="map-card"><h3>Map &amp; directions</h3><iframe id="map-frame" class="media-frame" title="Business location" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><a class="btn" id="map-link" href="#" target="_blank" rel="noopener" style="margin-top:12px">Open directions</a></div>
+                    <div class="card hidden" id="video-card"><h3>Business video</h3><iframe id="video-frame" class="media-frame" title="Business video" sandbox="allow-scripts allow-same-origin allow-presentation" referrerpolicy="no-referrer" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+                    <div class="card hidden" id="map-card"><h3>Map &amp; directions</h3><iframe id="map-frame" class="media-frame" title="Business location" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups" referrerpolicy="no-referrer"></iframe><a class="btn" id="map-link" href="#" target="_blank" rel="noopener" style="margin-top:12px">Open directions</a></div>
                     <div class="card offer hidden" id="offer-card"><div class="kicker">Special offer</div><h3 id="offer-title">Current promotion</h3><p id="offer-details"></p><div class="offer-code hidden" id="offer-code"></div></div>
                 </div>
             </section>
@@ -190,7 +201,7 @@
             <section class="shell section hidden" id="platinum-section">
                 <div class="platinum-band">
                     <div class="kicker">Platinum partner</div><h2>Take the next step</h2><p id="platinum-copy" style="color:var(--muted);line-height:1.7;max-width:760px">Book, explore virtually or connect directly with the business.</p>
-                    <div class="feature-grid" style="margin-top:22px"><div class="hidden" id="tour-card"><iframe id="tour-frame" class="media-frame" title="Virtual business tour" allowfullscreen></iframe></div></div>
+                    <div class="feature-grid" style="margin-top:22px"><div class="hidden" id="tour-card"><iframe id="tour-frame" class="media-frame" title="Virtual business tour" sandbox="allow-scripts allow-same-origin allow-presentation" referrerpolicy="no-referrer" allowfullscreen></iframe></div></div>
                     <div class="platinum-actions"><a class="btn btn-primary hidden" id="platinum-book" href="#" target="_blank" rel="noopener">Book an appointment</a><a class="btn hidden" id="tracked-call" href="#">Call now</a><a class="btn btn-green hidden" id="live-chat" href="#" target="_blank" rel="noopener">Start live chat</a></div>
                 </div>
             </section>

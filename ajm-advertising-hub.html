@@ -1851,6 +1851,86 @@
         let consultationTurnstileToken = '';
         let consultationTurnstileTimer = null;
         let consultationTurnstileLoadFailed = false;
+        const PUBLIC_LISTING_FIELDS = [
+            'id', 'business_name', 'description', 'category', 'subcategory', 'location',
+            'contact_phone', 'whatsapp', 'email', 'website', 'image_url', 'listing_type',
+            'status', 'is_featured', 'created_at'
+        ].join(',');
+        const MEMBER_LISTING_FIELDS = `${PUBLIC_LISTING_FIELDS},requested_tier`;
+        const listingCache = new Map();
+        let webpageTableUnavailable = false;
+        let webpageSubscriptionFieldsUnavailable = false;
+
+        function cacheListings(listings = []) {
+            listings.forEach((listing) => {
+                if (listing?.id) listingCache.set(String(listing.id), listing);
+            });
+        }
+
+        function isMissingTierSchemaError(error) {
+            if (!error) return false;
+            const message = `${error.message || ''} ${error.details || ''} ${error.hint || ''}`.toLowerCase();
+            return ['PGRST200', 'PGRST204', 'PGRST205', '42P01', '42703'].includes(error.code)
+                && ['listing_webpages', 'webpage_enabled', 'webpage_tier'].some((name) => message.includes(name));
+        }
+
+        function isMissingColumnError(error, columnName) {
+            if (!error) return false;
+            const message = `${error.message || ''} ${error.details || ''} ${error.hint || ''}`.toLowerCase();
+            return ['PGRST204', '42703'].includes(error.code) && message.includes(String(columnName).toLowerCase());
+        }
+
+        async function attachOptionalWebpages(...listingGroups) {
+            const listings = listingGroups.flat().filter(Boolean);
+            listings.forEach((listing) => { listing.listing_webpages = []; });
+            if (!listings.length || webpageTableUnavailable) return;
+
+            const ids = [...new Set(listings.map((listing) => listing.id).filter(Boolean))];
+            const { data: pages, error } = await supabase
+                .from('listing_webpages')
+                .select('listing_id,tier,page_status')
+                .in('listing_id', ids);
+
+            if (error) {
+                if (isMissingTierSchemaError(error)) webpageTableUnavailable = true;
+                console.warn('Optional AJM webpage information is unavailable; base listings will still be shown.', error.message);
+                return;
+            }
+
+            const pageByListing = new Map((pages || []).map((page) => [page.listing_id, page]));
+            listings.forEach((listing) => {
+                const page = pageByListing.get(listing.id);
+                listing.listing_webpages = page ? [page] : [];
+            });
+        }
+
+        async function attachOptionalSubscriptions(listings = []) {
+            listings.forEach((listing) => { listing.ad_subscriptions = []; });
+            if (!listings.length || webpageSubscriptionFieldsUnavailable) return;
+
+            const ids = listings.map((listing) => listing.id).filter(Boolean);
+            const { data: subscriptions, error } = await supabase
+                .from('ad_subscriptions')
+                .select('listing_id,status,expires_at,ad_packages(name,webpage_enabled,webpage_tier)')
+                .eq('user_id', currentUser.id)
+                .in('listing_id', ids);
+
+            if (error) {
+                if (isMissingTierSchemaError(error)) webpageSubscriptionFieldsUnavailable = true;
+                console.warn('Optional AJM package information is unavailable; member listings will still be shown.', error.message);
+                return;
+            }
+
+            const subscriptionsByListing = new Map();
+            (subscriptions || []).forEach((subscription) => {
+                const current = subscriptionsByListing.get(subscription.listing_id) || [];
+                current.push(subscription);
+                subscriptionsByListing.set(subscription.listing_id, current);
+            });
+            listings.forEach((listing) => {
+                listing.ad_subscriptions = subscriptionsByListing.get(listing.id) || [];
+            });
+        }
 
         // ==========================================
         // EXPOSE TO GLOBAL SCOPE (for onclick attrs)
@@ -1873,12 +1953,17 @@
         
 
         
-        window.openListingDetailsModal = function(listingJson) {
-            const l = JSON.parse(decodeURIComponent(listingJson));
+        window.openListingDetailsModal = function(listingId) {
+            const l = listingCache.get(String(listingId));
+            if (!l) {
+                showToast('This listing is no longer available. Please refresh and try again.', 'error');
+                return;
+            }
             const content = document.getElementById('ld-content');
             
             const isJob = l.category === 'JOBS & CAREERS';
             const webpage = Array.isArray(l.listing_webpages) ? l.listing_webpages[0] : l.listing_webpages;
+            const websiteUrl = normalizeWebsiteUrl(l.website);
             
             content.innerHTML = `
                 <div style="display:flex; gap: 16px; margin-bottom: 20px;">
@@ -1903,9 +1988,9 @@
                 <div style="display:flex; gap: 12px; flex-wrap:wrap; justify-content: flex-end; align-items:center; border-top: 1px solid var(--glass-border); padding-top:16px;">
                     <span style="color:var(--muted); font-size:0.85rem; margin-right:auto;">Posted: ${new Date(l.created_at).toLocaleDateString()}</span>
                     ${l.contact_phone ? `<a href="tel:${escHtml(l.contact_phone).replace(/\D/g,'')}" class="btn btn-ghost" style="border:1px solid var(--glass-border); padding:6px 12px;">📞 ${escHtml(l.contact_phone)}</a>` : ''}
-                    ${l.whatsapp ? `<a href="javascript:void(0)" onclick="closeModal('listing-details-modal'); openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" class="btn btn-ghost" style="border:1px solid var(--green); color:var(--green); padding:6px 12px;">💬 WhatsApp</a>` : ''}
-                    ${l.email ? `<a href="javascript:void(0)" onclick="closeModal('listing-details-modal'); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" class="btn btn-ghost" style="border:1px solid var(--blue); color:var(--blue); padding:6px 12px;">✉️ Email</a>` : ''}
-                    ${l.website ? `<a href="${escHtml(normalizeWebsiteUrl(l.website))}" target="_blank" class="btn btn-primary" style="padding:6px 12px;">🌐 Visit Website</a>` : ''}
+                    ${l.whatsapp ? `<a href="#" data-consultation-listing="${escHtml(l.id)}" data-consultation-source="whatsapp" data-consultation-target="${escHtml(l.whatsapp.replace(/\D/g,''))}" data-close-modal="listing-details-modal" class="btn btn-ghost" style="border:1px solid var(--green); color:var(--green); padding:6px 12px;">💬 WhatsApp</a>` : ''}
+                    ${l.email ? `<a href="#" data-consultation-listing="${escHtml(l.id)}" data-consultation-source="email" data-consultation-target="${escHtml(l.email)}" data-close-modal="listing-details-modal" class="btn btn-ghost" style="border:1px solid var(--blue); color:var(--blue); padding:6px 12px;">✉️ Email</a>` : ''}
+                    ${websiteUrl ? `<a href="${escHtml(websiteUrl)}" target="_blank" rel="noopener" class="btn btn-primary" style="padding:6px 12px;">🌐 Visit Website</a>` : ''}
                     ${webpage?.page_status === 'published' ? `<a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" class="btn btn-primary" style="padding:6px 12px;background:linear-gradient(135deg,var(--yellow),var(--green));">View AJM Webpage</a>` : ''}
                 </div>
             `;
@@ -1935,11 +2020,17 @@
             try {
                 const { data, error } = await supabase
                     .from('listings')
-                    .select('*, listing_webpages(tier, page_status), ad_subscriptions(status, expires_at, ad_packages(name, webpage_enabled, webpage_tier))')
+                    .select(MEMBER_LISTING_FIELDS)
                     .eq('owner_user_id', currentUser.id)
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
+
+                await Promise.all([
+                    attachOptionalWebpages(data || []),
+                    attachOptionalSubscriptions(data || [])
+                ]);
+                cacheListings(data || []);
 
                 if (!data || data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">You have no active or pending ads.</td></tr>';
@@ -1970,7 +2061,7 @@
                             <td style="padding:12px 10px;">${statusHtml}</td>
                             <td style="padding:12px 10px;">${typeHtml}</td>
                             <td style="padding:12px 10px;">
-                                <a href="javascript:void(0)" onclick="closeModal('member-dashboard-modal'); openListingDetailsModal('${encodeURIComponent(JSON.stringify(l)).replace(/'/g, "%27")}');" style="color:var(--blue); font-size:0.85rem;">View</a>
+                                <a href="#" data-open-listing-id="${escHtml(l.id)}" data-close-modal="member-dashboard-modal" style="color:var(--blue); font-size:0.85rem;">View</a>
                                 ${activeSubscription ? `<br><a href="ajm-webpage-builder.html?listing=${encodeURIComponent(l.id)}" style="color:var(--yellow);font-size:0.85rem;">Build Webpage</a>` : ''}
                                 ${webpage?.page_status === 'published' ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" target="_blank" rel="noopener" style="color:var(--green);font-size:0.85rem;">Open Live Page</a>` : ''}
                             </td>
@@ -1987,6 +2078,43 @@
             closeModal('member-dashboard-modal');
             openConsultationModal('subscription', 'email', 'info@ussehub.com');
         };
+
+        function setupListingActionDelegation() {
+            document.addEventListener('click', (event) => {
+                const consultationLink = event.target.closest('[data-consultation-listing]');
+                if (consultationLink) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const modalId = consultationLink.dataset.closeModal;
+                    if (modalId) closeModal(modalId);
+                    window.openConsultationModal(
+                        consultationLink.dataset.consultationListing,
+                        consultationLink.dataset.consultationSource,
+                        consultationLink.dataset.consultationTarget
+                    );
+                    return;
+                }
+
+                const listingLink = event.target.closest('[data-open-listing-id]');
+                if (!listingLink) return;
+                const interactiveChild = event.target.closest('a, button, input, select, textarea');
+                if (interactiveChild && interactiveChild !== listingLink) return;
+                event.preventDefault();
+                event.stopPropagation();
+                const modalId = listingLink.dataset.closeModal;
+                if (modalId) closeModal(modalId);
+                window.openListingDetailsModal(listingLink.dataset.openListingId);
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (!['Enter', ' '].includes(event.key)) return;
+                const listingTarget = event.target.closest('[data-open-listing-id]');
+                if (!listingTarget || event.target.closest('a, button, input, select, textarea')) return;
+                event.preventDefault();
+                window.openListingDetailsModal(listingTarget.dataset.openListingId);
+            });
+        }
+
         // ==========================================
         // INIT
         // ==========================================
@@ -1994,6 +2122,7 @@
             // NOTE: Tables are pre-created via server-side script. No DB creation in frontend.
             setupSearchListeners();
             setupImagePreview();
+            setupListingActionDelegation();
             
             // Populate Taxonomy
             if (window.populateCategorySelect) {
@@ -2368,14 +2497,14 @@
                 // Featured query: approved + featured flag
                 let featuredQuery = supabase
                     .from('listings')
-                    .select('*, listing_webpages(tier, page_status)')
+                    .select(PUBLIC_LISTING_FIELDS)
                     .eq('status', 'approved')
                     .eq('is_featured', true);
                 featuredQuery = applyFilters(featuredQuery);
                 featuredQuery = featuredQuery.order('created_at', { ascending: false }).limit(5);
 
                 // All-listings base query
-                let allBase = supabase.from('listings').select('*, listing_webpages(tier, page_status)', { count: 'exact' });
+                let allBase = supabase.from('listings').select(PUBLIC_LISTING_FIELDS, { count: 'exact' });
                 // Visibility: approved OR own listings if logged in
                 if (currentUser) {
                     allBase = allBase.or(`status.eq.approved,owner_user_id.eq.${currentUser.id}`);
@@ -2389,9 +2518,15 @@
 
                 const [featuredResult, allResult] = await Promise.all([featuredQuery, allQuery]);
 
+                if (featuredResult.error) throw featuredResult.error;
+                if (allResult.error) throw allResult.error;
+
                 const featured = featuredResult.data || [];
                 const all = allResult.data || [];
                 totalListingsCount = allResult.count || 0;
+
+                await attachOptionalWebpages(featured, all);
+                cacheListings([...featured, ...all]);
 
                 renderFeaturedListings(featured, all);
                 renderClassifiedsTable(all, allResult.count);
@@ -2399,8 +2534,7 @@
 
             } catch (err) {
                 console.error('Error loading listings:', err);
-                renderFeaturedListings([], []);
-                renderClassifiedsTable([], 0);
+                renderListingsError(err);
             }
         }
 
@@ -2412,7 +2546,7 @@
             const rawCategory = activeCategory || '';
             const categoryList = rawCategory ? getCategoryFilter(rawCategory) : [];
 
-            let query = supabase.from('listings').select('*, listing_webpages(tier, page_status)', { count: 'exact' });
+            let query = supabase.from('listings').select(PUBLIC_LISTING_FIELDS, { count: 'exact' });
             if (currentUser) {
                 query = query.or(`status.eq.approved,owner_user_id.eq.${currentUser.id}`);
             } else {
@@ -2434,7 +2568,16 @@
                          .order('created_at', { ascending: false })
                          .range(listingsOffset, listingsOffset + LISTINGS_PER_PAGE - 1);
 
-            const { data, count } = await query;
+            const { data, error, count } = await query;
+            if (error) {
+                listingsOffset = Math.max(0, listingsOffset - LISTINGS_PER_PAGE);
+                console.error('Error loading more listings:', error);
+                showToast('More listings could not be loaded. Please try again.', 'error');
+                return;
+            }
+
+            await attachOptionalWebpages(data || []);
+            cacheListings(data || []);
             totalListingsCount = count || totalListingsCount;
 
             // Append to existing table
@@ -2484,6 +2627,20 @@
                 `<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--muted);">Loading...</td></tr>`;
         }
 
+        function renderListingsError(error) {
+            console.error('Directory query failed:', error?.message || error);
+            document.getElementById('featured-listings-container').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">⚠️</div>
+                    <h4>Listings could not be loaded.</h4>
+                    <p>Please refresh the page or try again shortly.</p>
+                </div>`;
+            document.getElementById('classifieds-tbody').innerHTML =
+                `<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--red);">The directory query failed. Please try again.</td></tr>`;
+            document.getElementById('load-more-btn').style.display = 'none';
+            showToast('The directory could not be loaded. Please refresh and try again.', 'error');
+        }
+
         function renderFeaturedListings(featured, fallback) {
             const container = document.getElementById('featured-listings-container');
             const listings = featured.length > 0 ? featured : fallback.slice(0, 5);
@@ -2499,10 +2656,10 @@
             }
 
             container.innerHTML = listings.map(l => {
-                const lJson = encodeURIComponent(JSON.stringify(l)).replace(/'/g, "%27");
                 const webpage = Array.isArray(l.listing_webpages) ? l.listing_webpages[0] : l.listing_webpages;
+                const websiteUrl = normalizeWebsiteUrl(l.website);
                 return `
-                <div class="listing-row" style="cursor: pointer;" onclick="openListingDetailsModal('${lJson}')">
+                <div class="listing-row" style="cursor: pointer;" role="button" tabindex="0" data-open-listing-id="${escHtml(l.id)}">
                     ${l.image_url 
                         ? `<img src="${escHtml(l.image_url)}" class="listing-image" alt="Logo">` 
                         : `<div class="listing-image" style="display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 2.5rem;">🏢</div>`}
@@ -2520,10 +2677,10 @@
                         ${l.contact_phone ? `<span style="font-size:0.95rem; font-weight:600; margin-bottom: 4px;">📞 ${escHtml(l.contact_phone)}</span>` : ''}
                     </div>
                     <div class="listing-contact">
-                        ${l.email ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Email</a>` : ''}
-                        ${l.website ? `<a href="${escHtml(normalizeWebsiteUrl(l.website))}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Website</a>` : ''}
-                        ${l.whatsapp ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" class="btn btn-primary" style="padding: 6px 16px; font-size: 0.85rem; width: 100%; text-align: center;">WhatsApp</a>` : ''}
-                        ${webpage?.page_status === 'published' ? `<a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" onclick="event.stopPropagation();" class="btn btn-primary" style="padding:6px 16px;font-size:.85rem;width:100%;text-align:center;background:linear-gradient(135deg,var(--yellow),var(--green));">Business Webpage</a>` : ''}
+                        ${l.email ? `<a href="#" data-consultation-listing="${escHtml(l.id)}" data-consultation-source="email" data-consultation-target="${escHtml(l.email)}" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Email</a>` : ''}
+                        ${websiteUrl ? `<a href="${escHtml(websiteUrl)}" target="_blank" rel="noopener" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Website</a>` : ''}
+                        ${l.whatsapp ? `<a href="#" data-consultation-listing="${escHtml(l.id)}" data-consultation-source="whatsapp" data-consultation-target="${escHtml(l.whatsapp.replace(/\D/g,''))}" class="btn btn-primary" style="padding: 6px 16px; font-size: 0.85rem; width: 100%; text-align: center;">WhatsApp</a>` : ''}
+                        ${webpage?.page_status === 'published' ? `<a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" class="btn btn-primary" style="padding:6px 16px;font-size:.85rem;width:100%;text-align:center;background:linear-gradient(135deg,var(--yellow),var(--green));">Business Webpage</a>` : ''}
                     </div>
                 </div>
             `;
@@ -2531,20 +2688,19 @@
         }
 
         function buildTableRow(l) {
-            const lJson = encodeURIComponent(JSON.stringify(l)).replace(/'/g, "%27");
             const webpage = Array.isArray(l.listing_webpages) ? l.listing_webpages[0] : l.listing_webpages;
             return `
-                <tr style="cursor: pointer;" onclick="openListingDetailsModal('${lJson}')">
+                <tr style="cursor: pointer;" data-open-listing-id="${escHtml(l.id)}">
                     <td style="display:flex; align-items:center; gap:12px;">
                         ${l.image_url ? `<img src="${escHtml(l.image_url)}" alt="Logo" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: var(--glass-bg); border: 1px solid var(--glass-border);">` : `<div style="width: 48px; height: 48px; border-radius: 6px; flex-shrink: 0; background: var(--glass-bg); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.2rem;">🏢</div>`}
                         <div>
                             <strong>${escHtml(l.business_name)}</strong>${l.status === 'pending' ? ' <span style="font-size:0.7rem;color:var(--yellow);">(pending)</span>' : ''}
-                            ${webpage?.page_status === 'published' ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" onclick="event.stopPropagation();" style="font-size:.74rem;color:var(--yellow);text-transform:capitalize;">${escHtml(webpage.tier)} Webpage</a>` : ''}
+                            ${webpage?.page_status === 'published' ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" style="font-size:.74rem;color:var(--yellow);text-transform:capitalize;">${escHtml(webpage.tier)} Webpage</a>` : ''}
                         </div>
                     </td>
                     <td>${escHtml(l.subcategory || formatCategory(l.category) || '—')}</td>
                     <td>${escHtml(formatLocation(l.location))}</td>
-                    <td>${l.email ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" style="color:var(--blue);">Email</a>` : l.contact_phone ? escHtml(l.contact_phone) : '—'}</td>
+                    <td>${l.email ? `<a href="#" data-consultation-listing="${escHtml(l.id)}" data-consultation-source="email" data-consultation-target="${escHtml(l.email)}" style="color:var(--blue);">Email</a>` : l.contact_phone ? escHtml(l.contact_phone) : '—'}</td>
                 </tr>`;
         }
 
@@ -2733,7 +2889,9 @@
             const notes = document.getElementById('lf-notes').value.trim();
             const selectedPackage = document.querySelector('input[name="listing_type"]:checked')?.value || 'free';
             const requestedTier = selectedPackage === 'free' ? null : selectedPackage;
-            const listingType = requestedTier ? 'webpage' : 'basic';
+            // Keep the directory's constrained listing_type independent from the optional
+            // paid webpage request. requested_tier is the upgrade signal.
+            const listingType = 'basic';
             const imageFile = document.getElementById('lf-image')?.files?.[0] || null;
 
             if (!businessName || !category || !marketSegment || !description || !location) {
@@ -2761,7 +2919,7 @@
                 imageUrl = urlData?.publicUrl || null;
             }
 
-            const { error } = await supabase.from('listings').insert({
+            const listingPayload = {
                 business_name: businessName,
                 category,
                 subcategory,
@@ -2778,7 +2936,14 @@
                 market_segment: marketSegment,
                 status: 'pending',
                 owner_user_id: currentUser.id
-            });
+            };
+
+            let { error } = await supabase.from('listings').insert(listingPayload);
+            if (isMissingColumnError(error, 'market_segment')) {
+                console.warn('market_segment is not deployed yet; submitting the base listing without that optional field.');
+                const { market_segment: _marketSegment, ...basePayload } = listingPayload;
+                ({ error } = await supabase.from('listings').insert(basePayload));
+            }
 
             setLoading('listing-submit-text', 'listing-submit-spinner', false);
 
@@ -3063,9 +3228,14 @@
 
         function normalizeWebsiteUrl(url) {
             if (!url) return '';
-            const lower = url.trim().toLowerCase();
-            if (lower.startsWith('http://') || lower.startsWith('https://')) return url.trim();
-            return `https://${url.trim()}`;
+            const input = String(url).trim();
+            const candidate = /^https?:\/\//i.test(input) ? input : `https://${input}`;
+            try {
+                const parsed = new URL(candidate);
+                return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '';
+            } catch {
+                return '';
+            }
         }
 
         function escHtml(str) {
@@ -3104,5 +3274,402 @@
         // ==========================================
         init();
     </script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FLOATING ADVERTISE HERE BUTTON + PACKAGE SELECTION MODAL
+════════════════════════════════════════════════════════════════ -->
+<style>
+    /* FAB */
+    #advertise-fab {
+        position: fixed; bottom: 28px; right: 28px; z-index: 990;
+        display: flex; align-items: center; gap: 10px;
+        background: linear-gradient(135deg, #17d66f, #22d3ee);
+        color: #05070d; border: none; border-radius: 56px;
+        padding: 14px 22px; font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.92rem; font-weight: 800; cursor: pointer;
+        box-shadow: 0 8px 32px rgba(23,214,111,0.45), 0 2px 8px rgba(0,0,0,0.3);
+        transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+        letter-spacing: 0.2px;
+    }
+    #advertise-fab:hover { transform: scale(1.07) translateY(-2px); box-shadow: 0 16px 48px rgba(23,214,111,0.55); }
+    #advertise-fab .fab-icon { font-size: 1.2rem; }
+
+    /* Package Modal */
+    #advertise-modal {
+        position: fixed; inset: 0; z-index: 9000;
+        background: rgba(5,7,13,0.92); backdrop-filter: blur(18px);
+        display: none; align-items: flex-start; justify-content: center;
+        padding: 24px 16px; overflow-y: auto;
+    }
+    #advertise-modal.open { display: flex; }
+    .adv-modal-box {
+        background: #0b0f1c; border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 28px; padding: 36px; width: 100%; max-width: 920px;
+        position: relative; margin: auto;
+    }
+    .adv-modal-close {
+        position: absolute; top: 20px; right: 20px;
+        background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+        color: #b9c0d4; font-size: 1.2rem; width: 36px; height: 36px;
+        border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: 0.2s;
+    }
+    .adv-modal-close:hover { background: rgba(255,77,94,0.15); color: #ff4d5e; }
+    .adv-modal-title { font-size: 1.7rem; font-weight: 800; margin-bottom: 6px; }
+    .adv-modal-subtitle { color: #b9c0d4; font-size: 0.9rem; margin-bottom: 28px; }
+    .pkg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 28px; }
+    .pkg-tile {
+        background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.09);
+        border-radius: 20px; padding: 24px; cursor: pointer;
+        transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+        position: relative;
+    }
+    .pkg-tile:hover { border-color: rgba(23,214,111,0.5); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(23,214,111,0.12); }
+    .pkg-tile.selected { border-color: #17d66f; box-shadow: 0 0 0 3px rgba(23,214,111,0.2); }
+    .pkg-tile-badge {
+        display: inline-block; padding: 3px 10px; border-radius: 20px;
+        font-size: 0.7rem; font-weight: 700; margin-bottom: 10px;
+    }
+    .pkg-tile-name { font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
+    .pkg-tile-price { font-size: 1.6rem; font-weight: 800; color: #17d66f; margin-bottom: 4px; }
+    .pkg-tile-duration { font-size: 0.78rem; color: #b9c0d4; margin-bottom: 14px; }
+    .pkg-tile-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+    .pkg-tile-features li { font-size: 0.83rem; color: #b9c0d4; display: flex; align-items: center; gap: 6px; }
+    .pkg-tile-features li::before { content: '✓'; color: #17d66f; font-weight: 800; font-size: 0.8rem; flex-shrink: 0; }
+
+    /* Order Step */
+    .adv-step { display: none; }
+    .adv-step.active { display: block; }
+    .payment-instructions-box {
+        background: rgba(23,214,111,0.07); border: 1px solid rgba(23,214,111,0.25);
+        border-radius: 16px; padding: 20px; margin-bottom: 20px;
+    }
+    .payment-instructions-box h4 { color: #17d66f; font-size: 0.95rem; margin-bottom: 10px; }
+    .payment-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .payment-detail { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; }
+    .payment-detail label { font-size: 0.72rem; color: #b9c0d4; display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .payment-detail span { font-weight: 700; font-size: 0.92rem; word-break: break-all; }
+
+    @media (max-width: 640px) {
+        .adv-modal-box { padding: 24px 18px; }
+        .adv-modal-title { font-size: 1.3rem; }
+        .pkg-grid { grid-template-columns: 1fr; }
+        .payment-detail-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<!-- FAB -->
+<button id="advertise-fab" onclick="openAdvertiseModal()" aria-label="Advertise your business">
+    <span class="fab-icon">📢</span> Advertise Here
+</button>
+
+<!-- Package Selection Modal -->
+<div id="advertise-modal" role="dialog" aria-modal="true" aria-labelledby="adv-modal-heading">
+    <div class="adv-modal-box">
+        <button class="adv-modal-close" onclick="closeAdvertiseModal()" aria-label="Close">✕</button>
+
+        <!-- Step 1: Pick a package -->
+        <div id="adv-step-1" class="adv-step active">
+            <div class="adv-modal-title" id="adv-modal-heading">📢 Advertise Your Business</div>
+            <div class="adv-modal-subtitle">Choose an advertising package to get your business in front of thousands of Jamaicans.</div>
+            <div class="pkg-grid" id="adv-pkg-grid">
+                <div style="color:#b9c0d4;text-align:center;padding:40px;grid-column:1/-1;">Loading packages...</div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;">
+                <button class="btn btn-primary" id="adv-next-btn" onclick="advGoToStep2()" style="padding:14px 32px;font-size:1rem;" disabled>
+                    Next: Payment Details →
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Payment instructions + reference -->
+        <div id="adv-step-2" class="adv-step">
+            <div style="margin-bottom:20px;">
+                <button onclick="advGoToStep1()" style="background:none;border:none;color:#b9c0d4;cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:6px;">← Back to packages</button>
+            </div>
+            <div class="adv-modal-title" style="font-size:1.3rem;">💳 Complete Your Order</div>
+            <div class="adv-modal-subtitle">Your selected package: <strong id="adv-selected-pkg-name"></strong> · <strong id="adv-selected-pkg-price"></strong></div>
+
+            <div class="payment-instructions-box">
+                <h4>🏦 Bank Transfer Details</h4>
+                <div class="payment-detail-grid" id="adv-payment-details">
+                    <div style="color:#b9c0d4;font-size:0.86rem;">Loading payment details...</div>
+                </div>
+                <div id="adv-payment-instructions-text" style="margin-top:14px;font-size:0.86rem;color:#b9c0d4;line-height:1.6;"></div>
+            </div>
+
+            <div style="background:rgba(255,207,51,0.08);border:1px solid rgba(255,207,51,0.25);border-radius:12px;padding:14px;margin-bottom:20px;font-size:0.84rem;color:#b9c0d4;">
+                ⚡ <strong style="color:#ffcf33;">How it works:</strong> Make your bank transfer, then enter your payment reference below. Your ad will go live once our team confirms your payment (usually within 1 business day).
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:0.82rem;font-weight:600;color:#b9c0d4;margin-bottom:6px;">Payment Reference / Transaction ID *</label>
+                <input type="text" id="adv-payment-ref" placeholder="e.g. RBC-2024-001234 or bank confirmation #"
+                    style="width:100%;padding:13px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-family:inherit;font-size:0.9rem;outline:none;box-sizing:border-box;" />
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:0.82rem;font-weight:600;color:#b9c0d4;margin-bottom:6px;">Notes / Additional Info (optional)</label>
+                <textarea id="adv-customer-notes" placeholder="Any additional details about your ad..."
+                    style="width:100%;padding:13px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-family:inherit;font-size:0.9rem;outline:none;min-height:72px;resize:vertical;box-sizing:border-box;"></textarea>
+            </div>
+
+            <div id="adv-order-success" style="display:none;background:rgba(23,214,111,0.1);border:1px solid rgba(23,214,111,0.3);border-radius:16px;padding:24px;text-align:center;margin-bottom:16px;">
+                <div style="font-size:2rem;margin-bottom:8px;">🎉</div>
+                <div style="font-size:1.1rem;font-weight:800;color:#17d66f;margin-bottom:6px;">Order Submitted!</div>
+                <div style="font-size:0.86rem;color:#b9c0d4;">Your order number is <strong id="adv-order-number"></strong>. We'll notify you by email once your payment is confirmed and your ad goes live.</div>
+            </div>
+
+            <div id="adv-order-error" style="display:none;background:rgba(255,77,94,0.1);border:1px solid rgba(255,77,94,0.3);border-radius:12px;padding:14px;margin-bottom:16px;font-size:0.86rem;color:#ff4d5e;"></div>
+
+            <div style="display:flex;gap:12px;" id="adv-order-actions">
+                <button class="btn btn-primary" id="adv-submit-btn" onclick="submitAdOrder()" style="flex:1;padding:14px;font-size:1rem;">
+                    ✓ Submit Order
+                </button>
+                <button class="btn btn-ghost" onclick="closeAdvertiseModal()" style="padding:14px 24px;">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Login prompt -->
+        <div id="adv-step-login" class="adv-step" style="text-align:center;padding:40px 24px;">
+            <div style="font-size:3rem;margin-bottom:16px;">🔐</div>
+            <h2 style="font-size:1.4rem;margin-bottom:8px;">Sign In to Advertise</h2>
+            <p style="color:#b9c0d4;margin-bottom:24px;">You need a free account to place an advertising order and receive confirmation notifications.</p>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="triggerLoginFromModal()" style="padding:12px 28px;">Sign In / Register</button>
+                <button class="btn btn-ghost" onclick="closeAdvertiseModal()" style="padding:12px 24px;">Maybe Later</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let advPackages = [];
+    let advSelectedPkg = null;
+    let advDefaultAccount = null;
+    let advCurrentUser = null;
+
+    // ── Auth state ──
+    sb.auth.getSession().then(({ data: { session } }) => {
+        advCurrentUser = session?.user || null;
+    });
+    sb.auth.onAuthStateChange((_e, session) => {
+        advCurrentUser = session?.user || null;
+    });
+
+    // ── Load packages ──
+    async function loadAdvPackages() {
+        const grid = document.getElementById('adv-pkg-grid');
+        try {
+            const { data: pkgs, error } = await sb.from('ad_packages')
+                .select('id,name,code,price,currency,duration_days,description,features,product_type,payment_account_id')
+                .eq('is_active', true)
+                .order('price');
+            if (error) throw error;
+            advPackages = pkgs || [];
+
+            // Load default payment account
+            const { data: accounts } = await sb.from('payment_accounts')
+                .select('*').eq('is_active', true).eq('is_default', true).limit(1);
+            if (!accounts || accounts.length === 0) {
+                const { data: allAccounts } = await sb.from('payment_accounts')
+                    .select('*').eq('is_active', true).order('sort_order').limit(1);
+                advDefaultAccount = allAccounts?.[0] || null;
+            } else {
+                advDefaultAccount = accounts[0];
+            }
+
+            if (!advPackages.length) {
+                grid.innerHTML = '<div style="color:#b9c0d4;text-align:center;padding:40px;grid-column:1/-1;">No packages available at this time.</div>';
+                return;
+            }
+
+            const tierColors = {
+                'silver': { bg: 'rgba(180,180,200,0.08)', border: 'rgba(180,180,200,0.3)', badge: '#b9c0d4', badgeBg: 'rgba(180,180,200,0.1)' },
+                'gold': { bg: 'rgba(255,207,51,0.06)', border: 'rgba(255,207,51,0.3)', badge: '#ffcf33', badgeBg: 'rgba(255,207,51,0.1)' },
+                'platinum': { bg: 'rgba(91,156,246,0.06)', border: 'rgba(91,156,246,0.3)', badge: '#5b9cf6', badgeBg: 'rgba(91,156,246,0.1)' },
+            };
+
+            grid.innerHTML = advPackages.map((p, i) => {
+                const code = (p.code || '').toLowerCase();
+                const tier = code.includes('platinum') ? 'platinum' : code.includes('gold') ? 'gold' : 'silver';
+                const colors = tierColors[tier] || tierColors.silver;
+                const features = p.features ? Object.entries(p.features).filter(([,v]) => v && v !== false).map(([k,v]) => {
+                    const labels = { images: `Up to ${v} images`, video: 'Video support', featured: 'Featured listing', sidebar: 'Sidebar placement' };
+                    return labels[k] || k.replace(/_/g,' ');
+                }) : [];
+
+                return `<div class="pkg-tile" id="pkg-tile-${i}" onclick="selectAdvPackage(${i})"
+                    style="background:${colors.bg};border-color:${colors.border};">
+                    <div class="pkg-tile-badge" style="background:${colors.badgeBg};color:${colors.badge};">${tier.toUpperCase()}</div>
+                    <div class="pkg-tile-name">${p.name}</div>
+                    <div class="pkg-tile-price">${p.currency} ${Number(p.price).toLocaleString()}</div>
+                    <div class="pkg-tile-duration">${p.duration_days} days · ${p.product_type || 'display ad'}</div>
+                    ${p.description ? `<div style="font-size:0.82rem;color:#b9c0d4;margin-bottom:12px;">${p.description}</div>` : ''}
+                    ${features.length ? `<ul class="pkg-tile-features">${features.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
+                </div>`;
+            }).join('');
+        } catch(err) {
+            grid.innerHTML = `<div style="color:#ff4d5e;text-align:center;padding:40px;grid-column:1/-1;">Could not load packages: ${err.message}</div>`;
+        }
+    }
+
+    window.selectAdvPackage = function(idx) {
+        advSelectedPkg = advPackages[idx];
+        document.querySelectorAll('.pkg-tile').forEach(t => t.classList.remove('selected'));
+        document.getElementById(`pkg-tile-${idx}`)?.classList.add('selected');
+        document.getElementById('adv-next-btn').disabled = false;
+    };
+
+    window.advGoToStep1 = function() {
+        document.querySelectorAll('.adv-step').forEach(s => s.classList.remove('active'));
+        document.getElementById('adv-step-1').classList.add('active');
+    };
+
+    window.advGoToStep2 = async function() {
+        if (!advSelectedPkg) return;
+
+        // Check auth
+        if (!advCurrentUser) {
+            document.querySelectorAll('.adv-step').forEach(s => s.classList.remove('active'));
+            document.getElementById('adv-step-login').classList.add('active');
+            return;
+        }
+
+        document.querySelectorAll('.adv-step').forEach(s => s.classList.remove('active'));
+        document.getElementById('adv-step-2').classList.add('active');
+        document.getElementById('adv-selected-pkg-name').textContent = advSelectedPkg.name;
+        document.getElementById('adv-selected-pkg-price').textContent = `${advSelectedPkg.currency} ${Number(advSelectedPkg.price).toLocaleString()} for ${advSelectedPkg.duration_days} days`;
+        document.getElementById('adv-order-success').style.display = 'none';
+        document.getElementById('adv-order-error').style.display = 'none';
+        document.getElementById('adv-order-actions').style.display = 'flex';
+        document.getElementById('adv-payment-ref').value = '';
+
+        // Load payment account for this package
+        let account = advDefaultAccount;
+        if (advSelectedPkg.payment_account_id) {
+            try {
+                const { data } = await sb.from('payment_accounts').select('*').eq('id', advSelectedPkg.payment_account_id).single();
+                if (data) account = data;
+            } catch(_) {}
+        }
+
+        const pd = document.getElementById('adv-payment-details');
+        const pit = document.getElementById('adv-payment-instructions-text');
+        if (account) {
+            pd.innerHTML = [
+                { label: 'Bank', value: account.bank_name },
+                { label: 'Account Name', value: account.account_name },
+                { label: 'Account Number', value: account.account_number },
+                { label: 'Account Type', value: account.account_type },
+                { label: 'Branch', value: account.branch_name },
+                { label: 'Currency', value: account.currency },
+            ].filter(d => d.value).map(d => `<div class="payment-detail"><label>${d.label}</label><span>${d.value}</span></div>`).join('');
+            pit.textContent = account.instructions || 'Transfer the exact amount and use your order number as the payment reference.';
+        } else {
+            pd.innerHTML = '<div style="color:#b9c0d4;font-size:0.86rem;">Payment details will be provided upon order confirmation. Our team will contact you.</div>';
+            pit.textContent = '';
+        }
+    };
+
+    window.submitAdOrder = async function() {
+        if (!advSelectedPkg || !advCurrentUser) return;
+        const ref = document.getElementById('adv-payment-ref').value.trim();
+        if (!ref) {
+            document.getElementById('adv-order-error').style.display = 'block';
+            document.getElementById('adv-order-error').textContent = 'Please enter your payment reference number.';
+            return;
+        }
+        const btn = document.getElementById('adv-submit-btn');
+        btn.disabled = true;
+        btn.textContent = 'Submitting…';
+        document.getElementById('adv-order-error').style.display = 'none';
+
+        try {
+            let account = advDefaultAccount;
+            if (advSelectedPkg.payment_account_id) {
+                try {
+                    const { data } = await sb.from('payment_accounts').select('*').eq('id', advSelectedPkg.payment_account_id).single();
+                    if (data) account = data;
+                } catch(_) {}
+            }
+
+            const orderNumber = 'AJM-' + Date.now().toString(36).toUpperCase();
+            const orderPayload = {
+                user_id: advCurrentUser.id,
+                ad_package_id: advSelectedPkg.id,
+                order_number: orderNumber,
+                package_name_snapshot: advSelectedPkg.name,
+                package_code_snapshot: advSelectedPkg.code || advSelectedPkg.id,
+                package_description_snapshot: advSelectedPkg.description || null,
+                duration_days_snapshot: advSelectedPkg.duration_days,
+                base_price_snapshot: advSelectedPkg.price,
+                total_price_snapshot: advSelectedPkg.price,
+                currency_snapshot: advSelectedPkg.currency,
+                payment_account_id: account?.id || null,
+                payment_account_snapshot: account ? {
+                    bank_name: account.bank_name,
+                    account_name: account.account_name,
+                    account_number: account.account_number,
+                    account_type: account.account_type,
+                    branch_name: account.branch_name,
+                    currency: account.currency,
+                    instructions: account.instructions
+                } : null,
+                payment_reference: ref,
+                customer_notes: document.getElementById('adv-customer-notes').value.trim() || null,
+                status: 'payment_submitted'
+            };
+
+            const { data: order, error } = await sb.from('ad_orders').insert(orderPayload).select('id,order_number').single();
+            if (error) throw error;
+
+            document.getElementById('adv-order-success').style.display = 'block';
+            document.getElementById('adv-order-number').textContent = order.order_number;
+            document.getElementById('adv-order-actions').style.display = 'none';
+        } catch(err) {
+            document.getElementById('adv-order-error').style.display = 'block';
+            document.getElementById('adv-order-error').textContent = 'Error: ' + err.message;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '✓ Submit Order';
+        }
+    };
+
+    window.triggerLoginFromModal = function() {
+        closeAdvertiseModal();
+        // Trigger the main page's sign-in flow if available
+        if (typeof window.openAuthModal === 'function') window.openAuthModal('login');
+        else if (document.getElementById('auth-modal')) document.getElementById('auth-modal').classList.add('open');
+    };
+
+    window.openAdvertiseModal = async function() {
+        document.getElementById('advertise-modal').classList.add('open');
+        document.querySelectorAll('.adv-step').forEach(s => s.classList.remove('active'));
+        document.getElementById('adv-step-1').classList.add('active');
+        advSelectedPkg = null;
+        document.getElementById('adv-next-btn').disabled = true;
+        if (!advPackages.length) await loadAdvPackages();
+    };
+
+    window.closeAdvertiseModal = function() {
+        document.getElementById('advertise-modal').classList.remove('open');
+    };
+
+    // Close on backdrop
+    document.getElementById('advertise-modal').addEventListener('click', e => {
+        if (e.target === document.getElementById('advertise-modal')) closeAdvertiseModal();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && document.getElementById('advertise-modal').classList.contains('open')) closeAdvertiseModal();
+    });
+</script>
 </body>
 </html>
+

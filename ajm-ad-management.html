@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en-JM">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advertising Management — AJM Admin</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="icon" href="aloe%20favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --ink: #05070d;
+            --panel: #0b101a;
+            --panel-soft: #101724;
+            --white: #fff;
+            --text: #eef2ff;
+            --muted: #9ea8bf;
+            --green: #2dd6a4;
+            --green-deep: #149c79;
+            --blue: #66a8ff;
+            --yellow: #ffcf33;
+            --orange: #ff934f;
+            --red: #ff5d70;
+            --purple: #a88cff;
+            --line: rgba(255,255,255,.09);
+            --glass: rgba(255,255,255,.045);
+            --shadow: 0 24px 70px rgba(0,0,0,.34);
+            --radius: 18px;
+        }
+
+        * { box-sizing: border-box; }
+        html { color-scheme: dark; scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "Space Grotesk", sans-serif;
+            background:
+                radial-gradient(circle at 8% 4%, rgba(45,214,164,.11), transparent 27rem),
+                radial-gradient(circle at 94% 8%, rgba(102,168,255,.12), transparent 29rem),
+                var(--ink);
+        }
+        button, input, select, textarea { font: inherit; }
+        a { color: inherit; }
+        .hidden { display: none !important; }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 80;
+            border-bottom: 1px solid var(--line);
+            background: rgba(5,7,13,.88);
+            backdrop-filter: blur(22px);
+        }
+        .nav {
+            width: min(1540px, 100%);
+            min-height: 72px;
+            margin: auto;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .brand img { width: 44px; height: 44px; object-fit: contain; border-radius: 12px; }
+        .brand strong { display: block; font-size: .95rem; }
+        .brand small { display: block; margin-top: 2px; color: var(--muted); font-size: .72rem; }
+        .nav-actions { display: flex; align-items: center; justify-content: flex-end; gap: 9px; flex-wrap: wrap; }
+        .admin-chip { padding: 6px 10px; color: var(--green); border: 1px solid rgba(45,214,164,.3); border-radius: 999px; background: rgba(45,214,164,.08); font-size: .72rem; font-weight: 800; letter-spacing: .08em; }
+
+        .shell { width: min(1540px, 100%); margin: auto; padding: 28px 24px 64px; }
+        .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 26px; }
+        .eyebrow { margin-bottom: 7px; color: var(--green); font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+        h1, h2, h3, p { margin-top: 0; }
+        h1 { margin-bottom: 7px; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.045em; }
+        .page-head p { max-width: 760px; margin-bottom: 0; color: var(--muted); line-height: 1.65; }
+        .head-controls { display: flex; align-items: center; justify-content: flex-end; gap: 9px; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 40px;
+            padding: 9px 15px;
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            background: var(--glass);
+            text-decoration: none;
+            font-size: .82rem;
+            font-weight: 750;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+        .btn:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.08); }
+        .btn:disabled { opacity: .5; cursor: wait; }
+        .btn-primary { color: #03100c; border-color: transparent; background: linear-gradient(135deg, var(--green), #86e864); }
+        .btn-primary:hover:not(:disabled) { box-shadow: 0 10px 28px rgba(45,214,164,.2); }
+        .btn-danger { color: var(--red); border-color: rgba(255,93,112,.28); background: rgba(255,93,112,.1); }
+        .btn-warning { color: var(--yellow); border-color: rgba(255,207,51,.28); background: rgba(255,207,51,.09); }
+        .btn-blue { color: var(--blue); border-color: rgba(102,168,255,.28); background: rgba(102,168,255,.09); }
+        .btn-sm { min-height: 32px; padding: 6px 10px; border-radius: 8px; font-size: .74rem; }
+        .icon-btn { width: 38px; min-width: 38px; padding: 0; }
+
+        select, input, textarea {
+            width: 100%;
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            outline: none;
+            background: rgba(2,5,10,.72);
+            transition: border-color .2s, box-shadow .2s;
+        }
+        input, select { min-height: 42px; padding: 9px 12px; }
+        textarea { min-height: 100px; padding: 11px 12px; resize: vertical; }
+        input:focus, select:focus, textarea:focus { border-color: rgba(45,214,164,.55); box-shadow: 0 0 0 3px rgba(45,214,164,.08); }
+        label { display: block; margin-bottom: 7px; color: #dbe2f3; font-size: .76rem; font-weight: 700; }
+        label small { color: var(--muted); font-weight: 500; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(6, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .kpi {
+            position: relative;
+            overflow: hidden;
+            min-height: 122px;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+        }
+        .kpi::after { content: ""; position: absolute; right: -30px; bottom: -46px; width: 105px; height: 105px; border-radius: 50%; background: var(--glow, rgba(45,214,164,.12)); filter: blur(5px); }
+        .kpi-label { position: relative; z-index: 1; color: var(--muted); font-size: .72rem; font-weight: 700; letter-spacing: .03em; }
+        .kpi-value { position: relative; z-index: 1; margin-top: 12px; font-size: clamp(1.45rem, 2vw, 2rem); font-weight: 800; letter-spacing: -.045em; }
+        .kpi-note { position: relative; z-index: 1; margin-top: 5px; color: var(--muted); font-size: .68rem; }
+
+        .tabs { display: flex; gap: 5px; width: fit-content; max-width: 100%; margin-bottom: 22px; padding: 5px; overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--glass); }
+        .tab { min-width: max-content; padding: 9px 14px; color: var(--muted); border: 0; border-radius: 9px; background: transparent; font-size: .8rem; font-weight: 750; cursor: pointer; }
+        .tab.active { color: var(--white); background: rgba(255,255,255,.1); box-shadow: 0 5px 16px rgba(0,0,0,.16); }
+        .tab-count { display: inline-grid; min-width: 20px; min-height: 20px; margin-left: 5px; place-items: center; color: var(--yellow); border-radius: 999px; background: rgba(255,207,51,.1); font-size: .65rem; }
+
+        .panel { display: none; }
+        .panel.active { display: block; animation: reveal .22s ease; }
+        @keyframes reveal { from { opacity: 0; transform: translateY(5px); } }
+        .panel-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+        .panel-toolbar h2 { margin-bottom: 4px; font-size: 1.15rem; }
+        .panel-toolbar p { margin: 0; color: var(--muted); font-size: .77rem; }
+        .toolbar-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+        .toolbar-actions input, .toolbar-actions select { width: auto; min-width: 165px; }
+
+        .chart-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+        .chart-card { grid-column: span 6; min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--glass); }
+        .chart-card.wide { grid-column: span 8; }
+        .chart-card.narrow { grid-column: span 4; }
+        .chart-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+        .chart-head h3 { margin-bottom: 3px; font-size: .92rem; }
+        .chart-head p { margin: 0; color: var(--muted); font-size: .68rem; }
+        .chart-wrap { position: relative; height: 285px; }
+        .chart-empty { position: absolute; inset: 0; z-index: 2; display: none; place-items: center; color: var(--muted); background: rgba(5,7,13,.72); font-size: .78rem; text-align: center; }
+        .chart-card.empty .chart-empty { display: grid; }
+
+        .table-card { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--glass); }
+        .table-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: .76rem; }
+        th { padding: 13px 14px; color: var(--muted); border-bottom: 1px solid var(--line); background: rgba(255,255,255,.035); font-size: .67rem; letter-spacing: .05em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+        td { padding: 13px 14px; border-bottom: 1px solid rgba(255,255,255,.055); vertical-align: top; }
+        tbody tr:last-child td { border-bottom: 0; }
+        tbody tr:hover td { background: rgba(255,255,255,.022); }
+        .cell-title { display: block; max-width: 260px; font-weight: 750; }
+        .cell-sub { display: block; max-width: 280px; margin-top: 3px; color: var(--muted); font-size: .68rem; overflow-wrap: anywhere; }
+        .row-actions { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; min-width: 150px; }
+        .amount { color: var(--green); font-weight: 800; white-space: nowrap; }
+        .metric-pair { white-space: nowrap; }
+        .metric-pair strong { color: var(--blue); }
+        .empty-row td { padding: 44px 18px; color: var(--muted); text-align: center; }
+
+        .badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.05); font-size: .64rem; font-weight: 800; text-transform: capitalize; white-space: nowrap; }
+        .badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .badge-pending_payment { color: var(--yellow); background: rgba(255,207,51,.08); }
+        .badge-payment_submitted { color: var(--blue); background: rgba(102,168,255,.09); }
+        .badge-approved, .badge-active { color: var(--green); background: rgba(45,214,164,.09); }
+        .badge-paused { color: var(--orange); background: rgba(255,147,79,.09); }
+        .badge-rejected, .badge-cancelled, .badge-expired, .badge-inactive { color: var(--red); background: rgba(255,93,112,.08); }
+
+        .package-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+        .package-card { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018)); }
+        .package-top { position: relative; padding: 19px; border-bottom: 1px solid var(--line); }
+        .package-top::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: var(--accent, var(--green)); }
+        .package-meta { display: flex; align-items: center; justify-content: space-between; gap: 9px; }
+        .package-code { color: var(--muted); font-size: .65rem; letter-spacing: .07em; text-transform: uppercase; }
+        .package-top h3 { margin: 12px 0 5px; font-size: 1.12rem; }
+        .package-top p { min-height: 36px; margin: 0; color: var(--muted); font-size: .72rem; line-height: 1.5; }
+        .package-price { margin-top: 15px; font-size: 1.5rem; font-weight: 800; letter-spacing: -.04em; }
+        .package-price small { color: var(--muted); font-size: .68rem; font-weight: 600; letter-spacing: 0; }
+        .package-tags { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
+        .tag { padding: 4px 7px; color: var(--muted); border: 1px solid var(--line); border-radius: 7px; background: rgba(255,255,255,.035); font-size: .62rem; }
+        .option-list { display: grid; gap: 8px; padding: 14px; }
+        .option { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 11px; border: 1px solid rgba(255,255,255,.07); border-radius: 11px; background: rgba(0,0,0,.15); }
+        .option strong { display: block; font-size: .75rem; }
+        .option small { display: block; margin-top: 3px; color: var(--muted); font-size: .65rem; }
+        .option-actions { display: flex; align-items: center; gap: 4px; }
+        .package-actions { display: flex; gap: 7px; padding: 0 14px 14px; flex-wrap: wrap; }
+
+        .bank-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+        .bank-card { position: relative; overflow: hidden; padding: 19px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--glass); }
+        .bank-card.default { border-color: rgba(45,214,164,.35); box-shadow: inset 0 0 0 1px rgba(45,214,164,.08); }
+        .bank-card h3 { margin: 12px 0 4px; font-size: 1rem; }
+        .bank-name { color: var(--blue); font-size: .74rem; font-weight: 700; }
+        .account-number { margin: 16px 0; font-size: 1.15rem; font-weight: 800; letter-spacing: .08em; }
+        .bank-details { display: grid; gap: 7px; margin-bottom: 15px; color: var(--muted); font-size: .7rem; }
+        .bank-details strong { color: var(--text); }
+        .bank-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .state-card { max-width: 620px; margin: 12vh auto; padding: 34px; border: 1px solid var(--line); border-radius: 24px; background: var(--glass); box-shadow: var(--shadow); text-align: center; }
+        .state-icon { margin-bottom: 14px; font-size: 2.3rem; }
+        .state-card p { color: var(--muted); line-height: 1.6; }
+        .loading-dot { display: inline-block; width: 8px; height: 8px; margin: 0 3px; border-radius: 50%; background: var(--green); animation: bounce 1s infinite alternate; }
+        .loading-dot:nth-child(2) { animation-delay: .18s; }
+        .loading-dot:nth-child(3) { animation-delay: .36s; }
+        @keyframes bounce { to { transform: translateY(-8px); opacity: .4; } }
+
+        .notice { display: none; margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); background: var(--glass); font-size: .76rem; line-height: 1.5; }
+        .notice.show { display: block; }
+        .notice.error { color: #ffc8cf; border-color: rgba(255,93,112,.32); background: rgba(255,93,112,.08); }
+        .notice.success { color: #bdf8e5; border-color: rgba(45,214,164,.3); background: rgba(45,214,164,.08); }
+
+        .modal-backdrop { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; padding: 22px; background: rgba(0,0,0,.76); backdrop-filter: blur(10px); }
+        .modal-backdrop.open { display: flex; }
+        .modal { width: min(720px, 100%); max-height: min(90vh, 900px); overflow-y: auto; border: 1px solid rgba(255,255,255,.13); border-radius: 22px; background: #090e17; box-shadow: var(--shadow); }
+        .modal.wide { width: min(940px, 100%); }
+        .modal-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 20px 22px; border-bottom: 1px solid var(--line); background: rgba(9,14,23,.96); backdrop-filter: blur(16px); }
+        .modal-head h2 { margin-bottom: 4px; font-size: 1.18rem; }
+        .modal-head p { margin: 0; color: var(--muted); font-size: .7rem; }
+        .modal-body { padding: 22px; }
+        .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 17px 22px; border-top: 1px solid var(--line); }
+        .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+        .field.full { grid-column: 1 / -1; }
+        .check-row { display: flex; align-items: center; gap: 9px; min-height: 42px; }
+        .check-row input { width: 18px; min-height: 18px; }
+        .check-row label { margin: 0; }
+        .detail-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+        .detail { padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: rgba(255,255,255,.025); }
+        .detail span { display: block; color: var(--muted); font-size: .64rem; }
+        .detail strong { display: block; margin-top: 5px; font-size: .75rem; overflow-wrap: anywhere; }
+        .proof-link { display: inline-flex; margin-top: 12px; color: var(--blue); font-size: .75rem; }
+        .danger-copy { padding: 12px; color: #ffd0d5; border: 1px solid rgba(255,93,112,.24); border-radius: 11px; background: rgba(255,93,112,.07); font-size: .72rem; line-height: 1.55; }
+
+        .toast-stack { position: fixed; right: 20px; bottom: 20px; z-index: 180; display: grid; gap: 8px; width: min(390px, calc(100% - 40px)); }
+        .toast { padding: 13px 15px; border: 1px solid var(--line); border-radius: 12px; background: #111824; box-shadow: 0 18px 45px rgba(0,0,0,.34); font-size: .75rem; animation: toastIn .2s ease; }
+        .toast.success { border-color: rgba(45,214,164,.35); }
+        .toast.error { border-color: rgba(255,93,112,.4); }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } }
+
+        @media (max-width: 1180px) {
+            .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+            .package-grid, .bank-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-card, .chart-card.wide, .chart-card.narrow { grid-column: span 6; }
+        }
+        @media (max-width: 760px) {
+            .nav { align-items: flex-start; }
+            .nav-actions .nav-link { display: none; }
+            .shell { padding: 20px 14px 50px; }
+            .page-head, .panel-toolbar { flex-direction: column; }
+            .head-controls, .toolbar-actions { width: 100%; justify-content: flex-start; }
+            .toolbar-actions input, .toolbar-actions select { width: 100%; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-card, .chart-card.wide, .chart-card.narrow { grid-column: 1 / -1; }
+            .package-grid, .bank-grid { grid-template-columns: 1fr; }
+            .form-grid, .detail-grid { grid-template-columns: 1fr; }
+            .field.full { grid-column: auto; }
+        }
+        @media (max-width: 430px) {
+            .kpi-grid { grid-template-columns: 1fr; }
+            .brand small, #admin-email { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <nav class="nav" aria-label="Admin navigation">
+            <a class="brand" href="ajm-advertising-hub.html">
+                <img src="aloe%20logo.png" alt="AJM" />
+                <span><strong>Advertising Management</strong><small>AJM Advertising Hub</small></span>
+            </a>
+            <div class="nav-actions">
+                <a class="btn btn-sm nav-link" href="master-admin.html">Master Dashboard</a>
+                <a class="btn btn-sm nav-link" href="ajm-admin-panel.html">Listings Admin</a>
+                <span class="admin-chip">ADMIN</span>
+                <span id="admin-email" style="color:var(--muted);font-size:.72rem;"></span>
+                <button class="btn btn-danger btn-sm" id="logout-btn" type="button">Sign out</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="shell" id="loading-state">
+            <div class="state-card">
+                <div class="state-icon">📡</div>
+                <h2>Loading advertising operations</h2>
+                <p>Confirming administrator access and assembling the latest orders, ads, packages and performance data.</p>
+                <div aria-label="Loading"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
+            </div>
+        </section>
+
+        <section class="shell hidden" id="denied-state">
+            <div class="state-card">
+                <div class="state-icon">🔒</div>
+                <h2>Administrator access required</h2>
+                <p id="denied-message">Sign in with an AJM administrator account to manage advertising.</p>
+                <a class="btn btn-primary" href="ajm-advertising-hub.html">Return to the Advertising Hub</a>
+            </div>
+        </section>
+
+        <section class="shell hidden" id="app">
+            <div class="page-head">
+                <div>
+                    <div class="eyebrow">Revenue, placements and customer fulfilment</div>
+                    <h1>Advertising operations</h1>
+                    <p>Control every package, bank-transfer instruction, payment decision and live placement from one audited workspace.</p>
+                </div>
+                <div class="head-controls">
+                    <select id="analytics-range" aria-label="Analytics range" style="width:auto;min-width:145px;">
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                        <option value="365">Last 12 months</option>
+                    </select>
+                    <button class="btn btn-blue" id="refresh-btn" type="button">↻ Refresh data</button>
+                </div>
+            </div>
+
+            <div class="notice" id="global-notice" role="status"></div>
+
+            <div class="kpi-grid" aria-label="Advertising key metrics">
+                <article class="kpi" style="--glow:rgba(255,207,51,.14)"><div class="kpi-label">Awaiting payment review</div><div class="kpi-value" id="kpi-payment-queue">—</div><div class="kpi-note">Transfers needing an admin decision</div></article>
+                <article class="kpi" style="--glow:rgba(45,214,164,.14)"><div class="kpi-label">Active advertisements</div><div class="kpi-value" id="kpi-active-ads">—</div><div class="kpi-note">Currently eligible for placement</div></article>
+                <article class="kpi" style="--glow:rgba(102,168,255,.14)"><div class="kpi-label">Confirmed revenue</div><div class="kpi-value" id="kpi-revenue">—</div><div class="kpi-note" id="kpi-revenue-note">Selected reporting period</div></article>
+                <article class="kpi" style="--glow:rgba(168,140,255,.14)"><div class="kpi-label">Impressions</div><div class="kpi-value" id="kpi-impressions">—</div><div class="kpi-note">Verified ad views</div></article>
+                <article class="kpi" style="--glow:rgba(255,147,79,.14)"><div class="kpi-label">Click-through rate</div><div class="kpi-value" id="kpi-ctr">—</div><div class="kpi-note">Clicks divided by impressions</div></article>
+                <article class="kpi" style="--glow:rgba(255,93,112,.14)"><div class="kpi-label">Expiring in 30 days</div><div class="kpi-value" id="kpi-expiring">—</div><div class="kpi-note">Renewals requiring attention</div></article>
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="Advertising management areas">
+                <button class="tab active" type="button" role="tab" data-panel="overview">Overview</button>
+                <button class="tab" type="button" role="tab" data-panel="payments">Payment queue <span class="tab-count" id="payment-tab-count">0</span></button>
+                <button class="tab" type="button" role="tab" data-panel="ads">Active ads</button>
+                <button class="tab" type="button" role="tab" data-panel="packages">Packages &amp; options</button>
+                <button class="tab" type="button" role="tab" data-panel="banks">Bank-transfer accounts</button>
+            </div>
+
+            <section class="panel active" id="panel-overview" role="tabpanel">
+                <div class="chart-grid">
+                    <article class="chart-card wide" id="card-revenue"><div class="chart-head"><div><h3>Orders and confirmed revenue</h3><p>Daily commercial activity for the selected period</p></div></div><div class="chart-wrap"><div class="chart-empty">No order activity in this period.</div><canvas id="chart-revenue"></canvas></div></article>
+                    <article class="chart-card narrow" id="card-status"><div class="chart-head"><div><h3>Order status mix</h3><p>Where current customer requests stand</p></div></div><div class="chart-wrap"><div class="chart-empty">No orders to chart.</div><canvas id="chart-status"></canvas></div></article>
+                    <article class="chart-card wide" id="card-traffic"><div class="chart-head"><div><h3>Impressions, clicks and CTR</h3><p>Audience response across live advertising</p></div></div><div class="chart-wrap"><div class="chart-empty">Tracking data will appear after ads receive traffic.</div><canvas id="chart-traffic"></canvas></div></article>
+                    <article class="chart-card narrow" id="card-packages"><div class="chart-head"><div><h3>Package performance</h3><p>Orders and revenue by package</p></div></div><div class="chart-wrap"><div class="chart-empty">No package sales to chart.</div><canvas id="chart-packages"></canvas></div></article>
+                    <article class="chart-card" id="card-placements"><div class="chart-head"><div><h3>Placement performance</h3><p>Impressions and clicks by site location</p></div></div><div class="chart-wrap"><div class="chart-empty">No placement activity yet.</div><canvas id="chart-placements"></canvas></div></article>
+                    <article class="chart-card" id="card-expirations"><div class="chart-head"><div><h3>Upcoming expirations</h3><p>Active campaigns ending over the next eight weeks</p></div></div><div class="chart-wrap"><div class="chart-empty">No upcoming expirations.</div><canvas id="chart-expirations"></canvas></div></article>
+                </div>
+                <div class="panel-toolbar" style="margin-top:22px;"><div><h2>Top advertisements</h2><p>Best-performing creatives in the selected reporting window.</p></div></div>
+                <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Advertisement</th><th>Placement</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Leads</th></tr></thead><tbody id="top-ads-body"><tr class="empty-row"><td colspan="6">Loading performance data…</td></tr></tbody></table></div></div>
+            </section>
+
+            <section class="panel" id="panel-payments" role="tabpanel">
+                <div class="panel-toolbar">
+                    <div><h2>Orders and bank-transfer reviews</h2><p>Nothing becomes active until an administrator confirms the payment.</p></div>
+                    <div class="toolbar-actions"><input id="order-search" type="search" placeholder="Search customer, business or reference" /><select id="order-status"><option value="">All statuses</option><option value="payment_submitted">Payment submitted</option><option value="pending_payment">Pending payment</option><option value="approved">Approved</option><option value="paused">Paused</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option><option value="expired">Expired</option></select><button class="btn" type="button" id="export-orders">Export CSV</button></div>
+                </div>
+                <div class="notice" id="orders-notice"></div>
+                <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Order / customer</th><th>Package</th><th>Amount</th><th>Payment</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead><tbody id="orders-body"><tr class="empty-row"><td colspan="7">Loading orders…</td></tr></tbody></table></div></div>
+            </section>
+
+            <section class="panel" id="panel-ads" role="tabpanel">
+                <div class="panel-toolbar">
+                    <div><h2>Advertisement lifecycle</h2><p>Review active, paused and expiring placements with their delivery metrics.</p></div>
+                    <div class="toolbar-actions"><input id="ad-search" type="search" placeholder="Search advertiser or creative" /><select id="ad-status"><option value="">All ad states</option><option value="active">Active</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option><option value="expired">Expired</option></select></div>
+                </div>
+                <div class="notice" id="ads-notice"></div>
+                <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Advertisement</th><th>Customer / package</th><th>Placements</th><th>Delivery</th><th>Run dates</th><th>Status</th><th>Actions</th></tr></thead><tbody id="ads-body"><tr class="empty-row"><td colspan="7">Loading advertisements…</td></tr></tbody></table></div></div>
+            </section>
+
+            <section class="panel" id="panel-packages" role="tabpanel">
+                <div class="panel-toolbar">
+                    <div><h2>Packages, prices and duration options</h2><p>Changes flow into the public package catalogue without editing the website.</p></div>
+                    <div class="toolbar-actions"><button class="btn btn-primary" type="button" id="new-package">＋ Add package</button></div>
+                </div>
+                <div class="notice" id="packages-notice"></div>
+                <div class="package-grid" id="package-grid"><div class="state-card" style="grid-column:1/-1;margin:0;">Loading package catalogue…</div></div>
+            </section>
+
+            <section class="panel" id="panel-banks" role="tabpanel">
+                <div class="panel-toolbar">
+                    <div><h2>Bank-transfer accounts</h2><p>Control exactly which payment instructions customers receive for each package.</p></div>
+                    <div class="toolbar-actions"><button class="btn btn-primary" type="button" id="new-bank">＋ Add bank account</button></div>
+                </div>
+                <div class="notice show" id="bank-safety">Account numbers are visible only to administrators here. Public customers receive instructions through the controlled package and order workflow.</div>
+                <div class="bank-grid" id="bank-grid"><div class="state-card" style="grid-column:1/-1;margin:0;">Loading payment accounts…</div></div>
+            </section>
+        </section>
+    </main>
+
+    <div class="modal-backdrop" id="package-modal" role="dialog" aria-modal="true" aria-labelledby="package-modal-title">
+        <form class="modal wide" id="package-form">
+            <div class="modal-head"><div><h2 id="package-modal-title">Add advertising package</h2><p>Set the public price, duration, product type and eligible placements.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
+            <div class="modal-body"><div class="notice" id="package-form-notice"></div><input id="package-id" type="hidden" /><div class="form-grid">
+                <div class="field"><label for="package-name">Package name *</label><input id="package-name" required maxlength="120" /></div>
+                <div class="field"><label for="package-code">Unique code *</label><input id="package-code" required maxlength="80" pattern="[a-z0-9-]+" placeholder="homepage-banner" /></div>
+                <div class="field full"><label for="package-description">Customer-facing description</label><textarea id="package-description" maxlength="1000"></textarea></div>
+                <div class="field"><label for="package-type">Product type *</label><select id="package-type"><option value="display_ad">Display advertisement</option><option value="webpage">Business webpage</option></select></div>
+                <div class="field"><label for="package-tier">Webpage tier</label><select id="package-tier"><option value="">Not a webpage tier</option><option value="silver">Silver</option><option value="gold">Gold</option><option value="platinum">Platinum</option></select></div>
+                <div class="field"><label for="package-price">Base price *</label><input id="package-price" type="number" min="0" step="0.01" required /></div>
+                <div class="field"><label for="package-currency">Currency *</label><select id="package-currency"><option value="JMD">JMD</option><option value="USD">USD</option></select></div>
+                <div class="field"><label for="package-duration">Base duration in days *</label><input id="package-duration" type="number" min="1" max="3650" required /></div>
+                <div class="field"><label for="package-sort">Display order</label><input id="package-sort" type="number" min="0" step="1" value="0" /></div>
+                <div class="field full"><label for="package-placements">Placements <small>Comma-separated keys, e.g. home-hero, hub-sidebar</small></label><input id="package-placements" placeholder="home-featured, hub-sidebar" /></div>
+                <div class="field full"><label for="package-features">Features <small>One customer-facing feature per line</small></label><textarea id="package-features"></textarea></div>
+                <div class="field"><label for="package-bank">Payment destination</label><select id="package-bank"><option value="">Default active bank account</option></select></div>
+                <div class="field"><div class="check-row"><input id="package-active" type="checkbox" checked /><label for="package-active">Package is available for purchase</label></div></div>
+            </div></div>
+            <div class="modal-foot"><button class="btn modal-close" type="button">Cancel</button><button class="btn btn-primary" id="package-save" type="submit">Save package</button></div>
+        </form>
+    </div>
+
+    <div class="modal-backdrop" id="option-modal" role="dialog" aria-modal="true" aria-labelledby="option-modal-title">
+        <form class="modal" id="option-form">
+            <div class="modal-head"><div><h2 id="option-modal-title">Add package option</h2><p>Offer optional upgrades, longer durations or extra placements.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
+            <div class="modal-body"><div class="notice" id="option-form-notice"></div><input id="option-id" type="hidden" /><input id="option-package-id" type="hidden" /><div class="form-grid">
+                <div class="field"><label for="option-name">Option name *</label><input id="option-name" required maxlength="120" /></div>
+                <div class="field"><label for="option-code">Unique code *</label><input id="option-code" required maxlength="80" pattern="[a-z0-9-]+" /></div>
+                <div class="field full"><label for="option-description">Description</label><textarea id="option-description" maxlength="600"></textarea></div>
+                <div class="field"><label for="option-price">Price adjustment</label><input id="option-price" type="number" min="0" step="0.01" value="0" /></div>
+                <div class="field"><label for="option-duration">Additional duration days</label><input id="option-duration" type="number" min="0" max="3650" value="0" /></div>
+                <div class="field full"><label for="option-placements">Additional placements <small>Comma-separated</small></label><input id="option-placements" /></div>
+                <div class="field full"><label for="option-features">Additional features <small>One per line</small></label><textarea id="option-features"></textarea></div>
+                <div class="field"><label for="option-sort">Display order</label><input id="option-sort" type="number" min="0" value="0" /></div>
+                <div class="field"><div class="check-row"><input id="option-active" type="checkbox" checked /><label for="option-active">Option is available</label></div></div>
+            </div></div>
+            <div class="modal-foot"><button class="btn modal-close" type="button">Cancel</button><button class="btn btn-primary" id="option-save" type="submit">Save option</button></div>
+        </form>
+    </div>
+
+    <div class="modal-backdrop" id="bank-modal" role="dialog" aria-modal="true" aria-labelledby="bank-modal-title">
+        <form class="modal" id="bank-form">
+            <div class="modal-head"><div><h2 id="bank-modal-title">Add bank-transfer account</h2><p>These instructions are shown only through controlled customer order flows.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
+            <div class="modal-body"><div class="notice" id="bank-form-notice"></div><input id="bank-id" type="hidden" /><div class="form-grid">
+                <div class="field"><label for="bank-label">Internal label *</label><input id="bank-label" required maxlength="120" placeholder="JMD business account" /></div>
+                <div class="field"><label for="bank-name">Bank name *</label><input id="bank-name" required maxlength="160" /></div>
+                <div class="field"><label for="bank-account-name">Account holder *</label><input id="bank-account-name" required maxlength="180" /></div>
+                <div class="field"><label for="bank-account-number">Account number *</label><input id="bank-account-number" required maxlength="100" autocomplete="off" /></div>
+                <div class="field"><label for="bank-account-type">Account type</label><input id="bank-account-type" maxlength="80" placeholder="Business chequing" /></div>
+                <div class="field"><label for="bank-currency">Currency *</label><select id="bank-currency"><option value="JMD">JMD</option><option value="USD">USD</option></select></div>
+                <div class="field"><label for="bank-branch">Branch</label><input id="bank-branch" maxlength="160" /></div>
+                <div class="field"><label for="bank-routing">Routing / transit number</label><input id="bank-routing" maxlength="100" /></div>
+                <div class="field"><label for="bank-swift">SWIFT / BIC</label><input id="bank-swift" maxlength="40" /></div>
+                <div class="field full"><label for="bank-instructions">Transfer instructions *</label><textarea id="bank-instructions" required maxlength="2000" placeholder="Include the order number in the transfer memo and upload the receipt."></textarea></div>
+                <div class="field"><div class="check-row"><input id="bank-active" type="checkbox" checked /><label for="bank-active">Account is active</label></div></div>
+                <div class="field"><div class="check-row"><input id="bank-default" type="checkbox" /><label for="bank-default">Use as default payment account</label></div></div>
+            </div></div>
+            <div class="modal-foot"><button class="btn modal-close" type="button">Cancel</button><button class="btn btn-primary" id="bank-save" type="submit">Save account</button></div>
+        </form>
+    </div>
+
+    <div class="modal-backdrop" id="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
+        <div class="modal wide">
+            <div class="modal-head"><div><h2 id="order-modal-title">Advertising order</h2><p id="order-modal-subtitle"></p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
+            <div class="modal-body" id="order-detail"></div>
+            <div class="modal-foot" id="order-detail-actions"><button class="btn modal-close" type="button">Close</button></div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+        <form class="modal" id="confirm-form">
+            <div class="modal-head"><div><h2 id="confirm-title">Confirm action</h2><p>Administrative changes are written to the audit trail.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
+            <div class="modal-body"><div class="danger-copy" id="confirm-copy"></div><div class="form-grid" style="margin-top:15px;">
+                <div class="field full" id="confirm-reason-field"><label for="confirm-reason">Reason *</label><input id="confirm-reason" maxlength="500" /></div>
+                <div class="field full"><label for="confirm-note">Internal admin note <small>Recommended for payment decisions and manual adjustments</small></label><textarea id="confirm-note" maxlength="1500"></textarea></div>
+                <div class="field hidden" id="confirm-duration-field"><label for="confirm-duration">Renewal duration in days *</label><input id="confirm-duration" type="number" min="1" max="3650" value="30" /></div>
+            </div></div>
+            <div class="modal-foot"><button class="btn modal-close" type="button">Go back</button><button class="btn btn-danger" id="confirm-submit" type="submit">Confirm</button></div>
+        </form>
+    </div>
+
+    <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const ORDER_REVIEW_STATES = new Set(['pending_payment', 'payment_submitted']);
+        const TERMINAL_STATES = new Set(['rejected', 'cancelled', 'expired']);
+        const PALETTE = ['#2dd6a4', '#66a8ff', '#ffcf33', '#a88cff', '#ff934f', '#ff5d70', '#58d5ef'];
+
+        const state = {
+            user: null,
+            profile: null,
+            packages: [],
+            accounts: [],
+            orders: [],
+            advertisements: [],
+            analytics: {},
+            charts: {},
+            pendingConfirmation: null,
+            loading: false
+        };
+
+        const el = (id) => document.getElementById(id);
+        const text = (value) => String(value ?? '');
+        const safe = (value) => text(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        const splitComma = (value) => text(value).split(',').map((item) => item.trim()).filter(Boolean);
+        const splitLines = (value) => text(value).split('\n').map((item) => item.trim()).filter(Boolean);
+        const normalizeArray = (value) => Array.isArray(value) ? value : value && typeof value === 'object' ? Object.entries(value).map(([key, count]) => ({ key, status: key, count })) : [];
+        const first = (...values) => values.find((value) => value !== undefined && value !== null && value !== '');
+        const number = (value) => Number(value || 0);
+        const dateValue = (value) => value ? new Date(value) : null;
+        const fmtDate = (value, includeTime = false) => {
+            const date = dateValue(value);
+            if (!date || Number.isNaN(date.getTime())) return '—';
+            return date.toLocaleString('en-JM', includeTime ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' });
+        };
+        const fmtMoney = (value, currency = 'JMD') => {
+            try { return new Intl.NumberFormat('en-JM', { style: 'currency', currency: currency || 'JMD', maximumFractionDigits: 2 }).format(number(value)); }
+            catch { return `${currency || 'JMD'} ${number(value).toFixed(2)}`; }
+        };
+        const fmtPercent = (value) => `${number(value).toFixed(1)}%`;
+        const maskAccount = (value) => {
+            const raw = text(value).replace(/\s/g, '');
+            if (!raw) return 'Not provided';
+            return `${'•'.repeat(Math.max(4, raw.length - 4))}${raw.slice(-4)}`;
+        };
+        const statusBadge = (status) => `<span class="badge badge-${safe(status || 'inactive')}">${safe(text(status || 'unknown').replaceAll('_', ' '))}</span>`;
+        const packageById = (id) => state.packages.find((item) => item.id === id) || null;
+        const accountById = (id) => state.accounts.find((item) => item.id === id) || null;
+        const orderById = (id) => state.orders.find((item) => item.id === id) || null;
+
+        function toast(message, type = 'info') {
+            const item = document.createElement('div');
+            item.className = `toast ${type}`;
+            item.textContent = message;
+            el('toast-stack').appendChild(item);
+            setTimeout(() => item.remove(), 5200);
+        }
+
+        function showNotice(id, message, type = 'info') {
+            const node = el(id);
+            if (!node) return;
+            node.textContent = message || '';
+            node.className = `notice${message ? ' show' : ''}${type !== 'info' ? ` ${type}` : ''}`;
+        }
+
+        function openModal(id) {
+            el(id)?.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(target) {
+            const modal = typeof target === 'string' ? el(target) : target?.closest('.modal-backdrop');
+            modal?.classList.remove('open');
+            if (!document.querySelector('.modal-backdrop.open')) document.body.style.overflow = '';
+        }
+
+        async function adminCommand(action, payload = {}) {
+            const { data, error } = await supabase.rpc('admin_manage_advertising', { p_action: action, p_payload: payload });
+            if (error) throw error;
+            if (data?.error) throw new Error(data.error);
+            return data;
+        }
+
+        async function lowerCrud(entity, action, payload = {}) {
+            const rpc = { package: 'admin_manage_ad_package', option: 'admin_manage_ad_package_option', bank: 'admin_manage_payment_account' }[entity];
+            if (!rpc) throw new Error('Unsupported management action.');
+            const { data, error } = await supabase.rpc(rpc, { p_action: action, p_payload: payload });
+            if (error) throw error;
+            if (data?.error) throw new Error(data.error);
+            return data;
+        }
+
+        async function init() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.user) return deny('Please sign in through the AJM Advertising Hub first.');
+                state.user = session.user;
+                const { data: profile, error } = await supabase.from('profiles').select('role, full_name, email').eq('id', state.user.id).maybeSingle();
+                if (error || profile?.role !== 'admin') return deny('This account does not have administrator permission.');
+                state.profile = profile;
+                el('admin-email').textContent = profile.full_name || profile.email || state.user.email;
+                el('loading-state').classList.add('hidden');
+                el('app').classList.remove('hidden');
+                await refreshAll();
+            } catch (error) {
+                deny(error.message || 'Administrator access could not be verified.');
+            }
+        }
+
+        function deny(message) {
+            el('loading-state').classList.add('hidden');
+            el('app').classList.add('hidden');
+            el('denied-message').textContent = message;
+            el('denied-state').classList.remove('hidden');
+        }
+
+        async function refreshAll() {
+            if (state.loading) return;
+            state.loading = true;
+            el('refresh-btn').disabled = true;
+            el('refresh-btn').textContent = 'Refreshing…';
+            showNotice('global-notice', 'Refreshing the advertising workspace…');
+            const tasks = await Promise.allSettled([loadCatalog(), loadAccounts(), loadOrders(), loadAdvertisements(), loadAnalytics()]);
+            const failures = tasks.filter((item) => item.status === 'rejected').map((item) => item.reason?.message || 'Unknown data error');
+            renderAll();
+            if (failures.length) showNotice('global-notice', `Some advertising data could not be loaded: ${[...new Set(failures)].join(' · ')}`, 'error');
+            else showNotice('global-notice', '');
+            state.loading = false;
+            el('refresh-btn').disabled = false;
+            el('refresh-btn').textContent = '↻ Refresh data';
+        }
+
+        async function loadCatalog() {
+            const { data, error } = await supabase.rpc('get_ad_catalog');
+            if (error) throw new Error(`Package catalogue: ${error.message}`);
+            state.packages = Array.isArray(data) ? data : (data?.packages || []);
+        }
+
+        async function loadAccounts() {
+            const { data, error } = await supabase.from('payment_accounts').select('*').order('is_default', { ascending: false }).order('created_at', { ascending: false });
+            if (error) throw new Error(`Payment accounts: ${error.message}`);
+            state.accounts = data || [];
+        }
+
+        async function loadOrders() {
+            const status = el('order-status')?.value || null;
+            const { data, error } = await supabase.rpc('admin_get_ad_orders', { p_status: status, p_from: null, p_to: null, p_limit: 250, p_offset: 0 });
+            if (error) throw new Error(`Advertising orders: ${error.message}`);
+            state.orders = Array.isArray(data) ? data : (data?.orders || data?.data || []);
+        }
+
+        async function loadAdvertisements() {
+            let result = await supabase.from('advertisements').select('*').order('created_at', { ascending: false }).limit(500);
+            if (result.error) throw new Error(`Advertisements: ${result.error.message}`);
+            state.advertisements = result.data || [];
+        }
+
+        async function loadAnalytics() {
+            const days = Number(el('analytics-range')?.value || 30);
+            const { data, error } = await supabase.rpc('get_admin_advertising_analytics', { p_days: days });
+            if (error) throw new Error(`Advertising analytics: ${error.message}`);
+            state.analytics = data || {};
+        }
+
+        function renderAll() {
+            renderKpis();
+            renderOrders();
+            renderAdvertisements();
+            renderPackages();
+            renderAccounts();
+            renderAnalytics();
+            populateAccountSelect();
+        }
+
+        function renderKpis() {
+            const kpis = state.analytics.kpis || {};
+            const queue = first(kpis.payment_queue, kpis.pending_payments, state.orders.filter((item) => ORDER_REVIEW_STATES.has(item.status)).length, 0);
+            const activeAds = first(kpis.active_ads, state.advertisements.filter((item) => item.status === 'active').length, 0);
+            const revenue = first(kpis.confirmed_revenue, kpis.revenue, kpis.total_revenue, 0);
+            const currency = first(kpis.currency, state.packages[0]?.currency, 'JMD');
+            const impressions = first(kpis.impressions, kpis.total_impressions, 0);
+            const clicks = first(kpis.clicks, kpis.total_clicks, 0);
+            const ctr = first(kpis.ctr, impressions ? clicks / impressions * 100 : 0);
+            const expiring = first(kpis.expiring_30_days, kpis.expiring_soon, upcomingExpirationRows().reduce((sum, item) => sum + item.count, 0), 0);
+            el('kpi-payment-queue').textContent = number(queue).toLocaleString();
+            el('kpi-active-ads').textContent = number(activeAds).toLocaleString();
+            el('kpi-revenue').textContent = fmtMoney(revenue, currency);
+            el('kpi-impressions').textContent = number(impressions).toLocaleString();
+            el('kpi-ctr').textContent = fmtPercent(ctr);
+            el('kpi-expiring').textContent = number(expiring).toLocaleString();
+            el('payment-tab-count').textContent = number(queue).toLocaleString();
+            el('kpi-revenue-note').textContent = `Last ${el('analytics-range').value} days`;
+        }
+
+        function orderCustomer(order) {
+            const profile = first(order.customer, order.profile, order.profiles, {});
+            return {
+                name: first(order.customer_name, profile?.full_name, order.contact_name, 'AJM customer'),
+                email: first(order.customer_email, profile?.email, order.email, '')
+            };
+        }
+
+        function orderPackage(order) {
+            const embedded = first(order.package, order.ad_package, order.ad_packages, {});
+            const cached = packageById(order.package_id) || {};
+            return {
+                name: first(order.package_name, embedded?.name, cached.name, 'Advertising package'),
+                code: first(order.package_code, embedded?.code, cached.code, ''),
+                currency: first(order.currency, embedded?.currency, cached.currency, 'JMD')
+            };
+        }
+
+        function orderAmount(order) {
+            return first(order.amount_due, order.total_amount, order.amount, order.price_snapshot, order.package_price, 0);
+        }
+
+        function orderReference(order) {
+            return first(order.payment_reference, order.transfer_reference, order.reference, 'Not submitted');
+        }
+
+        function orderActions(order, compact = false) {
+            const buttons = [`<button class="btn btn-sm" type="button" data-order-detail="${safe(order.id)}">View</button>`];
+            if (order.status === 'payment_submitted') buttons.push(`<button class="btn btn-primary btn-sm" type="button" data-order-action="confirm_payment" data-order-id="${safe(order.id)}">Confirm</button>`);
+            if (ORDER_REVIEW_STATES.has(order.status)) buttons.push(`<button class="btn btn-danger btn-sm" type="button" data-order-action="reject_payment" data-order-id="${safe(order.id)}">Reject</button>`);
+            if (order.status === 'approved') buttons.push(`<button class="btn btn-warning btn-sm" type="button" data-order-action="pause_ad" data-order-id="${safe(order.id)}">Pause</button>`);
+            if (order.status === 'paused') buttons.push(`<button class="btn btn-primary btn-sm" type="button" data-order-action="resume_ad" data-order-id="${safe(order.id)}">Resume</button>`);
+            if (['approved', 'paused'].includes(order.status)) buttons.push(`<button class="btn btn-blue btn-sm" type="button" data-order-action="renew_subscription" data-order-id="${safe(order.id)}">Renew</button>`);
+            if (!TERMINAL_STATES.has(order.status)) buttons.push(`<button class="btn btn-danger btn-sm" type="button" data-order-action="cancel_subscription" data-order-id="${safe(order.id)}">Cancel</button>`);
+            return compact ? buttons.slice(0, 3).join('') : buttons.join('');
+        }
+
+        function filteredOrders() {
+            const query = text(el('order-search')?.value).trim().toLowerCase();
+            if (!query) return state.orders;
+            return state.orders.filter((order) => {
+                const customer = orderCustomer(order);
+                const pkg = orderPackage(order);
+                return [order.id, order.order_number, customer.name, customer.email, pkg.name, pkg.code, orderReference(order), order.business_name, order.listing_name].some((value) => text(value).toLowerCase().includes(query));
+            });
+        }
+
+        function renderOrders() {
+            const rows = filteredOrders();
+            if (!rows.length) {
+                el('orders-body').innerHTML = '<tr class="empty-row"><td colspan="7">No advertising orders match this view.</td></tr>';
+                return;
+            }
+            el('orders-body').innerHTML = rows.map((order) => {
+                const customer = orderCustomer(order);
+                const pkg = orderPackage(order);
+                const proof = first(order.payment_proof_url, order.proof_url, order.payment_proof_path, order.proof_path);
+                return `<tr>
+                    <td><span class="cell-title">${safe(first(order.order_number, `#${text(order.id).slice(0, 8)}`))}</span><span class="cell-sub">${safe(customer.name)}${customer.email ? ` · ${safe(customer.email)}` : ''}</span></td>
+                    <td><span class="cell-title">${safe(pkg.name)}</span><span class="cell-sub">${safe(first(order.business_name, order.listing_name, order.creative?.title, pkg.code))}</span></td>
+                    <td><span class="amount">${safe(fmtMoney(orderAmount(order), pkg.currency))}</span><span class="cell-sub">${safe(first(order.duration_days, order.duration_days_snapshot, '—'))} days</span></td>
+                    <td><span class="cell-title">${safe(orderReference(order))}</span><span class="cell-sub">${proof ? 'Proof attached' : 'No proof attached'}</span></td>
+                    <td>${safe(fmtDate(first(order.payment_submitted_at, order.created_at), true))}</td>
+                    <td>${statusBadge(order.status)}</td>
+                    <td><div class="row-actions">${orderActions(order, true)}</div></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function advertisementOrder(ad) {
+            return orderById(ad.order_id) || first(ad.order, ad.ad_order, ad.ad_orders, {}) || {};
+        }
+
+        function filteredAdvertisements() {
+            const query = text(el('ad-search')?.value).trim().toLowerCase();
+            const status = el('ad-status')?.value || '';
+            return state.advertisements.filter((ad) => {
+                if (status && ad.status !== status) return false;
+                const order = advertisementOrder(ad);
+                return !query || [ad.title, ad.headline, ad.id, ad.placement, ...(ad.placements || []), orderCustomer(order).name, orderPackage(order).name].some((value) => text(value).toLowerCase().includes(query));
+            });
+        }
+
+        function renderAdvertisements() {
+            const rows = filteredAdvertisements();
+            if (!rows.length) {
+                el('ads-body').innerHTML = '<tr class="empty-row"><td colspan="7">No advertisements match this view.</td></tr>';
+                return;
+            }
+            el('ads-body').innerHTML = rows.map((ad) => {
+                const order = advertisementOrder(ad);
+                const customer = orderCustomer(order);
+                const pkg = orderPackage(order);
+                const impressions = first(ad.impressions, ad.metrics?.impressions, 0);
+                const clicks = first(ad.clicks, ad.metrics?.clicks, 0);
+                const placements = first(ad.placements, ad.placement ? [ad.placement] : [], []);
+                const actions = [`<button class="btn btn-sm" type="button" data-order-detail="${safe(order.id || ad.order_id || '')}">Details</button>`];
+                if (ad.status === 'active') actions.push(`<button class="btn btn-warning btn-sm" type="button" data-order-action="pause_ad" data-order-id="${safe(order.id || ad.order_id)}">Pause</button>`);
+                if (ad.status === 'paused') actions.push(`<button class="btn btn-primary btn-sm" type="button" data-order-action="resume_ad" data-order-id="${safe(order.id || ad.order_id)}">Resume</button>`);
+                if (!TERMINAL_STATES.has(ad.status)) actions.push(`<button class="btn btn-danger btn-sm" type="button" data-order-action="expire_ad" data-order-id="${safe(order.id || ad.order_id)}">Expire</button>`);
+                return `<tr>
+                    <td><span class="cell-title">${safe(first(ad.title, ad.headline, order.creative?.title, 'Untitled advertisement'))}</span><span class="cell-sub">${safe(text(ad.id).slice(0, 8))}</span></td>
+                    <td><span class="cell-title">${safe(customer.name)}</span><span class="cell-sub">${safe(pkg.name)}</span></td>
+                    <td>${placements.length ? placements.map((item) => `<span class="tag">${safe(item)}</span>`).join(' ') : '—'}</td>
+                    <td><span class="metric-pair"><strong>${number(impressions).toLocaleString()}</strong> views · ${number(clicks).toLocaleString()} clicks</span><span class="cell-sub">${fmtPercent(impressions ? clicks / impressions * 100 : 0)} CTR</span></td>
+                    <td>${safe(fmtDate(first(ad.starts_at, order.starts_at)))}<span class="cell-sub">to ${safe(fmtDate(first(ad.expires_at, order.expires_at)))}</span></td>
+                    <td>${statusBadge(ad.status)}</td>
+                    <td><div class="row-actions">${actions.join('')}</div></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderPackages() {
+            if (!state.packages.length) {
+                el('package-grid').innerHTML = '<div class="state-card" style="grid-column:1/-1;margin:0;"><h3>No packages configured</h3><p>Add the first advertising package to publish prices and duration choices.</p><button class="btn btn-primary" type="button" data-new-package>＋ Add package</button></div>';
+                return;
+            }
+            el('package-grid').innerHTML = state.packages.map((pkg, index) => {
+                const account = accountById(pkg.payment_account_id);
+                const options = pkg.options || [];
+                const placements = pkg.placements || [];
+                return `<article class="package-card" style="--accent:${PALETTE[index % PALETTE.length]}">
+                    <div class="package-top"><div class="package-meta"><span class="package-code">${safe(pkg.code)}</span>${statusBadge(pkg.is_active === false ? 'inactive' : 'active')}</div><h3>${safe(pkg.name)}</h3><p>${safe(pkg.description || 'No customer-facing description supplied.')}</p><div class="package-price">${safe(fmtMoney(pkg.price, pkg.currency))} <small>/ ${safe(pkg.duration_days || 30)} days</small></div><div class="package-tags"><span class="tag">${safe(text(pkg.product_type || 'display_ad').replace('_', ' '))}</span>${pkg.webpage_tier ? `<span class="tag">${safe(pkg.webpage_tier)}</span>` : ''}${placements.map((item) => `<span class="tag">${safe(item)}</span>`).join('')}<span class="tag">${safe(account?.label || account?.account_label || 'Default bank')}</span></div></div>
+                    <div class="option-list">${options.length ? options.map((option) => `<div class="option"><div><strong>${safe(option.name)}</strong><small>+${safe(fmtMoney(option.price_delta, pkg.currency))} · +${safe(option.duration_days_delta || 0)} days${option.is_active === false ? ' · archived' : ''}</small></div><div class="option-actions"><button class="btn btn-sm" type="button" data-edit-option="${safe(option.id)}" data-package-id="${safe(pkg.id)}">Edit</button><button class="btn btn-danger btn-sm" type="button" data-archive-option="${safe(option.id)}">Archive</button></div></div>`).join('') : '<div style="color:var(--muted);font-size:.7rem;padding:8px;">No optional upgrades.</div>'}</div>
+                    <div class="package-actions"><button class="btn btn-sm" type="button" data-edit-package="${safe(pkg.id)}">Edit package</button><button class="btn btn-blue btn-sm" type="button" data-add-option="${safe(pkg.id)}">＋ Option</button>${pkg.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-package="${safe(pkg.id)}">Restore</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-package="${safe(pkg.id)}">Archive</button>`}</div>
+                </article>`;
+            }).join('');
+        }
+
+        function renderAccounts() {
+            if (!state.accounts.length) {
+                el('bank-grid').innerHTML = '<div class="state-card" style="grid-column:1/-1;margin:0;"><h3>No payment destination configured</h3><p>Add a bank account before publishing paid packages.</p><button class="btn btn-primary" type="button" data-new-bank>＋ Add bank account</button></div>';
+                return;
+            }
+            el('bank-grid').innerHTML = state.accounts.map((account) => `<article class="bank-card${account.is_default ? ' default' : ''}"><div>${account.is_default ? '<span class="badge badge-active">Default</span>' : statusBadge(account.is_active === false ? 'inactive' : 'active')}</div><h3>${safe(first(account.label, account.account_label, 'Payment account'))}</h3><div class="bank-name">${safe(account.bank_name)}</div><div class="account-number">${safe(maskAccount(account.account_number))}</div><div class="bank-details"><span>Holder: <strong>${safe(first(account.account_name, account.account_holder, '—'))}</strong></span><span>Currency: <strong>${safe(account.currency || 'JMD')}</strong></span><span>Branch: <strong>${safe(account.branch || '—')}</strong></span></div><div class="bank-actions"><button class="btn btn-sm" type="button" data-edit-bank="${safe(account.id)}">Edit</button>${!account.is_default && account.is_active !== false ? `<button class="btn btn-primary btn-sm" type="button" data-default-bank="${safe(account.id)}">Make default</button>` : ''}${account.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-bank="${safe(account.id)}">Restore</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-bank="${safe(account.id)}">Archive</button>`}</div></article>`).join('');
+        }
+
+        function analyticsRows(key) {
+            return normalizeArray(state.analytics[key] || state.analytics.data?.[key] || []);
+        }
+
+        function metric(row, ...keys) {
+            return first(...keys.map((key) => row?.[key]), 0);
+        }
+
+        function rowLabel(row, fallback = '') {
+            return text(first(row.day, row.date, row.period, row.label, row.name, row.package_name, row.placement, row.status, row.key, fallback));
+        }
+
+        function chartBase() {
+            return { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { labels: { color: '#aeb8cc', usePointStyle: true, boxWidth: 8, font: { family: 'Space Grotesk', size: 10 } } }, tooltip: { backgroundColor: '#111824', borderColor: 'rgba(255,255,255,.12)', borderWidth: 1, titleFont: { family: 'Space Grotesk' }, bodyFont: { family: 'Space Grotesk' } } }, scales: { x: { ticks: { color: '#8994aa', maxRotation: 0, autoSkip: true }, grid: { color: 'rgba(255,255,255,.045)' } }, y: { beginAtZero: true, ticks: { color: '#8994aa' }, grid: { color: 'rgba(255,255,255,.055)' } } } };
+        }
+
+        function drawChart(name, cardId, canvasId, config, hasData) {
+            state.charts[name]?.destroy();
+            el(cardId).classList.toggle('empty', !hasData);
+            if (!window.Chart) return;
+            state.charts[name] = new window.Chart(el(canvasId), config);
+        }
+
+        function upcomingExpirationRows() {
+            const now = new Date();
+            const buckets = Array.from({ length: 8 }, (_, index) => ({ label: `Week ${index + 1}`, count: 0 }));
+            state.advertisements.filter((ad) => ['active', 'paused'].includes(ad.status)).forEach((ad) => {
+                const expiry = dateValue(ad.expires_at || advertisementOrder(ad).expires_at);
+                if (!expiry) return;
+                const weeks = Math.floor((expiry - now) / (7 * 86400000));
+                if (weeks >= 0 && weeks < buckets.length) buckets[weeks].count += 1;
+            });
+            return buckets;
+        }
+
+        function renderAnalytics() {
+            if (!window.Chart) {
+                showNotice('global-notice', 'Chart.js could not load. Management tables remain available.', 'error');
+                return;
+            }
+            window.Chart.defaults.color = '#aeb8cc';
+            window.Chart.defaults.font.family = 'Space Grotesk';
+            const dailyOrders = analyticsRows('daily_orders');
+            const dailyEvents = analyticsRows('daily_events');
+            const packageRows = analyticsRows('package_performance');
+            const statusRows = analyticsRows('orders_by_status');
+            const placementRows = analyticsRows('placement_performance');
+            const expirations = upcomingExpirationRows();
+
+            let options = chartBase();
+            options.scales.y1 = { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#2dd6a4', callback: (value) => Number(value).toLocaleString() } };
+            drawChart('revenue', 'card-revenue', 'chart-revenue', { type: 'bar', data: { labels: dailyOrders.map((row) => rowLabel(row)), datasets: [{ label: 'Orders', data: dailyOrders.map((row) => number(metric(row, 'orders', 'order_count', 'count'))), backgroundColor: 'rgba(102,168,255,.45)', borderColor: '#66a8ff', borderWidth: 1, borderRadius: 5, yAxisID: 'y' }, { label: 'Revenue', data: dailyOrders.map((row) => number(metric(row, 'revenue', 'confirmed_revenue', 'amount'))), type: 'line', borderColor: '#2dd6a4', backgroundColor: 'rgba(45,214,164,.12)', fill: true, tension: .3, pointRadius: 2, yAxisID: 'y1' }] }, options }, dailyOrders.length > 0);
+
+            const trafficOptions = chartBase();
+            trafficOptions.scales.y1 = { beginAtZero: true, position: 'right', suggestedMax: 100, grid: { drawOnChartArea: false }, ticks: { color: '#ffcf33', callback: (value) => `${value}%` } };
+            drawChart('traffic', 'card-traffic', 'chart-traffic', { type: 'line', data: { labels: dailyEvents.map((row) => rowLabel(row)), datasets: [{ label: 'Impressions', data: dailyEvents.map((row) => number(metric(row, 'impressions', 'views'))), borderColor: '#66a8ff', backgroundColor: 'rgba(102,168,255,.12)', fill: true, tension: .3, pointRadius: 1.5 }, { label: 'Clicks', data: dailyEvents.map((row) => number(metric(row, 'clicks'))), borderColor: '#2dd6a4', tension: .3, pointRadius: 1.5 }, { label: 'CTR', data: dailyEvents.map((row) => number(metric(row, 'ctr', 'click_through_rate'))), borderColor: '#ffcf33', borderDash: [5, 4], tension: .3, pointRadius: 1.5, yAxisID: 'y1' }] }, options: trafficOptions }, dailyEvents.length > 0);
+
+            const doughnutOptions = { responsive: true, maintainAspectRatio: false, cutout: '66%', plugins: chartBase().plugins };
+            drawChart('status', 'card-status', 'chart-status', { type: 'doughnut', data: { labels: statusRows.map((row) => rowLabel(row).replaceAll('_', ' ')), datasets: [{ data: statusRows.map((row) => number(metric(row, 'count', 'orders', 'value'))), backgroundColor: statusRows.map((_, index) => PALETTE[index % PALETTE.length]), borderColor: '#0b101a', borderWidth: 3 }] }, options: doughnutOptions }, statusRows.length > 0);
+
+            drawChart('packages', 'card-packages', 'chart-packages', { type: 'bar', data: { labels: packageRows.map((row) => rowLabel(row)), datasets: [{ label: 'Orders', data: packageRows.map((row) => number(metric(row, 'orders', 'order_count', 'count'))), backgroundColor: 'rgba(168,140,255,.55)', borderColor: '#a88cff', borderWidth: 1, borderRadius: 5 }] }, options: { ...chartBase(), indexAxis: 'y' } }, packageRows.length > 0);
+
+            drawChart('placements', 'card-placements', 'chart-placements', { type: 'bar', data: { labels: placementRows.map((row) => rowLabel(row)), datasets: [{ label: 'Impressions', data: placementRows.map((row) => number(metric(row, 'impressions', 'views'))), backgroundColor: 'rgba(102,168,255,.5)', borderRadius: 5 }, { label: 'Clicks', data: placementRows.map((row) => number(metric(row, 'clicks'))), backgroundColor: 'rgba(45,214,164,.58)', borderRadius: 5 }] }, options: chartBase() }, placementRows.length > 0);
+
+            drawChart('expirations', 'card-expirations', 'chart-expirations', { type: 'bar', data: { labels: expirations.map((row) => row.label), datasets: [{ label: 'Expiring ads', data: expirations.map((row) => row.count), backgroundColor: expirations.map((row, index) => index < 2 ? 'rgba(255,93,112,.62)' : 'rgba(255,207,51,.5)', borderRadius: 5 }] }, options: chartBase() }, expirations.some((row) => row.count));
+            renderTopAds();
+        }
+
+        function renderTopAds() {
+            const rows = analyticsRows('top_ads');
+            if (!rows.length) {
+                el('top-ads-body').innerHTML = '<tr class="empty-row"><td colspan="6">No advertisement performance data is available yet.</td></tr>';
+                return;
+            }
+            el('top-ads-body').innerHTML = rows.slice(0, 10).map((row) => {
+                const impressions = number(metric(row, 'impressions', 'views'));
+                const clicks = number(metric(row, 'clicks'));
+                return `<tr><td><span class="cell-title">${safe(first(row.title, row.ad_name, row.headline, 'Advertisement'))}</span><span class="cell-sub">${safe(first(row.business_name, row.advertiser, ''))}</span></td><td>${safe(first(row.placement, (row.placements || []).join(', '), '—'))}</td><td>${impressions.toLocaleString()}</td><td>${clicks.toLocaleString()}</td><td>${fmtPercent(first(row.ctr, impressions ? clicks / impressions * 100 : 0))}</td><td>${number(metric(row, 'leads', 'conversions')).toLocaleString()}</td></tr>`;
+            }).join('');
+        }
+
+        function populateAccountSelect() {
+            const select = el('package-bank');
+            const current = select.value;
+            select.innerHTML = '<option value="">Default active bank account</option>' + state.accounts.map((account) => `<option value="${safe(account.id)}">${safe(first(account.label, account.account_label, account.bank_name))}${account.is_active === false ? ' (archived)' : ''}</option>`).join('');
+            if ([...select.options].some((option) => option.value === current)) select.value = current;
+        }
+
+        function resetForm(formId, noticeId) {
+            el(formId).reset();
+            showNotice(noticeId, '');
+        }
+
+        function openPackageForm(pkg = null) {
+            resetForm('package-form', 'package-form-notice');
+            el('package-modal-title').textContent = pkg ? 'Edit advertising package' : 'Add advertising package';
+            el('package-id').value = pkg?.id || '';
+            el('package-name').value = pkg?.name || '';
+            el('package-code').value = pkg?.code || '';
+            el('package-description').value = pkg?.description || '';
+            el('package-type').value = pkg?.product_type || 'display_ad';
+            el('package-tier').value = pkg?.webpage_tier || '';
+            el('package-price').value = pkg?.price ?? '';
+            el('package-currency').value = pkg?.currency || 'JMD';
+            el('package-duration').value = pkg?.duration_days || 30;
+            el('package-sort').value = pkg?.sort_order || 0;
+            el('package-placements').value = (pkg?.placements || []).join(', ');
+            el('package-features').value = Array.isArray(pkg?.features) ? pkg.features.join('\n') : '';
+            el('package-bank').value = pkg?.payment_account_id || '';
+            el('package-active').checked = pkg?.is_active !== false;
+            openModal('package-modal');
+        }
+
+        function openOptionForm(packageId, option = null) {
+            resetForm('option-form', 'option-form-notice');
+            el('option-modal-title').textContent = option ? 'Edit package option' : 'Add package option';
+            el('option-id').value = option?.id || '';
+            el('option-package-id').value = packageId;
+            el('option-name').value = option?.name || '';
+            el('option-code').value = option?.code || '';
+            el('option-description').value = option?.description || '';
+            el('option-price').value = option?.price_delta || 0;
+            el('option-duration').value = option?.duration_days_delta || 0;
+            el('option-placements').value = (option?.additional_placements || []).join(', ');
+            el('option-features').value = Array.isArray(option?.features) ? option.features.join('\n') : '';
+            el('option-sort').value = option?.sort_order || 0;
+            el('option-active').checked = option?.is_active !== false;
+            openModal('option-modal');
+        }
+
+        function openBankForm(account = null) {
+            resetForm('bank-form', 'bank-form-notice');
+            el('bank-modal-title').textContent = account ? 'Edit bank-transfer account' : 'Add bank-transfer account';
+            el('bank-id').value = account?.id || '';
+            el('bank-label').value = first(account?.label, account?.account_label, '');
+            el('bank-name').value = account?.bank_name || '';
+            el('bank-account-name').value = first(account?.account_name, account?.account_holder, '');
+            el('bank-account-number').value = account?.account_number || '';
+            el('bank-account-type').value = account?.account_type || '';
+            el('bank-currency').value = account?.currency || 'JMD';
+            el('bank-branch').value = account?.branch || '';
+            el('bank-routing').value = first(account?.routing_number, account?.routing_transit_number, '');
+            el('bank-swift').value = first(account?.swift_code, account?.swift_bic, '');
+            el('bank-instructions').value = first(account?.instructions, account?.payment_instructions, '');
+            el('bank-active').checked = account?.is_active !== false;
+            el('bank-default').checked = Boolean(account?.is_default);
+            openModal('bank-modal');
+        }
+
+        async function savePackage(event) {
+            event.preventDefault();
+            const button = el('package-save');
+            button.disabled = true;
+            const payload = { id: el('package-id').value || null, name: el('package-name').value.trim(), code: el('package-code').value.trim().toLowerCase(), description: el('package-description').value.trim() || null, product_type: el('package-type').value, webpage_tier: el('package-type').value === 'webpage' ? el('package-tier').value || null : null, webpage_enabled: el('package-type').value === 'webpage', price: number(el('package-price').value), currency: el('package-currency').value, duration_days: number(el('package-duration').value), sort_order: number(el('package-sort').value), placements: splitComma(el('package-placements').value), features: splitLines(el('package-features').value), payment_account_id: el('package-bank').value || null, is_active: el('package-active').checked };
+            try {
+                await adminCommand('package_upsert', payload);
+                toast('Advertising package saved.', 'success');
+                closeModal('package-modal');
+                await Promise.all([loadCatalog(), loadAnalytics()]);
+                renderAll();
+            } catch (error) { showNotice('package-form-notice', error.message || 'Package could not be saved.', 'error'); }
+            finally { button.disabled = false; }
+        }
+
+        async function saveOption(event) {
+            event.preventDefault();
+            const button = el('option-save');
+            button.disabled = true;
+            const payload = { id: el('option-id').value || null, package_id: el('option-package-id').value, name: el('option-name').value.trim(), code: el('option-code').value.trim().toLowerCase(), description: el('option-description').value.trim() || null, price_delta: number(el('option-price').value), duration_days_delta: number(el('option-duration').value), additional_placements: splitComma(el('option-placements').value), features: splitLines(el('option-features').value), sort_order: number(el('option-sort').value), is_active: el('option-active').checked };
+            try {
+                await adminCommand('option_upsert', payload);
+                toast('Package option saved.', 'success');
+                closeModal('option-modal');
+                await loadCatalog();
+                renderPackages();
+            } catch (error) { showNotice('option-form-notice', error.message || 'Option could not be saved.', 'error'); }
+            finally { button.disabled = false; }
+        }
+
+        async function saveBank(event) {
+            event.preventDefault();
+            const button = el('bank-save');
+            button.disabled = true;
+            const payload = { id: el('bank-id').value || null, label: el('bank-label').value.trim(), bank_name: el('bank-name').value.trim(), account_name: el('bank-account-name').value.trim(), account_number: el('bank-account-number').value.trim(), account_type: el('bank-account-type').value.trim() || null, currency: el('bank-currency').value, branch: el('bank-branch').value.trim() || null, routing_number: el('bank-routing').value.trim() || null, swift_code: el('bank-swift').value.trim() || null, instructions: el('bank-instructions').value.trim(), is_active: el('bank-active').checked, is_default: el('bank-default').checked };
+            try {
+                await adminCommand('bank_upsert', payload);
+                toast('Payment account saved.', 'success');
+                closeModal('bank-modal');
+                await Promise.all([loadAccounts(), loadCatalog()]);
+                renderAccounts();
+                renderPackages();
+                populateAccountSelect();
+            } catch (error) { showNotice('bank-form-notice', error.message || 'Account could not be saved.', 'error'); }
+            finally { button.disabled = false; }
+        }
+
+        function openOrderDetail(orderId) {
+            const order = orderById(orderId);
+            if (!order) return toast('Order details are unavailable. Refresh and try again.', 'error');
+            const customer = orderCustomer(order);
+            const pkg = orderPackage(order);
+            const proof = first(order.payment_proof_url, order.proof_url, order.payment_proof_path, order.proof_path);
+            el('order-modal-title').textContent = first(order.order_number, `Order ${text(order.id).slice(0, 8)}`);
+            el('order-modal-subtitle').textContent = `${pkg.name} · ${customer.name}`;
+            el('order-detail').innerHTML = `<div class="detail-grid">
+                <div class="detail"><span>Status</span><strong>${statusBadge(order.status)}</strong></div><div class="detail"><span>Customer</span><strong>${safe(customer.name)}${customer.email ? `<br>${safe(customer.email)}` : ''}</strong></div><div class="detail"><span>Business / listing</span><strong>${safe(first(order.business_name, order.listing_name, order.listing_id, 'Not linked'))}</strong></div>
+                <div class="detail"><span>Package</span><strong>${safe(pkg.name)}</strong></div><div class="detail"><span>Amount due</span><strong class="amount">${safe(fmtMoney(orderAmount(order), pkg.currency))}</strong></div><div class="detail"><span>Duration</span><strong>${safe(first(order.duration_days, order.duration_days_snapshot, '—'))} days</strong></div>
+                <div class="detail"><span>Payment reference</span><strong>${safe(orderReference(order))}</strong></div><div class="detail"><span>Payment submitted</span><strong>${safe(fmtDate(order.payment_submitted_at, true))}</strong></div><div class="detail"><span>Expiry</span><strong>${safe(fmtDate(order.expires_at))}</strong></div>
+            </div>${order.customer_notes ? `<div style="margin-top:14px;"><label>Customer notes</label><div class="danger-copy" style="color:var(--text);border-color:var(--line);background:var(--glass);white-space:pre-wrap;">${safe(order.customer_notes)}</div></div>` : ''}${order.admin_note ? `<div style="margin-top:14px;"><label>Latest admin note</label><div class="danger-copy" style="color:var(--text);border-color:var(--line);background:var(--glass);white-space:pre-wrap;">${safe(order.admin_note)}</div></div>` : ''}${proof ? `<a class="proof-link" href="${safe(proof)}" target="_blank" rel="noopener">Open payment proof ↗</a>` : '<div class="cell-sub" style="margin-top:14px;">No payment proof has been attached.</div>'}`;
+            el('order-detail-actions').innerHTML = `<button class="btn modal-close" type="button">Close</button>${orderActions(order)}`;
+            openModal('order-modal');
+        }
+
+        const ACTION_COPY = {
+            confirm_payment: ['Confirm bank transfer and activate', 'This confirms that AJM received the funds. The advertisement will become active and the customer notification will be queued.', false, false],
+            reject_payment: ['Reject payment submission', 'The customer will be told that the submitted payment could not be confirmed. A clear reason is required.', true, false],
+            cancel_subscription: ['Cancel advertising order', 'This stops the order and any associated active advertisement. This should only be used with a documented reason.', true, false],
+            renew_subscription: ['Renew advertising access', 'This extends the current expiry date by the selected number of days and records the administrator responsible.', false, true],
+            pause_ad: ['Pause advertisement', 'The advertisement will stop appearing publicly until an administrator resumes it.', true, false],
+            resume_ad: ['Resume advertisement', 'The advertisement will immediately become eligible for its assigned placements again.', false, false],
+            expire_ad: ['Expire advertisement now', 'This ends delivery immediately and records the manual expiry in the audit trail.', true, false]
+        };
+
+        function queueOrderAction(orderId, action) {
+            const order = orderById(orderId);
+            const copy = ACTION_COPY[action];
+            if (!order || !copy) return toast('This administrative action is unavailable.', 'error');
+            closeModal('order-modal');
+            state.pendingConfirmation = { kind: 'order', orderId, action };
+            el('confirm-title').textContent = copy[0];
+            el('confirm-copy').textContent = copy[1];
+            el('confirm-reason-field').classList.toggle('hidden', !copy[2]);
+            el('confirm-reason').required = copy[2];
+            el('confirm-duration-field').classList.toggle('hidden', !copy[3]);
+            el('confirm-duration').required = copy[3];
+            el('confirm-reason').value = '';
+            el('confirm-note').value = '';
+            el('confirm-submit').textContent = copy[0];
+            el('confirm-submit').className = `btn ${action === 'confirm_payment' || action === 'resume_ad' || action === 'renew_subscription' ? 'btn-primary' : 'btn-danger'}`;
+            openModal('confirm-modal');
+        }
+
+        function queueEntityAction(entity, id, action, label, destructive = false) {
+            state.pendingConfirmation = { kind: 'entity', entity, id, action };
+            el('confirm-title').textContent = label;
+            el('confirm-copy').textContent = destructive ? 'This permanently deletes the record. It will fail safely if customer orders still depend on it.' : 'The item will be removed from public selection while historical orders remain intact.';
+            el('confirm-reason-field').classList.add('hidden');
+            el('confirm-reason').required = false;
+            el('confirm-duration-field').classList.add('hidden');
+            el('confirm-note').value = '';
+            el('confirm-submit').textContent = label;
+            el('confirm-submit').className = 'btn btn-danger';
+            openModal('confirm-modal');
+        }
+
+        async function executeConfirmation(event) {
+            event.preventDefault();
+            const pending = state.pendingConfirmation;
+            if (!pending) return closeModal('confirm-modal');
+            const button = el('confirm-submit');
+            button.disabled = true;
+            try {
+                if (pending.kind === 'order') {
+                    await adminCommand(pending.action, { order_id: pending.orderId, reason: el('confirm-reason').value.trim() || null, admin_note: el('confirm-note').value.trim() || null, duration_days: pending.action === 'renew_subscription' ? number(el('confirm-duration').value) : null });
+                    toast('Advertising order updated and audit entry recorded.', 'success');
+                    await Promise.all([loadOrders(), loadAdvertisements(), loadAnalytics()]);
+                } else {
+                    const wrapperAction = { 'package:archive': 'package_archive', 'option:archive': 'option_archive', 'bank:archive': 'bank_archive', 'bank:default': 'bank_set_default' }[`${pending.entity}:${pending.action}`];
+                    if (wrapperAction) await adminCommand(wrapperAction, { id: pending.id, admin_note: el('confirm-note').value.trim() || null });
+                    else await lowerCrud(pending.entity, pending.action, { id: pending.id, admin_note: el('confirm-note').value.trim() || null });
+                    toast('Configuration updated and audit entry recorded.', 'success');
+                    await Promise.all([loadCatalog(), loadAccounts(), loadAnalytics()]);
+                }
+                closeModal('confirm-modal');
+                state.pendingConfirmation = null;
+                renderAll();
+            } catch (error) { toast(error.message || 'The administrative action failed.', 'error'); }
+            finally { button.disabled = false; }
+        }
+
+        function exportOrders() {
+            const rows = filteredOrders();
+            if (!rows.length) return toast('There are no orders to export.', 'error');
+            const headings = ['Order', 'Customer', 'Email', 'Package', 'Amount', 'Currency', 'Payment Reference', 'Status', 'Created', 'Expires'];
+            const csvRows = rows.map((order) => { const customer = orderCustomer(order); const pkg = orderPackage(order); return [first(order.order_number, order.id), customer.name, customer.email, pkg.name, orderAmount(order), pkg.currency, orderReference(order), order.status, order.created_at, order.expires_at]; });
+            const csv = [headings, ...csvRows].map((row) => row.map((value) => `"${text(value).replaceAll('"', '""')}"`).join(',')).join('\n');
+            const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ajm-ad-orders-${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach((item) => item.classList.toggle('active', item === tab));
+            document.querySelectorAll('.panel').forEach((panel) => panel.classList.toggle('active', panel.id === `panel-${tab.dataset.panel}`));
+        }));
+        document.querySelectorAll('.modal-close').forEach((button) => button.addEventListener('click', () => closeModal(button)));
+        document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.addEventListener('click', (event) => { if (event.target === backdrop) closeModal(backdrop); }));
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') document.querySelectorAll('.modal-backdrop.open').forEach((modal) => closeModal(modal)); });
+        document.addEventListener('click', async (event) => {
+            const button = event.target.closest('button');
+            if (!button) return;
+            if (button.matches('[data-new-package]')) openPackageForm();
+            if (button.matches('[data-new-bank]')) openBankForm();
+            if (button.dataset.orderDetail) openOrderDetail(button.dataset.orderDetail);
+            if (button.dataset.orderAction) queueOrderAction(button.dataset.orderId, button.dataset.orderAction);
+            if (button.dataset.editPackage) openPackageForm(packageById(button.dataset.editPackage));
+            if (button.dataset.addOption) openOptionForm(button.dataset.addOption);
+            if (button.dataset.editOption) { const pkg = packageById(button.dataset.packageId); openOptionForm(pkg?.id, pkg?.options?.find((item) => item.id === button.dataset.editOption)); }
+            if (button.dataset.editBank) openBankForm(accountById(button.dataset.editBank));
+            if (button.dataset.archivePackage) queueEntityAction('package', button.dataset.archivePackage, 'archive', 'Archive package');
+            if (button.dataset.restorePackage) { try { await lowerCrud('package', 'restore', { id: button.dataset.restorePackage }); await loadCatalog(); renderPackages(); toast('Package restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
+            if (button.dataset.archiveOption) queueEntityAction('option', button.dataset.archiveOption, 'archive', 'Archive package option');
+            if (button.dataset.archiveBank) queueEntityAction('bank', button.dataset.archiveBank, 'archive', 'Archive bank account');
+            if (button.dataset.defaultBank) queueEntityAction('bank', button.dataset.defaultBank, 'default', 'Make default account');
+            if (button.dataset.restoreBank) { try { await lowerCrud('bank', 'restore', { id: button.dataset.restoreBank }); await loadAccounts(); renderAccounts(); populateAccountSelect(); toast('Bank account restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
+        });
+        el('refresh-btn').addEventListener('click', refreshAll);
+        el('analytics-range').addEventListener('change', async () => { try { await loadAnalytics(); renderKpis(); renderAnalytics(); } catch (error) { toast(error.message, 'error'); } });
+        el('order-status').addEventListener('change', async () => { try { await loadOrders(); renderOrders(); renderKpis(); } catch (error) { showNotice('orders-notice', error.message, 'error'); } });
+        el('order-search').addEventListener('input', renderOrders);
+        el('ad-search').addEventListener('input', renderAdvertisements);
+        el('ad-status').addEventListener('change', renderAdvertisements);
+        el('new-package').addEventListener('click', () => openPackageForm());
+        el('new-bank').addEventListener('click', () => openBankForm());
+        el('package-form').addEventListener('submit', savePackage);
+        el('option-form').addEventListener('submit', saveOption);
+        el('bank-form').addEventListener('submit', saveBank);
+        el('confirm-form').addEventListener('submit', executeConfirmation);
+        el('export-orders').addEventListener('click', exportOrders);
+        el('logout-btn').addEventListener('click', async () => { await supabase.auth.signOut(); location.href = 'ajm-advertising-hub.html'; });
+        el('package-type').addEventListener('change', () => { el('package-tier').disabled = el('package-type').value !== 'webpage'; if (el('package-type').value !== 'webpage') el('package-tier').value = ''; });
+
+        init();
+    </script>
+</body>
+</html>
