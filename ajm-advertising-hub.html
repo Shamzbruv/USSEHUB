@@ -349,6 +349,42 @@
             line-height: 1.6;
         }
 
+        /* --- Paid Business Webpages --- */
+        .webpage-packages {
+            margin-bottom: 76px;
+            padding: 34px;
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            background:
+                radial-gradient(circle at 90% 0%, rgba(13,110,253,.14), transparent 34%),
+                rgba(255,255,255,.035);
+        }
+        .packages-head {
+            display: grid;
+            grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr);
+            gap: 28px;
+            align-items: end;
+            margin-bottom: 26px;
+        }
+        .packages-kicker { color: var(--green); font-size:.75rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+        .packages-head h2 { margin:8px 0 0; font-size:clamp(2rem,4vw,3.2rem); }
+        .packages-head p { color:var(--muted); line-height:1.65; margin:0; }
+        .package-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+        .package-card { position:relative; overflow:hidden; padding:24px; border:1px solid var(--glass-border); border-radius:22px; background:rgba(5,7,13,.72); }
+        .package-card::before { content:""; position:absolute; inset:0 0 auto; height:4px; background:var(--package-accent); }
+        .package-card.silver { --package-accent:#cbd5e1; }
+        .package-card.gold { --package-accent:#ffcf33; }
+        .package-card.platinum { --package-accent:#62b7ff; }
+        .package-tier { color:var(--package-accent); font-size:.75rem; font-weight:900; letter-spacing:.13em; text-transform:uppercase; }
+        .package-card h3 { margin:10px 0 4px; font-size:1.5rem; }
+        .package-price { color:var(--muted); font-size:.85rem; margin-bottom:17px; }
+        .package-card ul { display:grid; gap:9px; padding:0; margin:0 0 22px; list-style:none; color:#dfe4f0; font-size:.88rem; line-height:1.4; }
+        .package-card li::before { content:"✓"; color:var(--package-accent); font-weight:900; margin-right:8px; }
+        .segment-strip { margin-top:18px; padding:18px; border:1px solid var(--glass-border); border-radius:18px; background:rgba(255,255,255,.025); }
+        .segment-strip strong { display:block; margin-bottom:10px; }
+        .segment-pills { display:flex; flex-wrap:wrap; gap:8px; }
+        .segment-pill { padding:7px 10px; border-radius:999px; color:var(--muted); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); font-size:.74rem; }
+
         /* --- Search Bar --- */
         .search-bar {
             background: rgba(255, 255, 255, 0.08);
@@ -1099,6 +1135,8 @@
         .login-prompt-actions .btn { flex: 1; }
 
         @media (max-width: 980px) {
+            .packages-head { grid-template-columns: 1fr; }
+            .package-grid { grid-template-columns: 1fr; }
             .hub-layout {
                 grid-template-columns: 1fr;
             }
@@ -1152,6 +1190,8 @@
             .hero h1 {
                 font-size: 2.4rem;
             }
+
+            .webpage-packages { padding:22px 18px; border-radius:22px; }
 
             .floating-whatsapp {
                 right: 12px;
@@ -1319,6 +1359,18 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="lf-market-segment">Customer / Market Segment *</label>
+                    <select id="lf-market-segment" required>
+                        <option value="">Select the best fit</option>
+                        <option value="local-business">Local Business, Institutions, Agencies & Directories</option>
+                        <option value="professional-services">Professional & Niche Services</option>
+                        <option value="b2b-supplier">B2B Supplier & Wholesale Marketplaces</option>
+                        <option value="hospitality-events">Hospitality, Accommodation, Weddings & Events</option>
+                        <option value="automotive-collectibles">Automotive, Collectibles & Precious Metals</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="lf-description">Business Description *</label>
                     <textarea id="lf-description" placeholder="Describe your business, products or services..." required></textarea>
                 </div>
@@ -1368,25 +1420,26 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Listing Type *</label>
+                    <label>Directory / Webpage Package *</label>
                     <div class="listing-type-grid">
                         <div class="listing-type-option">
-                            <input type="radio" name="listing_type" id="lt-basic" value="basic" checked />
-                            <label for="lt-basic">📋 Basic Listing<br><small style="font-weight:400;color:var(--muted)">Standard directory entry</small></label>
+                            <input type="radio" name="listing_type" id="lt-basic" value="free" checked />
+                            <label for="lt-basic">Free Directory<br><small style="font-weight:400;color:var(--muted)">Standard listing only</small></label>
                         </div>
                         <div class="listing-type-option">
-                            <input type="radio" name="listing_type" id="lt-advanced" value="advanced" />
-                            <label for="lt-advanced">⭐ Advanced Listing<br><small style="font-weight:400;color:var(--muted)">Enhanced visibility</small></label>
+                            <input type="radio" name="listing_type" id="lt-silver" value="silver" />
+                            <label for="lt-silver">Silver Webpage<br><small style="font-weight:400;color:var(--muted)">Essentials + 3 photos</small></label>
                         </div>
                         <div class="listing-type-option">
-                            <input type="radio" name="listing_type" id="lt-featured" value="featured" />
-                            <label for="lt-featured">🚀 Featured Placement<br><small style="font-weight:400;color:var(--muted)">Top of results</small></label>
+                            <input type="radio" name="listing_type" id="lt-gold" value="gold" />
+                            <label for="lt-gold">Gold Webpage<br><small style="font-weight:400;color:var(--muted)">Media, leads & offers</small></label>
                         </div>
                         <div class="listing-type-option">
-                            <input type="radio" name="listing_type" id="lt-banner" value="banner" />
-                            <label for="lt-banner">📢 Banner / Ad<br><small style="font-weight:400;color:var(--muted)">Sidebar advertisement</small></label>
+                            <input type="radio" name="listing_type" id="lt-platinum" value="platinum" />
+                            <label for="lt-platinum">Platinum Webpage<br><small style="font-weight:400;color:var(--muted)">Booking, tour & chat</small></label>
                         </div>
                     </div>
+                    <div style="font-size:.76rem;color:var(--muted);margin-top:8px;">Paid webpage tiers require AJM approval and package activation before the builder unlocks.</div>
                 </div>
 
                 <div class="form-group">
@@ -1428,6 +1481,7 @@
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="ajm-aloe-jamaica.html">Agency</a>
+                <a href="#webpage-packages">Webpages</a>
                 <a href="#services" class="active">Directory</a>
             </div>
 
@@ -1512,6 +1566,31 @@
             </div>
             <button class="scroll-arrow right-arrow" onclick="scrollCategories(1)" aria-label="Scroll right">&#10095;</button>
         </div>
+    </section>
+
+    <section class="container webpage-packages" id="webpage-packages">
+        <div class="packages-head">
+            <div><div class="packages-kicker">For paying AJM clients</div><h2>Your own business webpage</h2></div>
+            <p>Free members can keep a standard directory listing. Paying clients can upgrade that listing into a managed mini-website, choose the market segment that fits their business, and update the content through their account after AJM activates the package.</p>
+        </div>
+        <div class="package-grid">
+            <article class="package-card silver">
+                <div class="package-tier">Silver</div><h3>Business Essentials</h3><div class="package-price">Contact AJM for pricing</div>
+                <ul><li>Business logo and contact details</li><li>About section and services</li><li>Operating hours</li><li>Up to 3 gallery photos</li></ul>
+                <button class="btn btn-ghost" style="width:100%;" onclick="handlePostListingClick('silver')">Choose Silver</button>
+            </article>
+            <article class="package-card gold">
+                <div class="package-tier">Gold</div><h3>Lead Generator</h3><div class="package-price">Contact AJM for pricing</div>
+                <ul><li>Everything in Silver</li><li>Hero image and video gallery</li><li>Google Map and customer reviews</li><li>Lead form, offers and coupons</li></ul>
+                <button class="btn btn-primary" style="width:100%;" onclick="handlePostListingClick('gold')">Choose Gold</button>
+            </article>
+            <article class="package-card platinum">
+                <div class="package-tier">Platinum</div><h3>Premier Experience</h3><div class="package-price">Contact AJM for pricing</div>
+                <ul><li>Everything in Gold</li><li>Cinematic cover and virtual tour</li><li>Booking and featured testimonials</li><li>Tracked calls and live chat</li></ul>
+                <button class="btn btn-ghost" style="width:100%;border-color:rgba(98,183,255,.4);" onclick="handlePostListingClick('platinum')">Choose Platinum</button>
+            </article>
+        </div>
+        <div class="segment-strip"><strong>Available market segments</strong><div class="segment-pills"><span class="segment-pill">Local businesses & directories</span><span class="segment-pill">Professional & niche services</span><span class="segment-pill">B2B suppliers & wholesale</span><span class="segment-pill">Hospitality, accommodation, weddings & events</span><span class="segment-pill">Automotive, collectibles & precious metals</span></div></div>
     </section>
 
     <!-- Member Dashboard Modal -->
@@ -1799,6 +1878,7 @@
             const content = document.getElementById('ld-content');
             
             const isJob = l.category === 'JOBS & CAREERS';
+            const webpage = Array.isArray(l.listing_webpages) ? l.listing_webpages[0] : l.listing_webpages;
             
             content.innerHTML = `
                 <div style="display:flex; gap: 16px; margin-bottom: 20px;">
@@ -1826,6 +1906,7 @@
                     ${l.whatsapp ? `<a href="javascript:void(0)" onclick="closeModal('listing-details-modal'); openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" class="btn btn-ghost" style="border:1px solid var(--green); color:var(--green); padding:6px 12px;">💬 WhatsApp</a>` : ''}
                     ${l.email ? `<a href="javascript:void(0)" onclick="closeModal('listing-details-modal'); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" class="btn btn-ghost" style="border:1px solid var(--blue); color:var(--blue); padding:6px 12px;">✉️ Email</a>` : ''}
                     ${l.website ? `<a href="${escHtml(normalizeWebsiteUrl(l.website))}" target="_blank" class="btn btn-primary" style="padding:6px 12px;">🌐 Visit Website</a>` : ''}
+                    ${webpage?.page_status === 'published' ? `<a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" class="btn btn-primary" style="padding:6px 12px;background:linear-gradient(135deg,var(--yellow),var(--green));">View AJM Webpage</a>` : ''}
                 </div>
             `;
             openModal('listing-details-modal');
@@ -1854,7 +1935,7 @@
             try {
                 const { data, error } = await supabase
                     .from('listings')
-                    .select('*')
+                    .select('*, listing_webpages(tier, page_status), ad_subscriptions(status, expires_at, ad_packages(name, webpage_enabled, webpage_tier))')
                     .eq('owner_user_id', currentUser.id)
                     .order('created_at', { ascending: false });
 
@@ -1866,14 +1947,22 @@
                 }
 
                 tbody.innerHTML = data.map(l => {
+                    const webpage = Array.isArray(l.listing_webpages) ? l.listing_webpages[0] : l.listing_webpages;
+                    const activeSubscription = (l.ad_subscriptions || []).find((subscription) => {
+                        const active = subscription.status === 'active';
+                        const current = !subscription.expires_at || new Date(subscription.expires_at) > new Date();
+                        return active && current && subscription.ad_packages?.webpage_enabled;
+                    });
                     let statusHtml = '';
                     if (l.status === 'approved') statusHtml = '<span class="listing-badge" style="background:rgba(23,214,111,0.15);color:var(--green);font-size:0.75rem;padding:4px 8px;">Approved</span>';
                     else if (l.status === 'pending') statusHtml = '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);font-size:0.75rem;padding:4px 8px;">Pending</span>';
                     else statusHtml = `<span class="listing-badge" style="background:rgba(255,51,51,0.15);color:var(--red);font-size:0.75rem;padding:4px 8px;">${escHtml(l.status)}</span>`;
 
                     let typeHtml = '';
-                    if (l.is_featured) typeHtml = '<span style="color:var(--yellow);font-size:0.85rem;">⭐ Featured</span>';
-                    else typeHtml = '<span style="color:var(--muted);font-size:0.85rem;">Basic</span>';
+                    if (activeSubscription) typeHtml = `<span style="color:var(--yellow);font-size:0.85rem;text-transform:capitalize;">${escHtml(activeSubscription.ad_packages?.webpage_tier || 'Paid')} Webpage</span>`;
+                    else if (l.requested_tier) typeHtml = `<span style="color:var(--muted);font-size:0.85rem;text-transform:capitalize;">${escHtml(l.requested_tier)} Requested</span>`;
+                    else if (l.is_featured) typeHtml = '<span style="color:var(--yellow);font-size:0.85rem;">Featured</span>';
+                    else typeHtml = '<span style="color:var(--muted);font-size:0.85rem;">Free Directory</span>';
 
                     return `
                         <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
@@ -1882,6 +1971,8 @@
                             <td style="padding:12px 10px;">${typeHtml}</td>
                             <td style="padding:12px 10px;">
                                 <a href="javascript:void(0)" onclick="closeModal('member-dashboard-modal'); openListingDetailsModal('${encodeURIComponent(JSON.stringify(l)).replace(/'/g, "%27")}');" style="color:var(--blue); font-size:0.85rem;">View</a>
+                                ${activeSubscription ? `<br><a href="ajm-webpage-builder.html?listing=${encodeURIComponent(l.id)}" style="color:var(--yellow);font-size:0.85rem;">Build Webpage</a>` : ''}
+                                ${webpage?.page_status === 'published' ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" target="_blank" rel="noopener" style="color:var(--green);font-size:0.85rem;">Open Live Page</a>` : ''}
                             </td>
                         </tr>
                     `;
@@ -2027,6 +2118,9 @@
             await loadListings();
             // Close auth modal if open
             closeModal('auth-modal');
+            if (sessionStorage.getItem('ajmRequestedTier')) {
+                setTimeout(() => handlePostListingClick(), 150);
+            }
         }
 
         // ==========================================
@@ -2274,14 +2368,14 @@
                 // Featured query: approved + featured flag
                 let featuredQuery = supabase
                     .from('listings')
-                    .select('*')
+                    .select('*, listing_webpages(tier, page_status)')
                     .eq('status', 'approved')
                     .eq('is_featured', true);
                 featuredQuery = applyFilters(featuredQuery);
                 featuredQuery = featuredQuery.order('created_at', { ascending: false }).limit(5);
 
                 // All-listings base query
-                let allBase = supabase.from('listings').select('*', { count: 'exact' });
+                let allBase = supabase.from('listings').select('*, listing_webpages(tier, page_status)', { count: 'exact' });
                 // Visibility: approved OR own listings if logged in
                 if (currentUser) {
                     allBase = allBase.or(`status.eq.approved,owner_user_id.eq.${currentUser.id}`);
@@ -2318,7 +2412,7 @@
             const rawCategory = activeCategory || '';
             const categoryList = rawCategory ? getCategoryFilter(rawCategory) : [];
 
-            let query = supabase.from('listings').select('*', { count: 'exact' });
+            let query = supabase.from('listings').select('*, listing_webpages(tier, page_status)', { count: 'exact' });
             if (currentUser) {
                 query = query.or(`status.eq.approved,owner_user_id.eq.${currentUser.id}`);
             } else {
@@ -2406,6 +2500,7 @@
 
             container.innerHTML = listings.map(l => {
                 const lJson = encodeURIComponent(JSON.stringify(l)).replace(/'/g, "%27");
+                const webpage = Array.isArray(l.listing_webpages) ? l.listing_webpages[0] : l.listing_webpages;
                 return `
                 <div class="listing-row" style="cursor: pointer;" onclick="openListingDetailsModal('${lJson}')">
                     ${l.image_url 
@@ -2415,6 +2510,7 @@
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <h4 style="margin: 0; font-size: 1.3rem;">${escHtml(l.business_name)}</h4>
                             ${l.is_featured ? '<span class="listing-badge badge-featured">⭐ Featured</span>' : ''}
+                            ${webpage?.page_status === 'published' ? `<span class="listing-badge" style="color:var(--yellow);background:rgba(255,207,51,.12);text-transform:capitalize;">${escHtml(webpage.tier)} Webpage</span>` : ''}
                             ${l.status === 'pending' ? '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);">⏳ Pending</span>' : ''}
                         </div>
                         <span style="font-size: 0.9rem; color: var(--muted);">${escHtml(formatLocation(l.location))}${l.category ? ' · <span style="color:var(--green);font-weight:600;">' + formatCategory(l.category) + '</span>' : ''}</span>
@@ -2427,6 +2523,7 @@
                         ${l.email ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'email', '${escHtml(l.email)}')" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Email</a>` : ''}
                         ${l.website ? `<a href="${escHtml(normalizeWebsiteUrl(l.website))}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Website</a>` : ''}
                         ${l.whatsapp ? `<a href="javascript:void(0)" onclick="event.stopPropagation(); openConsultationModal('${l.id}', 'whatsapp', '${escHtml(l.whatsapp.replace(/\D/g,''))}')" class="btn btn-primary" style="padding: 6px 16px; font-size: 0.85rem; width: 100%; text-align: center;">WhatsApp</a>` : ''}
+                        ${webpage?.page_status === 'published' ? `<a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" onclick="event.stopPropagation();" class="btn btn-primary" style="padding:6px 16px;font-size:.85rem;width:100%;text-align:center;background:linear-gradient(135deg,var(--yellow),var(--green));">Business Webpage</a>` : ''}
                     </div>
                 </div>
             `;
@@ -2435,12 +2532,14 @@
 
         function buildTableRow(l) {
             const lJson = encodeURIComponent(JSON.stringify(l)).replace(/'/g, "%27");
+            const webpage = Array.isArray(l.listing_webpages) ? l.listing_webpages[0] : l.listing_webpages;
             return `
                 <tr style="cursor: pointer;" onclick="openListingDetailsModal('${lJson}')">
                     <td style="display:flex; align-items:center; gap:12px;">
                         ${l.image_url ? `<img src="${escHtml(l.image_url)}" alt="Logo" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: var(--glass-bg); border: 1px solid var(--glass-border);">` : `<div style="width: 48px; height: 48px; border-radius: 6px; flex-shrink: 0; background: var(--glass-bg); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.2rem;">🏢</div>`}
                         <div>
                             <strong>${escHtml(l.business_name)}</strong>${l.status === 'pending' ? ' <span style="font-size:0.7rem;color:var(--yellow);">(pending)</span>' : ''}
+                            ${webpage?.page_status === 'published' ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" onclick="event.stopPropagation();" style="font-size:.74rem;color:var(--yellow);text-transform:capitalize;">${escHtml(webpage.tier)} Webpage</a>` : ''}
                         </div>
                     </td>
                     <td>${escHtml(l.subcategory || formatCategory(l.category) || '—')}</td>
@@ -2596,34 +2695,15 @@
         // ==========================================
         // POST LISTING
         // ==========================================
-        function handlePostListingClick() {
+        function handlePostListingClick(requestedTier = null) {
+            const preferredTier = requestedTier || sessionStorage.getItem('ajmRequestedTier');
             if (currentUser) {
                 openModal('post-listing-modal');
-                
-                // Lock premium options for free members
-                const isPremium = currentProfile?.role === 'admin' || currentProfile?.role === 'subscriber';
-                ['lt-advanced', 'lt-featured', 'lt-banner'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        const wrapper = el.closest('.listing-type-option');
-                        if (!isPremium) {
-                            el.disabled = true;
-                            wrapper.style.opacity = '0.5';
-                            wrapper.style.cursor = 'not-allowed';
-                            wrapper.onclick = (e) => {
-                                e.preventDefault();
-                                document.getElementById('lt-basic').checked = true;
-                                showToast('This is a paid feature! Please upgrade to access special listings.', 'error');
-                            };
-                        } else {
-                            el.disabled = false;
-                            wrapper.style.opacity = '1';
-                            wrapper.style.cursor = 'pointer';
-                            wrapper.onclick = null;
-                        }
-                    }
-                });
+                const choice = document.getElementById(`lt-${preferredTier || 'basic'}`);
+                if (choice) choice.checked = true;
+                if (preferredTier) sessionStorage.removeItem('ajmRequestedTier');
             } else {
+                if (requestedTier) sessionStorage.setItem('ajmRequestedTier', requestedTier);
                 openModal('post-login-prompt-modal');
             }
         }
@@ -2643,6 +2723,7 @@
             const businessName = document.getElementById('lf-business-name').value.trim();
             const category = document.getElementById('lf-category').value;
             const subcategory = document.getElementById('lf-subcategory').value.trim();
+            const marketSegment = document.getElementById('lf-market-segment').value;
             const description = document.getElementById('lf-description').value.trim();
             const location = document.getElementById('lf-location').value;
             const phone = document.getElementById('lf-phone').value.trim();
@@ -2650,11 +2731,13 @@
             const email = document.getElementById('lf-email').value.trim();
             const website = document.getElementById('lf-website').value.trim();
             const notes = document.getElementById('lf-notes').value.trim();
-            const listingType = document.querySelector('input[name="listing_type"]:checked')?.value || 'basic';
+            const selectedPackage = document.querySelector('input[name="listing_type"]:checked')?.value || 'free';
+            const requestedTier = selectedPackage === 'free' ? null : selectedPackage;
+            const listingType = requestedTier ? 'webpage' : 'basic';
             const imageFile = document.getElementById('lf-image')?.files?.[0] || null;
 
-            if (!businessName || !category || !description || !location) {
-                showErrBox(errBox, 'Please fill in all required fields: Business Name, Category, Description, and Location.');
+            if (!businessName || !category || !marketSegment || !description || !location) {
+                showErrBox(errBox, 'Please fill in all required fields, including the market segment.');
                 return;
             }
 
@@ -2691,6 +2774,8 @@
                 image_url: imageUrl,
                 extra_notes: notes || null,
                 listing_type: listingType,
+                requested_tier: requestedTier,
+                market_segment: marketSegment,
                 status: 'pending',
                 owner_user_id: currentUser.id
             });
@@ -2700,7 +2785,9 @@
             if (error) {
                 showErrBox(errBox, error.message || 'Failed to submit listing. Please try again.');
             } else {
-                successBox.textContent = '✅ Your listing has been submitted for review. It will appear publicly once approved by an admin.';
+                successBox.textContent = requestedTier
+                    ? `Your listing and ${requestedTier} webpage request were submitted. AJM will review the listing and activate paid webpage access after package confirmation.`
+                    : 'Your free directory listing has been submitted for review. It will appear publicly once approved by an admin.';
                 successBox.classList.add('show');
                 document.getElementById('listing-form').reset();
                 document.getElementById('lf-image-preview').style.display = 'none';

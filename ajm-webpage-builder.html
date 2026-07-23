@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en-JM">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>AJM Webpage Builder | Advertising Hub</title>
+    <link rel="icon" href="aloe%20favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #05070d;
+            --panel: #0d111c;
+            --panel-2: #131927;
+            --text: #f8f9ff;
+            --muted: #aeb7cf;
+            --line: rgba(255,255,255,.13);
+            --green: #17d66f;
+            --yellow: #ffcf33;
+            --blue: #4da3ff;
+            --red: #ff5570;
+            --silver: #cbd5e1;
+            --gold: #f6c84b;
+            --platinum: #7dc4ff;
+            --max: 1180px;
+        }
+
+        * { box-sizing: border-box; }
+        html { color-scheme: dark; scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "Space Grotesk", sans-serif;
+            background:
+                radial-gradient(circle at 12% 0%, rgba(23,214,111,.13), transparent 28rem),
+                radial-gradient(circle at 88% 15%, rgba(77,163,255,.12), transparent 28rem),
+                var(--bg);
+        }
+        a { color: inherit; text-decoration: none; }
+        button, input, textarea, select { font: inherit; }
+        button { cursor: pointer; }
+        h1, h2, h3 { font-family: "Syne", sans-serif; letter-spacing: -.035em; }
+
+        .shell { width: min(var(--max), calc(100% - 32px)); margin: 0 auto; }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            border-bottom: 1px solid var(--line);
+            background: rgba(5,7,13,.86);
+            backdrop-filter: blur(18px);
+        }
+        .nav { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand img { width: 48px; height: 48px; object-fit: contain; border-radius: 12px; }
+        .brand strong { display: block; letter-spacing: .11em; font-size: .92rem; }
+        .brand span { display: block; color: var(--muted); font-size: .72rem; text-transform: uppercase; margin-top: 3px; }
+        .nav-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+
+        .btn {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 11px 17px;
+            color: var(--text);
+            background: rgba(255,255,255,.07);
+            font-weight: 700;
+            transition: .2s ease;
+        }
+        .btn:hover { transform: translateY(-1px); background: rgba(255,255,255,.12); }
+        .btn-primary { color: #051009; border: 0; background: linear-gradient(135deg, var(--green), var(--yellow)); }
+        .btn-danger { color: #fff; background: rgba(255,85,112,.15); border-color: rgba(255,85,112,.35); }
+        .btn:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+
+        main { padding: 44px 0 80px; }
+        .intro { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, .8fr); gap: 24px; margin-bottom: 26px; }
+        .intro-card, .access-card, .panel {
+            border: 1px solid var(--line);
+            border-radius: 26px;
+            background: rgba(13,17,28,.9);
+            box-shadow: 0 24px 70px rgba(0,0,0,.25);
+        }
+        .intro-card { padding: 30px; }
+        .eyebrow { color: var(--green); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: .74rem; }
+        .intro h1 { font-size: clamp(2rem, 4vw, 3.7rem); line-height: 1; margin: 10px 0 12px; }
+        .intro p { max-width: 720px; color: var(--muted); line-height: 1.65; margin: 0; }
+        .access-card { padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+        .access-card small { color: var(--muted); }
+        .access-value { font-family: "Syne", sans-serif; font-size: 1.35rem; }
+        .tier-pill { width: max-content; border-radius: 999px; padding: 7px 11px; font-weight: 800; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; background: rgba(255,255,255,.1); }
+        .tier-pill.silver { color: var(--silver); }
+        .tier-pill.gold { color: var(--gold); }
+        .tier-pill.platinum { color: var(--platinum); }
+
+        .notice { display: none; margin-bottom: 24px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--line); line-height: 1.5; }
+        .notice.show { display: block; }
+        .notice.error { color: #ffd7de; background: rgba(255,85,112,.1); border-color: rgba(255,85,112,.35); }
+        .notice.success { color: #c9ffdf; background: rgba(23,214,111,.1); border-color: rgba(23,214,111,.35); }
+        .notice.info { color: #d5eaff; background: rgba(77,163,255,.1); border-color: rgba(77,163,255,.35); }
+
+        .workspace { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }
+        .step-nav { position: sticky; top: 100px; display: grid; gap: 8px; }
+        .step-link { width: 100%; text-align: left; border: 1px solid transparent; border-radius: 13px; padding: 12px 14px; color: var(--muted); background: transparent; }
+        .step-link:hover, .step-link.active { color: #fff; background: rgba(255,255,255,.07); border-color: var(--line); }
+        .step-link span { color: var(--green); font-weight: 800; margin-right: 8px; }
+
+        .form-stack { display: grid; gap: 20px; }
+        .panel { padding: 26px; scroll-margin-top: 100px; }
+        .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+        .panel h2 { margin: 0 0 7px; font-size: 1.35rem; }
+        .panel p { margin: 0; color: var(--muted); line-height: 1.5; font-size: .91rem; }
+        .feature-lock { color: var(--yellow); font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+        .field { display: grid; gap: 7px; margin-bottom: 16px; }
+        .field:last-child { margin-bottom: 0; }
+        label { color: #e9ecf7; font-size: .86rem; font-weight: 700; }
+        label small { color: var(--muted); font-weight: 400; }
+        input, textarea, select {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            color: #fff;
+            background: rgba(0,0,0,.22);
+            outline: none;
+            padding: 12px 13px;
+        }
+        input:focus, textarea:focus, select:focus { border-color: rgba(23,214,111,.72); box-shadow: 0 0 0 3px rgba(23,214,111,.1); }
+        textarea { min-height: 118px; resize: vertical; line-height: 1.5; }
+        .compact { min-height: 82px; }
+        .help { color: var(--muted); font-size: .75rem; line-height: 1.45; }
+        .toggle { display: flex; align-items: center; gap: 10px; }
+        .toggle input { width: 18px; height: 18px; accent-color: var(--green); }
+        .toggle label { cursor: pointer; }
+        .tier-section.locked { opacity: .38; pointer-events: none; filter: grayscale(.35); }
+
+        .segment-note { padding: 13px 15px; border-radius: 13px; color: #dce8ff; background: rgba(77,163,255,.08); border: 1px solid rgba(77,163,255,.22); font-size: .84rem; line-height: 1.5; }
+        .upload-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .upload-row input { flex: 1; min-width: 230px; }
+        .savebar {
+            position: sticky;
+            bottom: 14px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: rgba(13,17,28,.94);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 18px 50px rgba(0,0,0,.45);
+        }
+        .savebar span { color: var(--muted); font-size: .82rem; }
+        .save-actions { display: flex; gap: 10px; }
+        .loading { display: grid; place-items: center; min-height: 42vh; color: var(--muted); }
+        .hidden { display: none !important; }
+
+        @media (max-width: 900px) {
+            .intro, .workspace { grid-template-columns: 1fr; }
+            .step-nav { position: static; grid-template-columns: repeat(3, minmax(0,1fr)); }
+            .step-link { text-align: center; padding: 10px 6px; font-size: .76rem; }
+            .step-link span { display: block; margin: 0 0 4px; }
+        }
+        @media (max-width: 650px) {
+            .shell { width: min(100% - 20px, var(--max)); }
+            .brand span { display: none; }
+            .nav-actions .btn:first-child { display: none; }
+            main { padding-top: 22px; }
+            .intro-card, .access-card, .panel { border-radius: 19px; }
+            .intro-card, .panel { padding: 20px; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .step-nav { grid-template-columns: repeat(2, minmax(0,1fr)); }
+            .savebar { align-items: stretch; flex-direction: column; }
+            .save-actions { display: grid; grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="shell nav">
+            <a class="brand" href="ajm-advertising-hub.html">
+                <img src="aloe%20logo.png" alt="Aloe Jamaica" />
+                <div><strong>ALOE JAMAICA</strong><span>Paid webpage builder</span></div>
+            </a>
+            <div class="nav-actions">
+                <a class="btn" href="ajm-advertising-hub.html">Back to directory</a>
+                <a class="btn" id="preview-link" href="#" target="_blank" rel="noopener">Preview webpage</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="shell">
+        <div id="loading" class="loading">Checking your AJM webpage access…</div>
+
+        <div id="builder" class="hidden">
+            <section class="intro">
+                <div class="intro-card">
+                    <div class="eyebrow">AJM Business Webpage</div>
+                    <h1 id="business-name">Your business</h1>
+                    <p>Build the page included with this listing’s paid package. Fields unlock automatically according to the active Silver, Gold or Platinum subscription.</p>
+                </div>
+                <aside class="access-card">
+                    <small>Current access</small>
+                    <div class="access-value" id="access-label">Checking package…</div>
+                    <div class="tier-pill" id="tier-pill">No active tier</div>
+                    <small id="access-detail">An active package is required to save.</small>
+                </aside>
+            </section>
+
+            <div id="notice" class="notice" role="status"></div>
+
+            <div class="workspace">
+                <nav class="step-nav" aria-label="Builder sections">
+                    <button type="button" class="step-link active" data-target="setup"><span>1</span>Setup</button>
+                    <button type="button" class="step-link" data-target="silver"><span>2</span>Silver</button>
+                    <button type="button" class="step-link" data-target="gold"><span>3</span>Gold</button>
+                    <button type="button" class="step-link" data-target="platinum"><span>4</span>Platinum</button>
+                    <button type="button" class="step-link" data-target="publish"><span>5</span>Publish</button>
+                </nav>
+
+                <form id="page-form" class="form-stack">
+                    <section class="panel" id="setup">
+                        <div class="panel-head">
+                            <div><h2>Package and market</h2><p>This controls the page layout and the business-specific guidance.</p></div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="field">
+                                <label for="tier">Webpage tier</label>
+                                <select id="tier" required>
+                                    <option value="silver">Silver</option>
+                                    <option value="gold">Gold</option>
+                                    <option value="platinum">Platinum</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="market-segment">Market segment</label>
+                                <select id="market-segment" required>
+                                    <option value="local-business">Local Business, Institutions, Agencies &amp; Directories</option>
+                                    <option value="professional-services">Professional &amp; Niche Services</option>
+                                    <option value="b2b-supplier">B2B Supplier &amp; Wholesale Marketplaces</option>
+                                    <option value="hospitality-events">Hospitality, Accommodation, Weddings &amp; Events</option>
+                                    <option value="automotive-collectibles">Automotive, Collectibles &amp; Precious Metals</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="segment-note" id="segment-note"></div>
+                    </section>
+
+                    <section class="panel tier-section" id="silver" data-min-tier="silver">
+                        <div class="panel-head">
+                            <div><h2>Silver foundation</h2><p>Business identity, contact details, description, hours and a focused photo gallery.</p></div>
+                            <span class="feature-lock">Silver+</span>
+                        </div>
+                        <div class="grid-2">
+                            <div class="field"><label for="tagline">Tagline</label><input id="tagline" type="text" maxlength="140" placeholder="A short promise to your customers" /></div>
+                            <div class="field"><label for="logo-url">Logo URL <small>(uses listing image if blank)</small></label><input id="logo-url" type="url" placeholder="https://…" /></div>
+                        </div>
+                        <div class="field"><label for="address">Business address</label><input id="address" type="text" maxlength="300" placeholder="Street, community, parish" /></div>
+                        <div class="field"><label for="about">About the business</label><textarea id="about" maxlength="5000" placeholder="Tell customers what the business does and why they should choose it."></textarea></div>
+                        <div class="field"><label for="hours">Operating hours</label><textarea id="hours" class="compact" placeholder="Monday–Friday: 8:00 AM–5:00 PM&#10;Saturday: 9:00 AM–2:00 PM&#10;Sunday: Closed"></textarea></div>
+                        <div class="field">
+                            <label for="gallery">Gallery image URLs <small>(one per line)</small></label>
+                            <textarea id="gallery" class="compact" placeholder="https://example.com/photo-1.jpg"></textarea>
+                            <div class="help" id="gallery-limit">Silver supports up to 3 photos.</div>
+                        </div>
+                        <div class="field">
+                            <label for="gallery-upload">Or upload gallery photos</label>
+                            <div class="upload-row"><input id="gallery-upload" type="file" multiple accept="image/jpeg,image/png,image/webp" /><button type="button" class="btn" id="upload-btn">Upload selected</button></div>
+                            <div class="help">JPG, PNG or WebP; maximum 5 MB each. Uploaded URLs are added above.</div>
+                        </div>
+                    </section>
+
+                    <section class="panel tier-section" id="gold" data-min-tier="gold">
+                        <div class="panel-head">
+                            <div><h2>Gold engagement</h2><p>Add richer media, location, reviews, lead capture and a promotion.</p></div>
+                            <span class="feature-lock">Gold+</span>
+                        </div>
+                        <div class="grid-2">
+                            <div class="field"><label for="hero-media">Hero image URL</label><input id="hero-media" type="url" placeholder="https://…" /></div>
+                            <div class="field"><label for="video-url">Video URL <small>(YouTube or Vimeo)</small></label><input id="video-url" type="url" placeholder="https://youtube.com/watch?v=…" /></div>
+                        </div>
+                        <div class="field"><label for="map-url">Google Maps link or embed URL</label><input id="map-url" type="url" placeholder="https://www.google.com/maps/…" /></div>
+                        <div class="grid-3">
+                            <div class="field"><label for="offer-title">Offer title</label><input id="offer-title" type="text" maxlength="120" placeholder="Summer Special" /></div>
+                            <div class="field"><label for="offer-code">Coupon code</label><input id="offer-code" type="text" maxlength="50" placeholder="AJM10" /></div>
+                            <div class="field"><label for="lead-form">Lead form</label><div class="toggle"><input id="lead-form" type="checkbox" /><label for="lead-form">Accept direct enquiries</label></div></div>
+                        </div>
+                        <div class="field"><label for="offer-details">Offer details</label><textarea id="offer-details" class="compact" maxlength="1000" placeholder="Describe the promotion, terms and expiry date."></textarea></div>
+                        <div class="field"><label for="testimonials">Customer reviews <small>(Name | Rating 1–5 | Review; one per line)</small></label><textarea id="testimonials" placeholder="Marsha Brown | 5 | Excellent service and fast response."></textarea></div>
+                    </section>
+
+                    <section class="panel tier-section" id="platinum" data-min-tier="platinum">
+                        <div class="panel-head">
+                            <div><h2>Platinum conversion tools</h2><p>Turn the page into a full customer journey with booking, virtual access and direct action tools.</p></div>
+                            <span class="feature-lock">Platinum</span>
+                        </div>
+                        <div class="grid-2">
+                            <div class="field"><label for="booking-url">Booking or appointment URL</label><input id="booking-url" type="url" placeholder="https://…" /></div>
+                            <div class="field"><label for="virtual-tour-url">Virtual / 360° tour URL</label><input id="virtual-tour-url" type="url" placeholder="https://…" /></div>
+                            <div class="field"><label for="call-phone">Tracked call number</label><input id="call-phone" type="tel" maxlength="50" placeholder="+1 876 …" /></div>
+                            <div class="field"><label for="chat-url">Live chat URL</label><input id="chat-url" type="url" placeholder="https://wa.me/… or chat provider URL" /></div>
+                        </div>
+                    </section>
+
+                    <section class="panel" id="publish">
+                        <div class="panel-head">
+                            <div><h2>Review and publish</h2><p>Save privately as a draft, or publish once the directory listing is approved.</p></div>
+                        </div>
+                        <div class="notice info show" id="publish-note">Drafts are visible only to the listing owner and AJM administrators.</div>
+                    </section>
+
+                    <div class="savebar">
+                        <span id="save-hint">Changes are not saved automatically.</span>
+                        <div class="save-actions">
+                            <button type="button" class="btn" id="save-draft">Save draft</button>
+                            <button type="button" class="btn btn-primary" id="publish-btn">Publish webpage</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const TIER_RANK = { silver: 1, gold: 2, platinum: 3 };
+        const GALLERY_LIMIT = { silver: 3, gold: 12, platinum: 24 };
+        const SEGMENT_NOTES = {
+            'local-business': 'Prioritise clear contact details, opening hours, services and easy local discovery.',
+            'professional-services': 'Use trust signals, credentials, intake information and appointment access to convert high-value leads.',
+            'b2b-supplier': 'Highlight bulk ordering, catalogue or RFQ access, trade assurance and the areas or currencies you serve.',
+            'hospitality-events': 'Lead with strong visuals, availability or booking access, seasonal promotions and direct enquiries.',
+            'automotive-collectibles': 'Show inventory or featured items clearly and use the action tools for financing, calls and serious buyer enquiries.'
+        };
+
+        const params = new URLSearchParams(location.search);
+        const listingId = params.get('listing');
+        const loading = document.getElementById('loading');
+        const builder = document.getElementById('builder');
+        const form = document.getElementById('page-form');
+        const notice = document.getElementById('notice');
+        let currentUser = null;
+        let currentProfile = null;
+        let listing = null;
+        let existingPage = null;
+        let maxTier = null;
+        let isAdmin = false;
+
+        const el = (id) => document.getElementById(id);
+        const value = (id) => el(id).value.trim();
+        const emptyToNull = (input) => input || null;
+
+        function showNotice(message, type = 'info') {
+            notice.textContent = message;
+            notice.className = `notice ${type} show`;
+            notice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function splitLines(input) {
+            return input.split('\n').map((item) => item.trim()).filter(Boolean);
+        }
+
+        function parseHours(input) {
+            const hours = {};
+            splitLines(input).forEach((line, index) => {
+                const separator = line.indexOf(':');
+                if (separator > 0) {
+                    hours[line.slice(0, separator).trim()] = line.slice(separator + 1).trim();
+                } else {
+                    hours[`Line ${index + 1}`] = line;
+                }
+            });
+            return hours;
+        }
+
+        function formatHours(hours) {
+            if (!hours || typeof hours !== 'object') return '';
+            return Object.entries(hours).map(([day, time]) => day.startsWith('Line ') ? time : `${day}: ${time}`).join('\n');
+        }
+
+        function parseTestimonials(input) {
+            return splitLines(input).map((line) => {
+                const [name = '', rating = '5', ...quoteParts] = line.split('|').map((part) => part.trim());
+                return { name, rating: Math.min(5, Math.max(1, Number(rating) || 5)), quote: quoteParts.join(' | ') };
+            }).filter((review) => review.name && review.quote);
+        }
+
+        function formatTestimonials(items) {
+            if (!Array.isArray(items)) return '';
+            return items.map((item) => `${item.name || ''} | ${item.rating || 5} | ${item.quote || ''}`).join('\n');
+        }
+
+        function updateTierUI() {
+            const tier = el('tier').value;
+            document.querySelectorAll('.tier-section').forEach((section) => {
+                section.classList.toggle('locked', TIER_RANK[tier] < TIER_RANK[section.dataset.minTier]);
+            });
+            el('gallery-limit').textContent = `${tier[0].toUpperCase() + tier.slice(1)} supports up to ${GALLERY_LIMIT[tier]} photos.`;
+            el('tier-pill').className = `tier-pill ${tier}`;
+            el('tier-pill').textContent = `${tier} webpage`;
+        }
+
+        function updateSegmentNote() {
+            el('segment-note').textContent = SEGMENT_NOTES[el('market-segment').value] || '';
+        }
+
+        function setFormEnabled(enabled) {
+            form.querySelectorAll('input, textarea, select, button').forEach((field) => {
+                field.disabled = !enabled;
+            });
+            document.querySelectorAll('.step-link').forEach((button) => button.disabled = false);
+        }
+
+        function populateForm(page) {
+            const tier = page?.tier || listing?.requested_tier || maxTier || 'silver';
+            const segment = page?.market_segment || listing?.market_segment || 'local-business';
+            el('tier').value = tier;
+            el('market-segment').value = segment;
+            el('tagline').value = page?.tagline || '';
+            el('logo-url').value = page?.logo_url || listing?.image_url || '';
+            el('address').value = page?.address || listing?.location || '';
+            el('about').value = page?.about_text || listing?.description || '';
+            el('hours').value = formatHours(page?.business_hours);
+            el('gallery').value = Array.isArray(page?.gallery_urls) ? page.gallery_urls.join('\n') : '';
+            el('hero-media').value = page?.hero_media_url || '';
+            el('video-url').value = page?.video_url || '';
+            el('map-url').value = page?.map_embed_url || '';
+            el('offer-title').value = page?.offer_title || '';
+            el('offer-details').value = page?.offer_details || '';
+            el('offer-code').value = page?.offer_code || '';
+            el('testimonials').value = formatTestimonials(page?.testimonials);
+            el('lead-form').checked = Boolean(page?.lead_form_enabled);
+            el('booking-url').value = page?.booking_url || '';
+            el('virtual-tour-url').value = page?.virtual_tour_url || '';
+            el('call-phone').value = page?.call_tracking_phone || '';
+            el('chat-url').value = page?.live_chat_url || '';
+            updateTierUI();
+            updateSegmentNote();
+        }
+
+        async function init() {
+            if (!listingId) {
+                loading.textContent = 'No listing was selected. Open the builder from your AJM dashboard.';
+                return;
+            }
+
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) {
+                loading.innerHTML = 'Please <a href="ajm-advertising-hub.html" style="color:var(--green);text-decoration:underline">log in through the AJM Advertising Hub</a>, then open the builder again.';
+                return;
+            }
+
+            currentUser = session.user;
+            const [{ data: profile }, { data: listingData, error: listingError }] = await Promise.all([
+                supabase.from('profiles').select('role, full_name').eq('id', currentUser.id).maybeSingle(),
+                supabase.from('listings').select('*').eq('id', listingId).maybeSingle()
+            ]);
+
+            currentProfile = profile;
+            isAdmin = profile?.role === 'admin';
+            listing = listingData;
+
+            if (listingError || !listing) {
+                loading.textContent = 'This listing could not be found, or you do not have permission to manage it.';
+                return;
+            }
+
+            const [{ data: page }, { data: subscriptions }] = await Promise.all([
+                supabase.from('listing_webpages').select('*').eq('listing_id', listingId).maybeSingle(),
+                supabase.from('ad_subscriptions')
+                    .select('status, expires_at, ad_packages(code, name, webpage_enabled, webpage_tier)')
+                    .eq('listing_id', listingId)
+                    .eq('user_id', listing.owner_user_id)
+                    .eq('status', 'active')
+            ]);
+
+            existingPage = page;
+            const active = (subscriptions || []).filter((subscription) => {
+                const notExpired = !subscription.expires_at || new Date(subscription.expires_at) > new Date();
+                return notExpired && subscription.ad_packages?.webpage_enabled && TIER_RANK[subscription.ad_packages.webpage_tier];
+            });
+            maxTier = active.sort((a, b) => TIER_RANK[b.ad_packages.webpage_tier] - TIER_RANK[a.ad_packages.webpage_tier])[0]?.ad_packages?.webpage_tier || null;
+
+            el('business-name').textContent = listing.business_name || 'Your business';
+            el('preview-link').href = `ajm-business-page.html?listing=${encodeURIComponent(listingId)}&preview=1`;
+            loading.classList.add('hidden');
+            builder.classList.remove('hidden');
+
+            if (isAdmin) {
+                maxTier = 'platinum';
+                el('access-label').textContent = 'Administrator access';
+                el('access-detail').textContent = 'You can configure any package tier for this listing.';
+                setFormEnabled(true);
+            } else if (maxTier) {
+                el('access-label').textContent = `${maxTier[0].toUpperCase() + maxTier.slice(1)} package active`;
+                el('access-detail').textContent = 'You may create and publish the features included in this package.';
+                setFormEnabled(true);
+            } else {
+                el('access-label').textContent = 'No paid webpage package';
+                el('access-detail').textContent = 'Contact AJM to activate Silver, Gold or Platinum for this listing.';
+                setFormEnabled(false);
+                showNotice('This listing does not have an active paid webpage package. Your free directory listing is unaffected. Contact AJM to activate a tier.', 'info');
+            }
+
+            populateForm(existingPage);
+
+            if (!isAdmin && maxTier) {
+                [...el('tier').options].forEach((option) => {
+                    option.disabled = TIER_RANK[option.value] > TIER_RANK[maxTier];
+                });
+                if (TIER_RANK[el('tier').value] > TIER_RANK[maxTier]) el('tier').value = maxTier;
+                updateTierUI();
+            }
+
+            if (listing.status !== 'approved') {
+                el('publish-btn').disabled = true;
+                el('publish-note').textContent = 'This listing is not yet approved. You can save the webpage as a draft, then publish after AJM approval.';
+            }
+        }
+
+        function buildPayload(pageStatus) {
+            const tier = el('tier').value;
+            const gallery = splitLines(value('gallery'));
+            if (gallery.length > GALLERY_LIMIT[tier]) throw new Error(`${tier} supports up to ${GALLERY_LIMIT[tier]} gallery photos.`);
+
+            const payload = {
+                listing_id: listingId,
+                tier,
+                market_segment: el('market-segment').value,
+                page_status: pageStatus,
+                tagline: emptyToNull(value('tagline')),
+                logo_url: emptyToNull(value('logo-url')),
+                address: emptyToNull(value('address')),
+                about_text: emptyToNull(value('about')),
+                business_hours: parseHours(value('hours')),
+                gallery_urls: gallery,
+                hero_media_url: null,
+                video_url: null,
+                map_embed_url: null,
+                offer_title: null,
+                offer_details: null,
+                offer_code: null,
+                testimonials: [],
+                lead_form_enabled: false,
+                booking_url: null,
+                virtual_tour_url: null,
+                call_tracking_phone: null,
+                live_chat_url: null,
+                created_by: currentUser.id
+            };
+
+            if (TIER_RANK[tier] >= TIER_RANK.gold) {
+                Object.assign(payload, {
+                    hero_media_url: emptyToNull(value('hero-media')),
+                    video_url: emptyToNull(value('video-url')),
+                    map_embed_url: emptyToNull(value('map-url')),
+                    offer_title: emptyToNull(value('offer-title')),
+                    offer_details: emptyToNull(value('offer-details')),
+                    offer_code: emptyToNull(value('offer-code')),
+                    testimonials: parseTestimonials(value('testimonials')),
+                    lead_form_enabled: el('lead-form').checked
+                });
+            }
+
+            if (tier === 'platinum') {
+                Object.assign(payload, {
+                    booking_url: emptyToNull(value('booking-url')),
+                    virtual_tour_url: emptyToNull(value('virtual-tour-url')),
+                    call_tracking_phone: emptyToNull(value('call-phone')),
+                    live_chat_url: emptyToNull(value('chat-url'))
+                });
+            }
+            return payload;
+        }
+
+        async function save(pageStatus) {
+            try {
+                if (!isAdmin && !maxTier) throw new Error('An active paid webpage package is required.');
+                if (pageStatus === 'published' && listing.status !== 'approved') throw new Error('The directory listing must be approved before this webpage can be published.');
+                const payload = buildPayload(pageStatus);
+                const buttons = [el('save-draft'), el('publish-btn')];
+                buttons.forEach((button) => button.disabled = true);
+                el('save-hint').textContent = pageStatus === 'published' ? 'Publishing…' : 'Saving draft…';
+
+                const { data, error } = await supabase.from('listing_webpages').upsert(payload, { onConflict: 'listing_id' }).select().single();
+                buttons.forEach((button) => button.disabled = false);
+                if (listing.status !== 'approved') el('publish-btn').disabled = true;
+                if (error) throw error;
+                existingPage = data;
+                el('save-hint').textContent = `Last saved ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                showNotice(pageStatus === 'published' ? 'Your AJM business webpage is now published.' : 'Draft saved successfully.', 'success');
+            } catch (error) {
+                el('save-hint').textContent = 'Changes are not saved automatically.';
+                showNotice(error.message || 'The webpage could not be saved.', 'error');
+            }
+        }
+
+        async function uploadGallery() {
+            const files = [...el('gallery-upload').files];
+            if (!files.length) return showNotice('Select one or more image files first.', 'info');
+            const tier = el('tier').value;
+            const existing = splitLines(value('gallery'));
+            if (existing.length + files.length > GALLERY_LIMIT[tier]) return showNotice(`${tier} supports up to ${GALLERY_LIMIT[tier]} photos.`, 'error');
+            if (files.some((file) => file.size > 5 * 1024 * 1024)) return showNotice('Each image must be 5 MB or smaller.', 'error');
+
+            el('upload-btn').disabled = true;
+            el('upload-btn').textContent = 'Uploading…';
+            const urls = [];
+            for (const file of files) {
+                const extension = file.name.split('.').pop().toLowerCase();
+                const path = `${currentUser.id}/webpages/${listingId}/${crypto.randomUUID()}.${extension}`;
+                const { error } = await supabase.storage.from('listing-images').upload(path, file, { upsert: false, cacheControl: '3600' });
+                if (error) {
+                    el('upload-btn').disabled = false;
+                    el('upload-btn').textContent = 'Upload selected';
+                    return showNotice(`Upload failed: ${error.message}`, 'error');
+                }
+                const { data } = supabase.storage.from('listing-images').getPublicUrl(path);
+                if (data?.publicUrl) urls.push(data.publicUrl);
+            }
+            el('gallery').value = [...existing, ...urls].join('\n');
+            el('gallery-upload').value = '';
+            el('upload-btn').disabled = false;
+            el('upload-btn').textContent = 'Upload selected';
+            showNotice(`${urls.length} photo${urls.length === 1 ? '' : 's'} uploaded. Save the webpage to keep these gallery changes.`, 'success');
+        }
+
+        el('tier').addEventListener('change', updateTierUI);
+        el('market-segment').addEventListener('change', updateSegmentNote);
+        el('save-draft').addEventListener('click', () => save('draft'));
+        el('publish-btn').addEventListener('click', () => save('published'));
+        el('upload-btn').addEventListener('click', uploadGallery);
+        document.querySelectorAll('.step-link').forEach((button) => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.step-link').forEach((item) => item.classList.remove('active'));
+                button.classList.add('active');
+                document.getElementById(button.dataset.target).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+        form.addEventListener('submit', (event) => event.preventDefault());
+
+        init().catch((error) => {
+            loading.textContent = error.message || 'The builder could not be loaded.';
+        });
+    </script>
+</body>
+</html>
