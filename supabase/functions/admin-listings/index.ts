@@ -75,7 +75,7 @@ serve(async (req: Request) => {
     } else if (action === 'update_listing') {
       // NOTE: status and is_featured are intentionally omitted from update_listing 
       // and must be managed via explicit actions (approve, reject, feature, etc.)
-      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes } = body;
+      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes, requested_tier, market_segment } = body;
       updatePayload = {
         ...updatePayload,
         business_name,
@@ -89,14 +89,16 @@ serve(async (req: Request) => {
         website,
         listing_type,
         extra_notes,
+        requested_tier,
+        market_segment,
         ...(image_url !== undefined && { image_url })
       };
     } else if (action === 'create_listing') {
-      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes, status, is_featured, owner_user_id } = body;
+      const { business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, image_url, extra_notes, status, is_featured, owner_user_id, requested_tier, market_segment } = body;
       const insertStatus = status || 'pending';
       const insertPayload = {
         owner_user_id: owner_user_id || user.id,
-        business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, extra_notes, image_url,
+        business_name, category, subcategory, description, location, contact_phone, whatsapp, email, website, listing_type, extra_notes, image_url, requested_tier, market_segment,
         status: insertStatus,
         is_featured: is_featured || false,
         ...(is_featured && { featured_until: new Date(Date.now() + 30*24*60*60*1000).toISOString() }),

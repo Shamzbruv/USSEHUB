@@ -379,6 +379,62 @@
     </div>
 </div>
 
+<!-- AJM Webpage Package Modal -->
+<div id="webpage-package-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="webpage-package-title">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeWebpagePackageModal()" aria-label="Close">&times;</button>
+        <h2 class="modal-title" id="webpage-package-title">AJM Paid Webpage</h2>
+        <p style="color:var(--muted);font-size:0.9rem;margin-top:-4px;line-height:1.5;">Activate the customer’s Silver, Gold or Platinum webpage and assign the correct market segment.</p>
+        <input type="hidden" id="webpage-listing-id" />
+        <div class="form-group">
+            <label>Business</label>
+            <input type="text" id="webpage-business-name" readonly />
+        </div>
+        <div style="display:flex;gap:12px;">
+            <div class="form-group" style="flex:1;">
+                <label>Paid Package</label>
+                <select id="webpage-package-code">
+                    <option value="ajm-webpage-silver">Silver</option>
+                    <option value="ajm-webpage-gold">Gold</option>
+                    <option value="ajm-webpage-platinum">Platinum</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Access Duration</label>
+                <select id="webpage-duration">
+                    <option value="30">30 days</option>
+                    <option value="90">90 days</option>
+                    <option value="180">6 months</option>
+                    <option value="365">1 year</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Market Segment</label>
+            <select id="webpage-market-segment">
+                <option value="local-business">Local Business, Institutions, Agencies & Directories</option>
+                <option value="professional-services">Professional & Niche Services</option>
+                <option value="b2b-supplier">B2B Supplier & Wholesale Marketplaces</option>
+                <option value="hospitality-events">Hospitality, Accommodation, Weddings & Events</option>
+                <option value="automotive-collectibles">Automotive, Collectibles & Precious Metals</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Payment Reference (optional)</label>
+            <input type="text" id="webpage-payment-reference" placeholder="Receipt, invoice or transaction reference" />
+        </div>
+        <div id="webpage-package-status" style="padding:12px 14px;border:1px solid var(--glass-border);border-radius:12px;color:var(--muted);font-size:0.86rem;margin-bottom:16px;">Checking current access…</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-primary" style="flex:1;border-radius:12px;" onclick="activateWebpagePackage()" id="activate-webpage-btn">Activate Package</button>
+            <button class="btn btn-danger" style="border-radius:12px;" onclick="cancelWebpagePackage()" id="cancel-webpage-btn">Cancel Access</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+            <a class="btn btn-ghost" style="flex:1;border-radius:12px;text-align:center;" id="admin-webpage-builder-link" href="#" target="_blank" rel="noopener">Open Webpage Builder</a>
+            <a class="btn btn-ghost" style="border-radius:12px;text-align:center;" id="admin-live-webpage-link" href="#" target="_blank" rel="noopener">View Page</a>
+        </div>
+    </div>
+</div>
+
 <!-- Add Modal -->
 <div id="add-modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-box">
@@ -661,6 +717,10 @@
     window.openAddModal = openAddModal;
     window.closeAddModal = closeAddModal;
     window.saveNewListing = saveNewListing;
+    window.openWebpagePackageModal = openWebpagePackageModal;
+    window.closeWebpagePackageModal = closeWebpagePackageModal;
+    window.activateWebpagePackage = activateWebpagePackage;
+    window.cancelWebpagePackage = cancelWebpagePackage;
 
     // ── INIT ──
     async function init() {
@@ -791,7 +851,7 @@
         const offset = currentPage * PAGE_SIZE;
 
         try {
-            let query = supabase.from('listings').select('*, profiles(email, full_name)', { count: 'exact' });
+            let query = supabase.from('listings').select('*, profiles(email, full_name), listing_webpages(tier, page_status)', { count: 'exact' });
             if (statusFilter) query = query.eq('status', statusFilter);
             if (category) query = query.eq('category', category);
             if (keyword) {
@@ -818,6 +878,7 @@
             window.listingCache = window.listingCache || {};
             tbody.innerHTML = filtered.map(l => {
                 window.listingCache[l.id] = l;
+                const webpage = Array.isArray(l.listing_webpages) ? l.listing_webpages[0] : l.listing_webpages;
                 return `
                 <tr>
                     <td>
@@ -835,6 +896,7 @@
                     <td>
                         <span class="badge badge-${l.status}">${l.status}</span>
                         ${l.is_featured ? '<br><span class="badge badge-featured" style="margin-top:4px;">⭐ featured</span>' : ''}
+                        ${webpage ? `<br><span class="badge" style="margin-top:4px;color:var(--yellow);background:rgba(255,207,51,.12);">${escHtml(webpage.tier || '')} page · ${escHtml(webpage.page_status || 'draft')}</span>` : (l.requested_tier ? `<br><span class="badge" style="margin-top:4px;color:var(--muted);">${escHtml(l.requested_tier)} requested</span>` : '')}
                     </td>
                     <td>
                         <div class="action-row" style="gap: 4px; margin-top: 4px;">
@@ -844,6 +906,7 @@
                             ${l.status !== 'expired' ? `<button class="btn btn-warning btn-sm" style="padding: 4px 8px;" onclick="expireListing('${l.id}')" title="Expire">🕰</button>` : ''}
                             <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick="toggleFeatured('${l.id}', ${l.is_featured})" title="${l.is_featured ? 'Unfeature' : 'Feature'}">${l.is_featured ? '★' : '☆'}</button>
                             <button class="btn btn-ghost btn-sm" style="padding: 4px 8px;" onclick="openEditModal(window.listingCache['${l.id}'])" title="Edit">✎</button>
+                            <button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:var(--yellow);border-color:rgba(255,207,51,.35);" onclick="openWebpagePackageModal(window.listingCache['${l.id}'])" title="Manage paid webpage">Webpage</button>
                         </div>
                     </td>
                 </tr>
@@ -896,6 +959,91 @@
             showToast(currently ? 'Removed from featured.' : 'Marked as featured!', 'success');
             await loadListings();
         }
+    }
+
+    // ── PAID WEBPAGE PACKAGES ──
+    async function openWebpagePackageModal(listing) {
+        document.getElementById('webpage-listing-id').value = listing.id;
+        document.getElementById('webpage-business-name').value = listing.business_name || '';
+        document.getElementById('webpage-package-code').value = `ajm-webpage-${listing.requested_tier || 'silver'}`;
+        document.getElementById('webpage-market-segment').value = listing.market_segment || 'local-business';
+        document.getElementById('webpage-duration').value = '30';
+        document.getElementById('webpage-payment-reference').value = '';
+        document.getElementById('admin-webpage-builder-link').href = `ajm-webpage-builder.html?listing=${encodeURIComponent(listing.id)}`;
+        document.getElementById('admin-live-webpage-link').href = `ajm-business-page.html?listing=${encodeURIComponent(listing.id)}&preview=1`;
+        const status = document.getElementById('webpage-package-status');
+        status.textContent = 'Checking current access…';
+        document.getElementById('webpage-package-modal').classList.add('open');
+
+        const { data, error } = await supabase
+            .from('ad_subscriptions')
+            .select('status, expires_at, ad_packages(code, name, webpage_tier)')
+            .eq('listing_id', listing.id)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (error || !data) {
+            status.textContent = 'No active paid webpage package.';
+            return;
+        }
+
+        const packageData = data.ad_packages;
+        if (packageData?.code) document.getElementById('webpage-package-code').value = packageData.code;
+        const expiry = data.expires_at ? fmtDate(data.expires_at) : 'no expiry date';
+        status.innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(packageData?.name || packageData?.webpage_tier || 'AJM webpage')} · expires ${escHtml(expiry)}`;
+    }
+
+    function closeWebpagePackageModal() {
+        document.getElementById('webpage-package-modal').classList.remove('open');
+    }
+
+    async function activateWebpagePackage() {
+        const listingId = document.getElementById('webpage-listing-id').value;
+        const button = document.getElementById('activate-webpage-btn');
+        button.disabled = true;
+        button.textContent = 'Activating…';
+        const { data, error } = await supabase.functions.invoke('admin-ad-subscriptions', {
+            body: {
+                action: 'activate',
+                listing_id: listingId,
+                package_code: document.getElementById('webpage-package-code').value,
+                market_segment: document.getElementById('webpage-market-segment').value,
+                duration_days: Number(document.getElementById('webpage-duration').value),
+                payment_reference: document.getElementById('webpage-payment-reference').value.trim() || null
+            }
+        });
+        button.disabled = false;
+        button.textContent = 'Activate Package';
+        if (error || data?.error) {
+            showToast('Package activation failed: ' + (data?.error || error?.message || 'Unknown error'), 'error');
+            return;
+        }
+        const expires = data?.subscription?.expires_at ? fmtDate(data.subscription.expires_at) : 'no expiry date';
+        document.getElementById('webpage-package-status').innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(data?.package?.name || 'AJM webpage')} · expires ${escHtml(expires)}`;
+        showToast('Paid webpage package activated.', 'success');
+        await loadListings();
+    }
+
+    async function cancelWebpagePackage() {
+        const listingId = document.getElementById('webpage-listing-id').value;
+        if (!confirm('Cancel paid webpage access for this listing? The public webpage will stop displaying immediately.')) return;
+        const button = document.getElementById('cancel-webpage-btn');
+        button.disabled = true;
+        button.textContent = 'Cancelling…';
+        const { data, error } = await supabase.functions.invoke('admin-ad-subscriptions', {
+            body: { action: 'cancel', listing_id: listingId }
+        });
+        button.disabled = false;
+        button.textContent = 'Cancel Access';
+        if (error || data?.error) {
+            showToast('Could not cancel access: ' + (data?.error || error?.message || 'Unknown error'), 'error');
+            return;
+        }
+        document.getElementById('webpage-package-status').textContent = 'No active paid webpage package.';
+        showToast('Paid webpage access cancelled.', 'success');
+        await loadListings();
     }
 
     // ── EDIT MODAL ──

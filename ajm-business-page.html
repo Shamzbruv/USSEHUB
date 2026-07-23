@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en-JM">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AJM Business Webpage | Advertising Hub</title>
+    <meta name="description" content="Discover a verified Jamaican business on the AJM Advertising Hub." />
+    <meta name="theme-color" content="#070910" />
+    <link rel="icon" href="aloe%20favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet" />
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
+    <style>
+        :root {
+            --bg: #070910;
+            --panel: #101522;
+            --panel-2: #161d2d;
+            --text: #f8f9fd;
+            --muted: #aeb7ca;
+            --line: rgba(255,255,255,.13);
+            --accent: #cbd5e1;
+            --accent-2: #8894a8;
+            --green: #23d477;
+            --red: #ff5f78;
+            --max: 1180px;
+        }
+        body.tier-gold { --accent: #ffd457; --accent-2: #c99418; }
+        body.tier-platinum { --accent: #75c5ff; --accent-2: #807cff; }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; color-scheme: dark; }
+        body { margin: 0; min-height: 100vh; color: var(--text); font-family: "DM Sans", sans-serif; background: var(--bg); }
+        a { color: inherit; text-decoration: none; }
+        button, input, textarea { font: inherit; }
+        h1, h2, h3 { font-family: "Manrope", sans-serif; letter-spacing: -.035em; }
+        .shell { width: min(var(--max), calc(100% - 34px)); margin: 0 auto; }
+        .topbar { position: absolute; inset: 0 0 auto; z-index: 20; padding: 18px 0; }
+        .nav { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .08em; font-size: .82rem; }
+        .brand img { width: 44px; height: 44px; object-fit: contain; border-radius: 11px; }
+        .back-link { border: 1px solid var(--line); border-radius: 999px; padding: 10px 15px; background: rgba(7,9,16,.55); backdrop-filter: blur(12px); font-size: .86rem; }
+        .hero { position: relative; min-height: 680px; display: flex; align-items: flex-end; overflow: hidden; background: linear-gradient(135deg, #141a28, #070910); }
+        .hero-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .52; }
+        .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 0%, rgba(7,9,16,.28) 55%, rgba(7,9,16,.68) 100%); }
+        .hero-grid { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 36px; align-items: end; padding: 160px 0 76px; }
+        .tier-badge { display: inline-flex; border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); border-radius: 999px; padding: 7px 11px; color: var(--accent); background: rgba(7,9,16,.58); font-size: .72rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+        .hero h1 { max-width: 880px; margin: 18px 0 12px; font-size: clamp(3rem, 8vw, 6.8rem); line-height: .92; }
+        .tagline { max-width: 700px; margin: 0; color: #dbe1ef; font-size: clamp(1.05rem, 2vw, 1.35rem); line-height: 1.55; }
+        .logo-card { width: 170px; height: 170px; border: 1px solid var(--line); border-radius: 28px; padding: 18px; background: rgba(255,255,255,.92); box-shadow: 0 22px 60px rgba(0,0,0,.42); }
+        .logo-card img { width: 100%; height: 100%; object-fit: contain; }
+        .logo-fallback { width: 100%; height: 100%; display: grid; place-items: center; color: #0d1421; font: 800 4rem/1 "Manrope", sans-serif; }
+        .quick-actions { position: relative; z-index: 4; margin-top: -30px; }
+        .action-bar { display: flex; gap: 10px; flex-wrap: wrap; padding: 14px; border: 1px solid var(--line); border-radius: 20px; background: rgba(16,21,34,.94); backdrop-filter: blur(18px); box-shadow: 0 22px 60px rgba(0,0,0,.32); }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 12px 17px; color: #fff; background: rgba(255,255,255,.06); font-weight: 700; transition: .2s ease; cursor: pointer; }
+        .btn:hover { transform: translateY(-2px); background: rgba(255,255,255,.12); }
+        .btn-primary { color: #07100b; border: 0; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+        .btn-green { color: #04150c; border: 0; background: var(--green); }
+        .spacer { flex: 1; }
+        main { padding: 90px 0; }
+        .section { padding: 44px 0; }
+        .section-head { display: grid; grid-template-columns: .7fr 1.3fr; gap: 34px; margin-bottom: 28px; }
+        .kicker { color: var(--accent); font-size: .74rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+        .section h2 { margin: 8px 0 0; font-size: clamp(2rem, 4vw, 3.4rem); }
+        .section-head p { color: var(--muted); line-height: 1.8; font-size: 1.05rem; margin: 3px 0 0; white-space: pre-wrap; }
+        .info-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 20px; }
+        .card { border: 1px solid var(--line); border-radius: 24px; padding: 26px; background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.018)); }
+        .card h3 { margin: 0 0 14px; font-size: 1.12rem; }
+        .hours-list { display: grid; gap: 10px; }
+        .hours-row { display: flex; justify-content: space-between; gap: 22px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,.08); color: var(--muted); }
+        .hours-row strong { color: #fff; }
+        .address { color: var(--muted); line-height: 1.65; white-space: pre-wrap; }
+        .gallery { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+        .gallery img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border: 1px solid var(--line); border-radius: 20px; transition: .25s ease; }
+        .gallery img:hover { transform: translateY(-4px); }
+        .feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px; }
+        .media-frame { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 20px; background: #000; }
+        .offer { border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, transparent), rgba(255,255,255,.025)); }
+        .offer-code { display: inline-block; margin-top: 12px; padding: 8px 12px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 9px; font-weight: 800; letter-spacing: .08em; }
+        .reviews { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+        .review p { color: #dce2ee; line-height: 1.6; }
+        .stars { color: var(--accent); letter-spacing: .1em; }
+        .review small { color: var(--muted); }
+        .lead-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 22px; }
+        .field { display: grid; gap: 7px; margin-bottom: 13px; }
+        label { color: #e6e9f3; font-size: .84rem; font-weight: 700; }
+        input, textarea { width: 100%; padding: 12px 13px; color: #fff; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,.22); outline: none; }
+        input:focus, textarea:focus { border-color: var(--accent); }
+        textarea { min-height: 120px; resize: vertical; }
+        .form-message { display: none; margin-bottom: 13px; padding: 11px 13px; border-radius: 11px; font-size: .86rem; }
+        .form-message.show { display: block; }
+        .form-message.error { color: #ffd9df; background: rgba(255,95,120,.12); }
+        .form-message.success { color: #c9ffdf; background: rgba(35,212,119,.12); }
+        .platinum-band { padding: 32px; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 28px; background: radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 18%, transparent), transparent 45%), var(--panel); }
+        .platinum-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+        footer { padding: 34px 0; border-top: 1px solid var(--line); color: var(--muted); }
+        .footer-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .state { min-height: 100vh; display: grid; place-items: center; padding: 30px; text-align: center; background: radial-gradient(circle, rgba(117,197,255,.12), transparent 36rem), var(--bg); }
+        .state-card { max-width: 620px; border: 1px solid var(--line); border-radius: 26px; padding: 34px; background: var(--panel); }
+        .state-card h1 { margin: 0 0 10px; }
+        .state-card p { color: var(--muted); line-height: 1.6; }
+        .hidden { display: none !important; }
+        @media (max-width: 850px) {
+            .hero { min-height: 620px; }
+            .hero-grid, .section-head, .info-grid, .lead-grid { grid-template-columns: 1fr; }
+            .logo-card { width: 120px; height: 120px; grid-row: 1; }
+            .gallery, .reviews { grid-template-columns: repeat(2, minmax(0,1fr)); }
+        }
+        @media (max-width: 620px) {
+            .shell { width: min(100% - 20px, var(--max)); }
+            .brand span { display: none; }
+            .hero-grid { padding-bottom: 58px; }
+            .hero h1 { font-size: clamp(2.7rem, 17vw, 4.4rem); }
+            .action-bar { border-radius: 17px; }
+            .action-bar .btn { flex: 1; min-width: 130px; }
+            .spacer { display: none; }
+            main { padding-top: 64px; }
+            .section { padding: 34px 0; }
+            .feature-grid, .gallery, .reviews { grid-template-columns: 1fr; }
+            .card, .platinum-band { padding: 20px; border-radius: 20px; }
+            .footer-row { align-items: flex-start; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="state"><div class="state-card"><h1>Loading business webpage…</h1><p>Please wait while AJM retrieves this listing.</p></div></div>
+    <div id="unavailable" class="state hidden"><div class="state-card"><h1>Webpage unavailable</h1><p id="unavailable-message">This paid business webpage is not published or could not be found.</p><a class="btn btn-primary" href="ajm-advertising-hub.html">Browse the AJM Directory</a></div></div>
+
+    <div id="page" class="hidden">
+        <header class="topbar">
+            <div class="shell nav">
+                <a class="brand" href="ajm-advertising-hub.html"><img src="aloe%20logo.png" alt="Aloe Jamaica" /><span>AJM ADVERTISING HUB</span></a>
+                <a class="back-link" href="ajm-advertising-hub.html">← Directory</a>
+            </div>
+        </header>
+
+        <section class="hero">
+            <img id="hero-image" class="hero-media hidden" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="" />
+            <div class="shell hero-grid">
+                <div>
+                    <span class="tier-badge" id="tier-badge">AJM Silver Member</span>
+                    <h1 id="business-name">AJM Business</h1>
+                    <p class="tagline" id="tagline"></p>
+                </div>
+                <div class="logo-card" id="logo-card"><img id="business-logo" class="hidden" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="" /><div id="logo-fallback" class="logo-fallback">A</div></div>
+            </div>
+        </section>
+
+        <div class="quick-actions">
+            <div class="shell action-bar" id="action-bar">
+                <a class="btn" id="phone-action" href="#">Call</a>
+                <a class="btn btn-green" id="whatsapp-action" href="#" target="_blank" rel="noopener">WhatsApp</a>
+                <a class="btn" id="email-action" href="#">Email</a>
+                <a class="btn" id="website-action" href="#" target="_blank" rel="noopener">Visit website</a>
+                <span class="spacer"></span>
+                <a class="btn btn-primary hidden" id="booking-action" href="#" target="_blank" rel="noopener">Book now</a>
+            </div>
+        </div>
+
+        <main>
+            <section class="shell section">
+                <div class="section-head">
+                    <div><div class="kicker">About</div><h2>Meet the business</h2></div>
+                    <p id="about-text"></p>
+                </div>
+                <div class="info-grid">
+                    <div class="card"><h3>Location</h3><div class="address" id="address"></div></div>
+                    <div class="card"><h3>Operating hours</h3><div class="hours-list" id="hours-list"></div></div>
+                </div>
+            </section>
+
+            <section class="shell section hidden" id="gallery-section">
+                <div class="section-head"><div><div class="kicker">Gallery</div><h2>A closer look</h2></div><p>Explore products, services and the customer experience.</p></div>
+                <div class="gallery" id="gallery"></div>
+            </section>
+
+            <section class="shell section hidden" id="gold-section">
+                <div class="section-head"><div><div class="kicker">Gold features</div><h2>See more. Connect faster.</h2></div><p>Rich media, directions, customer feedback and current promotions in one place.</p></div>
+                <div class="feature-grid">
+                    <div class="card hidden" id="video-card"><h3>Business video</h3><iframe id="video-frame" class="media-frame" title="Business video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+                    <div class="card hidden" id="map-card"><h3>Map &amp; directions</h3><iframe id="map-frame" class="media-frame" title="Business location" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><a class="btn" id="map-link" href="#" target="_blank" rel="noopener" style="margin-top:12px">Open directions</a></div>
+                    <div class="card offer hidden" id="offer-card"><div class="kicker">Special offer</div><h3 id="offer-title">Current promotion</h3><p id="offer-details"></p><div class="offer-code hidden" id="offer-code"></div></div>
+                </div>
+            </section>
+
+            <section class="shell section hidden" id="reviews-section">
+                <div class="section-head"><div><div class="kicker">Customer reviews</div><h2>What clients say</h2></div><p>Feedback shared on this AJM business webpage.</p></div>
+                <div class="reviews" id="reviews"></div>
+            </section>
+
+            <section class="shell section hidden" id="platinum-section">
+                <div class="platinum-band">
+                    <div class="kicker">Platinum partner</div><h2>Take the next step</h2><p id="platinum-copy" style="color:var(--muted);line-height:1.7;max-width:760px">Book, explore virtually or connect directly with the business.</p>
+                    <div class="feature-grid" style="margin-top:22px"><div class="hidden" id="tour-card"><iframe id="tour-frame" class="media-frame" title="Virtual business tour" allowfullscreen></iframe></div></div>
+                    <div class="platinum-actions"><a class="btn btn-primary hidden" id="platinum-book" href="#" target="_blank" rel="noopener">Book an appointment</a><a class="btn hidden" id="tracked-call" href="#">Call now</a><a class="btn btn-green hidden" id="live-chat" href="#" target="_blank" rel="noopener">Start live chat</a></div>
+                </div>
+            </section>
+
+            <section class="shell section hidden" id="lead-section">
+                <div class="lead-grid">
+                    <div><div class="kicker">Direct enquiry</div><h2>Contact <span id="lead-business-name"></span></h2><p style="color:var(--muted);line-height:1.7">Send your details and message. The AJM team will route the enquiry to the business.</p></div>
+                    <form class="card" id="lead-form">
+                        <div class="form-message" id="form-message"></div>
+                        <div class="field"><label for="lead-name">Name *</label><input id="lead-name" type="text" maxlength="100" required /></div>
+                        <div class="field"><label for="lead-phone">Phone *</label><input id="lead-phone" type="tel" maxlength="50" required /></div>
+                        <div class="field"><label for="lead-email">Email</label><input id="lead-email" type="email" maxlength="255" /></div>
+                        <div class="field"><label for="lead-message">How can the business help? *</label><textarea id="lead-message" maxlength="2000" required></textarea></div>
+                        <div id="turnstile-widget" style="margin-bottom:13px"></div>
+                        <button class="btn btn-primary" id="lead-submit" type="submit">Send enquiry</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <footer><div class="shell footer-row"><span>Business webpage powered by AJM Advertising Hub</span><a href="ajm-advertising-hub.html">Find more Jamaican businesses →</a></div></footer>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
+        const TURNSTILE_SITE_KEY = '0x4AAAAAADny2ngXsIdv_AkO';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const TIER_RANK = { silver: 1, gold: 2, platinum: 3 };
+        const params = new URLSearchParams(location.search);
+        const listingParam = params.get('listing');
+        const slugParam = params.get('slug');
+        const isPreview = params.get('preview') === '1';
+        let listing = null;
+        let webpage = null;
+        let turnstileWidgetId = null;
+
+        const el = (id) => document.getElementById(id);
+        const safeUrl = (input, protocols = ['https:', 'http:']) => {
+            if (!input) return '';
+            try {
+                const url = new URL(input, location.origin);
+                return protocols.includes(url.protocol) ? url.href : '';
+            } catch { return ''; }
+        };
+        const phoneHref = (phone) => `tel:${String(phone || '').replace(/[^\d+]/g, '')}`;
+        const show = (id) => el(id)?.classList.remove('hidden');
+        const hide = (id) => el(id)?.classList.add('hidden');
+        const setText = (id, text) => { if (el(id)) el(id).textContent = text || ''; };
+
+        function youtubeEmbed(input) {
+            const url = safeUrl(input);
+            if (!url) return '';
+            try {
+                const parsed = new URL(url);
+                if (parsed.hostname.includes('youtu.be')) return `https://www.youtube.com/embed/${parsed.pathname.slice(1)}`;
+                if (parsed.hostname.includes('youtube.com')) {
+                    const id = parsed.searchParams.get('v') || parsed.pathname.split('/').pop();
+                    return id ? `https://www.youtube.com/embed/${id}` : '';
+                }
+                if (parsed.hostname.includes('vimeo.com')) return `https://player.vimeo.com/video/${parsed.pathname.split('/').filter(Boolean).pop()}`;
+            } catch { return ''; }
+            return '';
+        }
+
+        function mapEmbed(input) {
+            const url = safeUrl(input);
+            if (!url) return '';
+            try {
+                const parsed = new URL(url);
+                if (!parsed.hostname.includes('google.')) return '';
+                if (parsed.pathname.includes('/embed')) return url;
+                return `https://www.google.com/maps?q=${encodeURIComponent(url)}&output=embed`;
+            } catch { return ''; }
+        }
+
+        function setAction(id, href, shouldShow = true) {
+            const action = el(id);
+            if (!action || !href || !shouldShow) return hide(id);
+            action.href = href;
+            show(id);
+        }
+
+        function renderHours(hours) {
+            const container = el('hours-list');
+            container.textContent = '';
+            const rows = hours && typeof hours === 'object' ? Object.entries(hours) : [];
+            if (!rows.length) {
+                const empty = document.createElement('div');
+                empty.className = 'address';
+                empty.textContent = 'Contact the business for current opening hours.';
+                container.appendChild(empty);
+                return;
+            }
+            rows.forEach(([day, time]) => {
+                const row = document.createElement('div');
+                row.className = 'hours-row';
+                const dayEl = document.createElement('strong');
+                const timeEl = document.createElement('span');
+                dayEl.textContent = day.startsWith('Line ') ? 'Hours' : day;
+                timeEl.textContent = String(time || '');
+                row.append(dayEl, timeEl);
+                container.appendChild(row);
+            });
+        }
+
+        function renderGallery(urls) {
+            const valid = (urls || []).map((url) => safeUrl(url)).filter(Boolean);
+            if (!valid.length) return;
+            const gallery = el('gallery');
+            gallery.textContent = '';
+            valid.forEach((url, index) => {
+                const image = document.createElement('img');
+                image.src = url;
+                image.alt = `${listing.business_name} gallery image ${index + 1}`;
+                image.loading = 'lazy';
+                gallery.appendChild(image);
+            });
+            show('gallery-section');
+        }
+
+        function renderReviews(reviews) {
+            if (!Array.isArray(reviews) || !reviews.length) return;
+            const container = el('reviews');
+            container.textContent = '';
+            reviews.forEach((item) => {
+                const card = document.createElement('article');
+                card.className = 'card review';
+                const stars = document.createElement('div');
+                stars.className = 'stars';
+                stars.textContent = '★'.repeat(Math.max(1, Math.min(5, Number(item.rating) || 5)));
+                const quote = document.createElement('p');
+                quote.textContent = item.quote || '';
+                const name = document.createElement('small');
+                name.textContent = item.name || 'AJM customer';
+                card.append(stars, quote, name);
+                container.appendChild(card);
+            });
+            show('reviews-section');
+        }
+
+        function renderStructuredData() {
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.textContent = JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'LocalBusiness',
+                name: listing.business_name,
+                description: webpage.about_text || listing.description,
+                image: [webpage.logo_url, webpage.hero_media_url, ...(webpage.gallery_urls || [])].filter(Boolean),
+                address: webpage.address || listing.location,
+                telephone: webpage.call_tracking_phone || listing.contact_phone,
+                email: listing.email,
+                url: listing.website || location.href
+            });
+            document.head.appendChild(script);
+        }
+
+        function renderPage() {
+            const tier = webpage.tier || 'silver';
+            document.body.className = `tier-${tier}`;
+            document.title = `${listing.business_name} | AJM ${tier[0].toUpperCase() + tier.slice(1)} Webpage`;
+            document.querySelector('meta[name="description"]').content = (webpage.about_text || listing.description || '').slice(0, 155);
+            setText('business-name', listing.business_name);
+            setText('tagline', webpage.tagline || listing.description || 'Discover this Jamaican business on AJM Advertising Hub.');
+            setText('about-text', webpage.about_text || listing.description || 'Business information coming soon.');
+            setText('address', webpage.address || listing.location || 'Jamaica');
+            setText('lead-business-name', listing.business_name);
+            setText('tier-badge', `AJM ${tier[0].toUpperCase() + tier.slice(1)} ${tier === 'platinum' ? 'Premier Partner' : tier === 'gold' ? 'Verified Member' : 'Member'}`);
+
+            const heroUrl = safeUrl(webpage.hero_media_url || webpage.gallery_urls?.[0] || listing.image_url);
+            if (heroUrl) { el('hero-image').src = heroUrl; el('hero-image').alt = listing.business_name; show('hero-image'); }
+            const logoUrl = safeUrl(webpage.logo_url || listing.image_url);
+            if (logoUrl) { el('business-logo').src = logoUrl; el('business-logo').alt = `${listing.business_name} logo`; show('business-logo'); hide('logo-fallback'); }
+            else setText('logo-fallback', (listing.business_name || 'A').charAt(0).toUpperCase());
+
+            const directPhone = webpage.call_tracking_phone || listing.contact_phone;
+            setAction('phone-action', directPhone ? phoneHref(directPhone) : '');
+            setAction('whatsapp-action', listing.whatsapp ? `https://wa.me/${String(listing.whatsapp).replace(/\D/g, '')}?text=${encodeURIComponent(`Hi, I found ${listing.business_name} on AJM Advertising Hub.`)}` : '');
+            setAction('email-action', listing.email ? `mailto:${listing.email}` : '');
+            setAction('website-action', safeUrl(listing.website));
+            setAction('booking-action', safeUrl(webpage.booking_url), tier === 'platinum');
+            renderHours(webpage.business_hours);
+            renderGallery(webpage.gallery_urls);
+
+            if (TIER_RANK[tier] >= TIER_RANK.gold) {
+                show('gold-section');
+                const video = youtubeEmbed(webpage.video_url);
+                if (video) { el('video-frame').src = video; show('video-card'); }
+                const mapUrl = safeUrl(webpage.map_embed_url);
+                const embed = mapEmbed(webpage.map_embed_url);
+                if (mapUrl) { el('map-link').href = mapUrl; if (embed) el('map-frame').src = embed; else hide('map-frame'); show('map-card'); }
+                if (webpage.offer_title || webpage.offer_details) {
+                    setText('offer-title', webpage.offer_title || 'Current promotion');
+                    setText('offer-details', webpage.offer_details);
+                    if (webpage.offer_code) { setText('offer-code', webpage.offer_code); show('offer-code'); }
+                    show('offer-card');
+                }
+                renderReviews(webpage.testimonials);
+                if (webpage.lead_form_enabled) { show('lead-section'); setupTurnstile(); }
+            }
+
+            if (tier === 'platinum') {
+                show('platinum-section');
+                const tour = safeUrl(webpage.virtual_tour_url);
+                if (tour) { el('tour-frame').src = tour; show('tour-card'); }
+                setAction('platinum-book', safeUrl(webpage.booking_url));
+                setAction('tracked-call', webpage.call_tracking_phone ? phoneHref(webpage.call_tracking_phone) : '');
+                setAction('live-chat', safeUrl(webpage.live_chat_url));
+            }
+
+            renderStructuredData();
+            hide('loading');
+            show('page');
+        }
+
+        async function loadPage() {
+            if (!listingParam && !slugParam) throw new Error('No business listing was selected.');
+            let listingQuery = supabase.from('listings').select('*');
+            listingQuery = listingParam ? listingQuery.eq('id', listingParam) : listingQuery.eq('slug', slugParam);
+            const { data: listingData, error: listingError } = await listingQuery.maybeSingle();
+            if (listingError || !listingData) throw new Error('This listing is unavailable.');
+            listing = listingData;
+
+            const { data: pageData, error: pageError } = await supabase.from('listing_webpages').select('*').eq('listing_id', listing.id).maybeSingle();
+            if (pageError || !pageData) throw new Error('This business does not have a published AJM webpage.');
+            webpage = pageData;
+            if (webpage.page_status !== 'published' && !isPreview) throw new Error('This business webpage is still in draft.');
+            renderPage();
+        }
+
+        function setupTurnstile() {
+            let attempts = 0;
+            const timer = setInterval(() => {
+                attempts += 1;
+                if (window.turnstile?.render) {
+                    clearInterval(timer);
+                    turnstileWidgetId = window.turnstile.render('#turnstile-widget', { sitekey: TURNSTILE_SITE_KEY, theme: 'dark', size: 'flexible' });
+                } else if (attempts > 80) clearInterval(timer);
+            }, 100);
+        }
+
+        el('lead-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const message = el('form-message');
+            const token = turnstileWidgetId !== null && window.turnstile?.getResponse ? window.turnstile.getResponse(turnstileWidgetId) : '';
+            if (!token) { message.textContent = 'Please complete the security check.'; message.className = 'form-message error show'; return; }
+            const button = el('lead-submit');
+            button.disabled = true;
+            button.textContent = 'Sending…';
+            const { error } = await supabase.functions.invoke('submit-consultation', { body: {
+                listing_id: listing.id,
+                customer_name: el('lead-name').value.trim(),
+                phone: el('lead-phone').value.trim(),
+                email: el('lead-email').value.trim(),
+                source: 'website',
+                notes: el('lead-message').value.trim(),
+                turnstile_token: token
+            }});
+            button.disabled = false;
+            button.textContent = 'Send enquiry';
+            if (error) {
+                message.textContent = error.message || 'Your enquiry could not be sent. Please try again.';
+                message.className = 'form-message error show';
+                if (turnstileWidgetId !== null) window.turnstile?.reset(turnstileWidgetId);
+                return;
+            }
+            event.target.reset();
+            message.textContent = 'Your enquiry was sent successfully.';
+            message.className = 'form-message success show';
+            if (turnstileWidgetId !== null) window.turnstile?.reset(turnstileWidgetId);
+        });
+
+        loadPage().catch((error) => {
+            hide('loading');
+            setText('unavailable-message', error.message || 'This paid business webpage is unavailable.');
+            show('unavailable');
+        });
+    </script>
+</body>
+</html>
