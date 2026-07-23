@@ -1831,7 +1831,8 @@
                             <small style="color:var(--muted)">${escHtml(p.code || '(no code)')} · ${p.is_active ? '<span style="color:var(--green)">Active</span>' : '<span style="color:var(--red)">Inactive</span>'}</small>
                         </div>
                         <div style="display:flex;gap:8px;">
-                            <button class="btn btn-ghost btn-sm" onclick="openEditPackageModal(${JSON.stringify(JSON.stringify(p))})">✎ Edit</button>
+                            <button class="btn btn-ghost btn-sm" onclick="openEditPackageModal(this)" data-pkg="${escHtml(JSON.stringify(p))}">✎ Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deletePackage('${p.id}')">🗑 Delete</button>
                         </div>
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;">
@@ -1848,8 +1849,8 @@
         }
     }
 
-    window.openEditPackageModal = function(jsonStr) {
-        const p = JSON.parse(jsonStr);
+    window.openEditPackageModal = function(btn) {
+        const p = JSON.parse(btn.getAttribute('data-pkg'));
         document.getElementById('pkg-modal-title').textContent = 'Edit Package';
         document.getElementById('pkg-id').value = p.id;
         document.getElementById('pkg-name').value = p.name || '';
@@ -1861,6 +1862,18 @@
         document.getElementById('pkg-payment-account').value = p.payment_account_id || '';
         document.getElementById('pkg-is-active').checked = p.is_active !== false;
         document.getElementById('package-edit-modal').classList.add('open');
+    };
+
+    window.deletePackage = async function(id) {
+        if (!confirm('Are you sure you want to delete this package? This action cannot be undone.')) return;
+        try {
+            const { error } = await supabase.from('ad_packages').delete().eq('id', id);
+            if (error) throw error;
+            showToast('Package deleted.', 'success');
+            await loadPackages();
+        } catch(err) {
+            showToast('Error deleting package: ' + err.message, 'error');
+        }
     };
 
     function openAddPackageModal() {
