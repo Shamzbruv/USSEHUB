@@ -469,6 +469,7 @@
         <div id="webpage-package-status" style="padding:12px 14px;border:1px solid var(--glass-border);border-radius:12px;color:var(--muted);font-size:0.86rem;margin-bottom:16px;">Checking current access…</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btn-primary" style="flex:1;border-radius:12px;" onclick="activateWebpagePackage()" id="activate-webpage-btn">Activate Package</button>
+            <button class="btn btn-warning" style="display:none;flex:1;border-radius:12px;" onclick="renewWebpagePackage()" id="renew-webpage-btn">Renew Access</button>
             <button class="btn btn-danger" style="border-radius:12px;" onclick="cancelWebpagePackage()" id="cancel-webpage-btn">Cancel Access</button>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
@@ -615,6 +616,7 @@
         </div>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
             <button class="btn btn-primary" style="background:var(--blue);color:var(--white);font-weight:800;" onclick="openAddModal()">➕ Add Listing</button>
+            <a href="ajm-ad-management.html" class="btn btn-primary" style="background:linear-gradient(135deg,var(--yellow),#ff9f43);color:#090b10;font-weight:800;">💰 Advertising Operations</a>
             <a href="master-admin.html" class="btn btn-primary" style="background: linear-gradient(135deg, var(--green) 0%, #17b07f 100%); color: #000; font-weight: 800;">👑 Switch to Master Admin Hub</a>
         </div>
     </div>
@@ -648,7 +650,7 @@
         <button class="tab-btn" id="tab-all" onclick="switchTab('all')" role="tab">📋 All</button>
         <button class="tab-btn" id="tab-members" onclick="switchTab('members')" role="tab">👥 Members</button>
         <button class="tab-btn" id="tab-charts" onclick="switchTab('charts')" role="tab">📊 Analytics</button>
-        <button class="tab-btn" id="tab-advertising" onclick="switchTab('advertising')" role="tab">💰 Advertising</button>
+        <button class="tab-btn" id="tab-advertising" onclick="window.location.href='ajm-ad-management.html'" role="tab">💰 Advertising ↗</button>
     </div>
 
     <!-- Filter bar (listings tabs) -->
@@ -950,6 +952,7 @@
     window.openWebpagePackageModal = openWebpagePackageModal;
     window.closeWebpagePackageModal = closeWebpagePackageModal;
     window.activateWebpagePackage = activateWebpagePackage;
+    window.renewWebpagePackage = renewWebpagePackage;
     window.cancelWebpagePackage = cancelWebpagePackage;
     // Advertising management
     window.switchAdvTab = switchAdvTab;
@@ -959,6 +962,8 @@
     window.closeRejectOrderModal = closeRejectOrderModal;
     window.confirmRejectOrder = confirmRejectOrder;
     window.pauseOrder = pauseOrder;
+    window.resumeOrder = resumeOrder;
+    window.renewOrder = renewOrder;
     window.cancelOrder = cancelOrder;
     window.viewOrderDetail = viewOrderDetail;
     window.openPaymentAccountModal = openPaymentAccountModal;
@@ -971,18 +976,29 @@
 
     // ── INIT ──
     async function init() {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+            showAccessDenied();
+            showToast('Your administrator session could not be verified.', 'error');
+            return;
+        }
         if (!session?.user) {
             showAccessDenied();
             return;
         }
         currentUser = session.user;
 
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', currentUser.id)
             .single();
+
+        if (profileError) {
+            showAccessDenied();
+            showToast('Administrator profile lookup failed: ' + profileError.message, 'error');
+            return;
+        }
 
         currentProfile = profile;
 
@@ -1229,6 +1245,38 @@
     }
 
     // ── PAID WEBPAGE PACKAGES ──
+    function setWebpagePackageControls(hasActiveAccess) {
+        document.getElementById('renew-webpage-btn').style.display = hasActiveAccess ? '' : 'none';
+        document.getElementById('cancel-webpage-btn').style.display = hasActiveAccess ? '' : 'none';
+        document.getElementById('activate-webpage-btn').style.display = hasActiveAccess ? 'none' : '';
+        document.getElementById('webpage-package-code').disabled = hasActiveAccess;
+    }
+
+    function webpagePackagePayload() {
+        return {
+            listing_id: document.getElementById('webpage-listing-id').value,
+            package_code: document.getElementById('webpage-package-code').value,
+            market_segment: document.getElementById('webpage-market-segment').value,
+            duration_days: Number(document.getElementById('webpage-duration').value),
+            payment_reference: document.getElementById('webpage-payment-reference').value.trim() || null
+        };
+    }
+
+    async function manageListingWebpage(action, payload) {
+        const { data, error } = await supabase.rpc('admin_manage_listing_webpage', { p_action: action, p_payload: payload });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        return data || {};
+    }
+
+    function webpageResultSubscription(data) {
+        if (data?.subscription) return data.subscription;
+        const subscriptions = Array.isArray(data?.subscriptions) ? data.subscriptions : [];
+        return [...subscriptions]
+            .reverse()
+            .find((subscription) => ['active', 'paused'].includes(subscription?.status)) || null;
+    }
+
     async function openWebpagePackageModal(listing) {
         document.getElementById('webpage-listing-id').value = listing.id;
         document.getElementById('webpage-business-name').value = listing.business_name || '';
@@ -1240,6 +1288,8 @@
         document.getElementById('admin-live-webpage-link').href = `ajm-business-page.html?listing=${encodeURIComponent(listing.id)}&preview=1`;
         const status = document.getElementById('webpage-package-status');
         status.textContent = 'Checking current access…';
+        setWebpagePackageControls(false);
+        document.getElementById('activate-webpage-btn').disabled = true;
         document.getElementById('webpage-package-modal').classList.add('open');
 
         const { data, error } = await supabase
@@ -1251,8 +1301,16 @@
             .limit(1)
             .maybeSingle();
 
-        if (error || !data) {
+        if (error) {
+            status.textContent = 'Current webpage access could not be verified.';
+            showToast('Could not check webpage access: ' + error.message, 'error');
+            setWebpagePackageControls(false);
+            return;
+        }
+        if (!data) {
             status.textContent = 'No active paid webpage package.';
+            setWebpagePackageControls(false);
+            document.getElementById('activate-webpage-btn').disabled = false;
             return;
         }
 
@@ -1260,6 +1318,8 @@
         if (packageData?.code) document.getElementById('webpage-package-code').value = packageData.code;
         const expiry = data.expires_at ? fmtDate(data.expires_at) : 'no expiry date';
         status.innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(packageData?.name || packageData?.webpage_tier || 'AJM webpage')} · expires ${escHtml(expiry)}`;
+        setWebpagePackageControls(true);
+        document.getElementById('activate-webpage-btn').disabled = false;
     }
 
     function closeWebpagePackageModal() {
@@ -1267,50 +1327,69 @@
     }
 
     async function activateWebpagePackage() {
-        const listingId = document.getElementById('webpage-listing-id').value;
         const button = document.getElementById('activate-webpage-btn');
         button.disabled = true;
         button.textContent = 'Activating…';
-        const { data, error } = await supabase.functions.invoke('admin-ad-subscriptions', {
-            body: {
-                action: 'activate',
-                listing_id: listingId,
-                package_code: document.getElementById('webpage-package-code').value,
-                market_segment: document.getElementById('webpage-market-segment').value,
-                duration_days: Number(document.getElementById('webpage-duration').value),
-                payment_reference: document.getElementById('webpage-payment-reference').value.trim() || null
-            }
-        });
-        button.disabled = false;
-        button.textContent = 'Activate Package';
-        if (error || data?.error) {
-            showToast('Package activation failed: ' + (data?.error || error?.message || 'Unknown error'), 'error');
-            return;
+        try {
+            const data = await manageListingWebpage('activate', webpagePackagePayload());
+            const subscription = webpageResultSubscription(data);
+            const expires = subscription?.expires_at ? fmtDate(subscription.expires_at) : 'no expiry date';
+            document.getElementById('webpage-package-status').innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(data?.package?.name || 'AJM webpage')} · expires ${escHtml(expires)}`;
+            setWebpagePackageControls(true);
+            showToast('Paid webpage package activated.', 'success');
+            await loadListings();
+        } catch (error) {
+            showToast('Package activation failed: ' + (error.message || 'Unknown error'), 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = 'Activate Package';
         }
-        const expires = data?.subscription?.expires_at ? fmtDate(data.subscription.expires_at) : 'no expiry date';
-        document.getElementById('webpage-package-status').innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(data?.package?.name || 'AJM webpage')} · expires ${escHtml(expires)}`;
-        showToast('Paid webpage package activated.', 'success');
-        await loadListings();
+    }
+
+    async function renewWebpagePackage() {
+        const button = document.getElementById('renew-webpage-btn');
+        button.disabled = true;
+        button.textContent = 'Renewing…';
+        try {
+            const data = await manageListingWebpage('renew', webpagePackagePayload());
+            const subscription = webpageResultSubscription(data);
+            const expires = subscription?.expires_at ? fmtDate(subscription.expires_at) : 'no expiry date';
+            document.getElementById('webpage-package-status').innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(data?.package?.name || 'AJM webpage')} · expires ${escHtml(expires)}`;
+            showToast('Paid webpage access renewed.', 'success');
+            await loadListings();
+        } catch (error) {
+            showToast('Could not renew access: ' + (error.message || 'Unknown error'), 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = 'Renew Access';
+        }
     }
 
     async function cancelWebpagePackage() {
         const listingId = document.getElementById('webpage-listing-id').value;
         if (!confirm('Cancel paid webpage access for this listing? The public webpage will stop displaying immediately.')) return;
+        const response = prompt('Reason for cancellation (required):');
+        if (response === null) return;
+        const reason = response.trim();
+        if (!reason) {
+            showToast('A cancellation reason is required.', 'error');
+            return;
+        }
         const button = document.getElementById('cancel-webpage-btn');
         button.disabled = true;
         button.textContent = 'Cancelling…';
-        const { data, error } = await supabase.functions.invoke('admin-ad-subscriptions', {
-            body: { action: 'cancel', listing_id: listingId }
-        });
-        button.disabled = false;
-        button.textContent = 'Cancel Access';
-        if (error || data?.error) {
-            showToast('Could not cancel access: ' + (data?.error || error?.message || 'Unknown error'), 'error');
-            return;
+        try {
+            await manageListingWebpage('cancel', { listing_id: listingId, reason, admin_note: reason });
+            document.getElementById('webpage-package-status').textContent = 'No active paid webpage package.';
+            setWebpagePackageControls(false);
+            showToast('Paid webpage access cancelled.', 'success');
+            await loadListings();
+        } catch (error) {
+            showToast('Could not cancel access: ' + (error.message || 'Unknown error'), 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = 'Cancel Access';
         }
-        document.getElementById('webpage-package-status').textContent = 'No active paid webpage package.';
-        showToast('Paid webpage access cancelled.', 'success');
-        await loadListings();
     }
 
     // ── EDIT MODAL ──
@@ -1623,7 +1702,46 @@
     // ADVERTISING MANAGEMENT
     // ════════════════════════════════════════════════════
 
+    async function adminAdvertisingCommand(action, payload = {}) {
+        const { data, error } = await supabase.rpc('admin_manage_advertising', { p_action: action, p_payload: payload });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        return data;
+    }
+
+    async function advertisingCrud(entity, action, payload = {}) {
+        const rpc = { package: 'admin_manage_ad_package', bank: 'admin_manage_payment_account' }[entity];
+        if (!rpc) throw new Error('Unsupported advertising configuration action.');
+        const { data, error } = await supabase.rpc(rpc, { p_action: action, p_payload: payload });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        return data;
+    }
+
+    async function getAdvertisingConfiguration() {
+        const { data, error } = await supabase.rpc('admin_get_ad_configuration');
+        if (error) throw error;
+        const configuration = data && typeof data === 'object' ? data : {};
+        return {
+            ...configuration,
+            packages: Array.isArray(configuration.packages) ? configuration.packages : [],
+            accounts: Array.isArray(configuration.payment_accounts)
+                ? configuration.payment_accounts
+                : (Array.isArray(configuration.accounts) ? configuration.accounts : [])
+        };
+    }
+
     let advTabActive = 'orders';
+    let adOrdersCache = [];
+
+    function adOrderCustomer(order) {
+        const customer = order?.customer || order?.profiles || {};
+        return {
+            name: order?.customer_name || customer.full_name || '',
+            email: order?.customer_email || customer.email || '',
+            fallback: order?.user_id ? String(order.user_id).slice(0, 8) : 'Unknown customer'
+        };
+    }
     function switchAdvTab(name) {
         advTabActive = name;
         document.querySelectorAll('.adv-sub-tab').forEach(b => b.classList.remove('active'));
@@ -1648,15 +1766,11 @@
         const pkgFilter = document.getElementById('order-package-filter')?.value || '';
 
         try {
-            let q = supabase.from('ad_orders')
-                .select('id,order_number,user_id,package_name_snapshot,package_code_snapshot,total_price_snapshot,currency_snapshot,status,created_at,approved_at,expires_at,admin_note,rejection_reason,payment_reference,payment_account_snapshot')
-                .order('created_at', { ascending: false })
-                .limit(100);
-            if (statusFilter) q = q.eq('status', statusFilter);
-            if (pkgFilter) q = q.eq('package_code_snapshot', pkgFilter);
-
-            const { data: orders, error } = await q;
+            const { data, error } = await supabase.rpc('admin_get_ad_orders', { p_status: statusFilter || null, p_from: null, p_to: null, p_limit: 250, p_offset: 0 });
             if (error) throw error;
+            let orders = Array.isArray(data) ? data : (data?.orders || []);
+            adOrdersCache = orders;
+            if (pkgFilter) orders = orders.filter((order) => order.package_code_snapshot === pkgFilter);
 
             // Populate package filter
             const pkgSel = document.getElementById('order-package-filter');
@@ -1669,28 +1783,22 @@
                 tbody.innerHTML = '<tr class="loading-row"><td colspan="7">No orders found.</td></tr>'; return;
             }
 
-            // Fetch customer emails
-            const uids = [...new Set(orders.map(o => o.user_id))];
-            let emailMap = {};
-            try {
-                const { data: profiles } = await supabase.from('profiles').select('id,email,full_name').in('id', uids);
-                if (profiles) profiles.forEach(p => { emailMap[p.id] = p.email || p.full_name || p.id.slice(0,8); });
-            } catch(_) {}
-
             const statusColors = { pending_payment:'var(--yellow)', payment_submitted:'var(--orange)', approved:'var(--green)', rejected:'var(--red)', paused:'var(--blue)', cancelled:'var(--muted)', expired:'var(--muted)' };
 
             tbody.innerHTML = orders.map(o => {
                 const color = statusColors[o.status] || 'var(--muted)';
                 const badge = `<span style="background:rgba(255,255,255,0.05);border:1px solid ${color};color:${color};border-radius:20px;padding:2px 9px;font-size:0.72rem;font-weight:700;">${o.status.replace(/_/g,' ')}</span>`;
-                const canApprove = ['pending_payment','payment_submitted'].includes(o.status);
+                const customer = adOrderCustomer(o);
+                const canApprove = o.status === 'payment_submitted';
                 const canReject = ['pending_payment','payment_submitted'].includes(o.status);
                 const canPause = o.status === 'approved';
                 const canResume = o.status === 'paused';
+                const canRenew = ['approved','paused'].includes(o.status);
                 const canCancel = !['cancelled','expired'].includes(o.status);
 
                 return `<tr>
                     <td><strong>${escHtml(o.order_number)}</strong></td>
-                    <td><small>${escHtml(emailMap[o.user_id] || o.user_id?.slice(0,8))}</small></td>
+                    <td><small>${escHtml(customer.name || customer.email || customer.fallback)}${customer.name && customer.email ? `<br>${escHtml(customer.email)}` : ''}</small></td>
                     <td><strong>${escHtml(o.package_name_snapshot)}</strong><br><small style="color:var(--muted)">${escHtml(o.package_code_snapshot)}</small></td>
                     <td><strong>${escHtml(o.currency_snapshot)} ${Number(o.total_price_snapshot).toLocaleString()}</strong></td>
                     <td>${badge}</td>
@@ -1701,7 +1809,8 @@
                             ${canApprove ? `<button class="btn btn-primary btn-sm" onclick="approveOrder('${o.id}')" title="Approve">✓ Approve</button>` : ''}
                             ${canReject ? `<button class="btn btn-danger btn-sm" onclick="openRejectOrderModal('${o.id}')" title="Reject">✗ Reject</button>` : ''}
                             ${canPause ? `<button class="btn btn-warning btn-sm" onclick="pauseOrder('${o.id}')" title="Pause">⏸ Pause</button>` : ''}
-                            ${canResume ? `<button class="btn btn-primary btn-sm" onclick="approveOrder('${o.id}')" title="Resume">▶ Resume</button>` : ''}
+                            ${canResume ? `<button class="btn btn-primary btn-sm" onclick="resumeOrder('${o.id}')" title="Resume">▶ Resume</button>` : ''}
+                            ${canRenew ? `<button class="btn btn-ghost btn-sm" onclick="renewOrder('${o.id}')" title="Renew">↻ Renew</button>` : ''}
                             ${canCancel ? `<button class="btn btn-danger btn-sm" style="opacity:0.7" onclick="cancelOrder('${o.id}')" title="Cancel">✕</button>` : ''}
                         </div>
                     </td>
@@ -1713,19 +1822,9 @@
     }
 
     async function approveOrder(id) {
-        if (!confirm('Approve this advertising order? This will activate the ad and notify the customer by email.')) return;
+        if (!confirm('Confirm the bank transfer and activate this advertising order? The customer will be notified by email.')) return;
         try {
-            const starts = new Date();
-            const { data: ord } = await supabase.from('ad_orders').select('duration_days_snapshot,status').eq('id', id).single();
-            if (!ord) throw new Error('Order not found');
-            const expires = new Date(starts.getTime() + ord.duration_days_snapshot * 86400000);
-            const { error } = await supabase.from('ad_orders').update({
-                status: 'approved', approved_at: starts.toISOString(),
-                starts_at: starts.toISOString(), expires_at: expires.toISOString(),
-                approved_by: currentUser.id
-            }).eq('id', id);
-            if (error) throw error;
-            await dispatchNotifications();
+            await adminAdvertisingCommand('confirm_payment', { order_id: id });
             showToast('Order approved — customer notified!', 'success');
             await loadAdOrders();
         } catch(err) { showToast('Error: ' + err.message, 'error'); }
@@ -1743,9 +1842,7 @@
         const reason = document.getElementById('reject-reason').value.trim();
         if (!reason) { showToast('Please enter a rejection reason.', 'error'); return; }
         try {
-            const { error } = await supabase.from('ad_orders').update({ status: 'rejected', rejection_reason: reason }).eq('id', id);
-            if (error) throw error;
-            await dispatchNotifications();
+            await adminAdvertisingCommand('reject_payment', { order_id: id, reason });
             showToast('Order rejected — customer notified.', 'success');
             closeRejectOrderModal();
             await loadAdOrders();
@@ -1753,33 +1850,71 @@
     }
 
     async function pauseOrder(id) {
-        if (!confirm('Pause this ad?')) return;
+        const reason = prompt('Why is this advertisement being paused?');
+        if (!reason?.trim()) return;
         try {
-            const { error } = await supabase.from('ad_orders').update({ status: 'paused' }).eq('id', id);
-            if (error) throw error;
+            await adminAdvertisingCommand('pause_ad', { order_id: id, reason: reason.trim() });
             showToast('Order paused.', 'info');
             await loadAdOrders();
         } catch(err) { showToast('Error: ' + err.message, 'error'); }
     }
 
-    async function cancelOrder(id) {
-        if (!confirm('Cancel this order? This cannot be undone.')) return;
+    async function resumeOrder(id) {
+        if (!confirm('Resume this advertisement using its current expiry date?')) return;
         try {
-            const { error } = await supabase.from('ad_orders').update({ status: 'cancelled', cancelled_at: new Date().toISOString() }).eq('id', id);
-            if (error) throw error;
+            await adminAdvertisingCommand('resume_ad', { order_id: id });
+            showToast('Advertisement resumed.', 'success');
+            await loadAdOrders();
+        } catch(err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function renewOrder(id) {
+        const rawDays = prompt('Add how many days to this advertising order?', '30');
+        if (rawDays === null) return;
+        const durationDays = Number(rawDays);
+        if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 3650) {
+            showToast('Enter a whole number from 1 to 3650.', 'error');
+            return;
+        }
+        try {
+            await adminAdvertisingCommand('renew_subscription', { order_id: id, duration_days: durationDays });
+            showToast(`Advertising access renewed by ${durationDays} days.`, 'success');
+            await loadAdOrders();
+        } catch(err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function cancelOrder(id) {
+        const reason = prompt('Why is this advertising order being cancelled?');
+        if (!reason?.trim()) return;
+        try {
+            await adminAdvertisingCommand('cancel_subscription', { order_id: id, reason: reason.trim() });
             showToast('Order cancelled.', 'info');
             await loadAdOrders();
         } catch(err) { showToast('Error: ' + err.message, 'error'); }
     }
 
     async function viewOrderDetail(id) {
-        const { data: o, error } = await supabase.from('ad_orders')
-            .select('*').eq('id', id).single();
-        if (error || !o) { showToast('Could not load order.', 'error'); return; }
+        let o = adOrdersCache.find((order) => order.id === id);
+        if (!o) {
+            const { data, error } = await supabase.rpc('admin_get_ad_orders', { p_status: null, p_from: null, p_to: null, p_limit: 250, p_offset: 0 });
+            if (error) { showToast('Could not load order: ' + error.message, 'error'); return; }
+            adOrdersCache = Array.isArray(data) ? data : (data?.orders || []);
+            o = adOrdersCache.find((order) => order.id === id);
+        }
+        if (!o) { showToast('Could not load order.', 'error'); return; }
+        const customer = adOrderCustomer(o);
         const pa = o.payment_account_snapshot || {};
+        let proofUrl = null;
+        let proofError = '';
+        if (o.payment_proof_path) {
+            const { data, error } = await supabase.storage.from('ad-payment-proofs').createSignedUrl(o.payment_proof_path, 600);
+            if (error) proofError = error.message;
+            else proofUrl = data?.signedUrl || data?.signedURL || null;
+        }
         document.getElementById('order-detail-content').innerHTML = `
             <table style="width:100%;">
                 <tr><td style="padding:6px 0;color:var(--muted);width:40%;">Order #</td><td><strong>${escHtml(o.order_number)}</strong></td></tr>
+                <tr><td style="padding:6px 0;color:var(--muted);">Customer</td><td>${escHtml(customer.name || customer.email || customer.fallback)}${customer.name && customer.email ? `<br><small>${escHtml(customer.email)}</small>` : ''}</td></tr>
                 <tr><td style="padding:6px 0;color:var(--muted);">Package</td><td>${escHtml(o.package_name_snapshot)}</td></tr>
                 <tr><td style="padding:6px 0;color:var(--muted);">Amount</td><td><strong>${escHtml(o.currency_snapshot)} ${Number(o.total_price_snapshot).toLocaleString()}</strong></td></tr>
                 <tr><td style="padding:6px 0;color:var(--muted);">Status</td><td>${escHtml(o.status)}</td></tr>
@@ -1795,14 +1930,9 @@
                 <strong style="font-size:0.86rem;color:var(--muted);">Payment Account Used</strong><br>
                 ${escHtml(pa.bank_name)} · ${escHtml(pa.account_name)} · ${escHtml(pa.account_number ? '••••'+pa.account_number.slice(-4) : '')}
             </div>` : ''}
+            ${proofUrl ? `<a class="btn btn-ghost btn-sm" style="display:inline-block;margin-top:14px;" href="${escHtml(proofUrl)}" target="_blank" rel="noopener">Open payment proof ↗</a>` : proofError ? `<p style="margin-top:14px;color:var(--red);">Payment proof could not be opened: ${escHtml(proofError)}</p>` : '<p style="margin-top:14px;color:var(--muted);">No payment proof attached.</p>'}
         `;
         document.getElementById('order-detail-modal').classList.add('open');
-    }
-
-    async function dispatchNotifications() {
-        try {
-            await supabase.rpc('dispatch_ad_notification_outbox', { p_limit: 10 });
-        } catch(_) { /* Vault may not be configured — silent fail */ }
     }
 
     // ── PACKAGES ──
@@ -1810,11 +1940,9 @@
         const container = document.getElementById('packages-list');
         container.innerHTML = '<p style="color:var(--muted);">Loading...</p>';
         try {
-            const { data: pkgs, error } = await supabase.from('ad_packages')
-                .select('*').order('sort_order').order('name');
-            if (error) throw error;
-
-            const { data: accounts } = await supabase.from('payment_accounts').select('id,label,currency').eq('is_active', true);
+            const configuration = await getAdvertisingConfiguration();
+            const pkgs = configuration.packages || [];
+            const accounts = configuration.accounts || [];
             const accountMap = {}; (accounts||[]).forEach(a => { accountMap[a.id] = a; });
 
             if (!pkgs || pkgs.length === 0) {
@@ -1832,7 +1960,7 @@
                         </div>
                         <div style="display:flex;gap:8px;">
                             <button class="btn btn-ghost btn-sm" onclick="openEditPackageModal(this)" data-pkg="${escHtml(JSON.stringify(p))}">✎ Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deletePackage('${p.id}')">🗑 Delete</button>
+                            ${p.is_active === false ? `<button class="btn btn-danger btn-sm" onclick="deletePackage('${p.id}')">🗑 Delete</button>` : ''}
                         </div>
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;">
@@ -1865,10 +1993,9 @@
     };
 
     window.deletePackage = async function(id) {
-        if (!confirm('Are you sure you want to delete this package? This action cannot be undone.')) return;
+        if (!confirm('Permanently delete this inactive package? The request will fail if order history depends on it.')) return;
         try {
-            const { error } = await supabase.from('ad_packages').delete().eq('id', id);
-            if (error) throw error;
+            await advertisingCrud('package', 'delete', { id });
             showToast('Package deleted.', 'success');
             await loadPackages();
         } catch(err) {
@@ -1893,7 +2020,14 @@
 
     async function savePackage() {
         const id = document.getElementById('pkg-id').value;
+        if (!id) {
+            closePackageModal();
+            showToast('Create complete packages in Advertising Operations.', 'info');
+            window.location.href = 'ajm-ad-management.html';
+            return;
+        }
         const payload = {
+            id,
             name: document.getElementById('pkg-name').value.trim(),
             code: document.getElementById('pkg-code').value.trim().toLowerCase().replace(/\s+/g,'-') || null,
             description: document.getElementById('pkg-description').value.trim() || null,
@@ -1901,15 +2035,11 @@
             currency: document.getElementById('pkg-currency').value,
             duration_days: parseInt(document.getElementById('pkg-duration').value) || 30,
             payment_account_id: document.getElementById('pkg-payment-account').value || null,
-            is_active: document.getElementById('pkg-is-active').checked,
-            updated_at: new Date().toISOString()
+            is_active: document.getElementById('pkg-is-active').checked
         };
         if (!payload.name) { showToast('Package name is required.', 'error'); return; }
         try {
-            const { error } = id
-                ? await supabase.from('ad_packages').update(payload).eq('id', id)
-                : await supabase.from('ad_packages').insert(payload);
-            if (error) throw error;
+            await advertisingCrud('package', 'upsert', payload);
             showToast('Package saved!', 'success');
             closePackageModal();
             await loadPackages();
@@ -1921,9 +2051,8 @@
         const container = document.getElementById('payment-accounts-list');
         container.innerHTML = '<p style="color:var(--muted);">Loading...</p>';
         try {
-            const { data: accounts, error } = await supabase.from('payment_accounts')
-                .select('*').order('sort_order').order('label');
-            if (error) throw error;
+            const configuration = await getAdvertisingConfiguration();
+            const accounts = configuration.accounts || [];
 
             if (!accounts || accounts.length === 0) {
                 container.innerHTML = '<p style="color:var(--muted);">No payment accounts yet. Add one above.</p>'; return;
@@ -1937,8 +2066,8 @@
                             <small style="color:var(--muted)">${escHtml(a.currency)} · ${a.is_active ? '<span style="color:var(--green)">Active</span>' : '<span style="color:var(--muted)">Inactive</span>'}</small>
                         </div>
                         <div style="display:flex;gap:8px;">
-                            <button class="btn btn-ghost btn-sm" onclick="openPaymentAccountModal(${JSON.stringify(JSON.stringify(a))})">✎ Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deletePaymentAccount('${a.id}')">🗑</button>
+                            <button class="btn btn-ghost btn-sm" onclick="openPaymentAccountModal(this)" data-account="${escHtml(JSON.stringify(a))}">✎ Edit</button>
+                            ${a.is_active === false ? `<button class="btn btn-danger btn-sm" onclick="deletePaymentAccount('${a.id}')">🗑</button>` : ''}
                         </div>
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
@@ -1956,15 +2085,16 @@
     }
 
     async function loadPaymentAccountsIntoSelects() {
-        const { data: accounts } = await supabase.from('payment_accounts').select('id,label,currency').eq('is_active', true).order('sort_order');
+        const configuration = await getAdvertisingConfiguration();
+        const accounts = (configuration.accounts || []).filter((account) => account.is_active !== false);
         const sel = document.getElementById('pkg-payment-account');
         if (!sel || !accounts) return;
         while (sel.options.length > 1) sel.remove(1);
         (accounts || []).forEach(a => { sel.add(new Option(`${a.label} (${a.currency})`, a.id)); });
     }
 
-    function openPaymentAccountModal(jsonStrOrNull) {
-        const a = jsonStrOrNull ? JSON.parse(jsonStrOrNull) : null;
+    function openPaymentAccountModal(source) {
+        const a = source?.getAttribute ? JSON.parse(source.getAttribute('data-account')) : null;
         document.getElementById('pa-modal-title').textContent = a ? 'Edit Payment Account' : 'Add Payment Account';
         document.getElementById('pa-id').value = a?.id || '';
         document.getElementById('pa-label').value = a?.label || '';
@@ -1987,6 +2117,8 @@
         const id = document.getElementById('pa-id').value;
         const code = id ? undefined : (document.getElementById('pa-label').value.trim().toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now().toString(36));
         const payload = {
+            id: id || null,
+            code: code || undefined,
             label: document.getElementById('pa-label').value.trim(),
             currency: document.getElementById('pa-currency').value,
             bank_name: document.getElementById('pa-bank-name').value.trim() || null,
@@ -1997,15 +2129,11 @@
             routing_number: document.getElementById('pa-routing').value.trim() || null,
             instructions: document.getElementById('pa-instructions').value.trim() || null,
             is_default: document.getElementById('pa-is-default').checked,
-            is_active: document.getElementById('pa-is-active').checked,
-            updated_by: currentUser.id
+            is_active: document.getElementById('pa-is-active').checked
         };
         if (!payload.label) { showToast('Label is required.', 'error'); return; }
         try {
-            const { error } = id
-                ? await supabase.from('payment_accounts').update(payload).eq('id', id)
-                : await supabase.from('payment_accounts').insert({ ...payload, code, created_by: currentUser.id });
-            if (error) throw error;
+            await advertisingCrud('bank', 'upsert', payload);
             showToast('Payment account saved!', 'success');
             closePaymentAccountModal();
             await loadPaymentAccounts();
@@ -2014,10 +2142,9 @@
     }
 
     async function deletePaymentAccount(id) {
-        if (!confirm('Delete this payment account? Make sure no packages still reference it.')) return;
+        if (!confirm('Permanently delete this inactive payment account? The request will fail if packages or orders depend on it.')) return;
         try {
-            const { error } = await supabase.from('payment_accounts').delete().eq('id', id);
-            if (error) throw error;
+            await advertisingCrud('bank', 'delete', { id });
             showToast('Payment account deleted.', 'success');
             await loadPaymentAccounts();
         } catch(err) { showToast('Error: ' + err.message, 'error'); }
@@ -2123,80 +2250,69 @@
             });
         } catch(_) {}
 
-        // ── Ad KPIs ──
+        // ── Advertising analytics ──
         try {
-            const { data: orders } = await supabase.from('ad_orders').select('status,total_price_snapshot,currency_snapshot');
-            const total = (orders||[]).reduce((s,o) => o.status==='approved' ? s + Number(o.total_price_snapshot||0) : s, 0);
-            const pending = (orders||[]).filter(o=>['pending_payment','payment_submitted'].includes(o.status)).length;
-            const active = (orders||[]).filter(o=>o.status==='approved').length;
-            document.getElementById('ad-kpis').innerHTML = [
-                {v:'J$ '+total.toLocaleString(),l:'Total Approved Revenue',c:'var(--green)'},
-                {v:(orders||[]).length,l:'Total Orders',c:'var(--blue)'},
-                {v:active,l:'Active Ads',c:'var(--green)'},
-                {v:pending,l:'Awaiting Review',c:'var(--yellow)'}
-            ].map(k => `<div class="chart-kpi"><div class="kpi-val" style="color:${k.c}">${typeof k.v==='number'?k.v.toLocaleString():k.v}</div><div class="kpi-lbl">${k.l}</div></div>`).join('');
-        } catch(_) {}
+            const { data, error } = await supabase.rpc('get_admin_advertising_analytics', { p_days: 30 });
+            if (error) throw error;
+            const analytics = data || {};
+            const kpis = analytics.kpis || {};
+            const dailyOrders = Array.isArray(analytics.daily_orders) ? analytics.daily_orders : [];
+            const statusRows = Array.isArray(analytics.orders_by_status) ? analytics.orders_by_status : [];
+            const packageRows = Array.isArray(analytics.package_performance) ? analytics.package_performance : [];
+            const currency = kpis.currency || 'JMD';
+            const revenue = Number(kpis.confirmed_revenue ?? kpis.revenue ?? 0);
+            const revenueLabel = `${currency} ${revenue.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+            const totalOrders = statusRows.reduce(
+                (total, row) => total + Number(row.count ?? row.orders ?? row.value ?? 0),
+                0
+            );
 
-        // ── Orders over 30 days ──
-        try {
-            const since = new Date(Date.now()-30*86400000).toISOString();
-            const { data: rows } = await supabase.from('ad_orders').select('created_at').gte('created_at',since);
-            const days = {};
-            for (let i=29; i>=0; i--) { const d=new Date(Date.now()-i*86400000); days[d.toISOString().slice(0,10)]=0; }
-            (rows||[]).forEach(r => { const d=r.created_at.slice(0,10); if (d in days) days[d]++; });
-            const labels = Object.keys(days).map(d=>d.slice(5));
+            document.getElementById('ad-kpis').innerHTML = [
+                {v:revenueLabel,l:'Confirmed Revenue',c:'var(--green)'},
+                {v:Number(kpis.total_orders ?? totalOrders),l:'Total Orders',c:'var(--blue)'},
+                {v:Number(kpis.active_ads || 0),l:'Active Ads',c:'var(--green)'},
+                {v:Number(kpis.payment_queue ?? kpis.pending_payments ?? 0),l:'Awaiting Review',c:'var(--yellow)'}
+            ].map(k => `<div class="chart-kpi"><div class="kpi-val" style="color:${k.c}">${typeof k.v==='number'?k.v.toLocaleString():escHtml(k.v)}</div><div class="kpi-lbl">${k.l}</div></div>`).join('');
+
             destroyChart('orders-timeline');
             chartInstances['orders-timeline'] = new Chart(document.getElementById('chart-orders-timeline'), {
-                type:'line', data: { labels, datasets: [{ label:'Orders', data: Object.values(days), borderColor:'#ffcf33', backgroundColor:'rgba(255,207,51,0.1)', tension:0.4, fill:true, pointRadius:3 }] },
+                type:'line',
+                data: {
+                    labels: dailyOrders.map((row) => String(row.day || row.date || row.period || '').slice(5)),
+                    datasets: [{ label:'Orders', data:dailyOrders.map((row) => Number(row.orders ?? row.order_count ?? row.count ?? 0)), borderColor:'#ffcf33', backgroundColor:'rgba(255,207,51,0.1)', tension:0.4, fill:true, pointRadius:3 }]
+                },
                 options: { ...chartDefaults(), plugins: { legend: { display: false } } }
             });
-        } catch(_) {}
 
-        // ── Order status ──
-        try {
-            const { data: rows } = await supabase.from('ad_orders').select('status');
-            const counts = {};
-            (rows||[]).forEach(r => { counts[r.status] = (counts[r.status]||0)+1; });
-            const labels = Object.keys(counts);
             destroyChart('orders-status');
             chartInstances['orders-status'] = new Chart(document.getElementById('chart-orders-status'), {
-                type:'pie', data: { labels, datasets: [{ data: labels.map(l=>counts[l]), backgroundColor: PALETTE }] },
+                type:'pie',
+                data: { labels:statusRows.map((row) => String(row.status || row.label || row.key || '').replace(/_/g, ' ')), datasets:[{ data:statusRows.map((row) => Number(row.count ?? row.orders ?? row.value ?? 0)), backgroundColor:PALETTE }] },
                 options: { responsive:true, plugins: { legend: { labels: { color:'#b9c0d4', font:{family:'Space Grotesk',size:11} } } } }
             });
-        } catch(_) {}
 
-        // ── Revenue by package (bar) ──
-        try {
-            const { data: rows } = await supabase.from('ad_orders').select('package_name_snapshot,total_price_snapshot').eq('status','approved');
-            const revMap = {};
-            (rows||[]).forEach(r => { revMap[r.package_name_snapshot] = (revMap[r.package_name_snapshot]||0) + Number(r.total_price_snapshot||0); });
-            const sorted = Object.entries(revMap).sort((a,b)=>b[1]-a[1]);
+            const packageLabels = packageRows.map((row) => row.package_name || row.name || row.label || 'Package');
+            const packageRevenue = packageRows.map((row) => Number(row.revenue ?? row.confirmed_revenue ?? row.amount ?? 0));
+            const packageOrders = packageRows.map((row) => Number(row.orders ?? row.order_count ?? row.count ?? 0));
             destroyChart('revenue-package');
             chartInstances['revenue-package'] = new Chart(document.getElementById('chart-revenue-package'), {
-                type:'bar', data: { labels: sorted.map(s=>s[0]), datasets: [{ label:'Revenue (JMD)', data: sorted.map(s=>s[1]), backgroundColor: PALETTE }] },
+                type:'bar', data:{ labels:packageLabels, datasets:[{ label:`Revenue (${currency})`, data:packageRevenue, backgroundColor:PALETTE }] },
                 options: { ...chartDefaults(), plugins: { legend: { display: false } } }
             });
-
-            // Revenue donut
             destroyChart('revenue-donut');
             chartInstances['revenue-donut'] = new Chart(document.getElementById('chart-revenue-donut'), {
-                type:'doughnut', data: { labels: sorted.map(s=>s[0]), datasets: [{ data: sorted.map(s=>s[1]), backgroundColor: PALETTE }] },
+                type:'doughnut', data:{ labels:packageLabels, datasets:[{ data:packageRevenue, backgroundColor:PALETTE }] },
                 options: { responsive:true, plugins: { legend: { labels: { color:'#b9c0d4', font:{family:'Space Grotesk',size:10} } } } }
             });
-        } catch(_) {}
-
-        // ── Package popularity (all orders) ──
-        try {
-            const { data: rows } = await supabase.from('ad_orders').select('package_name_snapshot');
-            const counts = {};
-            (rows||[]).forEach(r => { counts[r.package_name_snapshot] = (counts[r.package_name_snapshot]||0)+1; });
-            const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
             destroyChart('package-popularity');
             chartInstances['package-popularity'] = new Chart(document.getElementById('chart-package-popularity'), {
-                type:'bar', data: { labels: sorted.map(s=>s[0]), datasets: [{ label:'Orders', data: sorted.map(s=>s[1]), backgroundColor: PALETTE }] },
+                type:'bar', data:{ labels:packageLabels, datasets:[{ label:'Orders', data:packageOrders, backgroundColor:PALETTE }] },
                 options: { ...chartDefaults(), plugins: { legend: { display: false } }, indexAxis:'y' }
             });
-        } catch(_) {}
+        } catch(error) {
+            document.getElementById('ad-kpis').innerHTML = `<div class="chart-kpi"><div class="kpi-lbl" style="color:var(--red);">Advertising analytics unavailable: ${escHtml(error.message)}</div></div>`;
+            showToast('Advertising analytics could not be loaded.', 'error');
+        }
     }
 
     // ── HELPERS ──

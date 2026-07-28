@@ -248,6 +248,39 @@
                             </div>
                         </div>
                         <div class="segment-note" id="segment-note"></div>
+                        <div id="segment-fields" style="margin-top:18px;">
+                            <div class="segment-field-group hidden" data-segment-fields="local-business">
+                                <div class="grid-2">
+                                    <div class="field"><label for="segment-service-area">Service area</label><input id="segment-service-area" type="text" maxlength="2048" placeholder="e.g. Kingston, St. Andrew and islandwide" /></div>
+                                    <div class="field"><label for="segment-directory-focus">Directory focus / specialties</label><textarea id="segment-directory-focus" class="compact" maxlength="2048" placeholder="List the services, departments or local specialties customers should know about."></textarea></div>
+                                </div>
+                            </div>
+                            <div class="segment-field-group hidden" data-segment-fields="professional-services">
+                                <div class="grid-2">
+                                    <div class="field"><label for="segment-credentials">Credentials and trust information</label><textarea id="segment-credentials" class="compact" maxlength="2048" placeholder="Licences, certifications, associations or professional experience."></textarea></div>
+                                    <div class="field"><label for="segment-intake-url">Client intake / appointment URL</label><input id="segment-intake-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                </div>
+                            </div>
+                            <div class="segment-field-group hidden" data-segment-fields="b2b-supplier">
+                                <div class="grid-3">
+                                    <div class="field"><label for="segment-catalog-url">Product catalogue URL</label><input id="segment-catalog-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                    <div class="field"><label for="segment-rfq-email">RFQ email</label><input id="segment-rfq-email" type="email" maxlength="254" placeholder="quotes@example.com" /></div>
+                                    <div class="field"><label for="segment-currencies">Supported currencies</label><input id="segment-currencies" type="text" maxlength="260" placeholder="JMD, USD, CAD" /></div>
+                                </div>
+                            </div>
+                            <div class="segment-field-group hidden" data-segment-fields="hospitality-events">
+                                <div class="grid-2">
+                                    <div class="field"><label for="segment-availability-url">Availability / reservation URL</label><input id="segment-availability-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                    <div class="field"><label for="segment-portfolio-url">Portfolio / venue gallery URL</label><input id="segment-portfolio-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                </div>
+                            </div>
+                            <div class="segment-field-group hidden" data-segment-fields="automotive-collectibles">
+                                <div class="grid-2">
+                                    <div class="field"><label for="segment-inventory-url">Live inventory URL</label><input id="segment-inventory-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                    <div class="field"><label for="segment-financing-url">Financing / buyer application URL</label><input id="segment-financing-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                </div>
+                            </div>
+                        </div>
                     </section>
 
                     <section class="panel tier-section" id="silver" data-min-tier="silver">
@@ -410,7 +443,57 @@
         }
 
         function updateSegmentNote() {
-            el('segment-note').textContent = SEGMENT_NOTES[el('market-segment').value] || '';
+            const segment = el('market-segment').value;
+            el('segment-note').textContent = SEGMENT_NOTES[segment] || '';
+            document.querySelectorAll('[data-segment-fields]').forEach((group) => {
+                group.classList.toggle('hidden', group.dataset.segmentFields !== segment);
+            });
+        }
+
+        function segmentValue(id) {
+            return emptyToNull(value(id));
+        }
+
+        function buildSegmentContent(segment) {
+            let content = {};
+            if (segment === 'local-business') {
+                content = { service_area: segmentValue('segment-service-area'), directory_focus: segmentValue('segment-directory-focus') };
+            } else if (segment === 'professional-services') {
+                content = { credentials: segmentValue('segment-credentials'), intake_url: segmentValue('segment-intake-url') };
+            } else if (segment === 'b2b-supplier') {
+                const currencies = [...new Set(value('segment-currencies').split(',').map((item) => item.trim().toUpperCase()).filter(Boolean))];
+                if (currencies.length > 20 || currencies.some((item) => item.length > 12)) {
+                    throw new Error('Use no more than 20 currency codes, with 12 characters or fewer per code.');
+                }
+                content = {
+                    catalog_url: segmentValue('segment-catalog-url'),
+                    rfq_email: segmentValue('segment-rfq-email'),
+                    currencies
+                };
+            } else if (segment === 'hospitality-events') {
+                content = { availability_url: segmentValue('segment-availability-url'), portfolio_url: segmentValue('segment-portfolio-url') };
+            } else if (segment === 'automotive-collectibles') {
+                content = { inventory_url: segmentValue('segment-inventory-url'), financing_url: segmentValue('segment-financing-url') };
+            }
+            Object.keys(content).forEach((key) => {
+                if (content[key] === null || content[key] === '' || (Array.isArray(content[key]) && !content[key].length)) delete content[key];
+            });
+            return Object.keys(content).length ? { [segment]: content } : {};
+        }
+
+        function populateSegmentContent(page, segment) {
+            const content = page?.segment_content?.[segment] || {};
+            el('segment-service-area').value = segment === 'local-business' ? content.service_area || '' : '';
+            el('segment-directory-focus').value = segment === 'local-business' ? content.directory_focus || '' : '';
+            el('segment-credentials').value = segment === 'professional-services' ? content.credentials || '' : '';
+            el('segment-intake-url').value = segment === 'professional-services' ? content.intake_url || '' : '';
+            el('segment-catalog-url').value = segment === 'b2b-supplier' ? content.catalog_url || '' : '';
+            el('segment-rfq-email').value = segment === 'b2b-supplier' ? content.rfq_email || '' : '';
+            el('segment-currencies').value = segment === 'b2b-supplier' && Array.isArray(content.currencies) ? content.currencies.join(', ') : '';
+            el('segment-availability-url').value = segment === 'hospitality-events' ? content.availability_url || '' : '';
+            el('segment-portfolio-url').value = segment === 'hospitality-events' ? content.portfolio_url || '' : '';
+            el('segment-inventory-url').value = segment === 'automotive-collectibles' ? content.inventory_url || '' : '';
+            el('segment-financing-url').value = segment === 'automotive-collectibles' ? content.financing_url || '' : '';
         }
 
         function setFormEnabled(enabled) {
@@ -425,6 +508,7 @@
             const segment = page?.market_segment || listing?.market_segment || 'local-business';
             el('tier').value = tier;
             el('market-segment').value = segment;
+            populateSegmentContent(page, segment);
             el('tagline').value = page?.tagline || '';
             el('logo-url').value = page?.logo_url || listing?.image_url || '';
             el('address').value = page?.address || listing?.location || '';
@@ -536,6 +620,7 @@
                 listing_id: listingId,
                 tier,
                 market_segment: el('market-segment').value,
+                segment_content: buildSegmentContent(el('market-segment').value),
                 page_status: pageStatus,
                 tagline: emptyToNull(value('tagline')),
                 logo_url: emptyToNull(value('logo-url')),

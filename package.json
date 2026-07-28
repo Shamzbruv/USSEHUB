@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test:rls",
+    "test": "npm run validate",
     "test:rls": "node test-rls.mjs",
-    "lint": "echo \"Linting placeholder...\" && exit 0",
+    "test:commerce": "node test-advertising-workflow.mjs",
+    "validate": "node --experimental-vm-modules validate-static.mjs",
+    "lint": "npm run validate",
     "start": "serve -l tcp://0.0.0.0:${PORT:-3000} ."
   },
   "keywords": [],

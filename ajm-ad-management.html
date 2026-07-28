@@ -447,6 +447,7 @@
             <div class="modal-head"><div><h2 id="bank-modal-title">Add bank-transfer account</h2><p>These instructions are shown only through controlled customer order flows.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
             <div class="modal-body"><div class="notice" id="bank-form-notice"></div><input id="bank-id" type="hidden" /><div class="form-grid">
                 <div class="field"><label for="bank-label">Internal label *</label><input id="bank-label" required maxlength="120" placeholder="JMD business account" /></div>
+                <div class="field"><label for="bank-code">Unique code *</label><input id="bank-code" required maxlength="64" pattern="[a-z0-9][a-z0-9_-]+" placeholder="jmd-main-account" /></div>
                 <div class="field"><label for="bank-name">Bank name *</label><input id="bank-name" required maxlength="160" /></div>
                 <div class="field"><label for="bank-account-name">Account holder *</label><input id="bank-account-name" required maxlength="180" /></div>
                 <div class="field"><label for="bank-account-number">Account number *</label><input id="bank-account-number" required maxlength="100" autocomplete="off" /></div>
@@ -581,7 +582,8 @@
 
         async function init() {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                if (sessionError) throw sessionError;
                 if (!session?.user) return deny('Please sign in through the AJM Advertising Hub first.');
                 state.user = session.user;
                 const { data: profile, error } = await supabase.from('profiles').select('role, full_name, email').eq('id', state.user.id).maybeSingle();
@@ -609,26 +611,26 @@
             el('refresh-btn').disabled = true;
             el('refresh-btn').textContent = 'Refreshing…';
             showNotice('global-notice', 'Refreshing the advertising workspace…');
-            const tasks = await Promise.allSettled([loadCatalog(), loadAccounts(), loadOrders(), loadAdvertisements(), loadAnalytics()]);
-            const failures = tasks.filter((item) => item.status === 'rejected').map((item) => item.reason?.message || 'Unknown data error');
-            renderAll();
-            if (failures.length) showNotice('global-notice', `Some advertising data could not be loaded: ${[...new Set(failures)].join(' · ')}`, 'error');
-            else showNotice('global-notice', '');
-            state.loading = false;
-            el('refresh-btn').disabled = false;
-            el('refresh-btn').textContent = '↻ Refresh data';
+            try {
+                const tasks = await Promise.allSettled([loadConfiguration(), loadOrders(), loadAdvertisements(), loadAnalytics()]);
+                const failures = tasks.filter((item) => item.status === 'rejected').map((item) => item.reason?.message || 'Unknown data error');
+                renderAll();
+                if (failures.length) showNotice('global-notice', `Some advertising data could not be loaded: ${[...new Set(failures)].join(' · ')}`, 'error');
+                else showNotice('global-notice', '');
+            } finally {
+                state.loading = false;
+                el('refresh-btn').disabled = false;
+                el('refresh-btn').textContent = '↻ Refresh data';
+            }
         }
 
-        async function loadCatalog() {
-            const { data, error } = await supabase.rpc('get_ad_catalog');
-            if (error) throw new Error(`Package catalogue: ${error.message}`);
-            state.packages = Array.isArray(data) ? data : (data?.packages || []);
-        }
-
-        async function loadAccounts() {
-            const { data, error } = await supabase.from('payment_accounts').select('*').order('is_default', { ascending: false }).order('created_at', { ascending: false });
-            if (error) throw new Error(`Payment accounts: ${error.message}`);
-            state.accounts = data || [];
+        async function loadConfiguration() {
+            const { data, error } = await supabase.rpc('admin_get_ad_configuration');
+            if (error) throw new Error(`Advertising configuration: ${error.message}`);
+            const configuration = data && typeof data === 'object' ? data : {};
+            state.packages = Array.isArray(configuration.packages) ? configuration.packages : [];
+            const accounts = configuration.payment_accounts ?? configuration.accounts;
+            state.accounts = Array.isArray(accounts) ? accounts : [];
         }
 
         async function loadOrders() {
@@ -804,8 +806,8 @@
                 const placements = pkg.placements || [];
                 return `<article class="package-card" style="--accent:${PALETTE[index % PALETTE.length]}">
                     <div class="package-top"><div class="package-meta"><span class="package-code">${safe(pkg.code)}</span>${statusBadge(pkg.is_active === false ? 'inactive' : 'active')}</div><h3>${safe(pkg.name)}</h3><p>${safe(pkg.description || 'No customer-facing description supplied.')}</p><div class="package-price">${safe(fmtMoney(pkg.price, pkg.currency))} <small>/ ${safe(pkg.duration_days || 30)} days</small></div><div class="package-tags"><span class="tag">${safe(text(pkg.product_type || 'display_ad').replace('_', ' '))}</span>${pkg.webpage_tier ? `<span class="tag">${safe(pkg.webpage_tier)}</span>` : ''}${placements.map((item) => `<span class="tag">${safe(item)}</span>`).join('')}<span class="tag">${safe(account?.label || account?.account_label || 'Default bank')}</span></div></div>
-                    <div class="option-list">${options.length ? options.map((option) => `<div class="option"><div><strong>${safe(option.name)}</strong><small>+${safe(fmtMoney(option.price_delta, pkg.currency))} · +${safe(option.duration_days_delta || 0)} days${option.is_active === false ? ' · archived' : ''}</small></div><div class="option-actions"><button class="btn btn-sm" type="button" data-edit-option="${safe(option.id)}" data-package-id="${safe(pkg.id)}">Edit</button><button class="btn btn-danger btn-sm" type="button" data-archive-option="${safe(option.id)}">Archive</button></div></div>`).join('') : '<div style="color:var(--muted);font-size:.7rem;padding:8px;">No optional upgrades.</div>'}</div>
-                    <div class="package-actions"><button class="btn btn-sm" type="button" data-edit-package="${safe(pkg.id)}">Edit package</button><button class="btn btn-blue btn-sm" type="button" data-add-option="${safe(pkg.id)}">＋ Option</button>${pkg.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-package="${safe(pkg.id)}">Restore</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-package="${safe(pkg.id)}">Archive</button>`}</div>
+                    <div class="option-list">${options.length ? options.map((option) => `<div class="option"><div><strong>${safe(option.name)}</strong><small>+${safe(fmtMoney(option.price_delta, pkg.currency))} · +${safe(option.duration_days_delta || 0)} days${option.is_active === false ? ' · archived' : ''}</small></div><div class="option-actions"><button class="btn btn-sm" type="button" data-edit-option="${safe(option.id)}" data-package-id="${safe(pkg.id)}">Edit</button>${option.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-option="${safe(option.id)}">Restore</button><button class="btn btn-danger btn-sm" type="button" data-delete-option="${safe(option.id)}">Delete</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-option="${safe(option.id)}">Archive</button>`}</div></div>`).join('') : '<div style="color:var(--muted);font-size:.7rem;padding:8px;">No optional upgrades.</div>'}</div>
+                    <div class="package-actions"><button class="btn btn-sm" type="button" data-edit-package="${safe(pkg.id)}">Edit package</button><button class="btn btn-blue btn-sm" type="button" data-add-option="${safe(pkg.id)}">＋ Option</button>${pkg.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-package="${safe(pkg.id)}">Restore</button><button class="btn btn-danger btn-sm" type="button" data-delete-package="${safe(pkg.id)}">Delete</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-package="${safe(pkg.id)}">Archive</button>`}</div>
                 </article>`;
             }).join('');
         }
@@ -815,7 +817,7 @@
                 el('bank-grid').innerHTML = '<div class="state-card" style="grid-column:1/-1;margin:0;"><h3>No payment destination configured</h3><p>Add a bank account before publishing paid packages.</p><button class="btn btn-primary" type="button" data-new-bank>＋ Add bank account</button></div>';
                 return;
             }
-            el('bank-grid').innerHTML = state.accounts.map((account) => `<article class="bank-card${account.is_default ? ' default' : ''}"><div>${account.is_default ? '<span class="badge badge-active">Default</span>' : statusBadge(account.is_active === false ? 'inactive' : 'active')}</div><h3>${safe(first(account.label, account.account_label, 'Payment account'))}</h3><div class="bank-name">${safe(account.bank_name)}</div><div class="account-number">${safe(maskAccount(account.account_number))}</div><div class="bank-details"><span>Holder: <strong>${safe(first(account.account_name, account.account_holder, '—'))}</strong></span><span>Currency: <strong>${safe(account.currency || 'JMD')}</strong></span><span>Branch: <strong>${safe(account.branch || '—')}</strong></span></div><div class="bank-actions"><button class="btn btn-sm" type="button" data-edit-bank="${safe(account.id)}">Edit</button>${!account.is_default && account.is_active !== false ? `<button class="btn btn-primary btn-sm" type="button" data-default-bank="${safe(account.id)}">Make default</button>` : ''}${account.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-bank="${safe(account.id)}">Restore</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-bank="${safe(account.id)}">Archive</button>`}</div></article>`).join('');
+            el('bank-grid').innerHTML = state.accounts.map((account) => `<article class="bank-card${account.is_default ? ' default' : ''}"><div>${account.is_default ? '<span class="badge badge-active">Default</span>' : statusBadge(account.is_active === false ? 'inactive' : 'active')}</div><h3>${safe(first(account.label, account.account_label, 'Payment account'))}</h3><div class="bank-name">${safe(account.bank_name)}</div><div class="account-number">${safe(maskAccount(account.account_number))}</div><div class="bank-details"><span>Holder: <strong>${safe(first(account.account_name, account.account_holder, '—'))}</strong></span><span>Currency: <strong>${safe(account.currency || 'JMD')}</strong></span><span>Branch: <strong>${safe(first(account.branch_name, account.branch, '—'))}</strong></span></div><div class="bank-actions"><button class="btn btn-sm" type="button" data-edit-bank="${safe(account.id)}">Edit</button>${!account.is_default && account.is_active !== false ? `<button class="btn btn-primary btn-sm" type="button" data-default-bank="${safe(account.id)}">Make default</button>` : ''}${account.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-bank="${safe(account.id)}">Restore</button><button class="btn btn-danger btn-sm" type="button" data-delete-bank="${safe(account.id)}">Delete</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-bank="${safe(account.id)}">Archive</button>`}</div></article>`).join('');
         }
 
         function analyticsRows(key) {
@@ -882,7 +884,7 @@
 
             drawChart('placements', 'card-placements', 'chart-placements', { type: 'bar', data: { labels: placementRows.map((row) => rowLabel(row)), datasets: [{ label: 'Impressions', data: placementRows.map((row) => number(metric(row, 'impressions', 'views'))), backgroundColor: 'rgba(102,168,255,.5)', borderRadius: 5 }, { label: 'Clicks', data: placementRows.map((row) => number(metric(row, 'clicks'))), backgroundColor: 'rgba(45,214,164,.58)', borderRadius: 5 }] }, options: chartBase() }, placementRows.length > 0);
 
-            drawChart('expirations', 'card-expirations', 'chart-expirations', { type: 'bar', data: { labels: expirations.map((row) => row.label), datasets: [{ label: 'Expiring ads', data: expirations.map((row) => row.count), backgroundColor: expirations.map((row, index) => index < 2 ? 'rgba(255,93,112,.62)' : 'rgba(255,207,51,.5)', borderRadius: 5 }] }, options: chartBase() }, expirations.some((row) => row.count));
+            drawChart('expirations', 'card-expirations', 'chart-expirations', { type: 'bar', data: { labels: expirations.map((row) => row.label), datasets: [{ label: 'Expiring ads', data: expirations.map((row) => row.count), backgroundColor: expirations.map((row, index) => index < 2 ? 'rgba(255,93,112,.62)' : 'rgba(255,207,51,.5)'), borderRadius: 5 }] }, options: chartBase() }, expirations.some((row) => row.count));
             renderTopAds();
         }
 
@@ -899,10 +901,11 @@
             }).join('');
         }
 
-        function populateAccountSelect() {
+        function populateAccountSelect(selectedValue = null) {
             const select = el('package-bank');
-            const current = select.value;
-            select.innerHTML = '<option value="">Default active bank account</option>' + state.accounts.map((account) => `<option value="${safe(account.id)}">${safe(first(account.label, account.account_label, account.bank_name))}${account.is_active === false ? ' (archived)' : ''}</option>`).join('');
+            const current = selectedValue ?? select.value;
+            const availableAccounts = state.accounts.filter((account) => account.is_active !== false || account.id === current);
+            select.innerHTML = '<option value="">Default active bank account</option>' + availableAccounts.map((account) => `<option value="${safe(account.id)}"${account.is_active === false ? ' disabled' : ''}>${safe(first(account.label, account.account_label, account.bank_name))}${account.is_active === false ? ' (archived; choose another account)' : ''}</option>`).join('');
             if ([...select.options].some((option) => option.value === current)) select.value = current;
         }
 
@@ -913,6 +916,7 @@
 
         function openPackageForm(pkg = null) {
             resetForm('package-form', 'package-form-notice');
+            populateAccountSelect(pkg?.payment_account_id || '');
             el('package-modal-title').textContent = pkg ? 'Edit advertising package' : 'Add advertising package';
             el('package-id').value = pkg?.id || '';
             el('package-name').value = pkg?.name || '';
@@ -920,6 +924,7 @@
             el('package-description').value = pkg?.description || '';
             el('package-type').value = pkg?.product_type || 'display_ad';
             el('package-tier').value = pkg?.webpage_tier || '';
+            el('package-tier').disabled = el('package-type').value !== 'webpage';
             el('package-price').value = pkg?.price ?? '';
             el('package-currency').value = pkg?.currency || 'JMD';
             el('package-duration').value = pkg?.duration_days || 30;
@@ -953,12 +958,13 @@
             el('bank-modal-title').textContent = account ? 'Edit bank-transfer account' : 'Add bank-transfer account';
             el('bank-id').value = account?.id || '';
             el('bank-label').value = first(account?.label, account?.account_label, '');
+            el('bank-code').value = account?.code || '';
             el('bank-name').value = account?.bank_name || '';
             el('bank-account-name').value = first(account?.account_name, account?.account_holder, '');
             el('bank-account-number').value = account?.account_number || '';
             el('bank-account-type').value = account?.account_type || '';
             el('bank-currency').value = account?.currency || 'JMD';
-            el('bank-branch').value = account?.branch || '';
+            el('bank-branch').value = first(account?.branch_name, account?.branch, '');
             el('bank-routing').value = first(account?.routing_number, account?.routing_transit_number, '');
             el('bank-swift').value = first(account?.swift_code, account?.swift_bic, '');
             el('bank-instructions').value = first(account?.instructions, account?.payment_instructions, '');
@@ -972,11 +978,17 @@
             const button = el('package-save');
             button.disabled = true;
             const payload = { id: el('package-id').value || null, name: el('package-name').value.trim(), code: el('package-code').value.trim().toLowerCase(), description: el('package-description').value.trim() || null, product_type: el('package-type').value, webpage_tier: el('package-type').value === 'webpage' ? el('package-tier').value || null : null, webpage_enabled: el('package-type').value === 'webpage', price: number(el('package-price').value), currency: el('package-currency').value, duration_days: number(el('package-duration').value), sort_order: number(el('package-sort').value), placements: splitComma(el('package-placements').value), features: splitLines(el('package-features').value), payment_account_id: el('package-bank').value || null, is_active: el('package-active').checked };
+            const selectedAccount = payload.payment_account_id ? accountById(payload.payment_account_id) : null;
+            if (selectedAccount?.is_active === false) {
+                showNotice('package-form-notice', 'Choose an active payment account before saving this package.', 'error');
+                button.disabled = false;
+                return;
+            }
             try {
-                await adminCommand('package_upsert', payload);
+                await lowerCrud('package', 'upsert', payload);
                 toast('Advertising package saved.', 'success');
                 closeModal('package-modal');
-                await Promise.all([loadCatalog(), loadAnalytics()]);
+                await Promise.all([loadConfiguration(), loadAnalytics()]);
                 renderAll();
             } catch (error) { showNotice('package-form-notice', error.message || 'Package could not be saved.', 'error'); }
             finally { button.disabled = false; }
@@ -988,10 +1000,10 @@
             button.disabled = true;
             const payload = { id: el('option-id').value || null, package_id: el('option-package-id').value, name: el('option-name').value.trim(), code: el('option-code').value.trim().toLowerCase(), description: el('option-description').value.trim() || null, price_delta: number(el('option-price').value), duration_days_delta: number(el('option-duration').value), additional_placements: splitComma(el('option-placements').value), features: splitLines(el('option-features').value), sort_order: number(el('option-sort').value), is_active: el('option-active').checked };
             try {
-                await adminCommand('option_upsert', payload);
+                await lowerCrud('option', 'upsert', payload);
                 toast('Package option saved.', 'success');
                 closeModal('option-modal');
-                await loadCatalog();
+                await loadConfiguration();
                 renderPackages();
             } catch (error) { showNotice('option-form-notice', error.message || 'Option could not be saved.', 'error'); }
             finally { button.disabled = false; }
@@ -1001,12 +1013,12 @@
             event.preventDefault();
             const button = el('bank-save');
             button.disabled = true;
-            const payload = { id: el('bank-id').value || null, label: el('bank-label').value.trim(), bank_name: el('bank-name').value.trim(), account_name: el('bank-account-name').value.trim(), account_number: el('bank-account-number').value.trim(), account_type: el('bank-account-type').value.trim() || null, currency: el('bank-currency').value, branch: el('bank-branch').value.trim() || null, routing_number: el('bank-routing').value.trim() || null, swift_code: el('bank-swift').value.trim() || null, instructions: el('bank-instructions').value.trim(), is_active: el('bank-active').checked, is_default: el('bank-default').checked };
+            const payload = { id: el('bank-id').value || null, code: el('bank-code').value.trim().toLowerCase(), label: el('bank-label').value.trim(), bank_name: el('bank-name').value.trim(), account_name: el('bank-account-name').value.trim(), account_number: el('bank-account-number').value.trim(), account_type: el('bank-account-type').value.trim() || null, currency: el('bank-currency').value, branch_name: el('bank-branch').value.trim() || null, routing_number: el('bank-routing').value.trim() || null, swift_code: el('bank-swift').value.trim() || null, instructions: el('bank-instructions').value.trim(), is_active: el('bank-active').checked, is_default: el('bank-default').checked };
             try {
-                await adminCommand('bank_upsert', payload);
+                await lowerCrud('bank', 'upsert', payload);
                 toast('Payment account saved.', 'success');
                 closeModal('bank-modal');
-                await Promise.all([loadAccounts(), loadCatalog()]);
+                await loadConfiguration();
                 renderAccounts();
                 renderPackages();
                 populateAccountSelect();
@@ -1014,19 +1026,35 @@
             finally { button.disabled = false; }
         }
 
-        function openOrderDetail(orderId) {
+        async function paymentProofUrl(order) {
+            const alreadySigned = first(order.payment_proof_signed_url, order.proof_signed_url);
+            if (alreadySigned) return alreadySigned;
+            const path = first(order.payment_proof_path, order.proof_path);
+            if (!path) return null;
+            const { data, error } = await supabase.storage.from('ad-payment-proofs').createSignedUrl(path, 600);
+            if (error) throw new Error(`Payment proof: ${error.message}`);
+            return data?.signedUrl || data?.signedURL || null;
+        }
+
+        async function openOrderDetail(orderId) {
             const order = orderById(orderId);
             if (!order) return toast('Order details are unavailable. Refresh and try again.', 'error');
             const customer = orderCustomer(order);
             const pkg = orderPackage(order);
-            const proof = first(order.payment_proof_url, order.proof_url, order.payment_proof_path, order.proof_path);
+            const hasProof = Boolean(first(order.payment_proof_signed_url, order.proof_signed_url, order.payment_proof_path, order.proof_path));
+            let proof = null;
+            let proofError = '';
+            if (hasProof) {
+                try { proof = await paymentProofUrl(order); }
+                catch (error) { proofError = error.message || 'Payment proof could not be opened.'; }
+            }
             el('order-modal-title').textContent = first(order.order_number, `Order ${text(order.id).slice(0, 8)}`);
             el('order-modal-subtitle').textContent = `${pkg.name} · ${customer.name}`;
             el('order-detail').innerHTML = `<div class="detail-grid">
                 <div class="detail"><span>Status</span><strong>${statusBadge(order.status)}</strong></div><div class="detail"><span>Customer</span><strong>${safe(customer.name)}${customer.email ? `<br>${safe(customer.email)}` : ''}</strong></div><div class="detail"><span>Business / listing</span><strong>${safe(first(order.business_name, order.listing_name, order.listing_id, 'Not linked'))}</strong></div>
                 <div class="detail"><span>Package</span><strong>${safe(pkg.name)}</strong></div><div class="detail"><span>Amount due</span><strong class="amount">${safe(fmtMoney(orderAmount(order), pkg.currency))}</strong></div><div class="detail"><span>Duration</span><strong>${safe(first(order.duration_days, order.duration_days_snapshot, '—'))} days</strong></div>
                 <div class="detail"><span>Payment reference</span><strong>${safe(orderReference(order))}</strong></div><div class="detail"><span>Payment submitted</span><strong>${safe(fmtDate(order.payment_submitted_at, true))}</strong></div><div class="detail"><span>Expiry</span><strong>${safe(fmtDate(order.expires_at))}</strong></div>
-            </div>${order.customer_notes ? `<div style="margin-top:14px;"><label>Customer notes</label><div class="danger-copy" style="color:var(--text);border-color:var(--line);background:var(--glass);white-space:pre-wrap;">${safe(order.customer_notes)}</div></div>` : ''}${order.admin_note ? `<div style="margin-top:14px;"><label>Latest admin note</label><div class="danger-copy" style="color:var(--text);border-color:var(--line);background:var(--glass);white-space:pre-wrap;">${safe(order.admin_note)}</div></div>` : ''}${proof ? `<a class="proof-link" href="${safe(proof)}" target="_blank" rel="noopener">Open payment proof ↗</a>` : '<div class="cell-sub" style="margin-top:14px;">No payment proof has been attached.</div>'}`;
+            </div>${order.customer_notes ? `<div style="margin-top:14px;"><label>Customer notes</label><div class="danger-copy" style="color:var(--text);border-color:var(--line);background:var(--glass);white-space:pre-wrap;">${safe(order.customer_notes)}</div></div>` : ''}${order.admin_note ? `<div style="margin-top:14px;"><label>Latest admin note</label><div class="danger-copy" style="color:var(--text);border-color:var(--line);background:var(--glass);white-space:pre-wrap;">${safe(order.admin_note)}</div></div>` : ''}${proof ? `<a class="proof-link" href="${safe(proof)}" target="_blank" rel="noopener">Open payment proof ↗</a>` : proofError ? `<div class="danger-copy" style="margin-top:14px;">${safe(proofError)}</div>` : '<div class="cell-sub" style="margin-top:14px;">No payment proof has been attached.</div>'}`;
             el('order-detail-actions').innerHTML = `<button class="btn modal-close" type="button">Close</button>${orderActions(order)}`;
             openModal('order-modal');
         }
@@ -1042,9 +1070,8 @@
         };
 
         function queueOrderAction(orderId, action) {
-            const order = orderById(orderId);
             const copy = ACTION_COPY[action];
-            if (!order || !copy) return toast('This administrative action is unavailable.', 'error');
+            if (!orderId || !copy) return toast('This administrative action is unavailable.', 'error');
             closeModal('order-modal');
             state.pendingConfirmation = { kind: 'order', orderId, action };
             el('confirm-title').textContent = copy[0];
@@ -1063,13 +1090,17 @@
         function queueEntityAction(entity, id, action, label, destructive = false) {
             state.pendingConfirmation = { kind: 'entity', entity, id, action };
             el('confirm-title').textContent = label;
-            el('confirm-copy').textContent = destructive ? 'This permanently deletes the record. It will fail safely if customer orders still depend on it.' : 'The item will be removed from public selection while historical orders remain intact.';
+            el('confirm-copy').textContent = destructive
+                ? 'This permanently deletes the record. It will fail safely if customer orders still depend on it.'
+                : action === 'default'
+                    ? 'Future orders without a package-specific destination will use this active account.'
+                    : 'The item will be removed from public selection while historical orders remain intact.';
             el('confirm-reason-field').classList.add('hidden');
             el('confirm-reason').required = false;
             el('confirm-duration-field').classList.add('hidden');
             el('confirm-note').value = '';
             el('confirm-submit').textContent = label;
-            el('confirm-submit').className = 'btn btn-danger';
+            el('confirm-submit').className = `btn ${action === 'default' ? 'btn-primary' : 'btn-danger'}`;
             openModal('confirm-modal');
         }
 
@@ -1085,11 +1116,10 @@
                     toast('Advertising order updated and audit entry recorded.', 'success');
                     await Promise.all([loadOrders(), loadAdvertisements(), loadAnalytics()]);
                 } else {
-                    const wrapperAction = { 'package:archive': 'package_archive', 'option:archive': 'option_archive', 'bank:archive': 'bank_archive', 'bank:default': 'bank_set_default' }[`${pending.entity}:${pending.action}`];
-                    if (wrapperAction) await adminCommand(wrapperAction, { id: pending.id, admin_note: el('confirm-note').value.trim() || null });
-                    else await lowerCrud(pending.entity, pending.action, { id: pending.id, admin_note: el('confirm-note').value.trim() || null });
+                    const crudAction = pending.action === 'default' ? 'set_default' : pending.action;
+                    await lowerCrud(pending.entity, crudAction, { id: pending.id, admin_note: el('confirm-note').value.trim() || null });
                     toast('Configuration updated and audit entry recorded.', 'success');
-                    await Promise.all([loadCatalog(), loadAccounts(), loadAnalytics()]);
+                    await Promise.all([loadConfiguration(), loadAnalytics()]);
                 }
                 closeModal('confirm-modal');
                 state.pendingConfirmation = null;
@@ -1122,6 +1152,7 @@
         document.addEventListener('click', async (event) => {
             const button = event.target.closest('button');
             if (!button) return;
+            if (button.matches('.modal-close')) closeModal(button);
             if (button.matches('[data-new-package]')) openPackageForm();
             if (button.matches('[data-new-bank]')) openBankForm();
             if (button.dataset.orderDetail) openOrderDetail(button.dataset.orderDetail);
@@ -1131,11 +1162,15 @@
             if (button.dataset.editOption) { const pkg = packageById(button.dataset.packageId); openOptionForm(pkg?.id, pkg?.options?.find((item) => item.id === button.dataset.editOption)); }
             if (button.dataset.editBank) openBankForm(accountById(button.dataset.editBank));
             if (button.dataset.archivePackage) queueEntityAction('package', button.dataset.archivePackage, 'archive', 'Archive package');
-            if (button.dataset.restorePackage) { try { await lowerCrud('package', 'restore', { id: button.dataset.restorePackage }); await loadCatalog(); renderPackages(); toast('Package restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
+            if (button.dataset.restorePackage) { try { await lowerCrud('package', 'restore', { id: button.dataset.restorePackage }); await loadConfiguration(); renderPackages(); toast('Package restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
+            if (button.dataset.deletePackage) queueEntityAction('package', button.dataset.deletePackage, 'delete', 'Delete package', true);
             if (button.dataset.archiveOption) queueEntityAction('option', button.dataset.archiveOption, 'archive', 'Archive package option');
+            if (button.dataset.restoreOption) { try { await lowerCrud('option', 'restore', { id: button.dataset.restoreOption }); await loadConfiguration(); renderPackages(); toast('Package option restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
+            if (button.dataset.deleteOption) queueEntityAction('option', button.dataset.deleteOption, 'delete', 'Delete package option', true);
             if (button.dataset.archiveBank) queueEntityAction('bank', button.dataset.archiveBank, 'archive', 'Archive bank account');
             if (button.dataset.defaultBank) queueEntityAction('bank', button.dataset.defaultBank, 'default', 'Make default account');
-            if (button.dataset.restoreBank) { try { await lowerCrud('bank', 'restore', { id: button.dataset.restoreBank }); await loadAccounts(); renderAccounts(); populateAccountSelect(); toast('Bank account restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
+            if (button.dataset.restoreBank) { try { await lowerCrud('bank', 'restore', { id: button.dataset.restoreBank }); await loadConfiguration(); renderAccounts(); populateAccountSelect(); toast('Bank account restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
+            if (button.dataset.deleteBank) queueEntityAction('bank', button.dataset.deleteBank, 'delete', 'Delete bank account', true);
         });
         el('refresh-btn').addEventListener('click', refreshAll);
         el('analytics-range').addEventListener('change', async () => { try { await loadAnalytics(); renderKpis(); renderAnalytics(); } catch (error) { toast(error.message, 'error'); } });

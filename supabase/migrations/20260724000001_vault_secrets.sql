@@ -1,12 +1,12 @@
--- Vault secrets for Resend email dispatch and AJM admin notification
--- Safe to re-run: uses INSERT ... ON CONFLICT DO UPDATE
+-- Intentionally contains no credential values.
+--
+-- Supabase Vault secrets are deployment configuration, not schema. Configure
+-- RESEND_API_KEY and RESEND_FROM_EMAIL through deploy_new_migrations.mjs (which
+-- reads local environment variables and sends them as query parameters), or
+-- through the Supabase dashboard. Never commit live secret values here.
 
--- Resend API key (used by dispatch_ad_notification_outbox())
-INSERT INTO vault.secrets (name, secret)
-VALUES ('RESEND_API_KEY', 're_dWqU6Bb8_Gutp6Q8xjdXqJQJFLV93sos7')
-ON CONFLICT (name) DO UPDATE SET secret = EXCLUDED.secret;
-
--- Sender address used in the From: header
-INSERT INTO vault.secrets (name, secret)
-VALUES ('RESEND_FROM_EMAIL', 'AJM Advertising <noreply@ussehub.com>')
-ON CONFLICT (name) DO UPDATE SET secret = EXCLUDED.secret;
+DO $$
+BEGIN
+  RAISE NOTICE 'Vault credentials are configured separately from migrations.';
+END
+$$;
