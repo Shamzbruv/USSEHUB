@@ -41,7 +41,8 @@ const migrations = [
     '20260722000000_ajm_tiered_webpages.sql',
     '20260723000000_advertising_commerce_analytics.sql',
     '20260728000000_advertising_workflow_repair.sql',
-    '20260728000001_webpage_activation_draft.sql'
+    '20260728000001_webpage_activation_draft.sql',
+    '20260728000002_webpage_segment_sync.sql'
 ];
 
 if (!databaseUrl) {

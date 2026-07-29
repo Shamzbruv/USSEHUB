@@ -80,6 +80,27 @@
         .page-head p { max-width: 760px; margin-bottom: 0; color: var(--muted); line-height: 1.65; }
         .head-controls { display: flex; align-items: center; justify-content: flex-end; gap: 9px; flex-wrap: wrap; }
 
+        .setup-guide {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
+            gap: 18px;
+            margin-bottom: 24px;
+            padding: 20px;
+            border: 1px solid rgba(45,214,164,.24);
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, rgba(45,214,164,.09), rgba(102,168,255,.055));
+        }
+        .setup-guide h2 { margin-bottom: 7px; font-size: 1.08rem; }
+        .setup-guide p { margin-bottom: 14px; color: var(--muted); font-size: .76rem; line-height: 1.6; }
+        .setup-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .setup-status { display: grid; gap: 8px; align-content: start; }
+        .setup-status-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(0,0,0,.17); font-size: .7rem; }
+        .setup-status-row span:first-child { color: var(--muted); }
+        .setup-status-row strong { text-align: right; }
+        .setup-ready { color: var(--green); }
+        .setup-needed { color: var(--yellow); }
+        .setup-blocked { color: var(--red); }
+
         .btn {
             display: inline-flex;
             align-items: center;
@@ -183,7 +204,7 @@
         .badge-payment_submitted { color: var(--blue); background: rgba(102,168,255,.09); }
         .badge-approved, .badge-active { color: var(--green); background: rgba(45,214,164,.09); }
         .badge-paused { color: var(--orange); background: rgba(255,147,79,.09); }
-        .badge-rejected, .badge-cancelled, .badge-expired, .badge-inactive { color: var(--red); background: rgba(255,93,112,.08); }
+        .badge-rejected, .badge-cancelled, .badge-expired, .badge-inactive, .badge-incomplete { color: var(--red); background: rgba(255,93,112,.08); }
 
         .package-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
         .package-card { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018)); }
@@ -203,6 +224,9 @@
         .option small { display: block; margin-top: 3px; color: var(--muted); font-size: .65rem; }
         .option-actions { display: flex; align-items: center; gap: 4px; }
         .package-actions { display: flex; gap: 7px; padding: 0 14px 14px; flex-wrap: wrap; }
+        .readiness-note { display: flex; align-items: flex-start; gap: 7px; margin-top: 11px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: rgba(0,0,0,.16); font-size: .65rem; line-height: 1.45; }
+        .readiness-note.ready { color: #bdf8e5; border-color: rgba(45,214,164,.25); background: rgba(45,214,164,.07); }
+        .readiness-note.blocked { color: #ffd0d5; border-color: rgba(255,93,112,.24); background: rgba(255,93,112,.06); }
 
         .bank-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
         .bank-card { position: relative; overflow: hidden; padding: 19px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--glass); }
@@ -271,6 +295,7 @@
             .package-grid, .bank-grid { grid-template-columns: 1fr; }
             .form-grid, .detail-grid { grid-template-columns: 1fr; }
             .field.full { grid-column: auto; }
+            .setup-guide { grid-template-columns: 1fr; }
         }
         @media (max-width: 430px) {
             .kpi-grid { grid-template-columns: 1fr; }
@@ -318,8 +343,8 @@
             <div class="page-head">
                 <div>
                     <div class="eyebrow">Revenue, placements and customer fulfilment</div>
-                    <h1>Advertising operations</h1>
-                    <p>Control every package, bank-transfer instruction, payment decision and live placement from one audited workspace.</p>
+                    <h1>Advertising operations &amp; Accounts Receivable</h1>
+                    <p>Control every package, payment destination, bank-transfer instruction, payment decision and live placement from one audited workspace.</p>
                 </div>
                 <div class="head-controls">
                     <select id="analytics-range" aria-label="Analytics range" style="width:auto;min-width:145px;">
@@ -334,6 +359,24 @@
 
             <div class="notice" id="global-notice" role="status"></div>
 
+            <section class="setup-guide" aria-labelledby="revenue-setup-title">
+                <div>
+                    <div class="eyebrow">Accounts Receivable setup</div>
+                    <h2 id="revenue-setup-title">Three steps make a paid package orderable</h2>
+                    <p>1. Add an active bank-transfer destination. 2. Set each package's price, currency and duration, then add any optional upgrades. 3. Assign the matching payment destination to the package—or intentionally use the active default account. Customers can then order and submit proof; an admin still confirms payment before anything goes live.</p>
+                    <div class="setup-actions">
+                        <button class="btn btn-primary" type="button" data-open-panel="banks">1. Accounts Receivable</button>
+                        <button class="btn btn-blue" type="button" data-open-panel="packages">2. Packages, prices &amp; options</button>
+                        <button class="btn" type="button" data-open-panel="payments">3. Review payments</button>
+                    </div>
+                </div>
+                <div class="setup-status" aria-label="Advertising setup status">
+                    <div class="setup-status-row"><span>Active payment destinations</span><strong id="setup-account-status">Checking…</strong></div>
+                    <div class="setup-status-row"><span>Active packages with prices</span><strong id="setup-price-status">Checking…</strong></div>
+                    <div class="setup-status-row"><span>Packages ready for orders</span><strong id="setup-orderable-status">Checking…</strong></div>
+                </div>
+            </section>
+
             <div class="kpi-grid" aria-label="Advertising key metrics">
                 <article class="kpi" style="--glow:rgba(255,207,51,.14)"><div class="kpi-label">Awaiting payment review</div><div class="kpi-value" id="kpi-payment-queue">—</div><div class="kpi-note">Transfers needing an admin decision</div></article>
                 <article class="kpi" style="--glow:rgba(45,214,164,.14)"><div class="kpi-label">Active advertisements</div><div class="kpi-value" id="kpi-active-ads">—</div><div class="kpi-note">Currently eligible for placement</div></article>
@@ -345,10 +388,10 @@
 
             <div class="tabs" role="tablist" aria-label="Advertising management areas">
                 <button class="tab active" type="button" role="tab" data-panel="overview">Overview</button>
+                <button class="tab" type="button" role="tab" data-panel="banks">Accounts Receivable &amp; payment destinations</button>
+                <button class="tab" type="button" role="tab" data-panel="packages">Packages, prices &amp; options</button>
                 <button class="tab" type="button" role="tab" data-panel="payments">Payment queue <span class="tab-count" id="payment-tab-count">0</span></button>
                 <button class="tab" type="button" role="tab" data-panel="ads">Active ads</button>
-                <button class="tab" type="button" role="tab" data-panel="packages">Packages &amp; options</button>
-                <button class="tab" type="button" role="tab" data-panel="banks">Bank-transfer accounts</button>
             </div>
 
             <section class="panel active" id="panel-overview" role="tabpanel">
@@ -384,7 +427,7 @@
 
             <section class="panel" id="panel-packages" role="tabpanel">
                 <div class="panel-toolbar">
-                    <div><h2>Packages, prices and duration options</h2><p>Changes flow into the public package catalogue without editing the website.</p></div>
+                    <div><h2>Packages, prices, durations and optional upgrades</h2><p>Edit a package to set its payment destination. Add package options for extra duration, placements, features or price adjustments. Changes flow into the public catalogue without editing the website.</p></div>
                     <div class="toolbar-actions"><button class="btn btn-primary" type="button" id="new-package">＋ Add package</button></div>
                 </div>
                 <div class="notice" id="packages-notice"></div>
@@ -393,10 +436,10 @@
 
             <section class="panel" id="panel-banks" role="tabpanel">
                 <div class="panel-toolbar">
-                    <div><h2>Bank-transfer accounts</h2><p>Control exactly which payment instructions customers receive for each package.</p></div>
-                    <div class="toolbar-actions"><button class="btn btn-primary" type="button" id="new-bank">＋ Add bank account</button></div>
+                    <div><div class="eyebrow">Accounts Receivable</div><h2>Bank-transfer payment destinations</h2><p>Add, edit, archive and select the destination used for each paid package. One active account may be the default; any package can instead use a specific same-currency destination.</p></div>
+                    <div class="toolbar-actions"><button class="btn btn-primary" type="button" id="new-bank">＋ Add payment destination</button></div>
                 </div>
-                <div class="notice show" id="bank-safety">Account numbers are visible only to administrators here. Public customers receive instructions through the controlled package and order workflow.</div>
+                <div class="notice show" id="bank-safety"><strong>Enter transfer destination details only.</strong> Never enter an online-banking login or username, password, PIN, one-time security code, card number or card security code. Authorized administrators can view and manage these transfer details. They are not published in the package catalogue; the selected destination is copied to an order and disclosed only to the signed-in customer who placed that order.</div>
                 <div class="bank-grid" id="bank-grid"><div class="state-card" style="grid-column:1/-1;margin:0;">Loading payment accounts…</div></div>
             </section>
         </section>
@@ -404,7 +447,7 @@
 
     <div class="modal-backdrop" id="package-modal" role="dialog" aria-modal="true" aria-labelledby="package-modal-title">
         <form class="modal wide" id="package-form">
-            <div class="modal-head"><div><h2 id="package-modal-title">Add advertising package</h2><p>Set the public price, duration, product type and eligible placements.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
+            <div class="modal-head"><div><h2 id="package-modal-title">Add advertising package</h2><p>Set the public price, duration, product type, eligible placements and payment destination.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
             <div class="modal-body"><div class="notice" id="package-form-notice"></div><input id="package-id" type="hidden" /><div class="form-grid">
                 <div class="field"><label for="package-name">Package name *</label><input id="package-name" required maxlength="120" /></div>
                 <div class="field"><label for="package-code">Unique code *</label><input id="package-code" required maxlength="80" pattern="[a-z0-9-]+" placeholder="homepage-banner" /></div>
@@ -417,7 +460,7 @@
                 <div class="field"><label for="package-sort">Display order</label><input id="package-sort" type="number" min="0" step="1" value="0" /></div>
                 <div class="field full"><label for="package-placements">Placements <small>Comma-separated keys, e.g. home-hero, hub-sidebar</small></label><input id="package-placements" placeholder="home-featured, hub-sidebar" /></div>
                 <div class="field full"><label for="package-features">Features <small>One customer-facing feature per line</small></label><textarea id="package-features"></textarea></div>
-                <div class="field"><label for="package-bank">Payment destination</label><select id="package-bank"><option value="">Default active bank account</option></select></div>
+                <div class="field"><label for="package-bank">Accounts Receivable destination *</label><select id="package-bank"><option value="">Use the active default destination</option></select></div>
                 <div class="field"><div class="check-row"><input id="package-active" type="checkbox" checked /><label for="package-active">Package is available for purchase</label></div></div>
             </div></div>
             <div class="modal-foot"><button class="btn modal-close" type="button">Cancel</button><button class="btn btn-primary" id="package-save" type="submit">Save package</button></div>
@@ -444,8 +487,8 @@
 
     <div class="modal-backdrop" id="bank-modal" role="dialog" aria-modal="true" aria-labelledby="bank-modal-title">
         <form class="modal" id="bank-form">
-            <div class="modal-head"><div><h2 id="bank-modal-title">Add bank-transfer account</h2><p>These instructions are shown only through controlled customer order flows.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
-            <div class="modal-body"><div class="notice" id="bank-form-notice"></div><input id="bank-id" type="hidden" /><div class="form-grid">
+            <div class="modal-head"><div><h2 id="bank-modal-title">Add bank-transfer payment destination</h2><p>Authorized admins manage these details; the ordering customer receives the selected snapshot only after creating an order.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
+            <div class="modal-body"><div class="notice show"><strong>Do not enter banking credentials.</strong> This form is only for information needed to send a transfer. Never enter an online-banking login or username, password, PIN, one-time code, card number or card security code.</div><div class="notice" id="bank-form-notice"></div><input id="bank-id" type="hidden" /><div class="form-grid">
                 <div class="field"><label for="bank-label">Internal label *</label><input id="bank-label" required maxlength="120" placeholder="JMD business account" /></div>
                 <div class="field"><label for="bank-code">Unique code *</label><input id="bank-code" required maxlength="64" pattern="[a-z0-9][a-z0-9_-]+" placeholder="jmd-main-account" /></div>
                 <div class="field"><label for="bank-name">Bank name *</label><input id="bank-name" required maxlength="160" /></div>
@@ -593,6 +636,7 @@
                 el('loading-state').classList.add('hidden');
                 el('app').classList.remove('hidden');
                 await refreshAll();
+                activatePanel(location.hash.slice(1) || 'overview', false);
             } catch (error) {
                 deny(error.message || 'Administrator access could not be verified.');
             }
@@ -661,6 +705,44 @@
             renderAccounts();
             renderAnalytics();
             populateAccountSelect();
+            renderSetupReadiness();
+        }
+
+        function activePaymentAccounts() {
+            return state.accounts.filter((account) => account.is_active !== false);
+        }
+
+        function paymentAccountForPackage(pkg) {
+            if (pkg.payment_account_id) {
+                return accountById(pkg.payment_account_id);
+            }
+            return activePaymentAccounts().find((account) => account.is_default) || null;
+        }
+
+        function packageReadiness(pkg) {
+            const issues = [];
+            const account = paymentAccountForPackage(pkg);
+            if (number(pkg.price) <= 0) issues.push('set a price above zero');
+            if (number(pkg.duration_days) < 1) issues.push('set a valid duration');
+            if (!account || account.is_active === false) issues.push(pkg.payment_account_id ? 'restore or replace its payment destination' : 'assign a payment destination or create an active default');
+            if (account && text(account.currency || 'JMD').toUpperCase() !== text(pkg.currency || 'JMD').toUpperCase()) issues.push('match the package and payment-destination currencies');
+            return { account, issues, ready: pkg.is_active !== false && issues.length === 0 };
+        }
+
+        function setSetupStatus(id, value, ready, blocked = false) {
+            const node = el(id);
+            node.textContent = value;
+            node.className = blocked ? 'setup-blocked' : ready ? 'setup-ready' : 'setup-needed';
+        }
+
+        function renderSetupReadiness() {
+            const activeAccounts = activePaymentAccounts();
+            const activePackages = state.packages.filter((pkg) => pkg.is_active !== false);
+            const pricedPackages = activePackages.filter((pkg) => number(pkg.price) > 0 && number(pkg.duration_days) > 0);
+            const readyPackages = activePackages.filter((pkg) => packageReadiness(pkg).ready);
+            setSetupStatus('setup-account-status', activeAccounts.length ? `${activeAccounts.length} active` : 'Action required', activeAccounts.length > 0, activeAccounts.length === 0);
+            setSetupStatus('setup-price-status', `${pricedPackages.length} of ${activePackages.length}`, activePackages.length > 0 && pricedPackages.length === activePackages.length, activePackages.length > 0 && pricedPackages.length === 0);
+            setSetupStatus('setup-orderable-status', `${readyPackages.length} of ${activePackages.length}`, activePackages.length > 0 && readyPackages.length === activePackages.length, activePackages.length > 0 && readyPackages.length === 0);
         }
 
         function renderKpis() {
@@ -801,11 +883,20 @@
                 return;
             }
             el('package-grid').innerHTML = state.packages.map((pkg, index) => {
-                const account = accountById(pkg.payment_account_id);
+                const readiness = packageReadiness(pkg);
+                const account = readiness.account;
                 const options = pkg.options || [];
                 const placements = pkg.placements || [];
+                const destinationLabel = account
+                    ? first(account.label, account.account_label, account.bank_name)
+                    : (pkg.payment_account_id ? 'Missing assigned destination' : 'No active default destination');
+                const readinessCopy = pkg.is_active === false
+                    ? 'Archived packages are hidden from customers.'
+                    : readiness.ready
+                        ? `Ready for customer orders using ${destinationLabel}.`
+                        : `Not orderable: ${readiness.issues.join('; ')}.`;
                 return `<article class="package-card" style="--accent:${PALETTE[index % PALETTE.length]}">
-                    <div class="package-top"><div class="package-meta"><span class="package-code">${safe(pkg.code)}</span>${statusBadge(pkg.is_active === false ? 'inactive' : 'active')}</div><h3>${safe(pkg.name)}</h3><p>${safe(pkg.description || 'No customer-facing description supplied.')}</p><div class="package-price">${safe(fmtMoney(pkg.price, pkg.currency))} <small>/ ${safe(pkg.duration_days || 30)} days</small></div><div class="package-tags"><span class="tag">${safe(text(pkg.product_type || 'display_ad').replace('_', ' '))}</span>${pkg.webpage_tier ? `<span class="tag">${safe(pkg.webpage_tier)}</span>` : ''}${placements.map((item) => `<span class="tag">${safe(item)}</span>`).join('')}<span class="tag">${safe(account?.label || account?.account_label || 'Default bank')}</span></div></div>
+                    <div class="package-top"><div class="package-meta"><span class="package-code">${safe(pkg.code)}</span>${statusBadge(pkg.is_active === false ? 'inactive' : readiness.ready ? 'active' : 'incomplete')}</div><h3>${safe(pkg.name)}</h3><p>${safe(pkg.description || 'No customer-facing description supplied.')}</p><div class="package-price">${safe(fmtMoney(pkg.price, pkg.currency))} <small>/ ${safe(pkg.duration_days || 30)} days</small></div><div class="package-tags"><span class="tag">${safe(text(pkg.product_type || 'display_ad').replace('_', ' '))}</span>${pkg.webpage_tier ? `<span class="tag">${safe(pkg.webpage_tier)}</span>` : ''}${placements.map((item) => `<span class="tag">${safe(item)}</span>`).join('')}<span class="tag">${safe(destinationLabel)}</span></div><div class="readiness-note ${readiness.ready ? 'ready' : pkg.is_active === false ? '' : 'blocked'}">${readiness.ready ? '✓' : pkg.is_active === false ? '○' : '!'} <span>${safe(readinessCopy)}</span></div></div>
                     <div class="option-list">${options.length ? options.map((option) => `<div class="option"><div><strong>${safe(option.name)}</strong><small>+${safe(fmtMoney(option.price_delta, pkg.currency))} · +${safe(option.duration_days_delta || 0)} days${option.is_active === false ? ' · archived' : ''}</small></div><div class="option-actions"><button class="btn btn-sm" type="button" data-edit-option="${safe(option.id)}" data-package-id="${safe(pkg.id)}">Edit</button>${option.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-option="${safe(option.id)}">Restore</button><button class="btn btn-danger btn-sm" type="button" data-delete-option="${safe(option.id)}">Delete</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-option="${safe(option.id)}">Archive</button>`}</div></div>`).join('') : '<div style="color:var(--muted);font-size:.7rem;padding:8px;">No optional upgrades.</div>'}</div>
                     <div class="package-actions"><button class="btn btn-sm" type="button" data-edit-package="${safe(pkg.id)}">Edit package</button><button class="btn btn-blue btn-sm" type="button" data-add-option="${safe(pkg.id)}">＋ Option</button>${pkg.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-package="${safe(pkg.id)}">Restore</button><button class="btn btn-danger btn-sm" type="button" data-delete-package="${safe(pkg.id)}">Delete</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-package="${safe(pkg.id)}">Archive</button>`}</div>
                 </article>`;
@@ -814,10 +905,14 @@
 
         function renderAccounts() {
             if (!state.accounts.length) {
-                el('bank-grid').innerHTML = '<div class="state-card" style="grid-column:1/-1;margin:0;"><h3>No payment destination configured</h3><p>Add a bank account before publishing paid packages.</p><button class="btn btn-primary" type="button" data-new-bank>＋ Add bank account</button></div>';
+                el('bank-grid').innerHTML = '<div class="state-card" style="grid-column:1/-1;margin:0;"><h3>No payment destination configured</h3><p>Add the business bank account customers should transfer to. Then assign it to packages under Packages, prices &amp; options.</p><button class="btn btn-primary" type="button" data-new-bank>＋ Add payment destination</button></div>';
                 return;
             }
-            el('bank-grid').innerHTML = state.accounts.map((account) => `<article class="bank-card${account.is_default ? ' default' : ''}"><div>${account.is_default ? '<span class="badge badge-active">Default</span>' : statusBadge(account.is_active === false ? 'inactive' : 'active')}</div><h3>${safe(first(account.label, account.account_label, 'Payment account'))}</h3><div class="bank-name">${safe(account.bank_name)}</div><div class="account-number">${safe(maskAccount(account.account_number))}</div><div class="bank-details"><span>Holder: <strong>${safe(first(account.account_name, account.account_holder, '—'))}</strong></span><span>Currency: <strong>${safe(account.currency || 'JMD')}</strong></span><span>Branch: <strong>${safe(first(account.branch_name, account.branch, '—'))}</strong></span></div><div class="bank-actions"><button class="btn btn-sm" type="button" data-edit-bank="${safe(account.id)}">Edit</button>${!account.is_default && account.is_active !== false ? `<button class="btn btn-primary btn-sm" type="button" data-default-bank="${safe(account.id)}">Make default</button>` : ''}${account.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-bank="${safe(account.id)}">Restore</button><button class="btn btn-danger btn-sm" type="button" data-delete-bank="${safe(account.id)}">Delete</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-bank="${safe(account.id)}">Archive</button>`}</div></article>`).join('');
+            el('bank-grid').innerHTML = state.accounts.map((account) => {
+                const assignedCount = state.packages.filter((pkg) => pkg.payment_account_id === account.id).length;
+                const inheritedCount = account.is_default ? state.packages.filter((pkg) => !pkg.payment_account_id && text(pkg.currency).toUpperCase() === text(account.currency).toUpperCase()).length : 0;
+                return `<article class="bank-card${account.is_default ? ' default' : ''}"><div>${account.is_default ? '<span class="badge badge-active">Default</span>' : statusBadge(account.is_active === false ? 'inactive' : 'active')}</div><h3>${safe(first(account.label, account.account_label, 'Payment account'))}</h3><div class="bank-name">${safe(account.bank_name)}</div><div class="account-number">${safe(maskAccount(account.account_number))}</div><div class="bank-details"><span>Holder: <strong>${safe(first(account.account_name, account.account_holder, '—'))}</strong></span><span>Currency: <strong>${safe(account.currency || 'JMD')}</strong></span><span>Branch: <strong>${safe(first(account.branch_name, account.branch, '—'))}</strong></span><span>Package use: <strong>${assignedCount} assigned${inheritedCount ? ` · ${inheritedCount} using default` : ''}</strong></span></div><div class="bank-actions"><button class="btn btn-sm" type="button" data-edit-bank="${safe(account.id)}">Edit</button>${!account.is_default && account.is_active !== false ? `<button class="btn btn-primary btn-sm" type="button" data-default-bank="${safe(account.id)}">Make default</button>` : ''}${account.is_active === false ? `<button class="btn btn-primary btn-sm" type="button" data-restore-bank="${safe(account.id)}">Restore</button><button class="btn btn-danger btn-sm" type="button" data-delete-bank="${safe(account.id)}">Delete</button>` : `<button class="btn btn-danger btn-sm" type="button" data-archive-bank="${safe(account.id)}">Archive</button>`}</div></article>`;
+            }).join('');
         }
 
         function analyticsRows(key) {
@@ -905,7 +1000,17 @@
             const select = el('package-bank');
             const current = selectedValue ?? select.value;
             const availableAccounts = state.accounts.filter((account) => account.is_active !== false || account.id === current);
-            select.innerHTML = '<option value="">Default active bank account</option>' + availableAccounts.map((account) => `<option value="${safe(account.id)}"${account.is_active === false ? ' disabled' : ''}>${safe(first(account.label, account.account_label, account.bank_name))}${account.is_active === false ? ' (archived; choose another account)' : ''}</option>`).join('');
+            const currency = el('package-currency')?.value || 'JMD';
+            const defaultAccount = availableAccounts.find((account) => account.is_default && account.is_active !== false && text(account.currency).toUpperCase() === currency);
+            const fallbackLabel = defaultAccount
+                ? `Use active default — ${first(defaultAccount.label, defaultAccount.account_label, defaultAccount.bank_name)} (${currency})`
+                : `No active default ${currency} destination — select one`;
+            select.innerHTML = `<option value="">${safe(fallbackLabel)}</option>` + availableAccounts.map((account) => {
+                const currencyMismatch = text(account.currency).toUpperCase() !== currency;
+                const unavailable = account.is_active === false || currencyMismatch;
+                const suffix = account.is_active === false ? ' — archived' : currencyMismatch ? ' — currency mismatch' : '';
+                return `<option value="${safe(account.id)}"${unavailable ? ' disabled' : ''}>${safe(first(account.label, account.account_label, account.bank_name))} (${safe(account.currency || 'JMD')})${suffix}</option>`;
+            }).join('');
             if ([...select.options].some((option) => option.value === current)) select.value = current;
         }
 
@@ -916,7 +1021,6 @@
 
         function openPackageForm(pkg = null) {
             resetForm('package-form', 'package-form-notice');
-            populateAccountSelect(pkg?.payment_account_id || '');
             el('package-modal-title').textContent = pkg ? 'Edit advertising package' : 'Add advertising package';
             el('package-id').value = pkg?.id || '';
             el('package-name').value = pkg?.name || '';
@@ -927,6 +1031,7 @@
             el('package-tier').disabled = el('package-type').value !== 'webpage';
             el('package-price').value = pkg?.price ?? '';
             el('package-currency').value = pkg?.currency || 'JMD';
+            populateAccountSelect(pkg?.payment_account_id || '');
             el('package-duration').value = pkg?.duration_days || 30;
             el('package-sort').value = pkg?.sort_order || 0;
             el('package-placements').value = (pkg?.placements || []).join(', ');
@@ -955,7 +1060,7 @@
 
         function openBankForm(account = null) {
             resetForm('bank-form', 'bank-form-notice');
-            el('bank-modal-title').textContent = account ? 'Edit bank-transfer account' : 'Add bank-transfer account';
+            el('bank-modal-title').textContent = account ? 'Edit bank-transfer payment destination' : 'Add bank-transfer payment destination';
             el('bank-id').value = account?.id || '';
             el('bank-label').value = first(account?.label, account?.account_label, '');
             el('bank-code').value = account?.code || '';
@@ -978,9 +1083,17 @@
             const button = el('package-save');
             button.disabled = true;
             const payload = { id: el('package-id').value || null, name: el('package-name').value.trim(), code: el('package-code').value.trim().toLowerCase(), description: el('package-description').value.trim() || null, product_type: el('package-type').value, webpage_tier: el('package-type').value === 'webpage' ? el('package-tier').value || null : null, webpage_enabled: el('package-type').value === 'webpage', price: number(el('package-price').value), currency: el('package-currency').value, duration_days: number(el('package-duration').value), sort_order: number(el('package-sort').value), placements: splitComma(el('package-placements').value), features: splitLines(el('package-features').value), payment_account_id: el('package-bank').value || null, is_active: el('package-active').checked };
-            const selectedAccount = payload.payment_account_id ? accountById(payload.payment_account_id) : null;
-            if (selectedAccount?.is_active === false) {
-                showNotice('package-form-notice', 'Choose an active payment account before saving this package.', 'error');
+            const selectedAccount = payload.payment_account_id
+                ? accountById(payload.payment_account_id)
+                : activePaymentAccounts().find((account) => account.is_default);
+            const validationIssues = [];
+            if (payload.is_active && payload.price <= 0) validationIssues.push('enter a price above zero');
+            if (payload.is_active && payload.duration_days < 1) validationIssues.push('enter a duration of at least one day');
+            if (payload.is_active && (!selectedAccount || selectedAccount.is_active === false)) validationIssues.push('select an active payment destination or create an active default destination');
+            if (payload.is_active && selectedAccount && text(selectedAccount.currency || 'JMD').toUpperCase() !== text(payload.currency || 'JMD').toUpperCase()) validationIssues.push(`choose a ${payload.currency} payment destination`);
+            if (payload.product_type === 'webpage' && !payload.webpage_tier) validationIssues.push('select the Silver, Gold or Platinum webpage tier');
+            if (validationIssues.length) {
+                showNotice('package-form-notice', `Before making this package available, ${validationIssues.join('; ')}. You may turn off “Package is available for purchase” and save it as a draft instead.`, 'error');
                 button.disabled = false;
                 return;
             }
@@ -1014,14 +1127,23 @@
             const button = el('bank-save');
             button.disabled = true;
             const payload = { id: el('bank-id').value || null, code: el('bank-code').value.trim().toLowerCase(), label: el('bank-label').value.trim(), bank_name: el('bank-name').value.trim(), account_name: el('bank-account-name').value.trim(), account_number: el('bank-account-number').value.trim(), account_type: el('bank-account-type').value.trim() || null, currency: el('bank-currency').value, branch_name: el('bank-branch').value.trim() || null, routing_number: el('bank-routing').value.trim() || null, swift_code: el('bank-swift').value.trim() || null, instructions: el('bank-instructions').value.trim(), is_active: el('bank-active').checked, is_default: el('bank-default').checked };
+            const missing = [['code', 'unique code'], ['label', 'internal label'], ['bank_name', 'bank name'], ['account_name', 'account holder'], ['account_number', 'account number'], ['instructions', 'transfer instructions']]
+                .filter(([key]) => !payload[key])
+                .map(([, label]) => label);
+            if (missing.length) {
+                showNotice('bank-form-notice', `Complete the required payment-destination details: ${missing.join(', ')}.`, 'error');
+                button.disabled = false;
+                return;
+            }
             try {
                 await lowerCrud('bank', 'upsert', payload);
-                toast('Payment account saved.', 'success');
+                toast('Payment destination saved.', 'success');
                 closeModal('bank-modal');
                 await loadConfiguration();
                 renderAccounts();
                 renderPackages();
                 populateAccountSelect();
+                renderSetupReadiness();
             } catch (error) { showNotice('bank-form-notice', error.message || 'Account could not be saved.', 'error'); }
             finally { button.disabled = false; }
         }
@@ -1142,10 +1264,20 @@
             URL.revokeObjectURL(url);
         }
 
-        document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach((item) => item.classList.toggle('active', item === tab));
-            document.querySelectorAll('.panel').forEach((panel) => panel.classList.toggle('active', panel.id === `panel-${tab.dataset.panel}`));
-        }));
+        function activatePanel(requestedPanel, updateHash = true) {
+            const allowed = new Set(['overview', 'banks', 'packages', 'payments', 'ads']);
+            const panelName = allowed.has(requestedPanel) ? requestedPanel : 'overview';
+            document.querySelectorAll('.tab').forEach((item) => {
+                const active = item.dataset.panel === panelName;
+                item.classList.toggle('active', active);
+                item.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            document.querySelectorAll('.panel').forEach((panel) => panel.classList.toggle('active', panel.id === `panel-${panelName}`));
+            if (updateHash && location.hash !== `#${panelName}`) history.replaceState(null, '', `#${panelName}`);
+        }
+
+        document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => activatePanel(tab.dataset.panel)));
+        window.addEventListener('hashchange', () => activatePanel(location.hash.slice(1), false));
         document.querySelectorAll('.modal-close').forEach((button) => button.addEventListener('click', () => closeModal(button)));
         document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.addEventListener('click', (event) => { if (event.target === backdrop) closeModal(backdrop); }));
         document.addEventListener('keydown', (event) => { if (event.key === 'Escape') document.querySelectorAll('.modal-backdrop.open').forEach((modal) => closeModal(modal)); });
@@ -1153,6 +1285,7 @@
             const button = event.target.closest('button');
             if (!button) return;
             if (button.matches('.modal-close')) closeModal(button);
+            if (button.dataset.openPanel) activatePanel(button.dataset.openPanel);
             if (button.matches('[data-new-package]')) openPackageForm();
             if (button.matches('[data-new-bank]')) openBankForm();
             if (button.dataset.orderDetail) openOrderDetail(button.dataset.orderDetail);
@@ -1162,14 +1295,14 @@
             if (button.dataset.editOption) { const pkg = packageById(button.dataset.packageId); openOptionForm(pkg?.id, pkg?.options?.find((item) => item.id === button.dataset.editOption)); }
             if (button.dataset.editBank) openBankForm(accountById(button.dataset.editBank));
             if (button.dataset.archivePackage) queueEntityAction('package', button.dataset.archivePackage, 'archive', 'Archive package');
-            if (button.dataset.restorePackage) { try { await lowerCrud('package', 'restore', { id: button.dataset.restorePackage }); await loadConfiguration(); renderPackages(); toast('Package restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
+            if (button.dataset.restorePackage) { try { await lowerCrud('package', 'restore', { id: button.dataset.restorePackage }); await loadConfiguration(); renderPackages(); renderSetupReadiness(); toast('Package restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
             if (button.dataset.deletePackage) queueEntityAction('package', button.dataset.deletePackage, 'delete', 'Delete package', true);
             if (button.dataset.archiveOption) queueEntityAction('option', button.dataset.archiveOption, 'archive', 'Archive package option');
             if (button.dataset.restoreOption) { try { await lowerCrud('option', 'restore', { id: button.dataset.restoreOption }); await loadConfiguration(); renderPackages(); toast('Package option restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
             if (button.dataset.deleteOption) queueEntityAction('option', button.dataset.deleteOption, 'delete', 'Delete package option', true);
             if (button.dataset.archiveBank) queueEntityAction('bank', button.dataset.archiveBank, 'archive', 'Archive bank account');
             if (button.dataset.defaultBank) queueEntityAction('bank', button.dataset.defaultBank, 'default', 'Make default account');
-            if (button.dataset.restoreBank) { try { await lowerCrud('bank', 'restore', { id: button.dataset.restoreBank }); await loadConfiguration(); renderAccounts(); populateAccountSelect(); toast('Bank account restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
+            if (button.dataset.restoreBank) { try { await lowerCrud('bank', 'restore', { id: button.dataset.restoreBank }); await loadConfiguration(); renderAccounts(); renderPackages(); populateAccountSelect(); renderSetupReadiness(); toast('Payment destination restored.', 'success'); } catch (error) { toast(error.message, 'error'); } }
             if (button.dataset.deleteBank) queueEntityAction('bank', button.dataset.deleteBank, 'delete', 'Delete bank account', true);
         });
         el('refresh-btn').addEventListener('click', refreshAll);
@@ -1187,6 +1320,7 @@
         el('export-orders').addEventListener('click', exportOrders);
         el('logout-btn').addEventListener('click', async () => { await supabase.auth.signOut(); location.href = 'ajm-advertising-hub.html'; });
         el('package-type').addEventListener('change', () => { el('package-tier').disabled = el('package-type').value !== 'webpage'; if (el('package-type').value !== 'webpage') el('package-tier').value = ''; });
+        el('package-currency').addEventListener('change', () => populateAccountSelect(el('package-bank').value));
 
         init();
     </script>

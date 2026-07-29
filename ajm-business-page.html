@@ -101,6 +101,9 @@
         .state-card { max-width: 620px; border: 1px solid var(--line); border-radius: 26px; padding: 34px; background: var(--panel); }
         .state-card h1 { margin: 0 0 10px; }
         .state-card p { color: var(--muted); line-height: 1.6; }
+        .state-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+        .preview-banner { margin: -18px 0 14px; padding: 10px 18px; color: #d5eaff; background: #10213b; border-bottom: 1px solid rgba(117,197,255,.32); text-align: center; font-size: .84rem; line-height: 1.5; }
+        .preview-banner a { display: inline-block; margin-left: 8px; color: #fff; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
         .hidden { display: none !important; }
         @media (max-width: 850px) {
             .hero { min-height: 620px; }
@@ -126,10 +129,11 @@
 </head>
 <body>
     <div id="loading" class="state"><div class="state-card"><h1>Loading business webpage…</h1><p>Please wait while AJM retrieves this listing.</p></div></div>
-    <div id="unavailable" class="state hidden"><div class="state-card"><h1>Webpage unavailable</h1><p id="unavailable-message">This paid business webpage is not published or could not be found.</p><a class="btn btn-primary" href="ajm-advertising-hub.html">Browse the AJM Directory</a></div></div>
+    <div id="unavailable" class="state hidden"><div class="state-card"><h1>Webpage unavailable</h1><p id="unavailable-message">This paid business webpage is not published or could not be found.</p><div class="state-actions"><a class="btn btn-primary" href="ajm-advertising-hub.html">Browse the AJM Directory</a><a class="btn hidden" id="unavailable-builder-link" href="#">Open Webpage Builder</a></div></div></div>
 
     <div id="page" class="hidden">
         <header class="topbar">
+            <div class="preview-banner hidden" id="preview-banner" role="status"><span id="preview-banner-message"></span><a id="preview-builder-link" href="#">Edit webpage</a></div>
             <div class="shell nav">
                 <a class="brand" href="ajm-advertising-hub.html"><img src="aloe%20logo.png" alt="Aloe Jamaica" /><span>AJM ADVERTISING HUB</span></a>
                 <a class="back-link" href="ajm-advertising-hub.html">← Directory</a>
@@ -240,6 +244,7 @@
         let listing = null;
         let webpage = null;
         let turnstileWidgetId = null;
+        let canManagePreview = false;
 
         const el = (id) => document.getElementById(id);
         const safeUrl = (input, protocols = ['https:', 'http:']) => {
@@ -519,10 +524,52 @@
             if (listingError || !listingData) throw new Error('This listing is unavailable.');
             listing = listingData;
 
+            if (isPreview) {
+                let robots = document.querySelector('meta[name="robots"]');
+                if (!robots) {
+                    robots = document.createElement('meta');
+                    robots.name = 'robots';
+                    document.head.appendChild(robots);
+                }
+                robots.content = 'noindex,nofollow';
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) {
+                    const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+                    canManagePreview = listing.owner_user_id === session.user.id || profile?.role === 'admin';
+                }
+                if (!canManagePreview) {
+                    throw new Error('Private previews are available only to this listing’s owner and AJM administrators. Sign in through the Advertising Hub, then open the preview again.');
+                }
+                const builderLink = el('unavailable-builder-link');
+                builderLink.href = `ajm-webpage-builder.html?listing=${encodeURIComponent(listing.id)}`;
+                builderLink.classList.remove('hidden');
+            }
+
             const { data: pageData, error: pageError } = await supabase.from('listing_webpages').select('*').eq('listing_id', listing.id).maybeSingle();
-            if (pageError || !pageData) throw new Error('This business does not have a published AJM webpage.');
+            if (pageError) throw new Error(`The business webpage could not be loaded: ${pageError.message}`);
+            if (!pageData) {
+                throw new Error(isPreview
+                    ? 'No webpage draft exists yet. Activate the paid webpage package first, then open the Builder and save a draft before using View Page.'
+                    : 'This business does not have a published AJM webpage.');
+            }
             webpage = pageData;
             if (webpage.page_status !== 'published' && !isPreview) throw new Error('This business webpage is still in draft.');
+            if (isPreview) {
+                const { data: subscriptions } = await supabase.from('ad_subscriptions')
+                    .select('status,expires_at,ad_packages(webpage_enabled)')
+                    .eq('listing_id', listing.id)
+                    .eq('status', 'active');
+                const hasActiveAccess = (subscriptions || []).some((subscription) => {
+                    const current = !subscription.expires_at || new Date(subscription.expires_at) > new Date();
+                    return current && subscription.ad_packages?.webpage_enabled;
+                });
+                const banner = el('preview-banner');
+                el('preview-banner-message').textContent = hasActiveAccess
+                    ? `Private preview: this page is ${webpage.page_status === 'published' ? 'currently published' : 'still a draft'}. Return to the Builder to make changes.`
+                    : 'Private preview: no current paid webpage package is active. Activate a package before this page can be published or viewed by the public.';
+                el('preview-builder-link').href = `ajm-webpage-builder.html?listing=${encodeURIComponent(listing.id)}`;
+                banner.classList.remove('hidden');
+            }
             renderPage();
         }
 

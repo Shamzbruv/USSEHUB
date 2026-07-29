@@ -7,6 +7,7 @@ const htmlFiles = [
     'ajm-advertising-hub.html',
     'ajm-admin-panel.html',
     'ajm-ad-management.html',
+    'master-admin.html',
     'ajm-webpage-builder.html',
     'ajm-business-page.html'
 ];
@@ -40,6 +41,7 @@ for (const filename of htmlFiles) {
 
 const trackedText = [
     ...htmlFiles,
+    'taxonomy.js',
     'deploy_new_migrations.mjs',
     ...fs.readdirSync('supabase/migrations').map((name) => `supabase/migrations/${name}`)
 ].filter((filename) => fs.statSync(filename).isFile()).map((filename) => fs.readFileSync(filename, 'utf8')).join('\n');
@@ -47,17 +49,39 @@ const trackedText = [
 assert(!/\bre_[A-Za-z0-9_-]{20,}\b/.test(trackedText), 'A Resend-style secret appears in tracked source.');
 assert(fs.existsSync('supabase/migrations/20260728000000_advertising_workflow_repair.sql'), 'The advertising workflow repair migration is missing.');
 assert(fs.existsSync('supabase/migrations/20260728000001_webpage_activation_draft.sql'), 'The webpage activation follow-up migration is missing.');
+assert(fs.existsSync('supabase/migrations/20260728000002_webpage_segment_sync.sql'), 'The webpage market-segment synchronization migration is missing.');
 
 const hub = fs.readFileSync('ajm-advertising-hub.html', 'utf8');
 assert(hub.includes("rpc('get_ad_catalog'"), 'Hub does not use the safe package catalogue RPC.');
 assert(hub.includes("rpc('create_ad_order'"), 'Hub does not create advertising orders through the RPC.');
 assert(hub.includes("rpc('submit_ad_payment_proof'"), 'Hub does not submit bank-transfer proof through the RPC.');
 assert(!/from\(['"]ad_orders['"]\)[\s\S]{0,160}\.(?:insert|update|delete)\(/.test(hub), 'Hub directly mutates protected ad_orders.');
+assert(hub.includes('window.getCategoryFilterValues?.(category)'), 'Hub category filtering does not preserve legacy listing matches.');
+for (const category of [
+    'GENERAL',
+    'PROPERTY MANAGEMENT SERVICES',
+    'FINANCIAL SERVICES',
+    'NGO / SERVICE CLUBS',
+    'REAL ESTATE',
+    'FOOD & BEVERAGE',
+    'FARMING & AGRICULTURE',
+    'CONSTRUCTION',
+    'AUTO CARE SERVICES',
+    'ENTERTAINMENT'
+]) {
+    const htmlCategory = category.replaceAll('&', '&amp;');
+    assert(hub.includes(`filterByCategory('${htmlCategory}'`), `Hub is missing the current ${category} browse card.`);
+}
+assert(!hub.includes('data-category="jobs"'), 'Hub still presents Jobs & Careers as a current 2026 category.');
 
 const manager = fs.readFileSync('ajm-ad-management.html', 'utf8');
 for (const rpc of ['admin_get_ad_configuration', 'admin_get_ad_orders', 'admin_manage_advertising', 'get_admin_advertising_analytics']) {
     assert(manager.includes(rpc), `Dedicated admin manager does not call ${rpc}.`);
 }
+
+const adminPanel = fs.readFileSync('ajm-admin-panel.html', 'utf8');
+assert(adminPanel.includes("rpc('admin_manage_listing_webpage'"), 'Admin panel does not use the database-backed paid webpage lifecycle RPC.');
+assert(!adminPanel.includes("functions.invoke('admin-ad-subscriptions'"), 'Admin panel still invokes the obsolete paid webpage Edge Function.');
 
 try {
     execFileSync('git', ['diff', '--check'], { stdio: 'pipe' });

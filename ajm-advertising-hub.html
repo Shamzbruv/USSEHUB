@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
     <meta name="description"
-        content="Browse the AJM Advertising Hub for Jamaica business listings, classifieds, and promotions. Find services, real estate, accommodations, farming, retail & wholesale, food & beverage, and events. Discover health & wellness, construction, dining, shopping, and commercial opportunities across Jamaica." />
+        content="Browse the AJM Advertising Hub for Jamaica business listings, classifieds and promotions across general services, property management, financial services, NGOs, real estate, food and beverage, agriculture, construction, auto care and entertainment." />
     <meta name="keywords" content="AJM Advertising Hub, Jamaica business directory, classifieds, promotions, services, transport rentals, maintenance, auto repairs, construction, delivery, catering, health & wellness, medical clinics, gyms, educational services, communications, audio visual, graphic design, event planning, finances, banking, NGO, rooms, venue rentals, real estate sales, residential, commercial leasing, farming, agriculture, fisheries, poultry, horticulture, retail trade, wholesale, supermarkets, craft markets, purveyors, food & beverage, dining outlets, restaurants, cafes, events, entertainment, live shows, festivals, parties, clubs, Jamaica" />
     <link rel="canonical" href="https://www.usse-hub.com/ajm-advertising-hub.html" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
@@ -28,7 +28,7 @@
     <meta property="og:url" content="https://www.usse-hub.com/ajm-advertising-hub.html" />
     <meta property="og:title" content="AJM Advertising Hub Jamaica | Classifieds, Promotions &amp; Business Listings" />
     <meta property="og:description"
-        content="Browse the AJM Advertising Hub for Jamaica business listings, classifieds, and promotions. Find services, real estate, accommodations, farming, retail & wholesale, food & beverage, and events. Discover health & wellness, construction, dining, shopping, and commercial opportunities across Jamaica." />
+        content="Browse Jamaica listings across AJM's 2026 categories: general services, property management, financial services, NGOs, real estate, food and beverage, agriculture, construction, auto care and entertainment." />
     <meta property="og:image" content="https://www.usse-hub.com/assets/hub_ad_promo_1778519645791.png" />
     <meta property="og:image:alt" content="AJM Advertising Hub promotional visual" />
     <meta property="og:country-name" content="Jamaica" />
@@ -62,28 +62,53 @@
                         "itemListElement": [
                             {
                                 "@type": "OfferCatalog",
-                                "name": "Services",
+                                "name": "General",
                                 "position": 1
                             },
                             {
                                 "@type": "OfferCatalog",
-                                "name": "Rooms & Spaces",
+                                "name": "Property Management Services",
                                 "position": 2
                             },
                             {
                                 "@type": "OfferCatalog",
-                                "name": "Farming",
+                                "name": "Financial Services",
                                 "position": 3
                             },
                             {
                                 "@type": "OfferCatalog",
-                                "name": "Retail Shopping",
+                                "name": "NGO / Service Clubs",
                                 "position": 4
                             },
                             {
                                 "@type": "OfferCatalog",
-                                "name": "Drink & Eat",
+                                "name": "Real Estate",
                                 "position": 5
+                            },
+                            {
+                                "@type": "OfferCatalog",
+                                "name": "Food & Beverage",
+                                "position": 6
+                            },
+                            {
+                                "@type": "OfferCatalog",
+                                "name": "Farming & Agriculture",
+                                "position": 7
+                            },
+                            {
+                                "@type": "OfferCatalog",
+                                "name": "Construction",
+                                "position": 8
+                            },
+                            {
+                                "@type": "OfferCatalog",
+                                "name": "Auto Care Services",
+                                "position": 9
+                            },
+                            {
+                                "@type": "OfferCatalog",
+                                "name": "Entertainment",
+                                "position": 10
                             }
                         ]
                     }
@@ -1345,17 +1370,33 @@
                     </div>
                     <div class="form-group">
                         <label for="lf-category">Category *</label>
-                        <select id="lf-category" required onchange="populateSubcategorySelect('lf-category', 'lf-subcategory'); updateHubLabels()">
+                        <select id="lf-category" required onchange="populateSubcategorySelect('lf-category', 'lf-subcategory', 'lf-tertiary', 'lf-specific'); updateHubLabels()">
                             <option value="">Select category</option>
                         </select>
                     </div>
                 </div>
 
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="lf-subcategory">Secondary Category *</label>
+                        <select id="lf-subcategory" required disabled onchange="populateTertiarySelect('lf-category', 'lf-subcategory', 'lf-tertiary', 'lf-specific')">
+                            <option value="">Choose a primary category first</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="lf-tertiary">Tertiary Category *</label>
+                        <select id="lf-tertiary" required disabled onchange="populateSpecificSelect('lf-category', 'lf-subcategory', 'lf-tertiary', 'lf-specific')">
+                            <option value="">Choose a secondary category first</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label for="lf-subcategory">Subcategory</label>
-                    <select id="lf-subcategory">
-                        <option value="">Select subcategory (Optional)</option>
+                    <label for="lf-specific">Specific Type / Context <span style="color:var(--muted);font-weight:500;">(Optional)</span></label>
+                    <select id="lf-specific" disabled>
+                        <option value="">Choose a specialization first</option>
                     </select>
+                    <small style="display:block;margin-top:7px;color:var(--muted);">This structured classification follows AJM's approved 2026 directory categories.</small>
                 </div>
 
                 <div class="form-group">
@@ -1481,7 +1522,7 @@
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="ajm-aloe-jamaica.html">Agency</a>
-                <a href="#webpage-packages">Webpages</a>
+                <a href="?advertise=1&amp;product=webpage" onclick="event.preventDefault(); openWebpagePackages();">Webpages</a>
                 <a href="#services" class="active">Directory</a>
             </div>
 
@@ -1535,33 +1576,45 @@
         <div class="categories-scroll-wrapper">
             <button class="scroll-arrow left-arrow" onclick="scrollCategories(-1)" aria-label="Scroll left">&#10094;</button>
             <div class="categories-grid" id="categories-grid" role="list" aria-label="Browse by category">
-                <div class="cat-card" data-category="services" role="listitem" tabindex="0" onclick="filterByCategory('services', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('services',this)" aria-label="Filter by Services">
-                    <img src="assets/hub_cat_services_1778519570445.png" alt="Services">
-                    <span>Services</span>
+                <div class="cat-card" data-category="GENERAL" role="listitem" tabindex="0" onclick="filterByCategory('GENERAL', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('GENERAL',this)" aria-label="Filter by General">
+                    <img src="assets/hub_cat_services_1778519570445.png" alt="General services">
+                    <span>General</span>
                 </div>
-                <div class="cat-card" data-category="rooms" role="listitem" tabindex="0" onclick="filterByCategory('rooms', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('rooms',this)" aria-label="Filter by Rooms & Venue">
-                    <img src="assets/hub_cat_rooms_1778519582228.png" alt="Rooms &amp; Venue">
-                    <span>Rooms &amp; Venue</span>
+                <div class="cat-card" data-category="PROPERTY MANAGEMENT SERVICES" role="listitem" tabindex="0" onclick="filterByCategory('PROPERTY MANAGEMENT SERVICES', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('PROPERTY MANAGEMENT SERVICES',this)" aria-label="Filter by Property Management Services">
+                    <img src="assets/index_real_estate_1778518643066.png" alt="Property management services">
+                    <span>Property Management</span>
                 </div>
-                <div class="cat-card" data-category="farming" role="listitem" tabindex="0" onclick="filterByCategory('farming', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('farming',this)" aria-label="Filter by Farming">
-                    <img src="assets/hub_cat_farming_1778519594473.png" alt="Farming">
-                    <span>Farming</span>
+                <div class="cat-card" data-category="FINANCIAL SERVICES" role="listitem" tabindex="0" onclick="filterByCategory('FINANCIAL SERVICES', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('FINANCIAL SERVICES',this)" aria-label="Filter by Financial Services">
+                    <img src="assets/index_exec_session_1778518628423.png" alt="Financial services">
+                    <span>Financial Services</span>
                 </div>
-                <div class="cat-card" data-category="retail" role="listitem" tabindex="0" onclick="filterByCategory('retail', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('retail',this)" aria-label="Filter by Retail & Wholesale">
-                    <img src="assets/hub_cat_retail_1778519607226.png" alt="Retail &amp; Wholesale">
-                    <span>Retail &amp; Wholesale</span>
+                <div class="cat-card" data-category="NGO / SERVICE CLUBS" role="listitem" tabindex="0" onclick="filterByCategory('NGO / SERVICE CLUBS', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('NGO / SERVICE CLUBS',this)" aria-label="Filter by NGO and Service Clubs">
+                    <img src="assets/hub_cat_jobs.png" alt="NGOs and service clubs">
+                    <span>NGO / Service Clubs</span>
                 </div>
-                <div class="cat-card" data-category="food" role="listitem" tabindex="0" onclick="filterByCategory('food', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('food',this)" aria-label="Filter by Food & Beverage">
+                <div class="cat-card" data-category="REAL ESTATE" role="listitem" tabindex="0" onclick="filterByCategory('REAL ESTATE', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('REAL ESTATE',this)" aria-label="Filter by Real Estate">
+                    <img src="assets/hub_cat_rooms_1778519582228.png" alt="Real estate">
+                    <span>Real Estate</span>
+                </div>
+                <div class="cat-card" data-category="FOOD &amp; BEVERAGE" role="listitem" tabindex="0" onclick="filterByCategory('FOOD &amp; BEVERAGE', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('FOOD &amp; BEVERAGE',this)" aria-label="Filter by Food and Beverage">
                     <img src="assets/hub_cat_food_1778519621295.png" alt="Food &amp; Beverage">
                     <span>Food &amp; Beverage</span>
                 </div>
-                <div class="cat-card" data-category="events" role="listitem" tabindex="0" onclick="filterByCategory('events', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('events',this)" aria-label="Filter by Events & Entertainment">
-                    <img src="assets/hub_cat_events.png" alt="Events &amp; Entertainment">
-                    <span>Events &amp; Entertainment</span>
+                <div class="cat-card" data-category="FARMING &amp; AGRICULTURE" role="listitem" tabindex="0" onclick="filterByCategory('FARMING &amp; AGRICULTURE', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('FARMING &amp; AGRICULTURE',this)" aria-label="Filter by Farming and Agriculture">
+                    <img src="assets/hub_cat_farming_1778519594473.png" alt="Farming and agriculture">
+                    <span>Farming &amp; Agriculture</span>
                 </div>
-                <div class="cat-card" data-category="jobs" role="listitem" tabindex="0" onclick="filterByCategory('jobs', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('jobs',this)" aria-label="Filter by Jobs & Careers">
-                    <img src="assets/hub_cat_jobs.png" alt="Jobs &amp; Careers">
-                    <span>Jobs &amp; Careers</span>
+                <div class="cat-card" data-category="CONSTRUCTION" role="listitem" tabindex="0" onclick="filterByCategory('CONSTRUCTION', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('CONSTRUCTION',this)" aria-label="Filter by Construction">
+                    <img src="assets/consultancy_visual_1778518668416.png" alt="Construction services">
+                    <span>Construction</span>
+                </div>
+                <div class="cat-card" data-category="AUTO CARE SERVICES" role="listitem" tabindex="0" onclick="filterByCategory('AUTO CARE SERVICES', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('AUTO CARE SERVICES',this)" aria-label="Filter by Auto Care Services">
+                    <img src="assets/hub_cat_retail_1778519607226.png" alt="Auto care services">
+                    <span>Auto Care Services</span>
+                </div>
+                <div class="cat-card" data-category="ENTERTAINMENT" role="listitem" tabindex="0" onclick="filterByCategory('ENTERTAINMENT', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('ENTERTAINMENT',this)" aria-label="Filter by Entertainment">
+                    <img src="assets/hub_cat_events.png" alt="Entertainment">
+                    <span>Entertainment</span>
                 </div>
             </div>
             <button class="scroll-arrow right-arrow" onclick="scrollCategories(1)" aria-label="Scroll right">&#10095;</button>
@@ -1576,23 +1629,23 @@
             <section class="webpage-packages" id="webpage-packages" style="padding: 0; border: none; margin: 0; max-width: 100%;">
                 <div class="packages-head">
                     <div><div class="packages-kicker">For paying AJM clients</div><h2 style="font-size:2.4rem;">Your own business webpage</h2></div>
-                    <p style="font-size:1rem; max-width:600px;">Free members can keep a standard directory listing. Paying clients can upgrade that listing into a managed mini-website, choose the market segment that fits their business, and update the content through their account after AJM activates the package.</p>
+                    <p style="font-size:1rem; max-width:600px;">Free members can keep a standard directory listing. Existing members can upgrade one of their listings here, pay by bank transfer, and use the webpage builder after AJM confirms the payment and activates the package.</p>
                 </div>
                 <div class="package-grid">
                     <article class="package-card silver">
                         <div class="package-tier">Silver</div><h3>Business Essentials</h3><div class="package-price">Contact AJM for pricing</div>
                         <ul><li>Business logo and contact details</li><li>About section and services</li><li>Operating hours</li><li>Up to 3 gallery photos</li></ul>
-                        <button class="btn btn-ghost" style="width:100%;" onclick="closeModal('webpage-packages-modal'); handlePostListingClick('silver');">Choose Silver</button>
+                        <button class="btn btn-ghost" style="width:100%;" onclick="startWebpageUpgrade(null, 'silver')">Choose Silver</button>
                     </article>
                     <article class="package-card gold">
                         <div class="package-tier">Gold</div><h3>Lead Generator</h3><div class="package-price">Contact AJM for pricing</div>
                         <ul><li>Everything in Silver</li><li>Hero image and video gallery</li><li>Google Map and customer reviews</li><li>Lead form, offers and coupons</li></ul>
-                        <button class="btn btn-primary" style="width:100%;" onclick="closeModal('webpage-packages-modal'); handlePostListingClick('gold');">Choose Gold</button>
+                        <button class="btn btn-primary" style="width:100%;" onclick="startWebpageUpgrade(null, 'gold')">Choose Gold</button>
                     </article>
                     <article class="package-card platinum">
                         <div class="package-tier">Platinum</div><h3>Premier Experience</h3><div class="package-price">Contact AJM for pricing</div>
                         <ul><li>Everything in Gold</li><li>Cinematic cover and virtual tour</li><li>Booking and featured testimonials</li><li>Tracked calls and live chat</li></ul>
-                        <button class="btn btn-ghost" style="width:100%;border-color:rgba(98,183,255,.4);" onclick="closeModal('webpage-packages-modal'); handlePostListingClick('platinum');">Choose Platinum</button>
+                        <button class="btn btn-ghost" style="width:100%;border-color:rgba(98,183,255,.4);" onclick="startWebpageUpgrade(null, 'platinum')">Choose Platinum</button>
                     </article>
                 </div>
                 <div class="segment-strip"><strong>Available market segments</strong><div class="segment-pills"><span class="segment-pill">Local businesses & directories</span><span class="segment-pill">Professional & niche services</span><span class="segment-pill">B2B suppliers & wholesale</span><span class="segment-pill">Hospitality, accommodation, weddings & events</span><span class="segment-pill">Automotive, collectibles & precious metals</span></div></div>
@@ -1617,6 +1670,17 @@
                         </div>
                         <button class="btn btn-primary" onclick="closeModal('member-dashboard-modal'); openAdvertiseModal();">Browse Paid Packages</button>
                     </div>
+                </div>
+
+                <div class="dashboard-section" style="background:rgba(77,163,255,.06); border:1px solid rgba(77,163,255,.24); border-radius:16px; padding:20px;">
+                    <h4 style="margin:0 0 10px;">How to upgrade a listing to a business webpage</h4>
+                    <ol style="margin:0;padding-left:20px;color:var(--muted);font-size:.86rem;line-height:1.7;">
+                        <li>Post a free directory listing, or choose an existing listing below.</li>
+                        <li>Select Silver, Gold or Platinum and create the order.</li>
+                        <li>Transfer the displayed amount to AJM and upload the payment receipt.</li>
+                        <li>AJM verifies payment and activates the package; the member receives an email.</li>
+                        <li>Use <strong style="color:#fff;">Build Webpage</strong> to add content, then publish. The live-page link appears after publishing.</li>
+                    </ol>
                 </div>
 
                 <!-- Active Ads Section -->
@@ -2077,6 +2141,7 @@
                         const current = !subscription.expires_at || new Date(subscription.expires_at) > new Date();
                         return active && current && subscription.ad_packages?.webpage_enabled;
                     });
+                    const canUpgradeListing = ['approved', 'pending'].includes(l.status);
                     let statusHtml = '';
                     if (l.status === 'approved') statusHtml = '<span class="listing-badge" style="background:rgba(23,214,111,0.15);color:var(--green);font-size:0.75rem;padding:4px 8px;">Approved</span>';
                     else if (l.status === 'pending') statusHtml = '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);font-size:0.75rem;padding:4px 8px;">Pending</span>';
@@ -2095,8 +2160,16 @@
                             <td style="padding:12px 10px;">${typeHtml}</td>
                             <td style="padding:12px 10px;">
                                 <a href="#" data-open-listing-id="${escHtml(l.id)}" data-close-modal="member-dashboard-modal" style="color:var(--blue); font-size:0.85rem;">View</a>
-                                ${activeSubscription ? `<br><a href="ajm-webpage-builder.html?listing=${encodeURIComponent(l.id)}" style="color:var(--yellow);font-size:0.85rem;">Build Webpage</a>` : ''}
-                                ${webpage?.page_status === 'published' ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" target="_blank" rel="noopener" style="color:var(--green);font-size:0.85rem;">Open Live Page</a>` : ''}
+                                ${activeSubscription
+                                    ? `<br><a href="ajm-webpage-builder.html?listing=${encodeURIComponent(l.id)}" style="color:var(--yellow);font-size:0.85rem;">${webpage ? 'Edit Webpage' : 'Start Webpage'}</a>`
+                                    : canUpgradeListing
+                                        ? `<br><button type="button" data-upgrade-webpage="${escHtml(l.id)}" data-preferred-tier="${escHtml(l.requested_tier || 'silver')}" style="border:0;padding:0;background:none;color:var(--yellow);font:inherit;font-size:.85rem;cursor:pointer;">Upgrade to Webpage</button>`
+                                        : '<br><span style="color:var(--muted);font-size:.76rem;">Listing approval required</span>'}
+                                ${webpage?.page_status === 'published'
+                                    ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" target="_blank" rel="noopener" style="color:var(--green);font-size:0.85rem;">Open Live Page</a>`
+                                    : webpage
+                                        ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}&preview=1" target="_blank" rel="noopener" style="color:var(--blue);font-size:.85rem;">Preview Saved Draft</a>`
+                                        : activeSubscription ? '<br><span style="color:var(--muted);font-size:.76rem;">Save a draft in the builder to enable preview</span>' : ''}
                             </td>
                         </tr>
                     `;
@@ -2124,6 +2197,18 @@
                         consultationLink.dataset.consultationListing,
                         consultationLink.dataset.consultationSource,
                         consultationLink.dataset.consultationTarget
+                    );
+                    return;
+                }
+
+                const webpageUpgrade = event.target.closest('[data-upgrade-webpage]');
+                if (webpageUpgrade) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    closeModal('member-dashboard-modal');
+                    window.startWebpageUpgrade?.(
+                        webpageUpgrade.dataset.upgradeWebpage,
+                        webpageUpgrade.dataset.preferredTier || 'silver'
                     );
                     return;
                 }
@@ -2455,14 +2540,11 @@
         }
 
         function showActiveFilterBar(category) {
-            const labels = {
-                services: 'Services', rooms: 'Rooms & Venue', farming: 'Farming',
-                retail: 'Retail & Wholesale', food: 'Food & Beverage', events: 'Events & Entertainment', jobs: 'Jobs & Careers'
-            };
+            const label = categoryLabel(category);
             const bar = document.getElementById('active-filter-bar');
-            document.getElementById('active-filter-label').textContent = labels[category] || category;
+            document.getElementById('active-filter-label').textContent = label;
             bar.classList.add('visible');
-            document.getElementById('featured-section-title').textContent = `Results: ${labels[category] || category}`;
+            document.getElementById('featured-section-title').textContent = `Results: ${label}`;
         }
 
         function clearCategoryFilter() {
@@ -2476,23 +2558,12 @@
         }
 
         // ==========================================
-        // CATEGORY GROUP MAPPING
-        // Maps each card category to all DB categories it covers
+        // CURRENT + LEGACY CATEGORY MAPPING
+        // New browse choices also include the prior stored category values so
+        // recategorization never makes an existing approved listing disappear.
         // ==========================================
-        const CATEGORY_GROUPS = {
-            services: ['SERVICES'],
-            rooms:    ['ROOMS & VENUE - RENTALS AND REAL ESTATES SALES'],
-            farming:  ['FARMING'],
-            retail:   ['RETAIL & WHOLESALE TRADE'],
-            food:     ['FOOD & BEVERAGE'],
-            events:   ['EVENTS & ENTERTAINMENT'],
-            jobs:     ['JOBS & CAREERS']
-        };
-
         function getCategoryFilter(category) {
-            // If it's a card category (has a group), use the full group
-            const group = CATEGORY_GROUPS[category];
-            return group || [category]; // Return group array or single category
+            return window.getCategoryFilterValues?.(category) || [category];
         }
 
         // Supabase `.or()` accepts raw PostgREST filter syntax. Keep user input out of
@@ -2715,7 +2786,7 @@
                             ${webpage?.page_status === 'published' ? `<span class="listing-badge" style="color:var(--yellow);background:rgba(255,207,51,.12);text-transform:capitalize;">${escHtml(webpage.tier)} Webpage</span>` : ''}
                             ${l.status === 'pending' ? '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);">⏳ Pending</span>' : ''}
                         </div>
-                        <span style="font-size: 0.9rem; color: var(--muted);">${escHtml(formatLocation(l.location))}${l.category ? ' · <span style="color:var(--green);font-weight:600;">' + formatCategory(l.category) + '</span>' : ''}</span>
+                        <span style="font-size: 0.9rem; color: var(--muted);">${escHtml(formatLocation(l.location))}${l.category ? ' · <span style="color:var(--green);font-weight:600;">' + escHtml(formatCategory(l.category)) + '</span>' : ''}</span>
                         <p style="margin: 4px 0 0 0; font-size: 0.95rem; line-height: 1.5; color: #ddd;">
                             <strong>${escHtml(l.subcategory || '')}</strong> ${l.description ? ' - ' + escHtml(l.description.slice(0, 160)) + (l.description.length > 160 ? '…' : '') : ''}
                         </p>
@@ -2923,7 +2994,11 @@
 
             const businessName = document.getElementById('lf-business-name').value.trim();
             const category = document.getElementById('lf-category').value;
-            const subcategory = document.getElementById('lf-subcategory').value.trim();
+            const secondaryCategory = document.getElementById('lf-subcategory').value.trim();
+            const tertiaryCategory = document.getElementById('lf-tertiary').value.trim();
+            const subcategory = window.getClassificationValue
+                ? window.getClassificationValue('lf-subcategory', 'lf-tertiary', 'lf-specific')
+                : secondaryCategory;
             const marketSegment = document.getElementById('lf-market-segment').value;
             const description = document.getElementById('lf-description').value.trim();
             const location = document.getElementById('lf-location').value;
@@ -2939,8 +3014,8 @@
             const listingType = 'basic';
             const imageFile = document.getElementById('lf-image')?.files?.[0] || null;
 
-            if (!businessName || !category || !marketSegment || !description || !location) {
-                showErrBox(errBox, 'Please fill in all required fields, including the market segment.');
+            if (!businessName || !category || !secondaryCategory || !tertiaryCategory || !marketSegment || !description || !location) {
+                showErrBox(errBox, 'Please complete the primary, secondary and tertiary classification and all other required fields.');
                 return;
             }
 
@@ -3000,6 +3075,7 @@
                     : 'Your free directory listing has been submitted for review. It will appear publicly once approved by an admin.';
                 successBox.classList.add('show');
                 document.getElementById('listing-form').reset();
+                window.populateSubcategorySelect?.('lf-category', 'lf-subcategory', 'lf-tertiary', 'lf-specific');
                 document.getElementById('lf-image-preview').style.display = 'none';
                 showToast('Listing submitted! Pending admin approval.', 'success');
                 setTimeout(() => closeModal('post-listing-modal'), 4000);
@@ -3305,13 +3381,24 @@
             return map[loc] || loc;
         }
 
-        function formatCategory(cat) {
-            const map = {
-                services: 'Services', rooms: 'Rooms & Spaces', farming: 'Farming',
-                retail: 'Retail Shopping', food: 'Drink & Eat', health: 'Health & Wellness',
-                finance: 'Financial Services', tech: 'Technology', education: 'Education', other: 'Other'
+        function categoryLabel(category) {
+            const labels = {
+                GENERAL: 'General',
+                'PROPERTY MANAGEMENT SERVICES': 'Property Management Services',
+                'FINANCIAL SERVICES': 'Financial Services',
+                'NGO / SERVICE CLUBS': 'NGO / Service Clubs',
+                'REAL ESTATE': 'Real Estate',
+                'FOOD & BEVERAGE': 'Food & Beverage',
+                'FARMING & AGRICULTURE': 'Farming & Agriculture',
+                CONSTRUCTION: 'Construction',
+                'AUTO CARE SERVICES': 'Auto Care Services',
+                ENTERTAINMENT: 'Entertainment'
             };
-            return map[cat] || cat;
+            return labels[category] || category;
+        }
+
+        function formatCategory(category) {
+            return categoryLabel(category);
         }
 
         // ==========================================
@@ -3470,7 +3557,9 @@
         <!-- Step 1: Pick a package -->
         <div id="adv-step-1" class="adv-step active">
             <div class="adv-modal-title" id="adv-modal-heading">📢 Advertise Your Business</div>
-            <div class="adv-modal-subtitle">Choose an advertising package to get your business in front of thousands of Jamaicans.</div>
+            <div class="adv-modal-subtitle" id="adv-modal-subtitle">Choose an advertising package to get your business in front of thousands of Jamaicans.</div>
+            <div class="adv-alert info show" id="adv-catalog-guidance" style="margin-bottom:18px;">Business webpage packages upgrade an existing directory listing. Display-ad packages create advertisements for the listed placements. Prices, durations and payment destinations are managed by AJM.</div>
+            <div id="adv-package-message" class="adv-alert info" role="status"></div>
             <div class="pkg-grid" id="adv-pkg-grid">
                 <div style="color:#b9c0d4;text-align:center;padding:40px;grid-column:1/-1;">Loading packages...</div>
             </div>
@@ -3496,12 +3585,15 @@
             </div>
 
             <div id="adv-webpage-fields" style="display:none;">
+                <div class="adv-alert info show" style="margin-bottom:14px;">
+                    <strong>Webpage upgrade steps:</strong> select your listing → create the order → transfer payment → upload the receipt → wait for AJM approval → open the builder from your dashboard. A pending directory listing may be ordered, but it must be approved before its webpage can be published.
+                </div>
                 <div class="adv-field">
                     <label for="adv-listing-select">Business listing *</label>
                     <select id="adv-listing-select"><option value="">Select your listing</option></select>
                     <small>A paid webpage must be attached to a listing you own.</small>
                 </div>
-                <div id="adv-no-listings" class="adv-alert info">You need a directory listing before ordering a business webpage. Close this window and choose “Post Listing” first.</div>
+                <div id="adv-no-listings" class="adv-alert info">You need an approved or pending directory listing before ordering a business webpage. Close this window and choose “Post Listing” first.</div>
             </div>
 
             <div id="adv-display-fields" style="display:none;">
@@ -3538,6 +3630,9 @@
                 <h4>🏦 Transfer Destination</h4>
                 <div class="payment-detail-grid" id="adv-payment-details"></div>
                 <div id="adv-payment-instructions-text" style="margin-top:14px;font-size:0.86rem;color:#b9c0d4;line-height:1.6;white-space:pre-wrap;"></div>
+                <div style="margin-top:14px;padding:12px 14px;border-radius:12px;border:1px solid rgba(23,214,111,.24);background:rgba(23,214,111,.07);font-size:.8rem;color:#c9ffdf;line-height:1.55;">
+                    <strong>Payment safety:</strong> AJM only displays transfer instructions. This website will never ask for your online-banking password, PIN, card credentials or one-time verification code. Upload only the bank receipt after completing the transfer through your own bank.
+                </div>
             </div>
 
             <div class="adv-form-grid">
@@ -3567,9 +3662,9 @@
 
 <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const ADVERTISING_SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
+    const ADVERTISING_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
+    const sb = createClient(ADVERTISING_SUPABASE_URL, ADVERTISING_SUPABASE_ANON_KEY);
 
     let advPackages = [];
     let advSelectedPkg = null;
@@ -3580,6 +3675,8 @@
     let advCatalogPromise = null;
     let advListingsPromise = null;
     let advPendingProof = null;
+    let advPreferredListingId = null;
+    let advProductFilter = null;
 
     const advEl = (id) => document.getElementById(id);
     const advEscape = (value) => String(value ?? '')
@@ -3638,12 +3735,15 @@
     function renderAdvPackages() {
         const grid = advEl('adv-pkg-grid');
         grid.removeAttribute('style');
-        if (!advPackages.length) {
+        const visiblePackages = advPackages
+            .map((pkg, index) => ({ pkg, index }))
+            .filter(({ pkg }) => !advProductFilter || pkg.product_type === advProductFilter);
+        if (!visiblePackages.length) {
             grid.innerHTML = '<div style="color:#b9c0d4;text-align:center;padding:40px;grid-column:1/-1;">No packages are available at this time.</div>';
             return;
         }
 
-        grid.innerHTML = advPackages.map((pkg, index) => {
+        grid.innerHTML = visiblePackages.map(({ pkg, index }) => {
             const theme = advPackageTheme(pkg);
             const features = advFeatures(pkg.features);
             const orderable = pkg.is_orderable === true;
@@ -3771,8 +3871,15 @@
         select.innerHTML = '<option value="">Loading your listings…</option>';
         try {
             const listings = await loadAdvOwnedListings(true);
-            select.innerHTML = '<option value="">Select your listing</option>' + listings.map((listing) => `<option value="${advEscape(listing.id)}">${advEscape(listing.business_name)} (${advEscape(advStatusLabel(listing.status))})</option>`).join('');
-            advEl('adv-no-listings').classList.toggle('show', listings.length === 0);
+            const eligibleListings = listings.filter((listing) => ['approved', 'pending'].includes(listing.status));
+            select.innerHTML = '<option value="">Select your listing</option>' + listings.map((listing) => {
+                const eligible = ['approved', 'pending'].includes(listing.status);
+                return `<option value="${advEscape(listing.id)}" ${eligible ? '' : 'disabled'}>${advEscape(listing.business_name)} (${advEscape(advStatusLabel(listing.status))}${eligible ? '' : ' · unavailable'})</option>`;
+            }).join('');
+            if (advPreferredListingId && eligibleListings.some((listing) => String(listing.id) === String(advPreferredListingId))) {
+                select.value = String(advPreferredListingId);
+            }
+            advEl('adv-no-listings').classList.toggle('show', eligibleListings.length === 0);
         } catch (error) {
             select.innerHTML = '<option value="">Listings could not be loaded</option>';
             advShowAlert('adv-config-error', advFriendlyError(error, 'Your listings could not be loaded.'), 'error');
@@ -3856,7 +3963,7 @@
         if (!path) return { url: '', type: String(metadata.media_type || '') };
         const encodedPath = path.split('/').map((part) => encodeURIComponent(part)).join('/');
         return {
-            url: `${SUPABASE_URL}/storage/v1/object/public/ad-creatives/${encodedPath}`,
+            url: `${ADVERTISING_SUPABASE_URL}/storage/v1/object/public/ad-creatives/${encodedPath}`,
             type: String(metadata.media_type || (path.match(/\.(mp4|webm)$/i) ? 'video/mp4' : 'image'))
         };
     }
@@ -4091,10 +4198,17 @@
         advShowAlert('adv-payment-success', '');
         const canSubmit = ['pending_payment', 'payment_submitted'].includes(order.status);
         advEl('adv-payment-actions').style.display = canSubmit ? 'flex' : 'none';
+        const isWebpageOrder = order.product_type_snapshot === 'webpage';
         if (order.status === 'payment_submitted') {
             advShowAlert('adv-payment-message', 'AJM has received payment proof for this order. You may upload a replacement while it is awaiting review.', 'info');
         } else if (canSubmit) {
-            advShowAlert('adv-payment-message', 'Make the bank transfer, then upload proof below. The advertisement stays offline until AJM confirms payment.', 'info');
+            advShowAlert(
+                'adv-payment-message',
+                isWebpageOrder
+                    ? 'Make the bank transfer, then upload proof below. The webpage builder unlocks after AJM confirms payment and activates the package.'
+                    : 'Make the bank transfer, then upload proof below. The advertisement stays offline until AJM confirms payment.',
+                'info'
+            );
         } else {
             advShowAlert('adv-payment-message', `This order is ${advStatusLabel(order.status)}. Payment proof cannot be changed in this state.`, 'info');
         }
@@ -4189,7 +4303,14 @@
             if (error) throw error;
             advCurrentOrder = data || { ...advCurrentOrder, status: 'payment_submitted', payment_proof_path: proofPath };
             advPendingProof = null;
-            advShowAlert('adv-payment-success', `Payment proof for ${advCurrentOrder.order_number} was submitted. AJM will review it before activating the advertisement.`, 'success');
+            const activationTarget = advCurrentOrder.product_type_snapshot === 'webpage' ? 'webpage package' : 'advertisement';
+            advShowAlert(
+                'adv-payment-success',
+                advCurrentOrder.product_type_snapshot === 'webpage'
+                    ? `Payment proof for ${advCurrentOrder.order_number} was submitted. AJM will review it, activate the webpage package and email you. After approval, open Member Dashboard → Edit Webpage → Save Draft → Publish.`
+                    : `Payment proof for ${advCurrentOrder.order_number} was submitted. AJM will review it before activating the ${activationTarget}.`,
+                'success'
+            );
             advEl('adv-payment-actions').style.display = 'none';
             window.loadMyAdOrders(true);
         } catch (error) {
@@ -4209,12 +4330,18 @@
         }
         tbody.innerHTML = advMyOrders.map((order) => {
             const canPay = ['pending_payment', 'payment_submitted'].includes(order.status);
+            const isWebpage = order.product_type_snapshot === 'webpage' && order.listing_id;
+            const canBuild = isWebpage && order.status === 'approved';
             const date = order.created_at ? new Date(order.created_at).toLocaleDateString() : '';
             return `<tr style="border-bottom:1px solid rgba(255,255,255,.06);">
                 <td style="padding:11px 10px;"><strong>${advEscape(order.order_number)}</strong><br><small style="color:var(--muted);">${advEscape(date)}</small></td>
                 <td style="padding:11px 10px;">${advEscape(order.package_name_snapshot)}<br><small style="color:var(--muted);">${advEscape(advMoney(order.total_price_snapshot, order.currency_snapshot))}</small></td>
                 <td style="padding:11px 10px;"><span class="adv-status ${advStatusClass(order.status)}">${advEscape(advStatusLabel(order.status))}</span></td>
-                <td style="padding:11px 10px;">${canPay ? `<button type="button" class="btn btn-ghost" data-adv-resume-order="${advEscape(order.id)}" style="padding:6px 10px;font-size:.75rem;">${order.status === 'payment_submitted' ? 'View payment' : 'Pay / upload proof'}</button>` : '<span style="color:var(--muted);font-size:.75rem;">—</span>'}</td>
+                <td style="padding:11px 10px;">${canPay
+                    ? `<button type="button" class="btn btn-ghost" data-adv-resume-order="${advEscape(order.id)}" style="padding:6px 10px;font-size:.75rem;">${order.status === 'payment_submitted' ? 'View payment' : 'Pay / upload proof'}</button>`
+                    : canBuild
+                        ? `<a class="btn btn-ghost" href="ajm-webpage-builder.html?listing=${encodeURIComponent(order.listing_id)}" style="padding:6px 10px;font-size:.75rem;">Open builder</a>`
+                        : '<span style="color:var(--muted);font-size:.75rem;">—</span>'}</td>
             </tr>`;
         }).join('');
         tbody.querySelectorAll('[data-adv-resume-order]').forEach((button) => {
@@ -4270,12 +4397,27 @@
 
     window.openAdvertiseModal = async function(options = {}) {
         const preserveSelection = options === true || options?.preserveSelection === true;
+        if (options?.productType === 'webpage' || options?.productType === 'display_ad') {
+            advProductFilter = options.productType;
+        } else if (!preserveSelection && !options?.preserveFilter) {
+            advProductFilter = null;
+        }
         advEl('advertise-modal').classList.add('open');
         document.body.style.overflow = 'hidden';
         advShowStep('adv-step-1');
+        advShowAlert('adv-package-message', '');
+        const webpageOnly = advProductFilter === 'webpage';
+        advEl('adv-modal-heading').textContent = webpageOnly ? '🌐 Upgrade to a Business Webpage' : '📢 Advertise Your Business';
+        advEl('adv-modal-subtitle').textContent = webpageOnly
+            ? 'Step 1 of 4: choose the Silver, Gold or Platinum package for an existing directory listing.'
+            : 'Choose an advertising package to get your business in front of thousands of Jamaicans.';
+        advEl('adv-catalog-guidance').textContent = webpageOnly
+            ? 'The price, duration and AJM bank-transfer destination shown here come from the current admin settings. Your builder unlocks only after AJM confirms payment.'
+            : 'Business webpage packages upgrade an existing directory listing. Display-ad packages create advertisements for the listed placements. Prices, durations and payment destinations are managed by AJM.';
         if (!preserveSelection) {
             advSelectedPkg = null;
             advCurrentOrder = null;
+            if (!options?.preserveListing) advPreferredListingId = null;
         }
         advEl('adv-next-btn').disabled = !advSelectedPkg;
         await loadAdvPackages();
@@ -4289,6 +4431,39 @@
     window.closeAdvertiseModal = function() {
         advEl('advertise-modal').classList.remove('open');
         document.body.style.overflow = '';
+    };
+
+    window.startWebpageUpgrade = async function(listingId = null, preferredTier = 'silver') {
+        if (typeof window.closeModal === 'function') {
+            window.closeModal('webpage-packages-modal');
+            window.closeModal('member-dashboard-modal');
+        }
+        advPreferredListingId = listingId || null;
+        await window.openAdvertiseModal({ preserveListing: true, productType: 'webpage' });
+        const requestedCode = `ajm-webpage-${['silver', 'gold', 'platinum'].includes(preferredTier) ? preferredTier : 'silver'}`;
+        const requestedPackage = advPackages.find((pkg) => pkg.code === requestedCode);
+        const index = advPackages.findIndex((pkg) => pkg.code === requestedCode && pkg.is_orderable === true);
+        if (index < 0) {
+            advShowAlert(
+                'adv-package-message',
+                requestedPackage
+                    ? `${requestedPackage.name || 'This webpage package'} cannot accept orders until AJM configures both its price and bank-transfer destination. Your directory listing remains active.`
+                    : 'The selected webpage package is not currently available. Your directory listing remains active; choose another package or check again later.',
+                'info'
+            );
+            return;
+        }
+        window.selectAdvPackage(index);
+        await window.advGoToStep2();
+    };
+
+    window.openWebpagePackages = async function(listingId = null) {
+        if (typeof window.closeModal === 'function') {
+            window.closeModal('webpage-packages-modal');
+            window.closeModal('member-dashboard-modal');
+        }
+        advPreferredListingId = listingId || null;
+        await window.openAdvertiseModal({ preserveListing: true, productType: 'webpage' });
     };
 
     // Close on backdrop
@@ -4335,7 +4510,11 @@
     async function handleAdvertiseDeepLink() {
         const params = new URLSearchParams(window.location.search);
         if (params.get('advertise') !== '1' && !params.get('package')) return;
-        await window.openAdvertiseModal();
+        advPreferredListingId = params.get('listing') || null;
+        await window.openAdvertiseModal({
+            preserveListing: Boolean(advPreferredListingId),
+            productType: params.get('product') === 'webpage' ? 'webpage' : null
+        });
         const packageCode = params.get('package');
         if (!packageCode) return;
         const index = advPackages.findIndex((pkg) => pkg.code === packageCode && pkg.is_orderable === true);
