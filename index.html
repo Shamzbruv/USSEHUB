@@ -2091,7 +2091,7 @@
 
                         <div class="hero-actions">
                             <a class="btn btn-primary" href="ajm-advertising-hub.html">Visit the Advertising Hub</a>
-                            <a class="btn btn-ghost" href="ajm-advertising-hub.html?advertise=1">Post an Advertisement</a>
+                            <a class="btn btn-ghost" href="ajm-advertising-hub?advertise=1">Post an Advertisement</a>
                         </div>
                     </div>
                 </div>
@@ -2104,7 +2104,7 @@
                         </div>
                         <div>
                             <p>Put your offer in front of visitors across the USSE homepage and AJM directory. Packages, pricing, durations, and placement options are available in the Advertising Hub.</p>
-                            <a class="btn btn-primary" style="margin-top:14px;" href="ajm-advertising-hub.html?advertise=1">Advertise on USSE</a>
+                            <a class="btn btn-primary" style="margin-top:14px;" href="ajm-advertising-hub?advertise=1">Advertise on USSE</a>
                         </div>
                     </div>
                     <div class="home-ad-grid" id="homepage-ad-grid" aria-live="polite">
@@ -2398,14 +2398,14 @@
                 <a href="#about">About</a>
                 <a href="usse-consultancy.html" data-branch-nav="consultancy">USSE Consultancy</a>
                 <a href="ajm-aloe-jamaica.html" data-branch-nav="ajm">AJM</a>
-                <a href="ajm-advertising-hub.html?advertise=1">Advertise</a>
+                <a href="ajm-advertising-hub?advertise=1">Advertise</a>
                 <a href="pistol-operations-logistics.html" data-branch-nav="pistol">PISTOL</a>
                 <a href="#contact">Contact</a>
             </div>
         </div>
     </footer>
 
-    <a class="floating-advertise" href="ajm-advertising-hub.html?advertise=1" aria-label="View AJM advertising packages">
+    <a class="floating-advertise" href="ajm-advertising-hub?advertise=1" aria-label="View AJM advertising packages">
         <span aria-hidden="true">📣</span>
         <span>Advertise Here</span>
     </a>
@@ -2644,75 +2644,205 @@
         });
     </script>
 
-<!-- ═══ HOMEPAGE LIVE AD PACKAGES SECTION ═══ -->
+<!-- ═══ HOMEPAGE LIVE ADS + ADMIN-CONFIGURED PACKAGE CATALOGUE ═══ -->
 <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const sb = createClient(
-        'https://zcptuqrlovflcpqszery.supabase.co',
+
+    const AD_SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
+    const adSupabase = createClient(
+        AD_SUPABASE_URL,
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw'
     );
 
-    // Inject a live package pricing strip just before the "home-ad-network" div if not already present
-    async function renderHomePackagePricing() {
-        // Only render if we haven't already and the section exists
-        if (document.getElementById('home-pkg-strip')) return;
+    function appendText(parent, tag, text, style = '') {
+        const node = document.createElement(tag);
+        node.textContent = String(text ?? '');
+        if (style) node.style.cssText = style;
+        parent.appendChild(node);
+        return node;
+    }
 
+    function safeHttpUrl(value) {
+        if (!value) return '';
+        try {
+            const parsed = new URL(String(value), window.location.origin);
+            return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '';
+        } catch {
+            return '';
+        }
+    }
+
+    function publicCreativeUrl(path) {
+        const raw = String(path || '').trim();
+        const direct = /^https?:\/\//i.test(raw) ? safeHttpUrl(raw) : '';
+        if (direct) return direct;
+        const clean = raw.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+        return clean ? `${AD_SUPABASE_URL}/storage/v1/object/public/ad-creatives/${clean}` : '';
+    }
+
+    function advertisingSessionToken() {
+        const key = 'ajm_ad_session';
+        try {
+            let token = sessionStorage.getItem(key);
+            if (!token) {
+                token = crypto.randomUUID();
+                sessionStorage.setItem(key, token);
+            }
+            return token;
+        } catch {
+            return crypto.randomUUID();
+        }
+    }
+
+    const adSessionToken = advertisingSessionToken();
+    function recordAdEvent(advertisementId, eventType) {
+        adSupabase.rpc('record_ad_event', {
+            p_advertisement_id: advertisementId,
+            p_event_type: eventType,
+            p_session_token: adSessionToken,
+            p_metadata: { page: 'homepage' }
+        }).then(() => {}).catch(() => {});
+    }
+
+    function renderAdPlaceholder(grid) {
+        grid.textContent = '';
+        const placeholder = document.createElement('div');
+        placeholder.className = 'home-ad-placeholder';
+        const copy = document.createElement('div');
+        appendText(copy, 'strong', 'Your business could be featured here.', 'display:block;color:white;margin-bottom:7px;');
+        appendText(copy, 'span', 'Choose a homepage advertising package and submit your creative for approval.');
+        const link = document.createElement('a');
+        link.href = 'ajm-advertising-hub?advertise=1';
+        link.className = 'btn btn-primary';
+        link.style.marginTop = '16px';
+        link.textContent = 'View advertising packages';
+        copy.appendChild(link);
+        placeholder.appendChild(copy);
+        grid.appendChild(placeholder);
+    }
+
+    async function renderLiveHomepageAds() {
+        const grid = document.getElementById('homepage-ad-grid');
+        if (!grid) return;
+        const { data, error } = await adSupabase.rpc('get_active_advertisements', {
+            p_placement: 'homepage',
+            p_limit: 6
+        });
+        const ads = Array.isArray(data) ? data : (data?.advertisements || []);
+        if (error || !ads.length) {
+            renderAdPlaceholder(grid);
+            return;
+        }
+
+        grid.textContent = '';
+        const observer = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                recordAdEvent(entry.target.dataset.advertisementId, 'impression');
+                observer.unobserve(entry.target);
+            });
+        }, { threshold: 0.5 }) : null;
+
+        ads.forEach((ad) => {
+            const targetUrl = safeHttpUrl(ad.cta_url);
+            const card = document.createElement(targetUrl ? 'a' : 'article');
+            card.className = 'home-ad-card';
+            card.dataset.advertisementId = ad.id;
+            if (targetUrl) {
+                card.href = targetUrl;
+                card.target = '_blank';
+                card.rel = 'noopener sponsored';
+                card.addEventListener('click', () => recordAdEvent(ad.id, 'click'));
+            }
+
+            const mediaUrl = publicCreativeUrl(ad.creative_path);
+            if (mediaUrl) {
+                const mime = String(ad.creative_metadata?.mime_type || '');
+                const isVideo = mime.startsWith('video/') || /\.(mp4|webm)(?:$|\?)/i.test(mediaUrl);
+                const media = document.createElement(isVideo ? 'video' : 'img');
+                media.className = 'home-ad-card-media';
+                if (isVideo) {
+                    media.autoplay = true;
+                    media.muted = true;
+                    media.loop = true;
+                    media.playsInline = true;
+                } else {
+                    media.alt = '';
+                    media.loading = 'lazy';
+                }
+                media.src = mediaUrl;
+                card.appendChild(media);
+            }
+
+            const copy = document.createElement('div');
+            copy.className = 'home-ad-card-copy';
+            appendText(copy, 'small', ad.business_name ? `Sponsored · ${ad.business_name}` : 'Sponsored');
+            appendText(copy, 'strong', ad.headline || ad.package_name || 'Featured business');
+            appendText(copy, 'span', ad.body_text || (targetUrl ? (ad.cta_label || 'Learn more') : 'Featured on the AJM advertising network.'));
+            card.appendChild(copy);
+            grid.appendChild(card);
+            if (observer) observer.observe(card);
+            else recordAdEvent(ad.id, 'impression');
+        });
+    }
+
+    function tierGradient(code) {
+        const value = String(code || '').toLowerCase();
+        if (value.includes('platinum')) return 'linear-gradient(135deg,rgba(91,156,246,.15),rgba(91,156,246,.06))';
+        if (value.includes('gold')) return 'linear-gradient(135deg,rgba(255,207,51,.12),rgba(255,207,51,.04))';
+        if (value.includes('banner')) return 'linear-gradient(135deg,rgba(255,77,94,.12),rgba(255,77,94,.04))';
+        if (value.includes('advanced')) return 'linear-gradient(135deg,rgba(23,214,111,.12),rgba(23,214,111,.04))';
+        return 'linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02))';
+    }
+
+    async function renderHomePackagePricing() {
+        if (document.getElementById('home-pkg-strip')) return;
         const adNetwork = document.getElementById('advertising');
         if (!adNetwork) return;
 
-        try {
-            const { data: pkgs } = await sb.from('ad_packages')
-                .select('id,name,code,price,currency,duration_days,features,is_active')
-                .eq('is_active', true)
-                .order('price')
-                .limit(6);
+        const { data, error } = await adSupabase.rpc('get_ad_catalog');
+        const packages = (Array.isArray(data) ? data : (data?.packages || [])).slice(0, 6);
+        if (error || !packages.length) return;
 
-            if (!pkgs || pkgs.length === 0) return;
+        const strip = document.createElement('div');
+        strip.id = 'home-pkg-strip';
+        strip.style.marginBottom = '40px';
+        const heading = document.createElement('div');
+        heading.style.cssText = 'text-align:center;margin-bottom:24px;';
+        appendText(heading, 'span', 'Advertising Packages', 'font-size:.78rem;font-weight:700;letter-spacing:1.5px;color:#17d66f;text-transform:uppercase;');
+        appendText(heading, 'h3', 'Get Your Business Seen', 'font-size:1.6rem;font-weight:800;margin:8px 0 4px;');
+        appendText(heading, 'p', 'Choose a package and advertise across the USSE & AJM network', 'color:#b9c0d4;font-size:.9rem;');
+        strip.appendChild(heading);
 
-            const tierGrad = (code) => {
-                const c = (code||'').toLowerCase();
-                if (c.includes('platinum')) return 'linear-gradient(135deg,rgba(91,156,246,0.15),rgba(91,156,246,0.06))';
-                if (c.includes('gold')) return 'linear-gradient(135deg,rgba(255,207,51,0.12),rgba(255,207,51,0.04))';
-                if (c.includes('banner')) return 'linear-gradient(135deg,rgba(255,77,94,0.12),rgba(255,77,94,0.04))';
-                if (c.includes('advanced')) return 'linear-gradient(135deg,rgba(23,214,111,0.12),rgba(23,214,111,0.04))';
-                return 'linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))';
-            };
+        const packageGrid = document.createElement('div');
+        packageGrid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;';
+        packages.forEach((pkg) => {
+            const card = document.createElement('a');
+            card.href = `ajm-advertising-hub?advertise=1&package=${encodeURIComponent(pkg.code || pkg.id)}`;
+            card.style.cssText = `text-decoration:none;color:inherit;display:block;background:${tierGradient(pkg.code)};border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:20px;transition:transform .2s,box-shadow .2s;`;
+            card.addEventListener('mouseenter', () => { card.style.transform = 'translateY(-4px)'; card.style.boxShadow = '0 16px 40px rgba(0,0,0,.3)'; });
+            card.addEventListener('mouseleave', () => { card.style.transform = ''; card.style.boxShadow = ''; });
+            appendText(card, 'div', pkg.name, 'font-size:1rem;font-weight:800;margin-bottom:4px;');
+            const price = Number(pkg.price) > 0 ? `${pkg.currency} ${Number(pkg.price).toLocaleString()}` : 'Contact AJM for pricing';
+            appendText(card, 'div', price, 'font-size:1.4rem;font-weight:800;color:#17d66f;');
+            appendText(card, 'div', `${pkg.duration_days} days${pkg.is_orderable ? '' : ' · setup pending'}`, 'font-size:.75rem;color:#b9c0d4;margin-top:2px;');
+            packageGrid.appendChild(card);
+        });
+        strip.appendChild(packageGrid);
 
-            const strip = document.createElement('div');
-            strip.id = 'home-pkg-strip';
-            strip.style.cssText = 'margin-bottom:40px;';
-            strip.innerHTML = `
-                <div style="text-align:center;margin-bottom:24px;">
-                    <span style="font-size:0.78rem;font-weight:700;letter-spacing:1.5px;color:#17d66f;text-transform:uppercase;">Advertising Packages</span>
-                    <h3 style="font-size:1.6rem;font-weight:800;margin:8px 0 4px;">Get Your Business Seen</h3>
-                    <p style="color:#b9c0d4;font-size:0.9rem;">Choose a package and advertise across the USSE &amp; AJM network</p>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
-                    ${pkgs.map(p => `
-                        <a href="ajm-advertising-hub.html" style="text-decoration:none;color:inherit;display:block;background:${tierGrad(p.code)};border:1px solid rgba(255,255,255,0.09);border-radius:18px;padding:20px;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;"
-                            onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 40px rgba(0,0,0,0.3)'"
-                            onmouseout="this.style.transform='';this.style.boxShadow=''">
-                            <div style="font-size:1rem;font-weight:800;margin-bottom:4px;">${p.name}</div>
-                            <div style="font-size:1.4rem;font-weight:800;color:#17d66f;">${p.currency} ${Number(p.price).toLocaleString()}</div>
-                            <div style="font-size:0.75rem;color:#b9c0d4;margin-top:2px;">${p.duration_days} days</div>
-                        </a>
-                    `).join('')}
-                </div>
-                <div style="text-align:center;">
-                    <a href="ajm-advertising-hub.html" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#17d66f,#22d3ee);color:#05070d;border:none;border-radius:56px;padding:13px 28px;font-family:'Space Grotesk',sans-serif;font-size:0.92rem;font-weight:800;text-decoration:none;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 6px 24px rgba(23,214,111,0.35);"
-                        onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform=''">
-                        📢 View All Packages &amp; Advertise Now
-                    </a>
-                </div>
-            `;
-
-            adNetwork.insertAdjacentElement('beforebegin', strip);
-        } catch(_) { /* fail silently on homepage */ }
+        const actions = document.createElement('div');
+        actions.style.textAlign = 'center';
+        const cta = document.createElement('a');
+        cta.href = 'ajm-advertising-hub?advertise=1';
+        cta.className = 'btn btn-primary';
+        cta.textContent = '📢 View All Packages & Advertise Now';
+        actions.appendChild(cta);
+        strip.appendChild(actions);
+        adNetwork.insertAdjacentElement('beforebegin', strip);
     }
 
-    renderHomePackagePricing();
+    await Promise.allSettled([renderHomePackagePricing(), renderLiveHomepageAds()]);
 </script>
 </body>
 
 </html>
-

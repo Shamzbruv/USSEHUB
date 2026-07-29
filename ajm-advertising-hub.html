@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
     <meta name="description"
-        content="Browse the AJM Advertising Hub for Jamaica business listings, classifieds, and promotions. Find services, real estate, accommodations, farming, retail & wholesale, food & beverage, and events. Discover health & wellness, construction, dining, shopping, and commercial opportunities across Jamaica." />
+        content="Browse the AJM Advertising Hub for Jamaica business listings, classifieds and promotions across general services, property management, financial services, NGOs, real estate, food and beverage, agriculture, construction, auto care and entertainment." />
     <meta name="keywords" content="AJM Advertising Hub, Jamaica business directory, classifieds, promotions, services, transport rentals, maintenance, auto repairs, construction, delivery, catering, health & wellness, medical clinics, gyms, educational services, communications, audio visual, graphic design, event planning, finances, banking, NGO, rooms, venue rentals, real estate sales, residential, commercial leasing, farming, agriculture, fisheries, poultry, horticulture, retail trade, wholesale, supermarkets, craft markets, purveyors, food & beverage, dining outlets, restaurants, cafes, events, entertainment, live shows, festivals, parties, clubs, Jamaica" />
     <link rel="canonical" href="https://www.usse-hub.com/ajm-advertising-hub.html" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
@@ -28,7 +28,7 @@
     <meta property="og:url" content="https://www.usse-hub.com/ajm-advertising-hub.html" />
     <meta property="og:title" content="AJM Advertising Hub Jamaica | Classifieds, Promotions &amp; Business Listings" />
     <meta property="og:description"
-        content="Browse the AJM Advertising Hub for Jamaica business listings, classifieds, and promotions. Find services, real estate, accommodations, farming, retail & wholesale, food & beverage, and events. Discover health & wellness, construction, dining, shopping, and commercial opportunities across Jamaica." />
+        content="Browse Jamaica listings across AJM's 2026 categories: general services, property management, financial services, NGOs, real estate, food and beverage, agriculture, construction, auto care and entertainment." />
     <meta property="og:image" content="https://www.usse-hub.com/assets/hub_ad_promo_1778519645791.png" />
     <meta property="og:image:alt" content="AJM Advertising Hub promotional visual" />
     <meta property="og:country-name" content="Jamaica" />
@@ -62,28 +62,53 @@
                         "itemListElement": [
                             {
                                 "@type": "OfferCatalog",
-                                "name": "Services",
+                                "name": "General",
                                 "position": 1
                             },
                             {
                                 "@type": "OfferCatalog",
-                                "name": "Rooms & Spaces",
+                                "name": "Property Management Services",
                                 "position": 2
                             },
                             {
                                 "@type": "OfferCatalog",
-                                "name": "Farming",
+                                "name": "Financial Services",
                                 "position": 3
                             },
                             {
                                 "@type": "OfferCatalog",
-                                "name": "Retail Shopping",
+                                "name": "NGO / Service Clubs",
                                 "position": 4
                             },
                             {
                                 "@type": "OfferCatalog",
-                                "name": "Drink & Eat",
+                                "name": "Real Estate",
                                 "position": 5
+                            },
+                            {
+                                "@type": "OfferCatalog",
+                                "name": "Food & Beverage",
+                                "position": 6
+                            },
+                            {
+                                "@type": "OfferCatalog",
+                                "name": "Farming & Agriculture",
+                                "position": 7
+                            },
+                            {
+                                "@type": "OfferCatalog",
+                                "name": "Construction",
+                                "position": 8
+                            },
+                            {
+                                "@type": "OfferCatalog",
+                                "name": "Auto Care Services",
+                                "position": 9
+                            },
+                            {
+                                "@type": "OfferCatalog",
+                                "name": "Entertainment",
+                                "position": 10
                             }
                         ]
                     }
@@ -1345,17 +1370,33 @@
                     </div>
                     <div class="form-group">
                         <label for="lf-category">Category *</label>
-                        <select id="lf-category" required onchange="populateSubcategorySelect('lf-category', 'lf-subcategory'); updateHubLabels()">
+                        <select id="lf-category" required onchange="populateSubcategorySelect('lf-category', 'lf-subcategory', 'lf-tertiary', 'lf-specific'); updateHubLabels()">
                             <option value="">Select category</option>
                         </select>
                     </div>
                 </div>
 
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="lf-subcategory">Secondary Category *</label>
+                        <select id="lf-subcategory" required disabled onchange="populateTertiarySelect('lf-category', 'lf-subcategory', 'lf-tertiary', 'lf-specific')">
+                            <option value="">Choose a primary category first</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="lf-tertiary">Tertiary Category *</label>
+                        <select id="lf-tertiary" required disabled onchange="populateSpecificSelect('lf-category', 'lf-subcategory', 'lf-tertiary', 'lf-specific')">
+                            <option value="">Choose a secondary category first</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label for="lf-subcategory">Subcategory</label>
-                    <select id="lf-subcategory">
-                        <option value="">Select subcategory (Optional)</option>
+                    <label for="lf-specific">Specific Type / Context <span style="color:var(--muted);font-weight:500;">(Optional)</span></label>
+                    <select id="lf-specific" disabled>
+                        <option value="">Choose a specialization first</option>
                     </select>
+                    <small style="display:block;margin-top:7px;color:var(--muted);">This structured classification follows AJM's approved 2026 directory categories.</small>
                 </div>
 
                 <div class="form-group">
@@ -1481,7 +1522,7 @@
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="ajm-aloe-jamaica.html">Agency</a>
-                <a href="#webpage-packages">Webpages</a>
+                <a href="?advertise=1&amp;product=webpage" onclick="event.preventDefault(); openWebpagePackages();">Webpages</a>
                 <a href="#services" class="active">Directory</a>
             </div>
 
@@ -1535,33 +1576,45 @@
         <div class="categories-scroll-wrapper">
             <button class="scroll-arrow left-arrow" onclick="scrollCategories(-1)" aria-label="Scroll left">&#10094;</button>
             <div class="categories-grid" id="categories-grid" role="list" aria-label="Browse by category">
-                <div class="cat-card" data-category="services" role="listitem" tabindex="0" onclick="filterByCategory('services', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('services',this)" aria-label="Filter by Services">
-                    <img src="assets/hub_cat_services_1778519570445.png" alt="Services">
-                    <span>Services</span>
+                <div class="cat-card" data-category="GENERAL" role="listitem" tabindex="0" onclick="filterByCategory('GENERAL', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('GENERAL',this)" aria-label="Filter by General">
+                    <img src="assets/hub_cat_services_1778519570445.png" alt="General services">
+                    <span>General</span>
                 </div>
-                <div class="cat-card" data-category="rooms" role="listitem" tabindex="0" onclick="filterByCategory('rooms', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('rooms',this)" aria-label="Filter by Rooms & Venue">
-                    <img src="assets/hub_cat_rooms_1778519582228.png" alt="Rooms &amp; Venue">
-                    <span>Rooms &amp; Venue</span>
+                <div class="cat-card" data-category="PROPERTY MANAGEMENT SERVICES" role="listitem" tabindex="0" onclick="filterByCategory('PROPERTY MANAGEMENT SERVICES', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('PROPERTY MANAGEMENT SERVICES',this)" aria-label="Filter by Property Management Services">
+                    <img src="assets/index_real_estate_1778518643066.png" alt="Property management services">
+                    <span>Property Management</span>
                 </div>
-                <div class="cat-card" data-category="farming" role="listitem" tabindex="0" onclick="filterByCategory('farming', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('farming',this)" aria-label="Filter by Farming">
-                    <img src="assets/hub_cat_farming_1778519594473.png" alt="Farming">
-                    <span>Farming</span>
+                <div class="cat-card" data-category="FINANCIAL SERVICES" role="listitem" tabindex="0" onclick="filterByCategory('FINANCIAL SERVICES', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('FINANCIAL SERVICES',this)" aria-label="Filter by Financial Services">
+                    <img src="assets/index_exec_session_1778518628423.png" alt="Financial services">
+                    <span>Financial Services</span>
                 </div>
-                <div class="cat-card" data-category="retail" role="listitem" tabindex="0" onclick="filterByCategory('retail', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('retail',this)" aria-label="Filter by Retail & Wholesale">
-                    <img src="assets/hub_cat_retail_1778519607226.png" alt="Retail &amp; Wholesale">
-                    <span>Retail &amp; Wholesale</span>
+                <div class="cat-card" data-category="NGO / SERVICE CLUBS" role="listitem" tabindex="0" onclick="filterByCategory('NGO / SERVICE CLUBS', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('NGO / SERVICE CLUBS',this)" aria-label="Filter by NGO and Service Clubs">
+                    <img src="assets/hub_cat_jobs.png" alt="NGOs and service clubs">
+                    <span>NGO / Service Clubs</span>
                 </div>
-                <div class="cat-card" data-category="food" role="listitem" tabindex="0" onclick="filterByCategory('food', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('food',this)" aria-label="Filter by Food & Beverage">
+                <div class="cat-card" data-category="REAL ESTATE" role="listitem" tabindex="0" onclick="filterByCategory('REAL ESTATE', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('REAL ESTATE',this)" aria-label="Filter by Real Estate">
+                    <img src="assets/hub_cat_rooms_1778519582228.png" alt="Real estate">
+                    <span>Real Estate</span>
+                </div>
+                <div class="cat-card" data-category="FOOD &amp; BEVERAGE" role="listitem" tabindex="0" onclick="filterByCategory('FOOD &amp; BEVERAGE', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('FOOD &amp; BEVERAGE',this)" aria-label="Filter by Food and Beverage">
                     <img src="assets/hub_cat_food_1778519621295.png" alt="Food &amp; Beverage">
                     <span>Food &amp; Beverage</span>
                 </div>
-                <div class="cat-card" data-category="events" role="listitem" tabindex="0" onclick="filterByCategory('events', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('events',this)" aria-label="Filter by Events & Entertainment">
-                    <img src="assets/hub_cat_events.png" alt="Events &amp; Entertainment">
-                    <span>Events &amp; Entertainment</span>
+                <div class="cat-card" data-category="FARMING &amp; AGRICULTURE" role="listitem" tabindex="0" onclick="filterByCategory('FARMING &amp; AGRICULTURE', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('FARMING &amp; AGRICULTURE',this)" aria-label="Filter by Farming and Agriculture">
+                    <img src="assets/hub_cat_farming_1778519594473.png" alt="Farming and agriculture">
+                    <span>Farming &amp; Agriculture</span>
                 </div>
-                <div class="cat-card" data-category="jobs" role="listitem" tabindex="0" onclick="filterByCategory('jobs', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('jobs',this)" aria-label="Filter by Jobs & Careers">
-                    <img src="assets/hub_cat_jobs.png" alt="Jobs &amp; Careers">
-                    <span>Jobs &amp; Careers</span>
+                <div class="cat-card" data-category="CONSTRUCTION" role="listitem" tabindex="0" onclick="filterByCategory('CONSTRUCTION', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('CONSTRUCTION',this)" aria-label="Filter by Construction">
+                    <img src="assets/consultancy_visual_1778518668416.png" alt="Construction services">
+                    <span>Construction</span>
+                </div>
+                <div class="cat-card" data-category="AUTO CARE SERVICES" role="listitem" tabindex="0" onclick="filterByCategory('AUTO CARE SERVICES', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('AUTO CARE SERVICES',this)" aria-label="Filter by Auto Care Services">
+                    <img src="assets/hub_cat_retail_1778519607226.png" alt="Auto care services">
+                    <span>Auto Care Services</span>
+                </div>
+                <div class="cat-card" data-category="ENTERTAINMENT" role="listitem" tabindex="0" onclick="filterByCategory('ENTERTAINMENT', this)" onkeydown="if(event.key==='Enter'||event.key===' ')filterByCategory('ENTERTAINMENT',this)" aria-label="Filter by Entertainment">
+                    <img src="assets/hub_cat_events.png" alt="Entertainment">
+                    <span>Entertainment</span>
                 </div>
             </div>
             <button class="scroll-arrow right-arrow" onclick="scrollCategories(1)" aria-label="Scroll right">&#10095;</button>
@@ -1576,23 +1629,23 @@
             <section class="webpage-packages" id="webpage-packages" style="padding: 0; border: none; margin: 0; max-width: 100%;">
                 <div class="packages-head">
                     <div><div class="packages-kicker">For paying AJM clients</div><h2 style="font-size:2.4rem;">Your own business webpage</h2></div>
-                    <p style="font-size:1rem; max-width:600px;">Free members can keep a standard directory listing. Paying clients can upgrade that listing into a managed mini-website, choose the market segment that fits their business, and update the content through their account after AJM activates the package.</p>
+                    <p style="font-size:1rem; max-width:600px;">Free members can keep a standard directory listing. Existing members can upgrade one of their listings here, pay by bank transfer, and use the webpage builder after AJM confirms the payment and activates the package.</p>
                 </div>
                 <div class="package-grid">
                     <article class="package-card silver">
                         <div class="package-tier">Silver</div><h3>Business Essentials</h3><div class="package-price">Contact AJM for pricing</div>
                         <ul><li>Business logo and contact details</li><li>About section and services</li><li>Operating hours</li><li>Up to 3 gallery photos</li></ul>
-                        <button class="btn btn-ghost" style="width:100%;" onclick="closeModal('webpage-packages-modal'); handlePostListingClick('silver');">Choose Silver</button>
+                        <button class="btn btn-ghost" style="width:100%;" onclick="startWebpageUpgrade(null, 'silver')">Choose Silver</button>
                     </article>
                     <article class="package-card gold">
                         <div class="package-tier">Gold</div><h3>Lead Generator</h3><div class="package-price">Contact AJM for pricing</div>
                         <ul><li>Everything in Silver</li><li>Hero image and video gallery</li><li>Google Map and customer reviews</li><li>Lead form, offers and coupons</li></ul>
-                        <button class="btn btn-primary" style="width:100%;" onclick="closeModal('webpage-packages-modal'); handlePostListingClick('gold');">Choose Gold</button>
+                        <button class="btn btn-primary" style="width:100%;" onclick="startWebpageUpgrade(null, 'gold')">Choose Gold</button>
                     </article>
                     <article class="package-card platinum">
                         <div class="package-tier">Platinum</div><h3>Premier Experience</h3><div class="package-price">Contact AJM for pricing</div>
                         <ul><li>Everything in Gold</li><li>Cinematic cover and virtual tour</li><li>Booking and featured testimonials</li><li>Tracked calls and live chat</li></ul>
-                        <button class="btn btn-ghost" style="width:100%;border-color:rgba(98,183,255,.4);" onclick="closeModal('webpage-packages-modal'); handlePostListingClick('platinum');">Choose Platinum</button>
+                        <button class="btn btn-ghost" style="width:100%;border-color:rgba(98,183,255,.4);" onclick="startWebpageUpgrade(null, 'platinum')">Choose Platinum</button>
                     </article>
                 </div>
                 <div class="segment-strip"><strong>Available market segments</strong><div class="segment-pills"><span class="segment-pill">Local businesses & directories</span><span class="segment-pill">Professional & niche services</span><span class="segment-pill">B2B suppliers & wholesale</span><span class="segment-pill">Hospitality, accommodation, weddings & events</span><span class="segment-pill">Automotive, collectibles & precious metals</span></div></div>
@@ -1615,15 +1668,26 @@
                             <h4 style="margin:0 0 4px 0;">Subscription Plan</h4>
                             <p style="margin:0; font-size:0.9rem; color:var(--muted);">Current Status: <strong id="md-sub-status" style="color:white;">Free Member</strong></p>
                         </div>
-                        <button class="btn btn-primary" onclick="handleSubscribeClick()">Subscribe / Upgrade Plan</button>
+                        <button class="btn btn-primary" onclick="closeModal('member-dashboard-modal'); openAdvertiseModal();">Browse Paid Packages</button>
                     </div>
+                </div>
+
+                <div class="dashboard-section" style="background:rgba(77,163,255,.06); border:1px solid rgba(77,163,255,.24); border-radius:16px; padding:20px;">
+                    <h4 style="margin:0 0 10px;">How to upgrade a listing to a business webpage</h4>
+                    <ol style="margin:0;padding-left:20px;color:var(--muted);font-size:.86rem;line-height:1.7;">
+                        <li>Post a free directory listing, or choose an existing listing below.</li>
+                        <li>Select Silver, Gold or Platinum and create the order.</li>
+                        <li>Transfer the displayed amount to AJM and upload the payment receipt.</li>
+                        <li>AJM verifies payment and activates the package; the member receives an email.</li>
+                        <li>Use <strong style="color:#fff;">Build Webpage</strong> to add content, then publish. The live-page link appears after publishing.</li>
+                    </ol>
                 </div>
 
                 <!-- Active Ads Section -->
                 <div class="dashboard-section" style="background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:16px; padding:20px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                         <h4 style="margin:0;">My Listings / Ads</h4>
-                        <button class="btn btn-ghost" style="padding:6px 12px; font-size:0.85rem;" onclick="closeModal('member-dashboard-modal'); handlePostListingClick();">Post New Ad</button>
+                        <button class="btn btn-ghost" style="padding:6px 12px; font-size:0.85rem;" onclick="closeModal('member-dashboard-modal'); handlePostListingClick();">Post New Listing</button>
                     </div>
                     <div id="md-listings-container" style="overflow-x:auto;">
                         <table style="width:100%; border-collapse:collapse; text-align:left;">
@@ -1638,6 +1702,32 @@
                             <tbody id="md-listings-tbody">
                                 <!-- Listings injected here -->
                                 <tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Customer advertising orders -->
+                <div class="dashboard-section" style="background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:16px; padding:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px;">
+                        <div>
+                            <h4 style="margin:0 0 4px;">My Advertising Orders</h4>
+                            <p style="margin:0; color:var(--muted); font-size:.82rem;">Review payment, approval and campaign status.</p>
+                        </div>
+                        <button class="btn btn-primary" style="padding:8px 13px; font-size:.8rem;" onclick="closeModal('member-dashboard-modal'); openAdvertiseModal();">Place Ad</button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left;">
+                            <thead>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--muted); font-size:0.8rem;">
+                                    <th style="padding:10px;">Order</th>
+                                    <th style="padding:10px;">Package</th>
+                                    <th style="padding:10px;">Status</th>
+                                    <th style="padding:10px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="md-orders-tbody">
+                                <tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">Open the dashboard to load your orders.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1699,6 +1789,9 @@
     <div class="container hub-layout" id="services">
         <!-- Main Content -->
         <div class="main-content">
+
+            <!-- Active paid directory placements -->
+            <div id="directory-featured-ads" class="delivered-ads directory-featured-ads" aria-live="polite" aria-label="Sponsored advertisements"></div>
 
             <!-- Active filter bar -->
             <div class="active-filter-bar" id="active-filter-bar" role="status">
@@ -1813,15 +1906,9 @@
                 </div>
             </div>
 
-            <!-- Advertisements -->
+            <!-- Active paid sidebar placements -->
             <div class="sidebar-widget">
-                <div class="ad-banner" style="background-image: url('assets/hub_ad_resort_1778519633919.png');">
-                    <a href="#" style="position: absolute; inset: 0;" aria-label="Advertisement"></a>
-                </div>
-                
-                <div class="ad-banner" style="background-image: url('assets/hub_ad_promo_1778519645791.png');">
-                    <a href="#" style="position: absolute; inset: 0;" aria-label="Advertisement"></a>
-                </div>
+                <div id="hub-sidebar-ads" class="delivered-ads hub-sidebar-ads" aria-live="polite" aria-label="Sponsored advertisements"></div>
             </div>
         </div>
     </div>
@@ -2007,6 +2094,9 @@
         window.openMemberDashboard = async function() {
             if (!currentUser) return;
             openModal('member-dashboard-modal');
+            if (typeof window.loadMyAdOrders === 'function') {
+                window.loadMyAdOrders(true);
+            }
             
             const role = currentProfile?.role || 'member';
             const statusEl = document.getElementById('md-sub-status');
@@ -2051,6 +2141,7 @@
                         const current = !subscription.expires_at || new Date(subscription.expires_at) > new Date();
                         return active && current && subscription.ad_packages?.webpage_enabled;
                     });
+                    const canUpgradeListing = ['approved', 'pending'].includes(l.status);
                     let statusHtml = '';
                     if (l.status === 'approved') statusHtml = '<span class="listing-badge" style="background:rgba(23,214,111,0.15);color:var(--green);font-size:0.75rem;padding:4px 8px;">Approved</span>';
                     else if (l.status === 'pending') statusHtml = '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);font-size:0.75rem;padding:4px 8px;">Pending</span>';
@@ -2069,8 +2160,16 @@
                             <td style="padding:12px 10px;">${typeHtml}</td>
                             <td style="padding:12px 10px;">
                                 <a href="#" data-open-listing-id="${escHtml(l.id)}" data-close-modal="member-dashboard-modal" style="color:var(--blue); font-size:0.85rem;">View</a>
-                                ${activeSubscription ? `<br><a href="ajm-webpage-builder.html?listing=${encodeURIComponent(l.id)}" style="color:var(--yellow);font-size:0.85rem;">Build Webpage</a>` : ''}
-                                ${webpage?.page_status === 'published' ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" target="_blank" rel="noopener" style="color:var(--green);font-size:0.85rem;">Open Live Page</a>` : ''}
+                                ${activeSubscription
+                                    ? `<br><a href="ajm-webpage-builder.html?listing=${encodeURIComponent(l.id)}" style="color:var(--yellow);font-size:0.85rem;">${webpage ? 'Edit Webpage' : 'Start Webpage'}</a>`
+                                    : canUpgradeListing
+                                        ? `<br><button type="button" data-upgrade-webpage="${escHtml(l.id)}" data-preferred-tier="${escHtml(l.requested_tier || 'silver')}" style="border:0;padding:0;background:none;color:var(--yellow);font:inherit;font-size:.85rem;cursor:pointer;">Upgrade to Webpage</button>`
+                                        : '<br><span style="color:var(--muted);font-size:.76rem;">Listing approval required</span>'}
+                                ${webpage?.page_status === 'published'
+                                    ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" target="_blank" rel="noopener" style="color:var(--green);font-size:0.85rem;">Open Live Page</a>`
+                                    : webpage
+                                        ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}&preview=1" target="_blank" rel="noopener" style="color:var(--blue);font-size:.85rem;">Preview Saved Draft</a>`
+                                        : activeSubscription ? '<br><span style="color:var(--muted);font-size:.76rem;">Save a draft in the builder to enable preview</span>' : ''}
                             </td>
                         </tr>
                     `;
@@ -2098,6 +2197,18 @@
                         consultationLink.dataset.consultationListing,
                         consultationLink.dataset.consultationSource,
                         consultationLink.dataset.consultationTarget
+                    );
+                    return;
+                }
+
+                const webpageUpgrade = event.target.closest('[data-upgrade-webpage]');
+                if (webpageUpgrade) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    closeModal('member-dashboard-modal');
+                    window.startWebpageUpgrade?.(
+                        webpageUpgrade.dataset.upgradeWebpage,
+                        webpageUpgrade.dataset.preferredTier || 'silver'
                     );
                     return;
                 }
@@ -2429,14 +2540,11 @@
         }
 
         function showActiveFilterBar(category) {
-            const labels = {
-                services: 'Services', rooms: 'Rooms & Venue', farming: 'Farming',
-                retail: 'Retail & Wholesale', food: 'Food & Beverage', events: 'Events & Entertainment', jobs: 'Jobs & Careers'
-            };
+            const label = categoryLabel(category);
             const bar = document.getElementById('active-filter-bar');
-            document.getElementById('active-filter-label').textContent = labels[category] || category;
+            document.getElementById('active-filter-label').textContent = label;
             bar.classList.add('visible');
-            document.getElementById('featured-section-title').textContent = `Results: ${labels[category] || category}`;
+            document.getElementById('featured-section-title').textContent = `Results: ${label}`;
         }
 
         function clearCategoryFilter() {
@@ -2450,23 +2558,24 @@
         }
 
         // ==========================================
-        // CATEGORY GROUP MAPPING
-        // Maps each card category to all DB categories it covers
+        // CURRENT + LEGACY CATEGORY MAPPING
+        // New browse choices also include the prior stored category values so
+        // recategorization never makes an existing approved listing disappear.
         // ==========================================
-        const CATEGORY_GROUPS = {
-            services: ['SERVICES'],
-            rooms:    ['ROOMS & VENUE - RENTALS AND REAL ESTATES SALES'],
-            farming:  ['FARMING'],
-            retail:   ['RETAIL & WHOLESALE TRADE'],
-            food:     ['FOOD & BEVERAGE'],
-            events:   ['EVENTS & ENTERTAINMENT'],
-            jobs:     ['JOBS & CAREERS']
-        };
-
         function getCategoryFilter(category) {
-            // If it's a card category (has a group), use the full group
-            const group = CATEGORY_GROUPS[category];
-            return group || [category]; // Return group array or single category
+            return window.getCategoryFilterValues?.(category) || [category];
+        }
+
+        // Supabase `.or()` accepts raw PostgREST filter syntax. Keep user input out of
+        // that grammar so commas, wildcard characters and controls cannot break the
+        // full directory query (for example, a search for "food,bar").
+        function safeDirectoryKeyword(input) {
+            return String(input || '')
+                .normalize('NFKC')
+                .replace(/[^\p{L}\p{N}\s&'\u2019-]/gu, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .slice(0, 100);
         }
 
         // ==========================================
@@ -2475,7 +2584,7 @@
         async function loadListings(filters = {}) {
             showListingsLoading();
 
-            const keyword = filters.keyword ?? document.getElementById('search-keyword').value.trim();
+            const keyword = safeDirectoryKeyword(filters.keyword ?? document.getElementById('search-keyword').value);
             const location = filters.location ?? document.getElementById('search-location').value;
             const rawCategory = filters.category ?? activeCategory ?? '';
             const categoryList = rawCategory ? getCategoryFilter(rawCategory) : [];
@@ -2548,7 +2657,7 @@
         async function loadMoreListings() {
             listingsOffset += LISTINGS_PER_PAGE;
 
-            const keyword = document.getElementById('search-keyword').value.trim();
+            const keyword = safeDirectoryKeyword(document.getElementById('search-keyword').value);
             const location = document.getElementById('search-location').value;
             const rawCategory = activeCategory || '';
             const categoryList = rawCategory ? getCategoryFilter(rawCategory) : [];
@@ -2677,7 +2786,7 @@
                             ${webpage?.page_status === 'published' ? `<span class="listing-badge" style="color:var(--yellow);background:rgba(255,207,51,.12);text-transform:capitalize;">${escHtml(webpage.tier)} Webpage</span>` : ''}
                             ${l.status === 'pending' ? '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);">⏳ Pending</span>' : ''}
                         </div>
-                        <span style="font-size: 0.9rem; color: var(--muted);">${escHtml(formatLocation(l.location))}${l.category ? ' · <span style="color:var(--green);font-weight:600;">' + formatCategory(l.category) + '</span>' : ''}</span>
+                        <span style="font-size: 0.9rem; color: var(--muted);">${escHtml(formatLocation(l.location))}${l.category ? ' · <span style="color:var(--green);font-weight:600;">' + escHtml(formatCategory(l.category)) + '</span>' : ''}</span>
                         <p style="margin: 4px 0 0 0; font-size: 0.95rem; line-height: 1.5; color: #ddd;">
                             <strong>${escHtml(l.subcategory || '')}</strong> ${l.description ? ' - ' + escHtml(l.description.slice(0, 160)) + (l.description.length > 160 ? '…' : '') : ''}
                         </p>
@@ -2885,7 +2994,11 @@
 
             const businessName = document.getElementById('lf-business-name').value.trim();
             const category = document.getElementById('lf-category').value;
-            const subcategory = document.getElementById('lf-subcategory').value.trim();
+            const secondaryCategory = document.getElementById('lf-subcategory').value.trim();
+            const tertiaryCategory = document.getElementById('lf-tertiary').value.trim();
+            const subcategory = window.getClassificationValue
+                ? window.getClassificationValue('lf-subcategory', 'lf-tertiary', 'lf-specific')
+                : secondaryCategory;
             const marketSegment = document.getElementById('lf-market-segment').value;
             const description = document.getElementById('lf-description').value.trim();
             const location = document.getElementById('lf-location').value;
@@ -2901,8 +3014,8 @@
             const listingType = 'basic';
             const imageFile = document.getElementById('lf-image')?.files?.[0] || null;
 
-            if (!businessName || !category || !marketSegment || !description || !location) {
-                showErrBox(errBox, 'Please fill in all required fields, including the market segment.');
+            if (!businessName || !category || !secondaryCategory || !tertiaryCategory || !marketSegment || !description || !location) {
+                showErrBox(errBox, 'Please complete the primary, secondary and tertiary classification and all other required fields.');
                 return;
             }
 
@@ -2962,6 +3075,7 @@
                     : 'Your free directory listing has been submitted for review. It will appear publicly once approved by an admin.';
                 successBox.classList.add('show');
                 document.getElementById('listing-form').reset();
+                window.populateSubcategorySelect?.('lf-category', 'lf-subcategory', 'lf-tertiary', 'lf-specific');
                 document.getElementById('lf-image-preview').style.display = 'none';
                 showToast('Listing submitted! Pending admin approval.', 'success');
                 setTimeout(() => closeModal('post-listing-modal'), 4000);
@@ -3267,13 +3381,24 @@
             return map[loc] || loc;
         }
 
-        function formatCategory(cat) {
-            const map = {
-                services: 'Services', rooms: 'Rooms & Spaces', farming: 'Farming',
-                retail: 'Retail Shopping', food: 'Drink & Eat', health: 'Health & Wellness',
-                finance: 'Financial Services', tech: 'Technology', education: 'Education', other: 'Other'
+        function categoryLabel(category) {
+            const labels = {
+                GENERAL: 'General',
+                'PROPERTY MANAGEMENT SERVICES': 'Property Management Services',
+                'FINANCIAL SERVICES': 'Financial Services',
+                'NGO / SERVICE CLUBS': 'NGO / Service Clubs',
+                'REAL ESTATE': 'Real Estate',
+                'FOOD & BEVERAGE': 'Food & Beverage',
+                'FARMING & AGRICULTURE': 'Farming & Agriculture',
+                CONSTRUCTION: 'Construction',
+                'AUTO CARE SERVICES': 'Auto Care Services',
+                ENTERTAINMENT: 'Entertainment'
             };
-            return map[cat] || cat;
+            return labels[category] || category;
+        }
+
+        function formatCategory(category) {
+            return categoryLabel(category);
         }
 
         // ==========================================
@@ -3356,18 +3481,72 @@
     .payment-detail { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; }
     .payment-detail label { font-size: 0.72rem; color: #b9c0d4; display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
     .payment-detail span { font-weight: 700; font-size: 0.92rem; word-break: break-all; }
+    .adv-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .adv-field { margin-bottom:16px; }
+    .adv-field.full { grid-column:1 / -1; }
+    .adv-field label { display:block; margin-bottom:7px; color:#cbd2e2; font-size:.8rem; font-weight:700; }
+    .adv-field input, .adv-field textarea, .adv-field select {
+        width:100%; box-sizing:border-box; padding:12px 14px; color:#fff;
+        border:1px solid rgba(255,255,255,.13); border-radius:11px;
+        background:rgba(255,255,255,.04); font:inherit; outline:none;
+    }
+    .adv-field textarea { min-height:88px; resize:vertical; }
+    .adv-field input:focus, .adv-field textarea:focus, .adv-field select:focus { border-color:rgba(23,214,111,.65); }
+    .adv-field small { display:block; margin-top:6px; color:#8f98ad; font-size:.72rem; line-height:1.45; }
+    .adv-options { display:grid; gap:9px; }
+    .adv-option { display:flex; align-items:flex-start; gap:10px; padding:12px; border:1px solid rgba(255,255,255,.1); border-radius:12px; background:rgba(255,255,255,.025); }
+    .adv-option input { width:auto; margin-top:3px; accent-color:#17d66f; }
+    .adv-option-copy { flex:1; }
+    .adv-option-copy strong { display:block; font-size:.86rem; }
+    .adv-option-copy span { display:block; margin-top:3px; color:#9da6ba; font-size:.75rem; line-height:1.4; }
+    .adv-summary { display:flex; justify-content:space-between; gap:16px; align-items:center; margin:18px 0; padding:15px; border:1px solid rgba(23,214,111,.24); border-radius:13px; background:rgba(23,214,111,.06); }
+    .adv-summary strong { color:#17d66f; }
+    .adv-alert { display:none; margin-bottom:16px; padding:13px 15px; border-radius:12px; font-size:.84rem; line-height:1.5; }
+    .adv-alert.show { display:block; }
+    .adv-alert.error { color:#ff9aaa; border:1px solid rgba(255,77,94,.32); background:rgba(255,77,94,.09); }
+    .adv-alert.info { color:#cfe4ff; border:1px solid rgba(91,156,246,.3); background:rgba(91,156,246,.09); }
+    .adv-alert.success { color:#bff8d6; border:1px solid rgba(23,214,111,.3); background:rgba(23,214,111,.09); }
+    .pkg-tile.unavailable { cursor:not-allowed; opacity:.62; }
+    .pkg-tile.unavailable:hover { transform:none; box-shadow:none; border-color:rgba(255,255,255,.09); }
+    .pkg-unavailable { margin-top:13px; color:#ffcf33; font-size:.74rem; line-height:1.4; }
+    #adv-next-btn:disabled { opacity:.42; cursor:not-allowed; box-shadow:none; }
+    .adv-status { display:inline-flex; padding:4px 8px; border-radius:999px; font-size:.7rem; font-weight:800; text-transform:capitalize; white-space:nowrap; }
+    .adv-status.pending_payment { color:#ffcf33; background:rgba(255,207,51,.12); }
+    .adv-status.payment_submitted { color:#86bdff; background:rgba(91,156,246,.14); }
+    .adv-status.approved { color:#8cf0b5; background:rgba(23,214,111,.13); }
+    .adv-status.rejected, .adv-status.cancelled { color:#ff9aaa; background:rgba(255,77,94,.12); }
+    .adv-status.paused, .adv-status.expired { color:#c0c6d3; background:rgba(255,255,255,.08); }
+    .delivered-ads { display:grid; gap:14px; }
+    .directory-featured-ads:not(:empty) { margin-bottom:24px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+    .delivered-ad {
+        position:relative; overflow:hidden; min-width:0; border:1px solid rgba(255,255,255,.11);
+        border-radius:18px; background:linear-gradient(145deg,rgba(23,214,111,.07),rgba(255,255,255,.025));
+        box-shadow:0 14px 38px rgba(0,0,0,.2);
+    }
+    .delivered-ad-media { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; background:#111623; }
+    .hub-sidebar-ads .delivered-ad-media { aspect-ratio:4/3; }
+    .delivered-ad-copy { padding:16px; }
+    .delivered-ad-label { display:block; margin-bottom:7px; color:#17d66f; font-size:.65rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+    .delivered-ad h4 { margin:0 0 7px; color:#fff; font-size:1.02rem; line-height:1.3; }
+    .delivered-ad p { margin:0; color:#b9c0d4; font-size:.8rem; line-height:1.55; }
+    .delivered-ad-cta { display:inline-flex; margin-top:12px; color:#8cf0b5; font-size:.78rem; font-weight:800; }
+    .delivered-ad-house { padding:20px; border-style:dashed; text-align:center; }
+    .delivered-ad-house button { margin-top:12px; }
 
     @media (max-width: 640px) {
         .adv-modal-box { padding: 24px 18px; }
         .adv-modal-title { font-size: 1.3rem; }
         .pkg-grid { grid-template-columns: 1fr; }
         .payment-detail-grid { grid-template-columns: 1fr; }
+        .adv-form-grid { grid-template-columns:1fr; }
+        .adv-field.full { grid-column:auto; }
+        #advertise-fab { left:14px; right:14px; bottom:16px; justify-content:center; }
     }
 </style>
 
 <!-- FAB -->
-<button id="advertise-fab" onclick="openModal('webpage-packages-modal')" aria-label="Advertise your business">
-    <span class="fab-icon">📢</span> Advertise Here
+<button id="advertise-fab" onclick="openAdvertiseModal()" aria-label="View advertising packages">
+    <span class="fab-icon">📢</span> Do you want to advertise here?
 </button>
 
 <!-- Package Selection Modal -->
@@ -3378,61 +3557,93 @@
         <!-- Step 1: Pick a package -->
         <div id="adv-step-1" class="adv-step active">
             <div class="adv-modal-title" id="adv-modal-heading">📢 Advertise Your Business</div>
-            <div class="adv-modal-subtitle">Choose an advertising package to get your business in front of thousands of Jamaicans.</div>
+            <div class="adv-modal-subtitle" id="adv-modal-subtitle">Choose an advertising package to get your business in front of thousands of Jamaicans.</div>
+            <div class="adv-alert info show" id="adv-catalog-guidance" style="margin-bottom:18px;">Business webpage packages upgrade an existing directory listing. Display-ad packages create advertisements for the listed placements. Prices, durations and payment destinations are managed by AJM.</div>
+            <div id="adv-package-message" class="adv-alert info" role="status"></div>
             <div class="pkg-grid" id="adv-pkg-grid">
                 <div style="color:#b9c0d4;text-align:center;padding:40px;grid-column:1/-1;">Loading packages...</div>
             </div>
             <div style="display:flex;justify-content:flex-end;">
                 <button class="btn btn-primary" id="adv-next-btn" onclick="advGoToStep2()" style="padding:14px 32px;font-size:1rem;" disabled>
-                    Next: Payment Details →
+                    Configure Package →
                 </button>
             </div>
         </div>
 
-        <!-- Step 2: Payment instructions + reference -->
+        <!-- Step 2: Configure the selected package -->
         <div id="adv-step-2" class="adv-step">
             <div style="margin-bottom:20px;">
                 <button onclick="advGoToStep1()" style="background:none;border:none;color:#b9c0d4;cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:6px;">← Back to packages</button>
             </div>
-            <div class="adv-modal-title" style="font-size:1.3rem;">💳 Complete Your Order</div>
-            <div class="adv-modal-subtitle">Your selected package: <strong id="adv-selected-pkg-name"></strong> · <strong id="adv-selected-pkg-price"></strong></div>
+            <div class="adv-modal-title" style="font-size:1.3rem;">Configure Your Package</div>
+            <div class="adv-modal-subtitle">Selected: <strong id="adv-selected-pkg-name"></strong> · <strong id="adv-selected-pkg-price"></strong></div>
+            <div id="adv-config-error" class="adv-alert error" role="alert"></div>
 
-            <div class="payment-instructions-box">
-                <h4>🏦 Bank Transfer Details</h4>
-                <div class="payment-detail-grid" id="adv-payment-details">
-                    <div style="color:#b9c0d4;font-size:0.86rem;">Loading payment details...</div>
+            <div id="adv-options-wrap" class="adv-field" style="display:none;">
+                <label>Optional upgrades</label>
+                <div class="adv-options" id="adv-options-list"></div>
+            </div>
+
+            <div id="adv-webpage-fields" style="display:none;">
+                <div class="adv-alert info show" style="margin-bottom:14px;">
+                    <strong>Webpage upgrade steps:</strong> select your listing → create the order → transfer payment → upload the receipt → wait for AJM approval → open the builder from your dashboard. A pending directory listing may be ordered, but it must be approved before its webpage can be published.
                 </div>
-                <div id="adv-payment-instructions-text" style="margin-top:14px;font-size:0.86rem;color:#b9c0d4;line-height:1.6;"></div>
+                <div class="adv-field">
+                    <label for="adv-listing-select">Business listing *</label>
+                    <select id="adv-listing-select"><option value="">Select your listing</option></select>
+                    <small>A paid webpage must be attached to a listing you own.</small>
+                </div>
+                <div id="adv-no-listings" class="adv-alert info">You need an approved or pending directory listing before ordering a business webpage. Close this window and choose “Post Listing” first.</div>
             </div>
 
-            <div style="background:rgba(255,207,51,0.08);border:1px solid rgba(255,207,51,0.25);border-radius:12px;padding:14px;margin-bottom:20px;font-size:0.84rem;color:#b9c0d4;">
-                ⚡ <strong style="color:#ffcf33;">How it works:</strong> Make your bank transfer, then enter your payment reference below. Your ad will go live once our team confirms your payment (usually within 1 business day).
+            <div id="adv-display-fields" style="display:none;">
+                <div class="adv-form-grid">
+                    <div class="adv-field full"><label for="adv-headline">Advertisement headline *</label><input id="adv-headline" maxlength="120" placeholder="A clear, compelling headline" /></div>
+                    <div class="adv-field full"><label for="adv-body-text">Advertisement message *</label><textarea id="adv-body-text" maxlength="800" placeholder="What should customers know about this offer?"></textarea></div>
+                    <div class="adv-field"><label for="adv-cta-label">Button label *</label><input id="adv-cta-label" maxlength="40" placeholder="Learn More" /></div>
+                    <div class="adv-field"><label for="adv-cta-url">Destination URL *</label><input id="adv-cta-url" type="url" placeholder="https://yourbusiness.com/offer" /></div>
+                    <div class="adv-field full"><label for="adv-creative-file">Advertisement image or video *</label><input id="adv-creative-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" /><small>JPG, PNG, WebP, GIF, MP4 or WebM. Maximum 20 MB.</small></div>
+                </div>
             </div>
 
-            <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:0.82rem;font-weight:600;color:#b9c0d4;margin-bottom:6px;">Payment Reference / Transaction ID *</label>
-                <input type="text" id="adv-payment-ref" placeholder="e.g. RBC-2024-001234 or bank confirmation #"
-                    style="width:100%;padding:13px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-family:inherit;font-size:0.9rem;outline:none;box-sizing:border-box;" />
-            </div>
-            <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:0.82rem;font-weight:600;color:#b9c0d4;margin-bottom:6px;">Notes / Additional Info (optional)</label>
-                <textarea id="adv-customer-notes" placeholder="Any additional details about your ad..."
-                    style="width:100%;padding:13px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-family:inherit;font-size:0.9rem;outline:none;min-height:72px;resize:vertical;box-sizing:border-box;"></textarea>
-            </div>
+            <div class="adv-field"><label for="adv-customer-notes">Notes for AJM (optional)</label><textarea id="adv-customer-notes" maxlength="4000" placeholder="Campaign timing, audience, creative notes or other details..."></textarea></div>
+            <div class="adv-summary"><span>Total and duration</span><strong id="adv-order-total">—</strong></div>
 
-            <div id="adv-order-success" style="display:none;background:rgba(23,214,111,0.1);border:1px solid rgba(23,214,111,0.3);border-radius:16px;padding:24px;text-align:center;margin-bottom:16px;">
-                <div style="font-size:2rem;margin-bottom:8px;">🎉</div>
-                <div style="font-size:1.1rem;font-weight:800;color:#17d66f;margin-bottom:6px;">Order Submitted!</div>
-                <div style="font-size:0.86rem;color:#b9c0d4;">Your order number is <strong id="adv-order-number"></strong>. We'll notify you by email once your payment is confirmed and your ad goes live.</div>
-            </div>
-
-            <div id="adv-order-error" style="display:none;background:rgba(255,77,94,0.1);border:1px solid rgba(255,77,94,0.3);border-radius:12px;padding:14px;margin-bottom:16px;font-size:0.86rem;color:#ff4d5e;"></div>
-
-            <div style="display:flex;gap:12px;" id="adv-order-actions">
-                <button class="btn btn-primary" id="adv-submit-btn" onclick="submitAdOrder()" style="flex:1;padding:14px;font-size:1rem;">
-                    ✓ Submit Order
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <button class="btn btn-primary" id="adv-create-order-btn" onclick="createAdOrder()" style="flex:1;padding:14px;font-size:1rem;">
+                    Create Order &amp; View Bank Details →
                 </button>
                 <button class="btn btn-ghost" onclick="closeAdvertiseModal()" style="padding:14px 24px;">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Bank transfer and proof -->
+        <div id="adv-step-payment" class="adv-step">
+            <div style="margin-bottom:20px;">
+                <button onclick="advGoToStep1()" style="background:none;border:none;color:#b9c0d4;cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:6px;">← Start another order</button>
+            </div>
+            <div class="adv-modal-title" style="font-size:1.35rem;">Bank Transfer &amp; Payment Proof</div>
+            <div class="adv-modal-subtitle">Order <strong id="adv-order-number"></strong> · <strong id="adv-payment-package"></strong></div>
+            <div id="adv-payment-message" class="adv-alert info show">Your advertisement will remain pending until AJM verifies the bank transfer.</div>
+
+            <div class="payment-instructions-box">
+                <h4>🏦 Transfer Destination</h4>
+                <div class="payment-detail-grid" id="adv-payment-details"></div>
+                <div id="adv-payment-instructions-text" style="margin-top:14px;font-size:0.86rem;color:#b9c0d4;line-height:1.6;white-space:pre-wrap;"></div>
+                <div style="margin-top:14px;padding:12px 14px;border-radius:12px;border:1px solid rgba(23,214,111,.24);background:rgba(23,214,111,.07);font-size:.8rem;color:#c9ffdf;line-height:1.55;">
+                    <strong>Payment safety:</strong> AJM only displays transfer instructions. This website will never ask for your online-banking password, PIN, card credentials or one-time verification code. Upload only the bank receipt after completing the transfer through your own bank.
+                </div>
+            </div>
+
+            <div class="adv-form-grid">
+                <div class="adv-field"><label for="adv-payment-ref">Payment reference / transaction ID</label><input id="adv-payment-ref" maxlength="250" placeholder="Bank confirmation number" /></div>
+                <div class="adv-field"><label for="adv-proof-file">Proof of payment *</label><input id="adv-proof-file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF. Maximum 10 MB.</small></div>
+            </div>
+            <div id="adv-payment-error" class="adv-alert error" role="alert"></div>
+            <div id="adv-payment-success" class="adv-alert success" role="status"></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;" id="adv-payment-actions">
+                <button class="btn btn-primary" id="adv-submit-proof-btn" onclick="submitAdPaymentProof()" style="flex:1;padding:14px;font-size:1rem;">Upload Proof &amp; Notify AJM</button>
+                <button class="btn btn-ghost" onclick="closeAdvertiseModal()" style="padding:14px 24px;">Finish Later</button>
             </div>
         </div>
 
@@ -3451,232 +3662,875 @@
 
 <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const ADVERTISING_SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
+    const ADVERTISING_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
+    const sb = createClient(ADVERTISING_SUPABASE_URL, ADVERTISING_SUPABASE_ANON_KEY);
 
     let advPackages = [];
     let advSelectedPkg = null;
-    let advDefaultAccount = null;
     let advCurrentUser = null;
+    let advCurrentOrder = null;
+    let advOwnedListings = [];
+    let advMyOrders = [];
+    let advCatalogPromise = null;
+    let advListingsPromise = null;
+    let advPendingProof = null;
+    let advPreferredListingId = null;
+    let advProductFilter = null;
 
-    // ── Auth state ──
-    sb.auth.getSession().then(({ data: { session } }) => {
-        advCurrentUser = session?.user || null;
-    });
-    sb.auth.onAuthStateChange((_e, session) => {
-        advCurrentUser = session?.user || null;
-    });
+    const advEl = (id) => document.getElementById(id);
+    const advEscape = (value) => String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    const advNumber = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
+    const advMoney = (amount, currency = 'JMD') => `${String(currency || 'JMD').toUpperCase()} ${advNumber(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const advStatusLabel = (status) => String(status || 'pending').replace(/_/g, ' ');
+    const advStatusClass = (status) => ['pending_payment', 'payment_submitted', 'approved', 'rejected', 'cancelled', 'paused', 'expired'].includes(status) ? status : 'paused';
+    const advFriendlyError = (error, fallback) => {
+        const message = String(error?.message || '').trim();
+        if (!message) return fallback;
+        if (/No active bank-transfer destination/i.test(message)) return 'AJM has not configured bank-transfer details for this package yet.';
+        if (/not yet priced/i.test(message)) return 'This package is not priced yet. Please contact AJM.';
+        if (/Authentication is required|JWT/i.test(message)) return 'Please sign in again before continuing.';
+        return message.length <= 280 ? message : fallback;
+    };
 
-    // ── Load packages ──
-    async function loadAdvPackages() {
-        const grid = document.getElementById('adv-pkg-grid');
-        try {
-            const { data: pkgs, error } = await sb.from('ad_packages')
-                .select('id,name,code,price,currency,duration_days,description,features,product_type,payment_account_id')
-                .eq('is_active', true)
-                .order('price');
+    function advShowStep(id) {
+        document.querySelectorAll('#advertise-modal .adv-step').forEach((step) => step.classList.remove('active'));
+        advEl(id)?.classList.add('active');
+        document.querySelector('.adv-modal-box')?.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function advShowAlert(id, message, type = 'error') {
+        const box = advEl(id);
+        if (!box) return;
+        box.textContent = message || '';
+        box.className = `adv-alert ${type}${message ? ' show' : ''}`;
+    }
+
+    function advFeatures(features) {
+        if (Array.isArray(features)) return features.map((item) => String(item)).filter(Boolean);
+        if (!features || typeof features !== 'object') return [];
+        const labels = {
+            images: (value) => `Up to ${value} images`,
+            video: () => 'Video support',
+            featured: () => 'Featured listing',
+            sidebar: () => 'Sidebar placement'
+        };
+        return Object.entries(features)
+            .filter(([, value]) => value !== false && value !== null && value !== '' && value !== 0)
+            .map(([key, value]) => labels[key] ? labels[key](value) : `${key.replace(/_/g, ' ')}${value === true ? '' : `: ${value}`}`);
+    }
+
+    function advPackageTheme(pkg) {
+        const code = String(pkg.code || '').toLowerCase();
+        if (code.includes('platinum') || code.includes('banner')) return { label: code.includes('platinum') ? 'PLATINUM' : 'BANNER', bg: 'rgba(91,156,246,.06)', border: 'rgba(91,156,246,.3)', badge: '#70b1ff', badgeBg: 'rgba(91,156,246,.12)' };
+        if (code.includes('gold') || code.includes('advanced')) return { label: code.includes('gold') ? 'GOLD' : 'ADVANCED', bg: 'rgba(255,207,51,.06)', border: 'rgba(255,207,51,.3)', badge: '#ffcf33', badgeBg: 'rgba(255,207,51,.1)' };
+        return { label: code.includes('silver') ? 'SILVER' : 'BASIC', bg: 'rgba(180,190,210,.06)', border: 'rgba(180,190,210,.25)', badge: '#c8cfdd', badgeBg: 'rgba(180,190,210,.1)' };
+    }
+
+    function renderAdvPackages() {
+        const grid = advEl('adv-pkg-grid');
+        grid.removeAttribute('style');
+        const visiblePackages = advPackages
+            .map((pkg, index) => ({ pkg, index }))
+            .filter(({ pkg }) => !advProductFilter || pkg.product_type === advProductFilter);
+        if (!visiblePackages.length) {
+            grid.innerHTML = '<div style="color:#b9c0d4;text-align:center;padding:40px;grid-column:1/-1;">No packages are available at this time.</div>';
+            return;
+        }
+
+        grid.innerHTML = visiblePackages.map(({ pkg, index }) => {
+            const theme = advPackageTheme(pkg);
+            const features = advFeatures(pkg.features);
+            const orderable = pkg.is_orderable === true;
+            const price = advNumber(pkg.price) > 0 ? advMoney(pkg.price, pkg.currency) : 'Contact AJM for pricing';
+            const product = pkg.product_type === 'webpage' ? 'Business webpage' : 'Display advertisement';
+            return `<button type="button" class="pkg-tile${orderable ? '' : ' unavailable'}" id="pkg-tile-${index}" data-adv-package-index="${index}" ${orderable ? '' : 'disabled'} style="width:100%;text-align:left;color:inherit;background:${theme.bg};border-color:${theme.border};font:inherit;">
+                <span class="pkg-tile-badge" style="background:${theme.badgeBg};color:${theme.badge};">${advEscape(theme.label)}</span>
+                <span class="pkg-tile-name" style="display:block;">${advEscape(pkg.name)}</span>
+                <span class="pkg-tile-price" style="display:block;">${advEscape(price)}</span>
+                <span class="pkg-tile-duration" style="display:block;">${advEscape(pkg.duration_days)} days · ${advEscape(product)}</span>
+                ${pkg.description ? `<span style="display:block;font-size:.82rem;color:#b9c0d4;margin-bottom:12px;">${advEscape(pkg.description)}</span>` : ''}
+                ${features.length ? `<span class="pkg-tile-features" style="display:flex;">${features.map((feature) => `<span style="font-size:.8rem;color:#b9c0d4;">✓ ${advEscape(feature)}</span>`).join('')}</span>` : ''}
+                ${orderable ? '' : '<span class="pkg-unavailable" style="display:block;">Pricing or bank-transfer details are not configured yet.</span>'}
+            </button>`;
+        }).join('');
+
+        grid.querySelectorAll('[data-adv-package-index]').forEach((card) => {
+            card.addEventListener('click', () => window.selectAdvPackage(Number(card.dataset.advPackageIndex)));
+        });
+    }
+
+    async function loadAdvPackages(force = false) {
+        if (advPackages.length && !force) return advPackages;
+        if (advCatalogPromise && !force) return advCatalogPromise;
+        const grid = advEl('adv-pkg-grid');
+        grid.innerHTML = '<div style="color:#b9c0d4;text-align:center;padding:40px;grid-column:1/-1;">Loading current packages…</div>';
+        advCatalogPromise = (async () => {
+            const { data, error } = await sb.rpc('get_ad_catalog');
             if (error) throw error;
-            advPackages = pkgs || [];
-
-            // Load default payment account
-            const { data: accounts } = await sb.from('payment_accounts')
-                .select('*').eq('is_active', true).eq('is_default', true).limit(1);
-            if (!accounts || accounts.length === 0) {
-                const { data: allAccounts } = await sb.from('payment_accounts')
-                    .select('*').eq('is_active', true).order('sort_order').limit(1);
-                advDefaultAccount = allAccounts?.[0] || null;
-            } else {
-                advDefaultAccount = accounts[0];
-            }
-
-            if (!advPackages.length) {
-                grid.innerHTML = '<div style="color:#b9c0d4;text-align:center;padding:40px;grid-column:1/-1;">No packages available at this time.</div>';
-                return;
-            }
-
-            const tierColors = {
-                'silver': { bg: 'rgba(180,180,200,0.08)', border: 'rgba(180,180,200,0.3)', badge: '#b9c0d4', badgeBg: 'rgba(180,180,200,0.1)' },
-                'gold': { bg: 'rgba(255,207,51,0.06)', border: 'rgba(255,207,51,0.3)', badge: '#ffcf33', badgeBg: 'rgba(255,207,51,0.1)' },
-                'platinum': { bg: 'rgba(91,156,246,0.06)', border: 'rgba(91,156,246,0.3)', badge: '#5b9cf6', badgeBg: 'rgba(91,156,246,0.1)' },
-            };
-
-            grid.innerHTML = advPackages.map((p, i) => {
-                const code = (p.code || '').toLowerCase();
-                const tier = code.includes('platinum') ? 'platinum' : code.includes('gold') ? 'gold' : 'silver';
-                const colors = tierColors[tier] || tierColors.silver;
-                const features = p.features ? Object.entries(p.features).filter(([,v]) => v && v !== false).map(([k,v]) => {
-                    const labels = { images: `Up to ${v} images`, video: 'Video support', featured: 'Featured listing', sidebar: 'Sidebar placement' };
-                    return labels[k] || k.replace(/_/g,' ');
-                }) : [];
-
-                return `<div class="pkg-tile" id="pkg-tile-${i}" onclick="selectAdvPackage(${i})"
-                    style="background:${colors.bg};border-color:${colors.border};">
-                    <div class="pkg-tile-badge" style="background:${colors.badgeBg};color:${colors.badge};">${tier.toUpperCase()}</div>
-                    <div class="pkg-tile-name">${p.name}</div>
-                    <div class="pkg-tile-price">${p.currency} ${Number(p.price).toLocaleString()}</div>
-                    <div class="pkg-tile-duration">${p.duration_days} days · ${p.product_type || 'display ad'}</div>
-                    ${p.description ? `<div style="font-size:0.82rem;color:#b9c0d4;margin-bottom:12px;">${p.description}</div>` : ''}
-                    ${features.length ? `<ul class="pkg-tile-features">${features.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}
-                </div>`;
-            }).join('');
-        } catch(err) {
-            grid.innerHTML = `<div style="color:#ff4d5e;text-align:center;padding:40px;grid-column:1/-1;">Could not load packages: ${err.message}</div>`;
+            advPackages = Array.isArray(data?.packages) ? data.packages : [];
+            renderAdvPackages();
+            return advPackages;
+        })();
+        try {
+            return await advCatalogPromise;
+        } catch (error) {
+            grid.textContent = advFriendlyError(error, 'Advertising packages could not be loaded. Please try again.');
+            grid.style.color = '#ff9aaa';
+            grid.style.padding = '40px';
+            grid.style.gridColumn = '1 / -1';
+            advCatalogPromise = null;
+            return [];
         }
     }
 
     window.selectAdvPackage = function(idx) {
-        advSelectedPkg = advPackages[idx];
-        document.querySelectorAll('.pkg-tile').forEach(t => t.classList.remove('selected'));
-        document.getElementById(`pkg-tile-${idx}`)?.classList.add('selected');
-        document.getElementById('adv-next-btn').disabled = false;
+        const pkg = advPackages[idx];
+        if (!pkg || pkg.is_orderable !== true) return;
+        advSelectedPkg = pkg;
+        advCurrentOrder = null;
+        document.querySelectorAll('#adv-pkg-grid .pkg-tile').forEach((tile) => tile.classList.remove('selected'));
+        advEl(`pkg-tile-${idx}`)?.classList.add('selected');
+        advEl('adv-next-btn').disabled = false;
+        sessionStorage.setItem('ajmSelectedAdPackage', String(pkg.code || ''));
     };
 
     window.advGoToStep1 = function() {
-        document.querySelectorAll('.adv-step').forEach(s => s.classList.remove('active'));
-        document.getElementById('adv-step-1').classList.add('active');
+        advCurrentOrder = null;
+        advPendingProof = null;
+        advShowStep('adv-step-1');
     };
+
+    async function loadAdvOwnedListings(force = false) {
+        if (advOwnedListings.length && !force) return advOwnedListings;
+        if (advListingsPromise && !force) return advListingsPromise;
+        if (!advCurrentUser) return [];
+        advListingsPromise = (async () => {
+            const { data, error } = await sb.from('listings')
+                .select('id,business_name,status')
+                .eq('owner_user_id', advCurrentUser.id)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            advOwnedListings = data || [];
+            return advOwnedListings;
+        })();
+        try {
+            return await advListingsPromise;
+        } finally {
+            advListingsPromise = null;
+        }
+    }
+
+    function advSelectedOptions() {
+        const selectedIds = [...document.querySelectorAll('input[name="adv-package-option"]:checked')].map((input) => input.value);
+        return (advSelectedPkg?.options || []).filter((option) => selectedIds.includes(String(option.id)));
+    }
+
+    function updateAdvOrderTotal() {
+        if (!advSelectedPkg) return;
+        const options = advSelectedOptions();
+        const total = advNumber(advSelectedPkg.price) + options.reduce((sum, option) => sum + advNumber(option.price_delta), 0);
+        const duration = advNumber(advSelectedPkg.duration_days) + options.reduce((sum, option) => sum + advNumber(option.duration_days_delta), 0);
+        advEl('adv-order-total').textContent = `${advMoney(total, advSelectedPkg.currency)} · ${duration} days`;
+    }
+
+    function renderAdvOptions() {
+        const options = Array.isArray(advSelectedPkg?.options) ? advSelectedPkg.options : [];
+        const wrap = advEl('adv-options-wrap');
+        const list = advEl('adv-options-list');
+        if (!options.length) {
+            wrap.style.display = 'none';
+            list.textContent = '';
+            updateAdvOrderTotal();
+            return;
+        }
+        wrap.style.display = 'block';
+        list.innerHTML = options.map((option) => {
+            const adjustments = [];
+            if (advNumber(option.price_delta)) adjustments.push(`${advNumber(option.price_delta) > 0 ? '+' : ''}${advMoney(option.price_delta, advSelectedPkg.currency)}`);
+            if (advNumber(option.duration_days_delta)) adjustments.push(`${advNumber(option.duration_days_delta) > 0 ? '+' : ''}${advNumber(option.duration_days_delta)} days`);
+            const detail = [option.description, ...adjustments].filter(Boolean).join(' · ');
+            return `<label class="adv-option"><input type="checkbox" name="adv-package-option" value="${advEscape(option.id)}" /><span class="adv-option-copy"><strong>${advEscape(option.name)}</strong>${detail ? `<span>${advEscape(detail)}</span>` : ''}</span></label>`;
+        }).join('');
+        list.querySelectorAll('input').forEach((input) => input.addEventListener('change', updateAdvOrderTotal));
+        updateAdvOrderTotal();
+    }
+
+    async function renderAdvProductFields() {
+        const isWebpage = advSelectedPkg.product_type === 'webpage';
+        advEl('adv-webpage-fields').style.display = isWebpage ? 'block' : 'none';
+        advEl('adv-display-fields').style.display = isWebpage ? 'none' : 'block';
+        if (!isWebpage) return;
+
+        const select = advEl('adv-listing-select');
+        select.innerHTML = '<option value="">Loading your listings…</option>';
+        try {
+            const listings = await loadAdvOwnedListings(true);
+            const eligibleListings = listings.filter((listing) => ['approved', 'pending'].includes(listing.status));
+            select.innerHTML = '<option value="">Select your listing</option>' + listings.map((listing) => {
+                const eligible = ['approved', 'pending'].includes(listing.status);
+                return `<option value="${advEscape(listing.id)}" ${eligible ? '' : 'disabled'}>${advEscape(listing.business_name)} (${advEscape(advStatusLabel(listing.status))}${eligible ? '' : ' · unavailable'})</option>`;
+            }).join('');
+            if (advPreferredListingId && eligibleListings.some((listing) => String(listing.id) === String(advPreferredListingId))) {
+                select.value = String(advPreferredListingId);
+            }
+            advEl('adv-no-listings').classList.toggle('show', eligibleListings.length === 0);
+        } catch (error) {
+            select.innerHTML = '<option value="">Listings could not be loaded</option>';
+            advShowAlert('adv-config-error', advFriendlyError(error, 'Your listings could not be loaded.'), 'error');
+        }
+    }
 
     window.advGoToStep2 = async function() {
-        if (!advSelectedPkg) return;
-
-        // Check auth
+        if (!advSelectedPkg || advSelectedPkg.is_orderable !== true) return;
         if (!advCurrentUser) {
-            document.querySelectorAll('.adv-step').forEach(s => s.classList.remove('active'));
-            document.getElementById('adv-step-login').classList.add('active');
+            advShowStep('adv-step-login');
+            return;
+        }
+        advCurrentOrder = null;
+        lockAdvConfiguration(false);
+        advEl('adv-create-order-btn').textContent = 'Create Order & View Bank Details →';
+        advShowAlert('adv-config-error', '');
+        advEl('adv-selected-pkg-name').textContent = advSelectedPkg.name || 'Advertising package';
+        advEl('adv-selected-pkg-price').textContent = `${advMoney(advSelectedPkg.price, advSelectedPkg.currency)} for ${advSelectedPkg.duration_days} days`;
+        advEl('adv-customer-notes').value = '';
+        ['adv-headline', 'adv-body-text', 'adv-cta-label', 'adv-cta-url'].forEach((id) => { if (advEl(id)) advEl(id).value = ''; });
+        if (advEl('adv-creative-file')) advEl('adv-creative-file').value = '';
+        renderAdvOptions();
+        advShowStep('adv-step-2');
+        await renderAdvProductFields();
+    };
+
+    const ADV_CREATIVE_TYPES = new Map([
+        ['image/jpeg', 'jpg'], ['image/png', 'png'], ['image/webp', 'webp'], ['image/gif', 'gif'],
+        ['video/mp4', 'mp4'], ['video/webm', 'webm']
+    ]);
+    const ADV_PROOF_TYPES = new Map([
+        ['image/jpeg', 'jpg'], ['image/png', 'png'], ['image/webp', 'webp'], ['application/pdf', 'pdf']
+    ]);
+
+    function advHttpUrl(value) {
+        try {
+            const url = new URL(String(value || '').trim());
+            return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+        } catch (_) {
+            return '';
+        }
+    }
+
+    let advSessionToken = '';
+    const observedAdIds = new Set();
+
+    function getAdSessionToken() {
+        if (advSessionToken) return advSessionToken;
+        try {
+            const stored = localStorage.getItem('ajm_ad_session_token');
+            if (stored && stored.length >= 8) advSessionToken = stored;
+            else {
+                advSessionToken = crypto.randomUUID();
+                localStorage.setItem('ajm_ad_session_token', advSessionToken);
+            }
+        } catch (_) {
+            advSessionToken = crypto.randomUUID();
+        }
+        return advSessionToken;
+    }
+
+    function recordDeliveredAdEvent(ad, eventType) {
+        if (!ad?.id) return;
+        sb.rpc('record_ad_event', {
+            p_advertisement_id: ad.id,
+            p_event_type: eventType,
+            p_session_token: getAdSessionToken(),
+            p_metadata: { page: 'ajm-advertising-hub', placement: ad.placement || 'unknown' }
+        }).then(({ error }) => {
+            if (error) console.warn(`Advertisement ${eventType} tracking failed:`, error.message);
+        });
+    }
+
+    function deliveredAdMedia(ad) {
+        const metadata = ad?.creative_metadata && typeof ad.creative_metadata === 'object' && !Array.isArray(ad.creative_metadata)
+            ? ad.creative_metadata
+            : {};
+        const metadataUrl = advHttpUrl(metadata.media_url || metadata.public_url || '');
+        if (metadataUrl) return { url: metadataUrl, type: String(metadata.media_type || '') };
+        const path = String(ad?.creative_path || '').trim();
+        if (!path) return { url: '', type: String(metadata.media_type || '') };
+        const encodedPath = path.split('/').map((part) => encodeURIComponent(part)).join('/');
+        return {
+            url: `${ADVERTISING_SUPABASE_URL}/storage/v1/object/public/ad-creatives/${encodedPath}`,
+            type: String(metadata.media_type || (path.match(/\.(mp4|webm)$/i) ? 'video/mp4' : 'image'))
+        };
+    }
+
+    function observeDeliveredAd(article, ad) {
+        if (!('IntersectionObserver' in window)) {
+            if (!observedAdIds.has(ad.id)) {
+                observedAdIds.add(ad.id);
+                recordDeliveredAdEvent(ad, 'impression');
+            }
+            return;
+        }
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting || entry.intersectionRatio < .35 || observedAdIds.has(ad.id)) return;
+                observedAdIds.add(ad.id);
+                recordDeliveredAdEvent(ad, 'impression');
+                observer.disconnect();
+            });
+        }, { threshold: [.35] });
+        observer.observe(article);
+    }
+
+    function buildDeliveredAd(ad) {
+        const article = document.createElement('article');
+        article.className = 'delivered-ad';
+        const media = deliveredAdMedia(ad);
+        const destination = advHttpUrl(ad.cta_url);
+        let mediaElement = null;
+        if (media.url && media.type.toLowerCase().startsWith('video')) {
+            mediaElement = document.createElement('video');
+            mediaElement.controls = true;
+            mediaElement.muted = true;
+            mediaElement.playsInline = true;
+            mediaElement.preload = 'metadata';
+            mediaElement.src = media.url;
+        } else if (media.url) {
+            mediaElement = document.createElement('img');
+            mediaElement.src = media.url;
+            mediaElement.alt = ad.headline || ad.business_name || 'Sponsored advertisement';
+            mediaElement.loading = 'lazy';
+            mediaElement.referrerPolicy = 'no-referrer';
+        }
+        if (mediaElement) {
+            mediaElement.className = 'delivered-ad-media';
+            if (destination) {
+                const mediaLink = document.createElement('a');
+                mediaLink.href = destination;
+                mediaLink.target = '_blank';
+                mediaLink.rel = 'noopener noreferrer sponsored';
+                mediaLink.addEventListener('click', () => recordDeliveredAdEvent(ad, 'click'));
+                mediaLink.appendChild(mediaElement);
+                article.appendChild(mediaLink);
+            } else article.appendChild(mediaElement);
+        }
+
+        const copy = document.createElement('div');
+        copy.className = 'delivered-ad-copy';
+        const label = document.createElement('span');
+        label.className = 'delivered-ad-label';
+        label.textContent = `Sponsored${ad.business_name ? ` · ${ad.business_name}` : ''}`;
+        const heading = document.createElement('h4');
+        heading.textContent = ad.headline || ad.business_name || ad.package_name || 'Featured advertisement';
+        copy.append(label, heading);
+        if (ad.body_text) {
+            const body = document.createElement('p');
+            body.textContent = ad.body_text;
+            copy.appendChild(body);
+        }
+        if (destination) {
+            const cta = document.createElement('a');
+            cta.className = 'delivered-ad-cta';
+            cta.href = destination;
+            cta.target = '_blank';
+            cta.rel = 'noopener noreferrer sponsored';
+            cta.textContent = `${ad.cta_label || 'Learn more'} →`;
+            cta.addEventListener('click', () => recordDeliveredAdEvent(ad, 'click'));
+            copy.appendChild(cta);
+        }
+        article.appendChild(copy);
+        observeDeliveredAd(article, ad);
+        return article;
+    }
+
+    function renderDeliveredAdFallback(container, compact = false) {
+        container.textContent = '';
+        const card = document.createElement('div');
+        card.className = 'delivered-ad delivered-ad-house';
+        const title = document.createElement('strong');
+        title.textContent = 'Your business could be featured here.';
+        const text = document.createElement('p');
+        text.textContent = compact ? 'Choose a package for this AJM placement.' : 'Reach visitors browsing Jamaica businesses and opportunities.';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-primary';
+        button.textContent = 'View packages';
+        button.addEventListener('click', () => window.openAdvertiseModal());
+        card.append(title, text, button);
+        container.appendChild(card);
+    }
+
+    async function loadDeliveredAds(placement, containerId, limit) {
+        const container = advEl(containerId);
+        if (!container) return;
+        const { data, error } = await sb.rpc('get_active_advertisements', {
+            p_placement: placement,
+            p_limit: limit
+        });
+        if (error) {
+            console.warn(`Could not load ${placement} advertisements:`, error.message);
+            renderDeliveredAdFallback(container, placement === 'hub-sidebar');
+            return;
+        }
+        const advertisements = Array.isArray(data?.advertisements) ? data.advertisements : [];
+        container.textContent = '';
+        if (!advertisements.length) {
+            renderDeliveredAdFallback(container, placement === 'hub-sidebar');
+            return;
+        }
+        advertisements.forEach((ad) => container.appendChild(buildDeliveredAd(ad)));
+    }
+
+    async function loadHubAdvertisements() {
+        await Promise.all([
+            loadDeliveredAds('directory-featured', 'directory-featured-ads', 4),
+            loadDeliveredAds('hub-sidebar', 'hub-sidebar-ads', 4)
+        ]);
+    }
+
+    function getAdvConfiguration() {
+        if (!advSelectedPkg) throw new Error('Choose an advertising package first.');
+        const options = advSelectedOptions();
+        const configuration = {
+            listingId: null,
+            optionIds: options.map((option) => option.id),
+            notes: advEl('adv-customer-notes').value.trim() || null,
+            creative: {},
+            creativeFile: null
+        };
+
+        if (advSelectedPkg.product_type === 'webpage') {
+            configuration.listingId = advEl('adv-listing-select').value || null;
+            if (!configuration.listingId) throw new Error('Select the business listing for this webpage package.');
+            return configuration;
+        }
+
+        const headline = advEl('adv-headline').value.trim();
+        const bodyText = advEl('adv-body-text').value.trim();
+        const ctaLabel = advEl('adv-cta-label').value.trim();
+        const ctaUrl = advHttpUrl(advEl('adv-cta-url').value);
+        const creativeFile = advEl('adv-creative-file').files?.[0] || null;
+        if (!headline || !bodyText || !ctaLabel || !ctaUrl) throw new Error('Complete the headline, message, button label and a valid http(s) destination URL.');
+        if (!creativeFile) throw new Error('Select an advertisement image or video.');
+        if (!ADV_CREATIVE_TYPES.has(creativeFile.type)) throw new Error('Creative must be JPG, PNG, WebP, GIF, MP4 or WebM.');
+        if (creativeFile.size > 20 * 1024 * 1024) throw new Error('Creative files must be 20 MB or smaller.');
+
+        configuration.creativeFile = creativeFile;
+        configuration.creative = {
+            title: headline,
+            headline,
+            body_text: bodyText,
+            cta_label: ctaLabel,
+            cta_url: ctaUrl,
+            destination_url: ctaUrl,
+            original_filename: creativeFile.name,
+            media_type: creativeFile.type,
+            metadata: {
+                original_filename: creativeFile.name,
+                media_type: creativeFile.type
+            }
+        };
+        return configuration;
+    }
+
+    function lockAdvConfiguration(locked) {
+        advEl('adv-step-2')?.querySelectorAll('input, textarea, select').forEach((field) => { field.disabled = locked; });
+    }
+
+    async function uploadAdvCreative(order, configuration) {
+        if (order.creative_path) return order;
+        const extension = ADV_CREATIVE_TYPES.get(configuration.creativeFile.type);
+        const path = `${advCurrentUser.id}/${order.id}/${crypto.randomUUID()}.${extension}`;
+        const { error: uploadError } = await sb.storage.from('ad-creatives').upload(path, configuration.creativeFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: configuration.creativeFile.type
+        });
+        if (uploadError) throw uploadError;
+        const { data: publicData } = sb.storage.from('ad-creatives').getPublicUrl(path);
+        const creative = {
+            ...configuration.creative,
+            media_url: publicData?.publicUrl || null,
+            metadata: {
+                ...(configuration.creative.metadata || {}),
+                media_url: publicData?.publicUrl || null
+            }
+        };
+        const { data, error } = await sb.rpc('submit_ad_creative', {
+            p_order_id: order.id,
+            p_creative: creative,
+            p_creative_path: path
+        });
+        if (error) throw error;
+        return data || { ...order, creative_snapshot: creative, creative_path: path };
+    }
+
+    function renderAdvPayment(order) {
+        if (!order) return;
+        advCurrentOrder = order;
+        advPendingProof = null;
+        const account = order.payment_account_snapshot && typeof order.payment_account_snapshot === 'object' ? order.payment_account_snapshot : {};
+        const details = [
+            ['Bank', account.bank_name],
+            ['Account name', account.account_name],
+            ['Account number', account.account_number],
+            ['Account type', account.account_type],
+            ['Branch', account.branch_name],
+            ['Routing number', account.routing_number],
+            ['SWIFT code', account.swift_code],
+            ['Currency', account.currency || order.currency_snapshot],
+            ['Amount due', advMoney(order.total_price_snapshot, order.currency_snapshot)]
+        ].filter(([, value]) => value !== null && value !== undefined && value !== '');
+        advEl('adv-payment-details').innerHTML = details.length
+            ? details.map(([label, value]) => `<div class="payment-detail"><label>${advEscape(label)}</label><span>${advEscape(value)}</span></div>`).join('')
+            : '<div style="color:#ff9aaa;font-size:.86rem;grid-column:1/-1;">Bank-transfer details are unavailable. Please contact AJM and quote your order number.</div>';
+        advEl('adv-payment-instructions-text').textContent = account.instructions || `Transfer the exact amount and include ${order.order_number} in the bank reference.`;
+        advEl('adv-order-number').textContent = order.order_number || '—';
+        advEl('adv-payment-package').textContent = `${order.package_name_snapshot || 'Advertising package'} · ${advMoney(order.total_price_snapshot, order.currency_snapshot)}`;
+        advEl('adv-payment-ref').value = order.payment_reference || '';
+        advEl('adv-proof-file').value = '';
+        advShowAlert('adv-payment-error', '');
+        advShowAlert('adv-payment-success', '');
+        const canSubmit = ['pending_payment', 'payment_submitted'].includes(order.status);
+        advEl('adv-payment-actions').style.display = canSubmit ? 'flex' : 'none';
+        const isWebpageOrder = order.product_type_snapshot === 'webpage';
+        if (order.status === 'payment_submitted') {
+            advShowAlert('adv-payment-message', 'AJM has received payment proof for this order. You may upload a replacement while it is awaiting review.', 'info');
+        } else if (canSubmit) {
+            advShowAlert(
+                'adv-payment-message',
+                isWebpageOrder
+                    ? 'Make the bank transfer, then upload proof below. The webpage builder unlocks after AJM confirms payment and activates the package.'
+                    : 'Make the bank transfer, then upload proof below. The advertisement stays offline until AJM confirms payment.',
+                'info'
+            );
+        } else {
+            advShowAlert('adv-payment-message', `This order is ${advStatusLabel(order.status)}. Payment proof cannot be changed in this state.`, 'info');
+        }
+        advShowStep('adv-step-payment');
+    }
+
+    window.createAdOrder = async function() {
+        if (!advCurrentUser) return window.triggerLoginFromModal();
+        const button = advEl('adv-create-order-btn');
+        advShowAlert('adv-config-error', '');
+        let configuration;
+        try {
+            configuration = getAdvConfiguration();
+        } catch (error) {
+            advShowAlert('adv-config-error', error.message, 'error');
             return;
         }
 
-        document.querySelectorAll('.adv-step').forEach(s => s.classList.remove('active'));
-        document.getElementById('adv-step-2').classList.add('active');
-        document.getElementById('adv-selected-pkg-name').textContent = advSelectedPkg.name;
-        document.getElementById('adv-selected-pkg-price').textContent = `${advSelectedPkg.currency} ${Number(advSelectedPkg.price).toLocaleString()} for ${advSelectedPkg.duration_days} days`;
-        document.getElementById('adv-order-success').style.display = 'none';
-        document.getElementById('adv-order-error').style.display = 'none';
-        document.getElementById('adv-order-actions').style.display = 'flex';
-        document.getElementById('adv-payment-ref').value = '';
+        button.disabled = true;
+        button.textContent = advCurrentOrder ? 'Retrying creative upload…' : 'Creating secure order…';
+        try {
+            if (!advCurrentOrder) {
+                const { data, error } = await sb.rpc('create_ad_order', {
+                    p_package_id: advSelectedPkg.id,
+                    p_listing_id: configuration.listingId,
+                    p_option_ids: configuration.optionIds,
+                    p_customer_notes: configuration.notes,
+                    p_creative: configuration.creative
+                });
+                if (error) throw error;
+                if (!data?.id) throw new Error('The order was not returned by the server.');
+                advCurrentOrder = data;
+                lockAdvConfiguration(true);
+            }
 
-        // Load payment account for this package
-        let account = advDefaultAccount;
-        if (advSelectedPkg.payment_account_id) {
-            try {
-                const { data } = await sb.from('payment_accounts').select('*').eq('id', advSelectedPkg.payment_account_id).single();
-                if (data) account = data;
-            } catch(_) {}
-        }
-
-        const pd = document.getElementById('adv-payment-details');
-        const pit = document.getElementById('adv-payment-instructions-text');
-        if (account) {
-            pd.innerHTML = [
-                { label: 'Bank', value: account.bank_name },
-                { label: 'Account Name', value: account.account_name },
-                { label: 'Account Number', value: account.account_number },
-                { label: 'Account Type', value: account.account_type },
-                { label: 'Branch', value: account.branch_name },
-                { label: 'Currency', value: account.currency },
-            ].filter(d => d.value).map(d => `<div class="payment-detail"><label>${d.label}</label><span>${d.value}</span></div>`).join('');
-            pit.textContent = account.instructions || 'Transfer the exact amount and use your order number as the payment reference.';
-        } else {
-            pd.innerHTML = '<div style="color:#b9c0d4;font-size:0.86rem;">Payment details will be provided upon order confirmation. Our team will contact you.</div>';
-            pit.textContent = '';
+            if (advSelectedPkg.product_type === 'display_ad') {
+                button.textContent = 'Uploading advertisement creative…';
+                advCurrentOrder = await uploadAdvCreative(advCurrentOrder, configuration);
+            }
+            renderAdvPayment(advCurrentOrder);
+            window.loadMyAdOrders(true);
+        } catch (error) {
+            const prefix = advCurrentOrder?.order_number ? `Order ${advCurrentOrder.order_number} was created, but the next step failed. ` : '';
+            advShowAlert('adv-config-error', prefix + advFriendlyError(error, 'The order could not be created. Please try again.'), 'error');
+            button.textContent = advCurrentOrder ? 'Retry Creative Upload & Continue →' : 'Create Order & View Bank Details →';
+        } finally {
+            button.disabled = false;
+            if (!advCurrentOrder) button.textContent = 'Create Order & View Bank Details →';
         }
     };
 
-    window.submitAdOrder = async function() {
-        if (!advSelectedPkg || !advCurrentUser) return;
-        const ref = document.getElementById('adv-payment-ref').value.trim();
-        if (!ref) {
-            document.getElementById('adv-order-error').style.display = 'block';
-            document.getElementById('adv-order-error').textContent = 'Please enter your payment reference number.';
+    window.submitAdPaymentProof = async function() {
+        if (!advCurrentUser || !advCurrentOrder) return;
+        const file = advEl('adv-proof-file').files?.[0] || null;
+        if (!advPendingProof && !file) {
+            advShowAlert('adv-payment-error', 'Select an image or PDF showing the completed bank transfer.', 'error');
             return;
         }
-        const btn = document.getElementById('adv-submit-btn');
-        btn.disabled = true;
-        btn.textContent = 'Submitting…';
-        document.getElementById('adv-order-error').style.display = 'none';
-
-        try {
-            let account = advDefaultAccount;
-            if (advSelectedPkg.payment_account_id) {
-                try {
-                    const { data } = await sb.from('payment_accounts').select('*').eq('id', advSelectedPkg.payment_account_id).single();
-                    if (data) account = data;
-                } catch(_) {}
-            }
-
-            const orderNumber = 'AJM-' + Date.now().toString(36).toUpperCase();
-            const orderPayload = {
-                user_id: advCurrentUser.id,
-                ad_package_id: advSelectedPkg.id,
-                order_number: orderNumber,
-                package_name_snapshot: advSelectedPkg.name,
-                package_code_snapshot: advSelectedPkg.code || advSelectedPkg.id,
-                package_description_snapshot: advSelectedPkg.description || null,
-                duration_days_snapshot: advSelectedPkg.duration_days,
-                base_price_snapshot: advSelectedPkg.price,
-                total_price_snapshot: advSelectedPkg.price,
-                currency_snapshot: advSelectedPkg.currency,
-                payment_account_id: account?.id || null,
-                payment_account_snapshot: account ? {
-                    bank_name: account.bank_name,
-                    account_name: account.account_name,
-                    account_number: account.account_number,
-                    account_type: account.account_type,
-                    branch_name: account.branch_name,
-                    currency: account.currency,
-                    instructions: account.instructions
-                } : null,
-                payment_reference: ref,
-                customer_notes: document.getElementById('adv-customer-notes').value.trim() || null,
-                status: 'payment_submitted'
-            };
-
-            const { data: order, error } = await sb.from('ad_orders').insert(orderPayload).select('id,order_number').single();
-            if (error) throw error;
-
-            document.getElementById('adv-order-success').style.display = 'block';
-            document.getElementById('adv-order-number').textContent = order.order_number;
-            document.getElementById('adv-order-actions').style.display = 'none';
-        } catch(err) {
-            document.getElementById('adv-order-error').style.display = 'block';
-            document.getElementById('adv-order-error').textContent = 'Error: ' + err.message;
-        } finally {
-            btn.disabled = false;
-            btn.textContent = '✓ Submit Order';
+        if (file && !ADV_PROOF_TYPES.has(file.type)) {
+            advShowAlert('adv-payment-error', 'Payment proof must be JPG, PNG, WebP or PDF.', 'error');
+            return;
         }
+        if (file && file.size > 10 * 1024 * 1024) {
+            advShowAlert('adv-payment-error', 'Payment proof must be 10 MB or smaller.', 'error');
+            return;
+        }
+
+        const button = advEl('adv-submit-proof-btn');
+        button.disabled = true;
+        button.textContent = 'Uploading proof…';
+        advShowAlert('adv-payment-error', '');
+        advShowAlert('adv-payment-success', '');
+        try {
+            let proofPath = advPendingProof?.orderId === advCurrentOrder.id ? advPendingProof.path : null;
+            if (!proofPath) {
+                const extension = ADV_PROOF_TYPES.get(file.type);
+                proofPath = `${advCurrentUser.id}/${advCurrentOrder.id}/${crypto.randomUUID()}.${extension}`;
+                const { error: uploadError } = await sb.storage.from('ad-payment-proofs').upload(proofPath, file, {
+                    cacheControl: '3600',
+                    upsert: false,
+                    contentType: file.type
+                });
+                if (uploadError) throw uploadError;
+                advPendingProof = { orderId: advCurrentOrder.id, path: proofPath };
+            }
+            button.textContent = 'Notifying AJM…';
+            const { data, error } = await sb.rpc('submit_ad_payment_proof', {
+                p_order_id: advCurrentOrder.id,
+                p_proof_path: proofPath,
+                p_payment_reference: advEl('adv-payment-ref').value.trim() || null
+            });
+            if (error) throw error;
+            advCurrentOrder = data || { ...advCurrentOrder, status: 'payment_submitted', payment_proof_path: proofPath };
+            advPendingProof = null;
+            const activationTarget = advCurrentOrder.product_type_snapshot === 'webpage' ? 'webpage package' : 'advertisement';
+            advShowAlert(
+                'adv-payment-success',
+                advCurrentOrder.product_type_snapshot === 'webpage'
+                    ? `Payment proof for ${advCurrentOrder.order_number} was submitted. AJM will review it, activate the webpage package and email you. After approval, open Member Dashboard → Edit Webpage → Save Draft → Publish.`
+                    : `Payment proof for ${advCurrentOrder.order_number} was submitted. AJM will review it before activating the ${activationTarget}.`,
+                'success'
+            );
+            advEl('adv-payment-actions').style.display = 'none';
+            window.loadMyAdOrders(true);
+        } catch (error) {
+            advShowAlert('adv-payment-error', advFriendlyError(error, 'Payment proof could not be submitted. Please try again.'), 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = 'Upload Proof & Notify AJM';
+        }
+    };
+
+    function renderMyAdOrders() {
+        const tbody = advEl('md-orders-tbody');
+        if (!tbody) return;
+        if (!advMyOrders.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted);">You have not placed any paid advertising orders.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = advMyOrders.map((order) => {
+            const canPay = ['pending_payment', 'payment_submitted'].includes(order.status);
+            const isWebpage = order.product_type_snapshot === 'webpage' && order.listing_id;
+            const canBuild = isWebpage && order.status === 'approved';
+            const date = order.created_at ? new Date(order.created_at).toLocaleDateString() : '';
+            return `<tr style="border-bottom:1px solid rgba(255,255,255,.06);">
+                <td style="padding:11px 10px;"><strong>${advEscape(order.order_number)}</strong><br><small style="color:var(--muted);">${advEscape(date)}</small></td>
+                <td style="padding:11px 10px;">${advEscape(order.package_name_snapshot)}<br><small style="color:var(--muted);">${advEscape(advMoney(order.total_price_snapshot, order.currency_snapshot))}</small></td>
+                <td style="padding:11px 10px;"><span class="adv-status ${advStatusClass(order.status)}">${advEscape(advStatusLabel(order.status))}</span></td>
+                <td style="padding:11px 10px;">${canPay
+                    ? `<button type="button" class="btn btn-ghost" data-adv-resume-order="${advEscape(order.id)}" style="padding:6px 10px;font-size:.75rem;">${order.status === 'payment_submitted' ? 'View payment' : 'Pay / upload proof'}</button>`
+                    : canBuild
+                        ? `<a class="btn btn-ghost" href="ajm-webpage-builder.html?listing=${encodeURIComponent(order.listing_id)}" style="padding:6px 10px;font-size:.75rem;">Open builder</a>`
+                        : '<span style="color:var(--muted);font-size:.75rem;">—</span>'}</td>
+            </tr>`;
+        }).join('');
+        tbody.querySelectorAll('[data-adv-resume-order]').forEach((button) => {
+            button.addEventListener('click', () => window.openAdOrderPayment(button.dataset.advResumeOrder));
+        });
+    }
+
+    window.loadMyAdOrders = async function(force = false) {
+        const tbody = advEl('md-orders-tbody');
+        if (!advCurrentUser) {
+            const { data: { session } } = await sb.auth.getSession();
+            advCurrentUser = session?.user || null;
+        }
+        if (!advCurrentUser) {
+            if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted);">Sign in to view advertising orders.</td></tr>';
+            return [];
+        }
+        if (advMyOrders.length && !force) {
+            renderMyAdOrders();
+            return advMyOrders;
+        }
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted);">Loading orders…</td></tr>';
+        const { data, error } = await sb.rpc('get_my_ad_orders');
+        if (error) {
+            if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#ff9aaa;">${advEscape(advFriendlyError(error, 'Orders could not be loaded.'))}</td></tr>`;
+            return [];
+        }
+        advMyOrders = Array.isArray(data?.orders) ? data.orders : [];
+        renderMyAdOrders();
+        return advMyOrders;
+    };
+
+    window.openAdOrderPayment = function(orderId) {
+        const order = advMyOrders.find((item) => String(item.id) === String(orderId));
+        if (!order) return;
+        if (typeof window.closeModal === 'function') window.closeModal('member-dashboard-modal');
+        advEl('advertise-modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        renderAdvPayment(order);
     };
 
     window.triggerLoginFromModal = function() {
-        closeAdvertiseModal();
-        // Trigger the main page's sign-in flow if available
-        if (typeof window.openAuthModal === 'function') window.openAuthModal('login');
-        else if (document.getElementById('auth-modal')) document.getElementById('auth-modal').classList.add('open');
+        sessionStorage.setItem('ajmResumeAdCheckout', '1');
+        if (advSelectedPkg?.code) sessionStorage.setItem('ajmSelectedAdPackage', advSelectedPkg.code);
+        window.closeAdvertiseModal();
+        if (typeof window.openModal === 'function') {
+            window.openModal('auth-modal');
+            if (typeof window.switchAuthTab === 'function') window.switchAuthTab('login');
+        } else {
+            advEl('auth-modal')?.classList.add('open');
+        }
     };
 
-    window.openAdvertiseModal = async function() {
-        document.getElementById('advertise-modal').classList.add('open');
-        document.querySelectorAll('.adv-step').forEach(s => s.classList.remove('active'));
-        document.getElementById('adv-step-1').classList.add('active');
-        advSelectedPkg = null;
-        document.getElementById('adv-next-btn').disabled = true;
-        if (!advPackages.length) await loadAdvPackages();
+    window.openAdvertiseModal = async function(options = {}) {
+        const preserveSelection = options === true || options?.preserveSelection === true;
+        if (options?.productType === 'webpage' || options?.productType === 'display_ad') {
+            advProductFilter = options.productType;
+        } else if (!preserveSelection && !options?.preserveFilter) {
+            advProductFilter = null;
+        }
+        advEl('advertise-modal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        advShowStep('adv-step-1');
+        advShowAlert('adv-package-message', '');
+        const webpageOnly = advProductFilter === 'webpage';
+        advEl('adv-modal-heading').textContent = webpageOnly ? '🌐 Upgrade to a Business Webpage' : '📢 Advertise Your Business';
+        advEl('adv-modal-subtitle').textContent = webpageOnly
+            ? 'Step 1 of 4: choose the Silver, Gold or Platinum package for an existing directory listing.'
+            : 'Choose an advertising package to get your business in front of thousands of Jamaicans.';
+        advEl('adv-catalog-guidance').textContent = webpageOnly
+            ? 'The price, duration and AJM bank-transfer destination shown here come from the current admin settings. Your builder unlocks only after AJM confirms payment.'
+            : 'Business webpage packages upgrade an existing directory listing. Display-ad packages create advertisements for the listed placements. Prices, durations and payment destinations are managed by AJM.';
+        if (!preserveSelection) {
+            advSelectedPkg = null;
+            advCurrentOrder = null;
+            if (!options?.preserveListing) advPreferredListingId = null;
+        }
+        advEl('adv-next-btn').disabled = !advSelectedPkg;
+        await loadAdvPackages();
+        renderAdvPackages();
+        if (advSelectedPkg) {
+            const selectedIndex = advPackages.findIndex((pkg) => String(pkg.id) === String(advSelectedPkg.id));
+            if (selectedIndex >= 0) window.selectAdvPackage(selectedIndex);
+        }
     };
 
     window.closeAdvertiseModal = function() {
-        document.getElementById('advertise-modal').classList.remove('open');
+        advEl('advertise-modal').classList.remove('open');
+        document.body.style.overflow = '';
+    };
+
+    window.startWebpageUpgrade = async function(listingId = null, preferredTier = 'silver') {
+        if (typeof window.closeModal === 'function') {
+            window.closeModal('webpage-packages-modal');
+            window.closeModal('member-dashboard-modal');
+        }
+        advPreferredListingId = listingId || null;
+        await window.openAdvertiseModal({ preserveListing: true, productType: 'webpage' });
+        const requestedCode = `ajm-webpage-${['silver', 'gold', 'platinum'].includes(preferredTier) ? preferredTier : 'silver'}`;
+        const requestedPackage = advPackages.find((pkg) => pkg.code === requestedCode);
+        const index = advPackages.findIndex((pkg) => pkg.code === requestedCode && pkg.is_orderable === true);
+        if (index < 0) {
+            advShowAlert(
+                'adv-package-message',
+                requestedPackage
+                    ? `${requestedPackage.name || 'This webpage package'} cannot accept orders until AJM configures both its price and bank-transfer destination. Your directory listing remains active.`
+                    : 'The selected webpage package is not currently available. Your directory listing remains active; choose another package or check again later.',
+                'info'
+            );
+            return;
+        }
+        window.selectAdvPackage(index);
+        await window.advGoToStep2();
+    };
+
+    window.openWebpagePackages = async function(listingId = null) {
+        if (typeof window.closeModal === 'function') {
+            window.closeModal('webpage-packages-modal');
+            window.closeModal('member-dashboard-modal');
+        }
+        advPreferredListingId = listingId || null;
+        await window.openAdvertiseModal({ preserveListing: true, productType: 'webpage' });
     };
 
     // Close on backdrop
-    document.getElementById('advertise-modal').addEventListener('click', e => {
-        if (e.target === document.getElementById('advertise-modal')) closeAdvertiseModal();
+    advEl('advertise-modal').addEventListener('click', (event) => {
+        if (event.target === advEl('advertise-modal')) window.closeAdvertiseModal();
     });
 
     // Close on Escape
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && document.getElementById('advertise-modal').classList.contains('open')) closeAdvertiseModal();
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && advEl('advertise-modal').classList.contains('open')) window.closeAdvertiseModal();
+    });
+
+    async function resumeAdvCheckoutAfterLogin() {
+        if (sessionStorage.getItem('ajmResumeAdCheckout') !== '1') return;
+        sessionStorage.removeItem('ajmResumeAdCheckout');
+        const packageCode = sessionStorage.getItem('ajmSelectedAdPackage');
+        await window.openAdvertiseModal({ preserveSelection: true });
+        if (!advSelectedPkg && packageCode) {
+            const index = advPackages.findIndex((pkg) => pkg.code === packageCode && pkg.is_orderable === true);
+            if (index >= 0) window.selectAdvPackage(index);
+        }
+        if (advSelectedPkg) await window.advGoToStep2();
+    }
+
+    sb.auth.onAuthStateChange((_event, session) => {
+        const previousUserId = advCurrentUser?.id || null;
+        advCurrentUser = session?.user || null;
+        if (!advCurrentUser || (previousUserId && previousUserId !== advCurrentUser.id)) {
+            advOwnedListings = [];
+            advMyOrders = [];
+            advListingsPromise = null;
+        }
+        if (!advCurrentUser) {
+            renderMyAdOrders();
+            return;
+        }
+        setTimeout(() => {
+            resumeAdvCheckoutAfterLogin().catch((error) => {
+                console.error('Could not resume advertising checkout:', error);
+            });
+        }, 150);
+    });
+
+    async function handleAdvertiseDeepLink() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('advertise') !== '1' && !params.get('package')) return;
+        advPreferredListingId = params.get('listing') || null;
+        await window.openAdvertiseModal({
+            preserveListing: Boolean(advPreferredListingId),
+            productType: params.get('product') === 'webpage' ? 'webpage' : null
+        });
+        const packageCode = params.get('package');
+        if (!packageCode) return;
+        const index = advPackages.findIndex((pkg) => pkg.code === packageCode && pkg.is_orderable === true);
+        if (index >= 0) window.selectAdvPackage(index);
+    }
+
+    (async () => {
+        const { data: { session } } = await sb.auth.getSession();
+        advCurrentUser = session?.user || null;
+        await Promise.all([
+            handleAdvertiseDeepLink(),
+            loadHubAdvertisements()
+        ]);
+    })().catch((error) => {
+        console.error('Advertising checkout could not initialise:', error);
     });
 </script>
 </body>
 </html>
-

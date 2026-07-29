@@ -73,6 +73,7 @@
         .btn-primary { color: #051009; border: 0; background: linear-gradient(135deg, var(--green), var(--yellow)); }
         .btn-danger { color: #fff; background: rgba(255,85,112,.15); border-color: rgba(255,85,112,.35); }
         .btn:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+        .btn[aria-disabled="true"] { cursor: not-allowed; opacity: .45; pointer-events: none; transform: none; }
 
         main { padding: 44px 0 80px; }
         .intro { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, .8fr); gap: 24px; margin-bottom: 26px; }
@@ -93,6 +94,21 @@
         .tier-pill.silver { color: var(--silver); }
         .tier-pill.gold { color: var(--gold); }
         .tier-pill.platinum { color: var(--platinum); }
+
+        .workflow-card {
+            display: grid;
+            grid-template-columns: minmax(0,1fr) auto;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 20px 22px;
+            border: 1px solid rgba(77,163,255,.28);
+            border-radius: 20px;
+            background: rgba(77,163,255,.07);
+        }
+        .workflow-card h2 { margin: 0 0 7px; font-size: 1.05rem; }
+        .workflow-card p { margin: 0; color: var(--muted); font-size: .86rem; line-height: 1.65; }
+        .workflow-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
 
         .notice { display: none; margin-bottom: 24px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--line); line-height: 1.5; }
         .notice.show { display: block; }
@@ -176,6 +192,8 @@
             .step-nav { grid-template-columns: repeat(2, minmax(0,1fr)); }
             .savebar { align-items: stretch; flex-direction: column; }
             .save-actions { display: grid; grid-template-columns: 1fr 1fr; }
+            .workflow-card { grid-template-columns: 1fr; }
+            .workflow-actions { justify-content: flex-start; }
         }
     </style>
 </head>
@@ -188,7 +206,7 @@
             </a>
             <div class="nav-actions">
                 <a class="btn" href="ajm-advertising-hub.html">Back to directory</a>
-                <a class="btn" id="preview-link" href="#" target="_blank" rel="noopener">Preview webpage</a>
+                <a class="btn" id="preview-link" target="_blank" rel="noopener" aria-disabled="true">Preview after saving</a>
             </div>
         </div>
     </header>
@@ -209,6 +227,17 @@
                     <div class="tier-pill" id="tier-pill">No active tier</div>
                     <small id="access-detail">An active package is required to save.</small>
                 </aside>
+            </section>
+
+            <section class="workflow-card" aria-labelledby="workflow-title">
+                <div>
+                    <h2 id="workflow-title">Paid webpage workflow</h2>
+                    <p id="workflow-description">Checking the package and page prerequisites for this listing…</p>
+                </div>
+                <div class="workflow-actions">
+                    <a class="btn hidden" id="upgrade-package-link" href="ajm-advertising-hub.html?advertise=1&amp;package=ajm-webpage-silver">Choose a webpage package</a>
+                    <a class="btn" id="return-dashboard-link" href="ajm-advertising-hub.html">Return to Advertising Hub</a>
+                </div>
             </section>
 
             <div id="notice" class="notice" role="status"></div>
@@ -248,6 +277,39 @@
                             </div>
                         </div>
                         <div class="segment-note" id="segment-note"></div>
+                        <div id="segment-fields" style="margin-top:18px;">
+                            <div class="segment-field-group hidden" data-segment-fields="local-business">
+                                <div class="grid-2">
+                                    <div class="field"><label for="segment-service-area">Service area</label><input id="segment-service-area" type="text" maxlength="2048" placeholder="e.g. Kingston, St. Andrew and islandwide" /></div>
+                                    <div class="field"><label for="segment-directory-focus">Directory focus / specialties</label><textarea id="segment-directory-focus" class="compact" maxlength="2048" placeholder="List the services, departments or local specialties customers should know about."></textarea></div>
+                                </div>
+                            </div>
+                            <div class="segment-field-group hidden" data-segment-fields="professional-services">
+                                <div class="grid-2">
+                                    <div class="field"><label for="segment-credentials">Credentials and trust information</label><textarea id="segment-credentials" class="compact" maxlength="2048" placeholder="Licences, certifications, associations or professional experience."></textarea></div>
+                                    <div class="field"><label for="segment-intake-url">Client intake / appointment URL</label><input id="segment-intake-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                </div>
+                            </div>
+                            <div class="segment-field-group hidden" data-segment-fields="b2b-supplier">
+                                <div class="grid-3">
+                                    <div class="field"><label for="segment-catalog-url">Product catalogue URL</label><input id="segment-catalog-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                    <div class="field"><label for="segment-rfq-email">RFQ email</label><input id="segment-rfq-email" type="email" maxlength="254" placeholder="quotes@example.com" /></div>
+                                    <div class="field"><label for="segment-currencies">Supported currencies</label><input id="segment-currencies" type="text" maxlength="260" placeholder="JMD, USD, CAD" /></div>
+                                </div>
+                            </div>
+                            <div class="segment-field-group hidden" data-segment-fields="hospitality-events">
+                                <div class="grid-2">
+                                    <div class="field"><label for="segment-availability-url">Availability / reservation URL</label><input id="segment-availability-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                    <div class="field"><label for="segment-portfolio-url">Portfolio / venue gallery URL</label><input id="segment-portfolio-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                </div>
+                            </div>
+                            <div class="segment-field-group hidden" data-segment-fields="automotive-collectibles">
+                                <div class="grid-2">
+                                    <div class="field"><label for="segment-inventory-url">Live inventory URL</label><input id="segment-inventory-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                    <div class="field"><label for="segment-financing-url">Financing / buyer application URL</label><input id="segment-financing-url" type="url" maxlength="2048" placeholder="https://…" /></div>
+                                </div>
+                            </div>
+                        </div>
                     </section>
 
                     <section class="panel tier-section" id="silver" data-min-tier="silver">
@@ -354,6 +416,7 @@
         let existingPage = null;
         let maxTier = null;
         let isAdmin = false;
+        let activeSubscription = null;
 
         const el = (id) => document.getElementById(id);
         const value = (id) => el(id).value.trim();
@@ -410,7 +473,57 @@
         }
 
         function updateSegmentNote() {
-            el('segment-note').textContent = SEGMENT_NOTES[el('market-segment').value] || '';
+            const segment = el('market-segment').value;
+            el('segment-note').textContent = SEGMENT_NOTES[segment] || '';
+            document.querySelectorAll('[data-segment-fields]').forEach((group) => {
+                group.classList.toggle('hidden', group.dataset.segmentFields !== segment);
+            });
+        }
+
+        function segmentValue(id) {
+            return emptyToNull(value(id));
+        }
+
+        function buildSegmentContent(segment) {
+            let content = {};
+            if (segment === 'local-business') {
+                content = { service_area: segmentValue('segment-service-area'), directory_focus: segmentValue('segment-directory-focus') };
+            } else if (segment === 'professional-services') {
+                content = { credentials: segmentValue('segment-credentials'), intake_url: segmentValue('segment-intake-url') };
+            } else if (segment === 'b2b-supplier') {
+                const currencies = [...new Set(value('segment-currencies').split(',').map((item) => item.trim().toUpperCase()).filter(Boolean))];
+                if (currencies.length > 20 || currencies.some((item) => item.length > 12)) {
+                    throw new Error('Use no more than 20 currency codes, with 12 characters or fewer per code.');
+                }
+                content = {
+                    catalog_url: segmentValue('segment-catalog-url'),
+                    rfq_email: segmentValue('segment-rfq-email'),
+                    currencies
+                };
+            } else if (segment === 'hospitality-events') {
+                content = { availability_url: segmentValue('segment-availability-url'), portfolio_url: segmentValue('segment-portfolio-url') };
+            } else if (segment === 'automotive-collectibles') {
+                content = { inventory_url: segmentValue('segment-inventory-url'), financing_url: segmentValue('segment-financing-url') };
+            }
+            Object.keys(content).forEach((key) => {
+                if (content[key] === null || content[key] === '' || (Array.isArray(content[key]) && !content[key].length)) delete content[key];
+            });
+            return Object.keys(content).length ? { [segment]: content } : {};
+        }
+
+        function populateSegmentContent(page, segment) {
+            const content = page?.segment_content?.[segment] || {};
+            el('segment-service-area').value = segment === 'local-business' ? content.service_area || '' : '';
+            el('segment-directory-focus').value = segment === 'local-business' ? content.directory_focus || '' : '';
+            el('segment-credentials').value = segment === 'professional-services' ? content.credentials || '' : '';
+            el('segment-intake-url').value = segment === 'professional-services' ? content.intake_url || '' : '';
+            el('segment-catalog-url').value = segment === 'b2b-supplier' ? content.catalog_url || '' : '';
+            el('segment-rfq-email').value = segment === 'b2b-supplier' ? content.rfq_email || '' : '';
+            el('segment-currencies').value = segment === 'b2b-supplier' && Array.isArray(content.currencies) ? content.currencies.join(', ') : '';
+            el('segment-availability-url').value = segment === 'hospitality-events' ? content.availability_url || '' : '';
+            el('segment-portfolio-url').value = segment === 'hospitality-events' ? content.portfolio_url || '' : '';
+            el('segment-inventory-url').value = segment === 'automotive-collectibles' ? content.inventory_url || '' : '';
+            el('segment-financing-url').value = segment === 'automotive-collectibles' ? content.financing_url || '' : '';
         }
 
         function setFormEnabled(enabled) {
@@ -420,11 +533,64 @@
             document.querySelectorAll('.step-link').forEach((button) => button.disabled = false);
         }
 
+        function setPreviewAvailable(available) {
+            const preview = el('preview-link');
+            if (available) {
+                const isPublic = existingPage?.page_status === 'published'
+                    && Boolean(activeSubscription)
+                    && listing?.status === 'approved';
+                preview.href = `ajm-business-page.html?listing=${encodeURIComponent(listingId)}${isPublic ? '' : '&preview=1'}`;
+                preview.textContent = isPublic ? 'View live webpage' : 'Preview saved webpage';
+                preview.removeAttribute('aria-disabled');
+                preview.removeAttribute('title');
+            } else {
+                preview.removeAttribute('href');
+                preview.textContent = 'Preview after saving';
+                preview.setAttribute('aria-disabled', 'true');
+                preview.title = 'Save a draft before opening a preview.';
+            }
+        }
+
+        function updatePublishControl() {
+            const approved = listing?.status === 'approved';
+            const hasAccess = Boolean(activeSubscription);
+            el('publish-btn').disabled = !approved || !hasAccess;
+            if (!hasAccess) {
+                el('publish-note').textContent = 'A current paid webpage package must be activated before this draft can be published or shown publicly.';
+            } else if (!approved) {
+                el('publish-note').textContent = 'This directory listing is not yet approved. Save the webpage as a draft, then publish after AJM approves the listing.';
+            } else {
+                el('publish-note').textContent = 'Publishing makes this webpage public while its paid package remains active. Drafts are visible only to the listing owner and AJM administrators.';
+            }
+        }
+
+        function updateWorkflowHelp() {
+            const help = el('workflow-description');
+            const upgrade = el('upgrade-package-link');
+            const dashboardLink = el('return-dashboard-link');
+            upgrade.classList.add('hidden');
+            dashboardLink.href = isAdmin ? 'ajm-admin-panel.html' : 'ajm-advertising-hub.html';
+            dashboardLink.textContent = isAdmin ? 'Return to Admin Panel' : 'Return to Advertising Hub';
+            if (isAdmin && !activeSubscription) {
+                help.textContent = 'Administrator step 1: return to the listing in Admin and activate Silver, Gold or Platinum. You may prepare and save a draft here, but publishing and the public page stay unavailable until a package is active. Step 2: complete the content and publish. Step 3: use View Page.';
+            } else if (isAdmin) {
+                help.textContent = 'The package is active. Complete the tier and market content, save a draft, publish it, then use View Page in Admin. Activation and renewal are handled by the secure database workflow—not an Edge Function.';
+            } else if (!activeSubscription) {
+                help.textContent = 'Step 1: choose Silver, Gold or Platinum for this listing. Step 2: transfer the displayed amount and upload the receipt. Step 3: wait for AJM’s confirmation email. Step 4: return here to build and publish the page.';
+                upgrade.classList.remove('hidden');
+                const preferredTier = ['silver', 'gold', 'platinum'].includes(listing?.requested_tier) ? listing.requested_tier : 'silver';
+                upgrade.href = `ajm-advertising-hub.html?advertise=1&product=webpage&listing=${encodeURIComponent(listingId)}&package=ajm-webpage-${encodeURIComponent(preferredTier)}`;
+            } else {
+                help.textContent = 'Payment and package activation are complete. Add the content included in your tier, save a draft, preview it, then publish. The public View Page link appears in your member dashboard after publishing.';
+            }
+        }
+
         function populateForm(page) {
             const tier = page?.tier || listing?.requested_tier || maxTier || 'silver';
             const segment = page?.market_segment || listing?.market_segment || 'local-business';
             el('tier').value = tier;
             el('market-segment').value = segment;
+            populateSegmentContent(page, segment);
             el('tagline').value = page?.tagline || '';
             el('logo-url').value = page?.logo_url || listing?.image_url || '';
             el('address').value = page?.address || listing?.location || '';
@@ -474,7 +640,7 @@
                 return;
             }
 
-            const [{ data: page }, { data: subscriptions }] = await Promise.all([
+            const [{ data: page, error: pageError }, { data: subscriptions, error: subscriptionError }] = await Promise.all([
                 supabase.from('listing_webpages').select('*').eq('listing_id', listingId).maybeSingle(),
                 supabase.from('ad_subscriptions')
                     .select('status, expires_at, ad_packages(code, name, webpage_enabled, webpage_tier)')
@@ -483,22 +649,28 @@
                     .eq('status', 'active')
             ]);
 
+            if (pageError) throw new Error(`The webpage draft could not be loaded: ${pageError.message}`);
+            if (subscriptionError) throw new Error(`Paid webpage access could not be verified: ${subscriptionError.message}`);
+
             existingPage = page;
             const active = (subscriptions || []).filter((subscription) => {
                 const notExpired = !subscription.expires_at || new Date(subscription.expires_at) > new Date();
                 return notExpired && subscription.ad_packages?.webpage_enabled && TIER_RANK[subscription.ad_packages.webpage_tier];
             });
-            maxTier = active.sort((a, b) => TIER_RANK[b.ad_packages.webpage_tier] - TIER_RANK[a.ad_packages.webpage_tier])[0]?.ad_packages?.webpage_tier || null;
+            activeSubscription = active.sort((a, b) => TIER_RANK[b.ad_packages.webpage_tier] - TIER_RANK[a.ad_packages.webpage_tier])[0] || null;
+            maxTier = activeSubscription?.ad_packages?.webpage_tier || null;
 
             el('business-name').textContent = listing.business_name || 'Your business';
-            el('preview-link').href = `ajm-business-page.html?listing=${encodeURIComponent(listingId)}&preview=1`;
+            setPreviewAvailable(Boolean(existingPage));
             loading.classList.add('hidden');
             builder.classList.remove('hidden');
 
             if (isAdmin) {
-                maxTier = 'platinum';
-                el('access-label').textContent = 'Administrator access';
-                el('access-detail').textContent = 'You can configure any package tier for this listing.';
+                maxTier = activeSubscription?.ad_packages?.webpage_tier || 'platinum';
+                el('access-label').textContent = activeSubscription ? 'Administrator · package active' : 'Administrator draft access';
+                el('access-detail').textContent = activeSubscription
+                    ? 'You can configure the page within the customer’s active package and publish it.'
+                    : 'Activate a package in Admin before publishing this draft.';
                 setFormEnabled(true);
             } else if (maxTier) {
                 el('access-label').textContent = `${maxTier[0].toUpperCase() + maxTier.slice(1)} package active`;
@@ -506,14 +678,15 @@
                 setFormEnabled(true);
             } else {
                 el('access-label').textContent = 'No paid webpage package';
-                el('access-detail').textContent = 'Contact AJM to activate Silver, Gold or Platinum for this listing.';
+                el('access-detail').textContent = 'Choose a package, transfer payment to AJM and upload the receipt for approval.';
                 setFormEnabled(false);
-                showNotice('This listing does not have an active paid webpage package. Your free directory listing is unaffected. Contact AJM to activate a tier.', 'info');
+                showNotice('This free directory listing is unaffected. Choose a webpage package and submit payment proof; editing unlocks after AJM confirms payment.', 'info');
             }
 
             populateForm(existingPage);
+            updateWorkflowHelp();
 
-            if (!isAdmin && maxTier) {
+            if (activeSubscription && maxTier) {
                 [...el('tier').options].forEach((option) => {
                     option.disabled = TIER_RANK[option.value] > TIER_RANK[maxTier];
                 });
@@ -521,10 +694,7 @@
                 updateTierUI();
             }
 
-            if (listing.status !== 'approved') {
-                el('publish-btn').disabled = true;
-                el('publish-note').textContent = 'This listing is not yet approved. You can save the webpage as a draft, then publish after AJM approval.';
-            }
+            updatePublishControl();
         }
 
         function buildPayload(pageStatus) {
@@ -536,6 +706,7 @@
                 listing_id: listingId,
                 tier,
                 market_segment: el('market-segment').value,
+                segment_content: buildSegmentContent(el('market-segment').value),
                 page_status: pageStatus,
                 tagline: emptyToNull(value('tagline')),
                 logo_url: emptyToNull(value('logo-url')),
@@ -585,6 +756,7 @@
         async function save(pageStatus) {
             try {
                 if (!isAdmin && !maxTier) throw new Error('An active paid webpage package is required.');
+                if (pageStatus === 'published' && !activeSubscription) throw new Error('Activate the paid webpage package before publishing this draft.');
                 if (pageStatus === 'published' && listing.status !== 'approved') throw new Error('The directory listing must be approved before this webpage can be published.');
                 const payload = buildPayload(pageStatus);
                 const buttons = [el('save-draft'), el('publish-btn')];
@@ -593,11 +765,17 @@
 
                 const { data, error } = await supabase.from('listing_webpages').upsert(payload, { onConflict: 'listing_id' }).select().single();
                 buttons.forEach((button) => button.disabled = false);
-                if (listing.status !== 'approved') el('publish-btn').disabled = true;
+                updatePublishControl();
                 if (error) throw error;
                 existingPage = data;
+                setPreviewAvailable(true);
                 el('save-hint').textContent = `Last saved ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-                showNotice(pageStatus === 'published' ? 'Your AJM business webpage is now published.' : 'Draft saved successfully.', 'success');
+                showNotice(
+                    pageStatus === 'published'
+                        ? 'Your AJM business webpage is live. Use “View live webpage” to open the public page.'
+                        : 'Draft saved. Use “Preview saved webpage” to review it privately.',
+                    'success'
+                );
             } catch (error) {
                 el('save-hint').textContent = 'Changes are not saved automatically.';
                 showNotice(error.message || 'The webpage could not be saved.', 'error');

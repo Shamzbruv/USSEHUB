@@ -315,17 +315,31 @@
             <label>Business Name</label>
             <input type="text" id="edit-business-name" />
         </div>
-        <div style="display:flex;gap:12px;">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
             <div class="form-group" style="flex:1;">
-                <label>Category</label>
-                <select id="edit-category" onchange="populateSubcategorySelect('edit-category', 'edit-subcategory'); updateLabels('edit')">
-                    <option value="">Select Category</option>
+                <label>Primary Category</label>
+                <select id="edit-category" onchange="populateSubcategorySelect('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific'); updateLabels('edit')">
+                    <option value="">Select Primary Category</option>
                 </select>
             </div>
             <div class="form-group" style="flex:1;">
-                <label>Subcategory</label>
-                <select id="edit-subcategory">
-                    <option value="">Select Subcategory</option>
+                <label>Secondary Category</label>
+                <select id="edit-subcategory" disabled onchange="populateTertiarySelect('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific')">
+                    <option value="">Choose a primary category first</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;">
+                <label>Tertiary Category</label>
+                <select id="edit-tertiary" disabled onchange="populateSpecificSelect('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific')">
+                    <option value="">Choose a secondary category first</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Specific Type / Context <span style="color:var(--muted);font-weight:500;">(Optional)</span></label>
+                <select id="edit-specific" disabled>
+                    <option value="">Choose a specialization first</option>
                 </select>
             </div>
         </div>
@@ -966,11 +980,19 @@
         document.getElementById('edit-image').value = '';
         
         const catSelect = document.getElementById('edit-category');
-        catSelect.value = listing.category || '';
-        if (window.populateSubcategorySelect) {
-            window.populateSubcategorySelect('edit-category', 'edit-subcategory');
+        if (listing.category && !Array.from(catSelect.options).some(option => option.value === listing.category)) {
+            const existingCategory = document.createElement('option');
+            existingCategory.value = listing.category;
+            existingCategory.textContent = `${listing.category} (existing value)`;
+            catSelect.appendChild(existingCategory);
         }
-        document.getElementById('edit-subcategory').value = listing.subcategory || '';
+        catSelect.value = listing.category || '';
+        if (window.restoreClassification) {
+            window.restoreClassification('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific', listing.subcategory || '');
+        } else if (window.populateSubcategorySelect) {
+            window.populateSubcategorySelect('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific');
+            document.getElementById('edit-subcategory').value = listing.subcategory || '';
+        }
         
         updateLabels('edit');
 
@@ -994,7 +1016,9 @@
 
         const business_name = document.getElementById('edit-business-name').value;
         const category = document.getElementById('edit-category').value;
-        const subcategory = document.getElementById('edit-subcategory').value;
+        const subcategory = window.getClassificationValue
+            ? window.getClassificationValue('edit-subcategory', 'edit-tertiary', 'edit-specific')
+            : document.getElementById('edit-subcategory').value;
         const listing_type = document.getElementById('edit-listing-type').value;
         const location = document.getElementById('edit-location').value;
         const contact_phone = document.getElementById('edit-phone').value;

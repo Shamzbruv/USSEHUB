@@ -2,6 +2,14 @@ import { serve } from 'server'
 import { createClient } from '@supabase/supabase-js'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
 
+interface StatsResponse {
+  totalMembers: number | null
+  activeListings: number | null
+  pendingListings?: number | null
+  rejectedListings?: number | null
+  expiredListings?: number | null
+}
+
 serve(async (req: Request) => {
   const corsResponse = handleCors(req)
   if (corsResponse) return corsResponse
@@ -47,7 +55,7 @@ serve(async (req: Request) => {
     const { count: totalMembers } = await supabaseAdmin.from('profiles').select('*', { count: 'exact', head: true })
     const { count: activeListings } = await supabaseAdmin.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'approved')
     
-    let stats: any = { totalMembers, activeListings }
+    let stats: StatsResponse = { totalMembers, activeListings }
 
     if (profile.role === 'admin') {
       const { count: pendingListings } = await supabaseAdmin.from('listings').select('*', { count: 'exact', head: true }).eq('status', 'pending')

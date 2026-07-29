@@ -98,6 +98,24 @@
         .page-header { margin-bottom: 32px; }
         .page-header h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
         .page-header p { color: var(--muted); font-size: 0.9rem; }
+        .receivables-callout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            border: 1px solid rgba(255,207,51,.25);
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, rgba(255,207,51,.08), rgba(45,214,164,.055));
+        }
+        .receivables-callout h2 { margin-bottom: 5px; font-size: 1.04rem; }
+        .receivables-callout p { max-width: 820px; color: var(--muted); font-size: .82rem; line-height: 1.55; }
+        .receivables-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+        .webpage-steps { margin: 14px 0 16px; padding: 13px 14px; border: 1px solid rgba(91,156,246,.24); border-radius: 12px; background: rgba(91,156,246,.07); color: var(--muted); font-size: .78rem; line-height: 1.55; }
+        .webpage-steps strong { color: var(--white); }
+        .webpage-summary { margin: -7px 0 14px; color: var(--muted); font-size: .76rem; line-height: 1.45; }
+        a.btn[aria-disabled="true"] { opacity: .46; pointer-events: none; cursor: not-allowed; }
 
         /* ── STATS ROW ── */
         .stats-row {
@@ -338,6 +356,8 @@
             .stats-row { grid-template-columns: repeat(2, 1fr); }
             .tab-bar { overflow-x: auto; }
             .filter-bar { flex-direction: column; }
+            .receivables-callout { grid-template-columns: 1fr; }
+            .receivables-actions { justify-content: flex-start; }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -358,17 +378,31 @@
             <label>Business Name</label>
             <input type="text" id="edit-business-name" />
         </div>
-        <div style="display:flex;gap:12px;">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
             <div class="form-group" style="flex:1;">
-                <label>Category</label>
-                <select id="edit-category" onchange="populateSubcategorySelect('edit-category', 'edit-subcategory'); updateLabels('edit')">
-                    <option value="">Select Category</option>
+                <label>Primary Category</label>
+                <select id="edit-category" onchange="populateSubcategorySelect('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific'); updateLabels('edit')">
+                    <option value="">Select Primary Category</option>
                 </select>
             </div>
             <div class="form-group" style="flex:1;">
-                <label>Subcategory</label>
-                <select id="edit-subcategory">
-                    <option value="">Select Subcategory</option>
+                <label>Secondary Category</label>
+                <select id="edit-subcategory" disabled onchange="populateTertiarySelect('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific')">
+                    <option value="">Choose a primary category first</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;">
+                <label>Tertiary Category</label>
+                <select id="edit-tertiary" disabled onchange="populateSpecificSelect('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific')">
+                    <option value="">Choose a secondary category first</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Specific Type / Context <span style="color:var(--muted);font-weight:500;">(Optional)</span></label>
+                <select id="edit-specific" disabled>
+                    <option value="">Choose a specialization first</option>
                 </select>
             </div>
         </div>
@@ -427,7 +461,8 @@
     <div class="modal-box">
         <button class="modal-close" onclick="closeWebpagePackageModal()" aria-label="Close">&times;</button>
         <h2 class="modal-title" id="webpage-package-title">AJM Paid Webpage</h2>
-        <p style="color:var(--muted);font-size:0.9rem;margin-top:-4px;line-height:1.5;">Activate the customer’s Silver, Gold or Platinum webpage and assign the correct market segment.</p>
+        <p style="color:var(--muted);font-size:0.9rem;margin-top:-4px;line-height:1.5;">Upgrade this approved listing to a managed Silver, Gold or Platinum business webpage.</p>
+        <div class="webpage-steps"><strong>Admin procedure:</strong> 1. Verify that AJM received payment and record the transfer reference. 2. Choose the paid package, access duration and market segment. 3. Click <strong>Activate paid webpage</strong>. 4. After the status shows Active, open the builder, complete the content, save or publish it, and then preview the page. Activation is completed through the secured database workflow and is recorded in the admin audit log.</div>
         <input type="hidden" id="webpage-listing-id" />
         <div class="form-group">
             <label>Business</label>
@@ -452,6 +487,7 @@
                 </select>
             </div>
         </div>
+        <div class="webpage-summary" id="webpage-package-summary">Loading current package price and duration…</div>
         <div class="form-group">
             <label>Market Segment</label>
             <select id="webpage-market-segment">
@@ -463,17 +499,18 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Payment Reference (optional)</label>
+            <label>Payment Reference <span style="font-weight:400;">(recommended for audit records)</span></label>
             <input type="text" id="webpage-payment-reference" placeholder="Receipt, invoice or transaction reference" />
         </div>
         <div id="webpage-package-status" style="padding:12px 14px;border:1px solid var(--glass-border);border-radius:12px;color:var(--muted);font-size:0.86rem;margin-bottom:16px;">Checking current access…</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-primary" style="flex:1;border-radius:12px;" onclick="activateWebpagePackage()" id="activate-webpage-btn">Activate Package</button>
+            <button class="btn btn-primary" style="flex:1;border-radius:12px;" onclick="activateWebpagePackage()" id="activate-webpage-btn">Activate paid webpage</button>
+            <button class="btn btn-warning" style="display:none;flex:1;border-radius:12px;" onclick="renewWebpagePackage()" id="renew-webpage-btn">Renew Access</button>
             <button class="btn btn-danger" style="border-radius:12px;" onclick="cancelWebpagePackage()" id="cancel-webpage-btn">Cancel Access</button>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
-            <a class="btn btn-ghost" style="flex:1;border-radius:12px;text-align:center;" id="admin-webpage-builder-link" href="#" target="_blank" rel="noopener">Open Webpage Builder</a>
-            <a class="btn btn-ghost" style="border-radius:12px;text-align:center;" id="admin-live-webpage-link" href="#" target="_blank" rel="noopener">View Page</a>
+            <a class="btn btn-ghost" style="flex:1;border-radius:12px;text-align:center;" id="admin-webpage-builder-link" href="#" target="_blank" rel="noopener" aria-disabled="true">Edit webpage content</a>
+            <a class="btn btn-ghost" style="border-radius:12px;text-align:center;" id="admin-live-webpage-link" href="#" target="_blank" rel="noopener" aria-disabled="true">Preview public page</a>
         </div>
     </div>
 </div>
@@ -487,14 +524,30 @@
             <label>Business Name*</label>
             <input type="text" id="add-business-name" required />
         </div>
-        <div style="display:flex;gap:12px;">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
             <div class="form-group" style="flex:1;">
-                <label>Category*</label>
-                <select id="add-category" onchange="if(window.populateSubcategorySelect) window.populateSubcategorySelect('add-category', 'add-subcategory'); updateLabels('add')" required></select>
+                <label>Primary Category*</label>
+                <select id="add-category" onchange="if(window.populateSubcategorySelect) window.populateSubcategorySelect('add-category', 'add-subcategory', 'add-tertiary', 'add-specific'); updateLabels('add')" required></select>
             </div>
             <div class="form-group" style="flex:1;">
-                <label>Subcategory</label>
-                <select id="add-subcategory"></select>
+                <label>Secondary Category*</label>
+                <select id="add-subcategory" required disabled onchange="populateTertiarySelect('add-category', 'add-subcategory', 'add-tertiary', 'add-specific')">
+                    <option value="">Choose a primary category first</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;">
+                <label>Tertiary Category*</label>
+                <select id="add-tertiary" required disabled onchange="populateSpecificSelect('add-category', 'add-subcategory', 'add-tertiary', 'add-specific')">
+                    <option value="">Choose a secondary category first</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Specific Type / Context <span style="color:var(--muted);font-weight:500;">(Optional)</span></label>
+                <select id="add-specific" disabled>
+                    <option value="">Choose a specialization first</option>
+                </select>
             </div>
         </div>
         <div style="display:flex;gap:12px;">
@@ -615,9 +668,22 @@
         </div>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
             <button class="btn btn-primary" style="background:var(--blue);color:var(--white);font-weight:800;" onclick="openAddModal()">➕ Add Listing</button>
+            <a href="ajm-ad-management.html#overview" class="btn btn-primary" style="background:linear-gradient(135deg,var(--yellow),#ff9f43);color:#090b10;font-weight:800;">💰 Advertising &amp; Accounts Receivable</a>
             <a href="master-admin.html" class="btn btn-primary" style="background: linear-gradient(135deg, var(--green) 0%, #17b07f 100%); color: #000; font-weight: 800;">👑 Switch to Master Admin Hub</a>
         </div>
     </div>
+
+    <section class="receivables-callout" aria-labelledby="receivables-title">
+        <div>
+            <h2 id="receivables-title">🏦 Accounts Receivable &amp; paid advertising setup</h2>
+            <p>This is where administrators enter the business bank-transfer destinations disclosed to a signed-in customer after an order is created, set or change every package price and duration, add optional upgrades, review uploaded receipts and confirm payment before an advertisement or paid webpage becomes active.</p>
+        </div>
+        <div class="receivables-actions">
+            <a class="btn btn-warning" href="ajm-ad-management.html#banks">Manage banking details</a>
+            <a class="btn btn-ghost" href="ajm-ad-management.html#packages">Set package prices</a>
+            <a class="btn btn-ghost" href="ajm-ad-management.html#payments">Review payments</a>
+        </div>
+    </section>
 
     <!-- Stats -->
     <div class="stats-row" id="stats-row">
@@ -648,7 +714,7 @@
         <button class="tab-btn" id="tab-all" onclick="switchTab('all')" role="tab">📋 All</button>
         <button class="tab-btn" id="tab-members" onclick="switchTab('members')" role="tab">👥 Members</button>
         <button class="tab-btn" id="tab-charts" onclick="switchTab('charts')" role="tab">📊 Analytics</button>
-        <button class="tab-btn" id="tab-advertising" onclick="switchTab('advertising')" role="tab">💰 Advertising</button>
+        <button class="tab-btn" id="tab-advertising" onclick="window.location.href='ajm-ad-management.html#overview'" role="tab">💰 Accounts Receivable &amp; Ads ↗</button>
     </div>
 
     <!-- Filter bar (listings tabs) -->
@@ -743,7 +809,7 @@
         <div class="adv-sub-tabs">
             <button class="adv-sub-tab active" onclick="switchAdvTab('orders')">📋 Ad Orders</button>
             <button class="adv-sub-tab" onclick="switchAdvTab('packages')">📦 Packages & Pricing</button>
-            <button class="adv-sub-tab" onclick="switchAdvTab('payment-accounts')">🏦 Payment Accounts</button>
+            <button class="adv-sub-tab" onclick="switchAdvTab('payment-accounts')">🏦 Accounts Receivable</button>
         </div>
 
         <!-- Ad Orders -->
@@ -786,10 +852,11 @@
         <!-- Payment Accounts -->
         <div class="adv-panel" id="adv-payment-accounts">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <h3 style="font-size:1.05rem;">🏦 Bank Payment Accounts</h3>
-                <button class="btn btn-primary btn-sm" onclick="openPaymentAccountModal(null)">+ Add Account</button>
+                <h3 style="font-size:1.05rem;">🏦 Accounts Receivable — Payment Destinations</h3>
+                <button class="btn btn-primary btn-sm" onclick="openPaymentAccountModal(null)">+ Add Destination</button>
             </div>
-            <p style="color:var(--muted);font-size:0.86rem;margin-bottom:16px;">Customers will see these banking details when they select a paid advertising package. Set the default account that applies when no specific account is assigned to a package.</p>
+            <p style="color:var(--muted);font-size:0.86rem;margin-bottom:10px;">Set the default destination used when no specific same-currency account is assigned to a package. These details are not public; the selected snapshot is disclosed only to the signed-in customer after that customer creates an order.</p>
+            <p style="color:var(--yellow);font-size:0.8rem;margin-bottom:16px;"><strong>Never enter an online-banking login or username, password, PIN, one-time security code, card number or card security code.</strong> Use the full <a href="ajm-ad-management.html#banks" style="color:var(--green);">Accounts Receivable workspace</a> to edit, archive, restore and assign destinations.</p>
             <div id="payment-accounts-list"><p style="color:var(--muted);">Loading accounts...</p></div>
         </div>
     </div>
@@ -802,25 +869,26 @@
 <div id="payment-account-modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-box" style="max-width:560px;">
         <button class="modal-close" onclick="closePaymentAccountModal()" aria-label="Close">&times;</button>
-        <h2 class="modal-title" id="pa-modal-title">Add Payment Account</h2>
+        <h2 class="modal-title" id="pa-modal-title">Add Payment Destination</h2>
+        <div style="padding:11px 12px;margin-bottom:14px;border:1px solid rgba(255,207,51,.25);border-radius:10px;background:rgba(255,207,51,.06);color:var(--muted);font-size:.78rem;line-height:1.5;"><strong style="color:var(--yellow);">Transfer details only.</strong> Authorized admins can manage these details and the selected account is disclosed to the ordering customer after order creation. Never enter an online-banking login, password, PIN, one-time code or card credentials.</div>
         <input type="hidden" id="pa-id" />
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div class="form-group"><label>Label (e.g. JMD Main Account)</label><input type="text" id="pa-label" placeholder="JMD Main Account" /></div>
+            <div class="form-group"><label>Label (e.g. JMD Main Account) *</label><input type="text" id="pa-label" placeholder="JMD Main Account" required /></div>
             <div class="form-group"><label>Currency</label><select id="pa-currency"><option value="JMD">JMD — Jamaican Dollar</option><option value="USD">USD — US Dollar</option></select></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div class="form-group"><label>Bank Name</label><input type="text" id="pa-bank-name" placeholder="National Commercial Bank" /></div>
-            <div class="form-group"><label>Account Name</label><input type="text" id="pa-account-name" placeholder="AJM Enterprises Ltd" /></div>
+            <div class="form-group"><label>Bank Name *</label><input type="text" id="pa-bank-name" placeholder="National Commercial Bank" required /></div>
+            <div class="form-group"><label>Account Name *</label><input type="text" id="pa-account-name" placeholder="AJM Enterprises Ltd" required /></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div class="form-group"><label>Account Number</label><input type="text" id="pa-account-number" placeholder="1234567890" /></div>
+            <div class="form-group"><label>Account Number *</label><input type="text" id="pa-account-number" placeholder="1234567890" required autocomplete="off" /></div>
             <div class="form-group"><label>Account Type</label><select id="pa-account-type"><option value="Savings">Savings</option><option value="Chequing">Chequing</option><option value="Business Chequing">Business Chequing</option></select></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div class="form-group"><label>Branch Name (optional)</label><input type="text" id="pa-branch" /></div>
             <div class="form-group"><label>Routing / Transit # (optional)</label><input type="text" id="pa-routing" /></div>
         </div>
-        <div class="form-group"><label>Payment Instructions (shown to customer)</label><textarea id="pa-instructions" style="min-height:80px;" placeholder="Transfer to the above account and send proof of payment with your order number in the memo."></textarea></div>
+        <div class="form-group"><label>Payment Instructions (shown to ordering customer) *</label><textarea id="pa-instructions" style="min-height:80px;" required placeholder="Transfer to the above account, include the order number in the memo and upload the receipt."></textarea></div>
         <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;">
             <label style="display:flex;align-items:center;gap:6px;font-size:0.86rem;cursor:pointer;">
                 <input type="checkbox" id="pa-is-default" style="width:auto;" /> Set as default payment account
@@ -841,6 +909,7 @@
     <div class="modal-box" style="max-width:600px;">
         <button class="modal-close" onclick="closePackageModal()" aria-label="Close">&times;</button>
         <h2 class="modal-title" id="pkg-modal-title">Edit Package</h2>
+        <p style="color:var(--muted);font-size:.8rem;line-height:1.5;margin-bottom:14px;">Set the price, duration and payment destination here. Manage optional upgrades, placements and package features in <a href="ajm-ad-management.html#packages" style="color:var(--green);">Advertising Operations</a>.</p>
         <input type="hidden" id="pkg-id" />
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div class="form-group"><label>Package Name</label><input type="text" id="pkg-name" /></div>
@@ -848,7 +917,7 @@
         </div>
         <div class="form-group"><label>Description</label><textarea id="pkg-description" style="min-height:60px;"></textarea></div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-            <div class="form-group"><label>Price (JMD/USD)</label><input type="number" id="pkg-price" min="0" step="100" /></div>
+            <div class="form-group"><label>Price (JMD/USD)</label><input type="number" id="pkg-price" min="0" step="0.01" /></div>
             <div class="form-group"><label>Currency</label><select id="pkg-currency"><option value="JMD">JMD</option><option value="USD">USD</option></select></div>
             <div class="form-group"><label>Duration (days)</label><input type="number" id="pkg-duration" min="1" /></div>
         </div>
@@ -950,6 +1019,7 @@
     window.openWebpagePackageModal = openWebpagePackageModal;
     window.closeWebpagePackageModal = closeWebpagePackageModal;
     window.activateWebpagePackage = activateWebpagePackage;
+    window.renewWebpagePackage = renewWebpagePackage;
     window.cancelWebpagePackage = cancelWebpagePackage;
     // Advertising management
     window.switchAdvTab = switchAdvTab;
@@ -959,6 +1029,8 @@
     window.closeRejectOrderModal = closeRejectOrderModal;
     window.confirmRejectOrder = confirmRejectOrder;
     window.pauseOrder = pauseOrder;
+    window.resumeOrder = resumeOrder;
+    window.renewOrder = renewOrder;
     window.cancelOrder = cancelOrder;
     window.viewOrderDetail = viewOrderDetail;
     window.openPaymentAccountModal = openPaymentAccountModal;
@@ -971,18 +1043,29 @@
 
     // ── INIT ──
     async function init() {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+            showAccessDenied();
+            showToast('Your administrator session could not be verified.', 'error');
+            return;
+        }
         if (!session?.user) {
             showAccessDenied();
             return;
         }
         currentUser = session.user;
 
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', currentUser.id)
             .single();
+
+        if (profileError) {
+            showAccessDenied();
+            showToast('Administrator profile lookup failed: ' + profileError.message, 'error');
+            return;
+        }
 
         currentProfile = profile;
 
@@ -1173,7 +1256,7 @@
                             ${l.status !== 'expired' ? `<button class="btn btn-warning btn-sm" style="padding:4px 8px;" onclick="expireListing('${l.id}')" title="Expire">🕰</button>` : ''}
                             <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="toggleFeatured('${l.id}', ${l.is_featured})" title="${l.is_featured ? 'Unfeature' : 'Feature'}">${l.is_featured ? '★' : '☆'}</button>
                             <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="openEditModal(window.listingCache['${l.id}'])" title="Edit">✎</button>
-                            <button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:var(--yellow);border-color:rgba(255,207,51,.35);" onclick="openWebpagePackageModal(window.listingCache['${l.id}'])" title="Manage paid webpage">Webpage</button>
+                            ${l.status === 'approved' ? `<button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:var(--yellow);border-color:rgba(255,207,51,.35);" onclick="openWebpagePackageModal(window.listingCache['${l.id}'])" title="Upgrade this listing or manage its paid webpage">Upgrade / Page</button>` : ''}
                         </div>
                     </td>
                 </tr>
@@ -1229,18 +1312,165 @@
     }
 
     // ── PAID WEBPAGE PACKAGES ──
+    let webpagePackageConfiguration = { packages: [], accounts: [] };
+    let webpageModalHasActiveAccess = false;
+    let webpageAccessVerified = false;
+    let webpagePageState = null;
+
+    function setWebpageLinkState(id, enabled, label) {
+        const link = document.getElementById(id);
+        link.href = enabled ? link.dataset.target : '#';
+        link.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+        link.tabIndex = enabled ? 0 : -1;
+        link.textContent = label;
+    }
+
+    function setWebpageLinksEnabled(builderEnabled, pageState = null) {
+        setWebpageLinkState(
+            'admin-webpage-builder-link',
+            builderEnabled,
+            builderEnabled ? 'Step 4 — Edit webpage content' : 'Activate before opening builder'
+        );
+        const previewEnabled = builderEnabled && Boolean(pageState);
+        const previewLabel = !builderEnabled
+            ? 'Activate before previewing'
+            : !pageState
+                ? 'Save a draft before previewing'
+                : pageState.page_status === 'published'
+                    ? 'View published page'
+                    : 'Preview saved draft';
+        setWebpageLinkState('admin-live-webpage-link', previewEnabled, previewLabel);
+    }
+
+    function selectedWebpagePackageReadiness() {
+        const code = document.getElementById('webpage-package-code').value;
+        const pkg = webpagePackageConfiguration.packages.find((item) => item.code === code);
+        if (!pkg) return { package: null, issues: ['package configuration could not be loaded'] };
+        const account = pkg.payment_account_id
+            ? webpagePackageConfiguration.accounts.find((item) => item.id === pkg.payment_account_id)
+            : webpagePackageConfiguration.accounts.find((item) => item.is_default && item.is_active !== false);
+        const issues = [];
+        if (pkg.is_active === false) issues.push('package is archived');
+        if (Number(pkg.price) <= 0) issues.push('price is not set');
+        if (Number(pkg.duration_days) < 1) issues.push('duration is not set');
+        if (!account || account.is_active === false) issues.push('active payment destination is not assigned');
+        if (account && String(account.currency || 'JMD').toUpperCase() !== String(pkg.currency || 'JMD').toUpperCase()) issues.push('payment destination currency does not match');
+        return { package: pkg, account, issues };
+    }
+
+    function updateWebpagePackageSummary(applyDuration = false) {
+        const summary = document.getElementById('webpage-package-summary');
+        const readiness = selectedWebpagePackageReadiness();
+        if (!readiness.package) {
+            summary.innerHTML = '<strong style="color:var(--red);">Configuration required:</strong> This paid webpage package is unavailable. Open Advertising &amp; Accounts Receivable to restore or configure it.';
+        } else {
+            const pkg = readiness.package;
+            const price = new Intl.NumberFormat('en-JM', { style: 'currency', currency: pkg.currency || 'JMD', maximumFractionDigits: 2 }).format(Number(pkg.price || 0));
+            const options = Array.isArray(pkg.options) ? pkg.options.filter((item) => item.is_active !== false).length : 0;
+            const duration = Number(pkg.duration_days || 30);
+            if (applyDuration) {
+                const durationSelect = document.getElementById('webpage-duration');
+                if (![...durationSelect.options].some((option) => Number(option.value) === duration)) {
+                    durationSelect.add(new Option(`${duration} days (package default)`, String(duration)));
+                }
+                durationSelect.value = String(duration);
+            }
+            summary.innerHTML = readiness.issues.length
+                ? `<strong style="color:var(--red);">Not ready to activate:</strong> ${escHtml(readiness.issues.join('; '))}. <a href="ajm-ad-management.html#packages" style="color:var(--yellow);">Fix package setup →</a>`
+                : `<strong style="color:var(--green);">Configured:</strong> ${escHtml(price)} for ${duration} days${options ? ` · ${options} optional upgrade${options === 1 ? '' : 's'}` : ''} · payment destination ready.`;
+        }
+        setWebpagePackageControls(webpageModalHasActiveAccess, webpageAccessVerified);
+    }
+
+    async function populateWebpagePackageChoices(preferredCode) {
+        const configuration = await getAdvertisingConfiguration();
+        webpagePackageConfiguration = {
+            packages: (configuration.packages || []).filter((pkg) => pkg.product_type === 'webpage' || pkg.webpage_enabled || pkg.webpage_tier),
+            accounts: configuration.accounts || []
+        };
+        const select = document.getElementById('webpage-package-code');
+        select.replaceChildren();
+        webpagePackageConfiguration.packages.forEach((pkg) => {
+            const tier = pkg.webpage_tier ? `${String(pkg.webpage_tier).charAt(0).toUpperCase()}${String(pkg.webpage_tier).slice(1)}` : pkg.name;
+            const price = Number(pkg.price) > 0 ? ` — ${pkg.currency || 'JMD'} ${Number(pkg.price).toLocaleString('en-JM')}` : ' — price required';
+            select.add(new Option(`${tier}${price}${pkg.is_active === false ? ' (archived)' : ''}`, pkg.code));
+        });
+        if ([...select.options].some((option) => option.value === preferredCode)) select.value = preferredCode;
+        else if (select.options.length) select.selectedIndex = 0;
+        updateWebpagePackageSummary(true);
+    }
+
+    function setWebpagePackageControls(hasActiveAccess, accessVerified = true, pageState = webpagePageState) {
+        webpageModalHasActiveAccess = hasActiveAccess;
+        webpageAccessVerified = accessVerified;
+        webpagePageState = hasActiveAccess ? pageState : null;
+        const readiness = selectedWebpagePackageReadiness();
+        document.getElementById('renew-webpage-btn').style.display = hasActiveAccess ? '' : 'none';
+        document.getElementById('cancel-webpage-btn').style.display = hasActiveAccess ? '' : 'none';
+        document.getElementById('activate-webpage-btn').style.display = hasActiveAccess ? 'none' : '';
+        document.getElementById('activate-webpage-btn').disabled = !accessVerified || readiness.issues.length > 0;
+        document.getElementById('webpage-package-code').disabled = hasActiveAccess;
+        setWebpageLinksEnabled(hasActiveAccess && accessVerified, webpagePageState);
+    }
+
+    async function loadWebpagePageState(listingId) {
+        const { data, error } = await supabase
+            .from('listing_webpages')
+            .select('page_status, updated_at, published_at')
+            .eq('listing_id', listingId)
+            .maybeSingle();
+        if (error) throw error;
+        return data || null;
+    }
+
+    function webpagePackagePayload() {
+        return {
+            listing_id: document.getElementById('webpage-listing-id').value,
+            package_code: document.getElementById('webpage-package-code').value,
+            market_segment: document.getElementById('webpage-market-segment').value,
+            duration_days: Number(document.getElementById('webpage-duration').value),
+            payment_reference: document.getElementById('webpage-payment-reference').value.trim() || null
+        };
+    }
+
+    async function manageListingWebpage(action, payload) {
+        const { data, error } = await supabase.rpc('admin_manage_listing_webpage', { p_action: action, p_payload: payload });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        return data || {};
+    }
+
+    function webpageResultSubscription(data) {
+        if (data?.subscription) return data.subscription;
+        const subscriptions = Array.isArray(data?.subscriptions) ? data.subscriptions : [];
+        return [...subscriptions]
+            .reverse()
+            .find((subscription) => ['active', 'paused'].includes(subscription?.status)) || null;
+    }
+
     async function openWebpagePackageModal(listing) {
         document.getElementById('webpage-listing-id').value = listing.id;
         document.getElementById('webpage-business-name').value = listing.business_name || '';
-        document.getElementById('webpage-package-code').value = `ajm-webpage-${listing.requested_tier || 'silver'}`;
+        const preferredCode = `ajm-webpage-${listing.requested_tier || 'silver'}`;
+        document.getElementById('webpage-package-code').value = preferredCode;
         document.getElementById('webpage-market-segment').value = listing.market_segment || 'local-business';
         document.getElementById('webpage-duration').value = '30';
         document.getElementById('webpage-payment-reference').value = '';
-        document.getElementById('admin-webpage-builder-link').href = `ajm-webpage-builder.html?listing=${encodeURIComponent(listing.id)}`;
-        document.getElementById('admin-live-webpage-link').href = `ajm-business-page.html?listing=${encodeURIComponent(listing.id)}&preview=1`;
+        document.getElementById('admin-webpage-builder-link').dataset.target = `ajm-webpage-builder.html?listing=${encodeURIComponent(listing.id)}`;
+        document.getElementById('admin-live-webpage-link').dataset.target = `ajm-business-page.html?listing=${encodeURIComponent(listing.id)}&preview=1`;
         const status = document.getElementById('webpage-package-status');
         status.textContent = 'Checking current access…';
+        document.getElementById('webpage-package-summary').textContent = 'Loading current package price, duration and payment readiness…';
+        webpagePackageConfiguration = { packages: [], accounts: [] };
+        webpagePageState = null;
+        setWebpagePackageControls(false, false);
         document.getElementById('webpage-package-modal').classList.add('open');
+
+        try {
+            await populateWebpagePackageChoices(preferredCode);
+        } catch (error) {
+            document.getElementById('webpage-package-summary').innerHTML = `<strong style="color:var(--red);">Package configuration could not be loaded:</strong> ${escHtml(error.message || 'Unknown error')}`;
+        }
 
         const { data, error } = await supabase
             .from('ad_subscriptions')
@@ -1251,15 +1481,33 @@
             .limit(1)
             .maybeSingle();
 
-        if (error || !data) {
-            status.textContent = 'No active paid webpage package.';
+        if (error) {
+            status.textContent = 'Current webpage access could not be verified. Activation is disabled to prevent duplicate access.';
+            showToast('Could not check webpage access: ' + error.message, 'error');
+            setWebpagePackageControls(false, false);
+            return;
+        }
+        if (!data) {
+            status.innerHTML = '<strong>No active paid webpage.</strong> Complete steps 1–3 above to enable the builder and public-page preview.';
+            setWebpagePackageControls(false, true);
             return;
         }
 
         const packageData = data.ad_packages;
         if (packageData?.code) document.getElementById('webpage-package-code').value = packageData.code;
+        updateWebpagePackageSummary(false);
+        try {
+            webpagePageState = await loadWebpagePageState(listing.id);
+        } catch (pageError) {
+            webpagePageState = null;
+            showToast('Webpage draft status could not be checked: ' + pageError.message, 'error');
+        }
         const expiry = data.expires_at ? fmtDate(data.expires_at) : 'no expiry date';
-        status.innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(packageData?.name || packageData?.webpage_tier || 'AJM webpage')} · expires ${escHtml(expiry)}`;
+        const contentStatus = webpagePageState
+            ? webpagePageState.page_status === 'published' ? 'published page available' : 'saved draft available'
+            : 'open the builder and save the first draft';
+        status.innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(packageData?.name || packageData?.webpage_tier || 'AJM webpage')} · expires ${escHtml(expiry)} · ${escHtml(contentStatus)}`;
+        setWebpagePackageControls(true, true, webpagePageState);
     }
 
     function closeWebpagePackageModal() {
@@ -1267,50 +1515,80 @@
     }
 
     async function activateWebpagePackage() {
-        const listingId = document.getElementById('webpage-listing-id').value;
         const button = document.getElementById('activate-webpage-btn');
-        button.disabled = true;
-        button.textContent = 'Activating…';
-        const { data, error } = await supabase.functions.invoke('admin-ad-subscriptions', {
-            body: {
-                action: 'activate',
-                listing_id: listingId,
-                package_code: document.getElementById('webpage-package-code').value,
-                market_segment: document.getElementById('webpage-market-segment').value,
-                duration_days: Number(document.getElementById('webpage-duration').value),
-                payment_reference: document.getElementById('webpage-payment-reference').value.trim() || null
-            }
-        });
-        button.disabled = false;
-        button.textContent = 'Activate Package';
-        if (error || data?.error) {
-            showToast('Package activation failed: ' + (data?.error || error?.message || 'Unknown error'), 'error');
+        const readiness = selectedWebpagePackageReadiness();
+        if (!webpageAccessVerified || readiness.issues.length) {
+            showToast(`Complete the package setup before activation: ${readiness.issues.join('; ') || 'current access is still being checked'}.`, 'error');
             return;
         }
-        const expires = data?.subscription?.expires_at ? fmtDate(data.subscription.expires_at) : 'no expiry date';
-        document.getElementById('webpage-package-status').innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(data?.package?.name || 'AJM webpage')} · expires ${escHtml(expires)}`;
-        showToast('Paid webpage package activated.', 'success');
-        await loadListings();
+        button.disabled = true;
+        button.textContent = 'Activating…';
+        try {
+            const data = await manageListingWebpage('activate', webpagePackagePayload());
+            const subscription = webpageResultSubscription(data);
+            const expires = subscription?.expires_at ? fmtDate(subscription.expires_at) : 'no expiry date';
+            try {
+                webpagePageState = await loadWebpagePageState(document.getElementById('webpage-listing-id').value);
+            } catch (pageError) {
+                webpagePageState = null;
+            }
+            const contentStatus = webpagePageState ? 'starter draft ready' : 'open the builder and save the first draft';
+            document.getElementById('webpage-package-status').innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(data?.package?.name || 'AJM webpage')} · expires ${escHtml(expires)} · ${escHtml(contentStatus)}`;
+            setWebpagePackageControls(true, true, webpagePageState);
+            showToast('Paid webpage activated. Continue with the builder, then preview the saved page.', 'success');
+            await loadListings();
+        } catch (error) {
+            showToast('Paid webpage activation could not be completed: ' + (error.message || 'Unknown error'), 'error');
+        } finally {
+            button.disabled = webpageModalHasActiveAccess || selectedWebpagePackageReadiness().issues.length > 0;
+            button.textContent = 'Activate paid webpage';
+        }
+    }
+
+    async function renewWebpagePackage() {
+        const button = document.getElementById('renew-webpage-btn');
+        button.disabled = true;
+        button.textContent = 'Renewing…';
+        try {
+            const data = await manageListingWebpage('renew', webpagePackagePayload());
+            const subscription = webpageResultSubscription(data);
+            const expires = subscription?.expires_at ? fmtDate(subscription.expires_at) : 'no expiry date';
+            document.getElementById('webpage-package-status').innerHTML = `<strong style="color:var(--green);">Active:</strong> ${escHtml(data?.package?.name || 'AJM webpage')} · expires ${escHtml(expires)}`;
+            showToast('Paid webpage access renewed.', 'success');
+            await loadListings();
+        } catch (error) {
+            showToast('Could not renew access: ' + (error.message || 'Unknown error'), 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = 'Renew Access';
+        }
     }
 
     async function cancelWebpagePackage() {
         const listingId = document.getElementById('webpage-listing-id').value;
         if (!confirm('Cancel paid webpage access for this listing? The public webpage will stop displaying immediately.')) return;
+        const response = prompt('Reason for cancellation (required):');
+        if (response === null) return;
+        const reason = response.trim();
+        if (!reason) {
+            showToast('A cancellation reason is required.', 'error');
+            return;
+        }
         const button = document.getElementById('cancel-webpage-btn');
         button.disabled = true;
         button.textContent = 'Cancelling…';
-        const { data, error } = await supabase.functions.invoke('admin-ad-subscriptions', {
-            body: { action: 'cancel', listing_id: listingId }
-        });
-        button.disabled = false;
-        button.textContent = 'Cancel Access';
-        if (error || data?.error) {
-            showToast('Could not cancel access: ' + (data?.error || error?.message || 'Unknown error'), 'error');
-            return;
+        try {
+            await manageListingWebpage('cancel', { listing_id: listingId, reason, admin_note: reason });
+            document.getElementById('webpage-package-status').innerHTML = '<strong>No active paid webpage.</strong> Access was cancelled; the builder and public-page preview are disabled.';
+            setWebpagePackageControls(false, true, null);
+            showToast('Paid webpage access cancelled.', 'success');
+            await loadListings();
+        } catch (error) {
+            showToast('Could not cancel access: ' + (error.message || 'Unknown error'), 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = 'Cancel Access';
         }
-        document.getElementById('webpage-package-status').textContent = 'No active paid webpage package.';
-        showToast('Paid webpage access cancelled.', 'success');
-        await loadListings();
     }
 
     // ── EDIT MODAL ──
@@ -1320,11 +1598,19 @@
         document.getElementById('edit-image').value = ''; // Reset file input
         
         const catSelect = document.getElementById('edit-category');
-        catSelect.value = listing.category || '';
-        if (window.populateSubcategorySelect) {
-            window.populateSubcategorySelect('edit-category', 'edit-subcategory');
+        if (listing.category && !Array.from(catSelect.options).some(option => option.value === listing.category)) {
+            const existingCategory = document.createElement('option');
+            existingCategory.value = listing.category;
+            existingCategory.textContent = `${listing.category} (existing value)`;
+            catSelect.appendChild(existingCategory);
         }
-        document.getElementById('edit-subcategory').value = listing.subcategory || '';
+        catSelect.value = listing.category || '';
+        if (window.restoreClassification) {
+            window.restoreClassification('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific', listing.subcategory || '');
+        } else if (window.populateSubcategorySelect) {
+            window.populateSubcategorySelect('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific');
+            document.getElementById('edit-subcategory').value = listing.subcategory || '';
+        }
         
         updateLabels('edit');
 
@@ -1348,7 +1634,9 @@
 
         const business_name = document.getElementById('edit-business-name').value;
         const category = document.getElementById('edit-category').value;
-        const subcategory = document.getElementById('edit-subcategory').value;
+        const subcategory = window.getClassificationValue
+            ? window.getClassificationValue('edit-subcategory', 'edit-tertiary', 'edit-specific')
+            : document.getElementById('edit-subcategory').value;
         const listing_type = document.getElementById('edit-listing-type').value;
         const location = document.getElementById('edit-location').value;
         const contact_phone = document.getElementById('edit-phone').value;
@@ -1424,7 +1712,7 @@
         }
         document.getElementById('add-business-name').value = '';
         document.getElementById('add-category').value = '';
-        document.getElementById('add-subcategory').value = '';
+        window.populateSubcategorySelect?.('add-category', 'add-subcategory', 'add-tertiary', 'add-specific');
         document.getElementById('add-status').value = 'approved';
         document.getElementById('add-listing-type').value = 'basic';
         document.getElementById('add-location').value = '';
@@ -1450,7 +1738,11 @@
 
         const business_name = document.getElementById('add-business-name').value.trim();
         const category = document.getElementById('add-category').value;
-        const subcategory = document.getElementById('add-subcategory').value.trim();
+        const secondaryCategory = document.getElementById('add-subcategory').value.trim();
+        const tertiaryCategory = document.getElementById('add-tertiary').value.trim();
+        const subcategory = window.getClassificationValue
+            ? window.getClassificationValue('add-subcategory', 'add-tertiary', 'add-specific')
+            : secondaryCategory;
         const listing_type = document.getElementById('add-listing-type').value.trim();
         const location = document.getElementById('add-location').value.trim();
         const contact_phone = document.getElementById('add-phone').value.trim();
@@ -1461,8 +1753,8 @@
         const extra_notes = document.getElementById('add-extra-notes').value.trim();
         const imageFile = document.getElementById('add-image').files[0];
 
-        if (!business_name || !category || !location || !description) {
-            showToast('Business Name, Category, Location, and Description are required', 'error');
+        if (!business_name || !category || !secondaryCategory || !tertiaryCategory || !location || !description) {
+            showToast('Business Name, all three category levels, Location, and Description are required', 'error');
             return;
         }
 
@@ -1623,7 +1915,46 @@
     // ADVERTISING MANAGEMENT
     // ════════════════════════════════════════════════════
 
+    async function adminAdvertisingCommand(action, payload = {}) {
+        const { data, error } = await supabase.rpc('admin_manage_advertising', { p_action: action, p_payload: payload });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        return data;
+    }
+
+    async function advertisingCrud(entity, action, payload = {}) {
+        const rpc = { package: 'admin_manage_ad_package', bank: 'admin_manage_payment_account' }[entity];
+        if (!rpc) throw new Error('Unsupported advertising configuration action.');
+        const { data, error } = await supabase.rpc(rpc, { p_action: action, p_payload: payload });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        return data;
+    }
+
+    async function getAdvertisingConfiguration() {
+        const { data, error } = await supabase.rpc('admin_get_ad_configuration');
+        if (error) throw error;
+        const configuration = data && typeof data === 'object' ? data : {};
+        return {
+            ...configuration,
+            packages: Array.isArray(configuration.packages) ? configuration.packages : [],
+            accounts: Array.isArray(configuration.payment_accounts)
+                ? configuration.payment_accounts
+                : (Array.isArray(configuration.accounts) ? configuration.accounts : [])
+        };
+    }
+
     let advTabActive = 'orders';
+    let adOrdersCache = [];
+
+    function adOrderCustomer(order) {
+        const customer = order?.customer || order?.profiles || {};
+        return {
+            name: order?.customer_name || customer.full_name || '',
+            email: order?.customer_email || customer.email || '',
+            fallback: order?.user_id ? String(order.user_id).slice(0, 8) : 'Unknown customer'
+        };
+    }
     function switchAdvTab(name) {
         advTabActive = name;
         document.querySelectorAll('.adv-sub-tab').forEach(b => b.classList.remove('active'));
@@ -1648,15 +1979,11 @@
         const pkgFilter = document.getElementById('order-package-filter')?.value || '';
 
         try {
-            let q = supabase.from('ad_orders')
-                .select('id,order_number,user_id,package_name_snapshot,package_code_snapshot,total_price_snapshot,currency_snapshot,status,created_at,approved_at,expires_at,admin_note,rejection_reason,payment_reference,payment_account_snapshot')
-                .order('created_at', { ascending: false })
-                .limit(100);
-            if (statusFilter) q = q.eq('status', statusFilter);
-            if (pkgFilter) q = q.eq('package_code_snapshot', pkgFilter);
-
-            const { data: orders, error } = await q;
+            const { data, error } = await supabase.rpc('admin_get_ad_orders', { p_status: statusFilter || null, p_from: null, p_to: null, p_limit: 250, p_offset: 0 });
             if (error) throw error;
+            let orders = Array.isArray(data) ? data : (data?.orders || []);
+            adOrdersCache = orders;
+            if (pkgFilter) orders = orders.filter((order) => order.package_code_snapshot === pkgFilter);
 
             // Populate package filter
             const pkgSel = document.getElementById('order-package-filter');
@@ -1669,28 +1996,22 @@
                 tbody.innerHTML = '<tr class="loading-row"><td colspan="7">No orders found.</td></tr>'; return;
             }
 
-            // Fetch customer emails
-            const uids = [...new Set(orders.map(o => o.user_id))];
-            let emailMap = {};
-            try {
-                const { data: profiles } = await supabase.from('profiles').select('id,email,full_name').in('id', uids);
-                if (profiles) profiles.forEach(p => { emailMap[p.id] = p.email || p.full_name || p.id.slice(0,8); });
-            } catch(_) {}
-
             const statusColors = { pending_payment:'var(--yellow)', payment_submitted:'var(--orange)', approved:'var(--green)', rejected:'var(--red)', paused:'var(--blue)', cancelled:'var(--muted)', expired:'var(--muted)' };
 
             tbody.innerHTML = orders.map(o => {
                 const color = statusColors[o.status] || 'var(--muted)';
                 const badge = `<span style="background:rgba(255,255,255,0.05);border:1px solid ${color};color:${color};border-radius:20px;padding:2px 9px;font-size:0.72rem;font-weight:700;">${o.status.replace(/_/g,' ')}</span>`;
-                const canApprove = ['pending_payment','payment_submitted'].includes(o.status);
+                const customer = adOrderCustomer(o);
+                const canApprove = o.status === 'payment_submitted';
                 const canReject = ['pending_payment','payment_submitted'].includes(o.status);
                 const canPause = o.status === 'approved';
                 const canResume = o.status === 'paused';
+                const canRenew = ['approved','paused'].includes(o.status);
                 const canCancel = !['cancelled','expired'].includes(o.status);
 
                 return `<tr>
                     <td><strong>${escHtml(o.order_number)}</strong></td>
-                    <td><small>${escHtml(emailMap[o.user_id] || o.user_id?.slice(0,8))}</small></td>
+                    <td><small>${escHtml(customer.name || customer.email || customer.fallback)}${customer.name && customer.email ? `<br>${escHtml(customer.email)}` : ''}</small></td>
                     <td><strong>${escHtml(o.package_name_snapshot)}</strong><br><small style="color:var(--muted)">${escHtml(o.package_code_snapshot)}</small></td>
                     <td><strong>${escHtml(o.currency_snapshot)} ${Number(o.total_price_snapshot).toLocaleString()}</strong></td>
                     <td>${badge}</td>
@@ -1701,7 +2022,8 @@
                             ${canApprove ? `<button class="btn btn-primary btn-sm" onclick="approveOrder('${o.id}')" title="Approve">✓ Approve</button>` : ''}
                             ${canReject ? `<button class="btn btn-danger btn-sm" onclick="openRejectOrderModal('${o.id}')" title="Reject">✗ Reject</button>` : ''}
                             ${canPause ? `<button class="btn btn-warning btn-sm" onclick="pauseOrder('${o.id}')" title="Pause">⏸ Pause</button>` : ''}
-                            ${canResume ? `<button class="btn btn-primary btn-sm" onclick="approveOrder('${o.id}')" title="Resume">▶ Resume</button>` : ''}
+                            ${canResume ? `<button class="btn btn-primary btn-sm" onclick="resumeOrder('${o.id}')" title="Resume">▶ Resume</button>` : ''}
+                            ${canRenew ? `<button class="btn btn-ghost btn-sm" onclick="renewOrder('${o.id}')" title="Renew">↻ Renew</button>` : ''}
                             ${canCancel ? `<button class="btn btn-danger btn-sm" style="opacity:0.7" onclick="cancelOrder('${o.id}')" title="Cancel">✕</button>` : ''}
                         </div>
                     </td>
@@ -1713,19 +2035,9 @@
     }
 
     async function approveOrder(id) {
-        if (!confirm('Approve this advertising order? This will activate the ad and notify the customer by email.')) return;
+        if (!confirm('Confirm the bank transfer and activate this advertising order? The customer will be notified by email.')) return;
         try {
-            const starts = new Date();
-            const { data: ord } = await supabase.from('ad_orders').select('duration_days_snapshot,status').eq('id', id).single();
-            if (!ord) throw new Error('Order not found');
-            const expires = new Date(starts.getTime() + ord.duration_days_snapshot * 86400000);
-            const { error } = await supabase.from('ad_orders').update({
-                status: 'approved', approved_at: starts.toISOString(),
-                starts_at: starts.toISOString(), expires_at: expires.toISOString(),
-                approved_by: currentUser.id
-            }).eq('id', id);
-            if (error) throw error;
-            await dispatchNotifications();
+            await adminAdvertisingCommand('confirm_payment', { order_id: id });
             showToast('Order approved — customer notified!', 'success');
             await loadAdOrders();
         } catch(err) { showToast('Error: ' + err.message, 'error'); }
@@ -1743,9 +2055,7 @@
         const reason = document.getElementById('reject-reason').value.trim();
         if (!reason) { showToast('Please enter a rejection reason.', 'error'); return; }
         try {
-            const { error } = await supabase.from('ad_orders').update({ status: 'rejected', rejection_reason: reason }).eq('id', id);
-            if (error) throw error;
-            await dispatchNotifications();
+            await adminAdvertisingCommand('reject_payment', { order_id: id, reason });
             showToast('Order rejected — customer notified.', 'success');
             closeRejectOrderModal();
             await loadAdOrders();
@@ -1753,33 +2063,71 @@
     }
 
     async function pauseOrder(id) {
-        if (!confirm('Pause this ad?')) return;
+        const reason = prompt('Why is this advertisement being paused?');
+        if (!reason?.trim()) return;
         try {
-            const { error } = await supabase.from('ad_orders').update({ status: 'paused' }).eq('id', id);
-            if (error) throw error;
+            await adminAdvertisingCommand('pause_ad', { order_id: id, reason: reason.trim() });
             showToast('Order paused.', 'info');
             await loadAdOrders();
         } catch(err) { showToast('Error: ' + err.message, 'error'); }
     }
 
-    async function cancelOrder(id) {
-        if (!confirm('Cancel this order? This cannot be undone.')) return;
+    async function resumeOrder(id) {
+        if (!confirm('Resume this advertisement using its current expiry date?')) return;
         try {
-            const { error } = await supabase.from('ad_orders').update({ status: 'cancelled', cancelled_at: new Date().toISOString() }).eq('id', id);
-            if (error) throw error;
+            await adminAdvertisingCommand('resume_ad', { order_id: id });
+            showToast('Advertisement resumed.', 'success');
+            await loadAdOrders();
+        } catch(err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function renewOrder(id) {
+        const rawDays = prompt('Add how many days to this advertising order?', '30');
+        if (rawDays === null) return;
+        const durationDays = Number(rawDays);
+        if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 3650) {
+            showToast('Enter a whole number from 1 to 3650.', 'error');
+            return;
+        }
+        try {
+            await adminAdvertisingCommand('renew_subscription', { order_id: id, duration_days: durationDays });
+            showToast(`Advertising access renewed by ${durationDays} days.`, 'success');
+            await loadAdOrders();
+        } catch(err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function cancelOrder(id) {
+        const reason = prompt('Why is this advertising order being cancelled?');
+        if (!reason?.trim()) return;
+        try {
+            await adminAdvertisingCommand('cancel_subscription', { order_id: id, reason: reason.trim() });
             showToast('Order cancelled.', 'info');
             await loadAdOrders();
         } catch(err) { showToast('Error: ' + err.message, 'error'); }
     }
 
     async function viewOrderDetail(id) {
-        const { data: o, error } = await supabase.from('ad_orders')
-            .select('*').eq('id', id).single();
-        if (error || !o) { showToast('Could not load order.', 'error'); return; }
+        let o = adOrdersCache.find((order) => order.id === id);
+        if (!o) {
+            const { data, error } = await supabase.rpc('admin_get_ad_orders', { p_status: null, p_from: null, p_to: null, p_limit: 250, p_offset: 0 });
+            if (error) { showToast('Could not load order: ' + error.message, 'error'); return; }
+            adOrdersCache = Array.isArray(data) ? data : (data?.orders || []);
+            o = adOrdersCache.find((order) => order.id === id);
+        }
+        if (!o) { showToast('Could not load order.', 'error'); return; }
+        const customer = adOrderCustomer(o);
         const pa = o.payment_account_snapshot || {};
+        let proofUrl = null;
+        let proofError = '';
+        if (o.payment_proof_path) {
+            const { data, error } = await supabase.storage.from('ad-payment-proofs').createSignedUrl(o.payment_proof_path, 600);
+            if (error) proofError = error.message;
+            else proofUrl = data?.signedUrl || data?.signedURL || null;
+        }
         document.getElementById('order-detail-content').innerHTML = `
             <table style="width:100%;">
                 <tr><td style="padding:6px 0;color:var(--muted);width:40%;">Order #</td><td><strong>${escHtml(o.order_number)}</strong></td></tr>
+                <tr><td style="padding:6px 0;color:var(--muted);">Customer</td><td>${escHtml(customer.name || customer.email || customer.fallback)}${customer.name && customer.email ? `<br><small>${escHtml(customer.email)}</small>` : ''}</td></tr>
                 <tr><td style="padding:6px 0;color:var(--muted);">Package</td><td>${escHtml(o.package_name_snapshot)}</td></tr>
                 <tr><td style="padding:6px 0;color:var(--muted);">Amount</td><td><strong>${escHtml(o.currency_snapshot)} ${Number(o.total_price_snapshot).toLocaleString()}</strong></td></tr>
                 <tr><td style="padding:6px 0;color:var(--muted);">Status</td><td>${escHtml(o.status)}</td></tr>
@@ -1795,14 +2143,9 @@
                 <strong style="font-size:0.86rem;color:var(--muted);">Payment Account Used</strong><br>
                 ${escHtml(pa.bank_name)} · ${escHtml(pa.account_name)} · ${escHtml(pa.account_number ? '••••'+pa.account_number.slice(-4) : '')}
             </div>` : ''}
+            ${proofUrl ? `<a class="btn btn-ghost btn-sm" style="display:inline-block;margin-top:14px;" href="${escHtml(proofUrl)}" target="_blank" rel="noopener">Open payment proof ↗</a>` : proofError ? `<p style="margin-top:14px;color:var(--red);">Payment proof could not be opened: ${escHtml(proofError)}</p>` : '<p style="margin-top:14px;color:var(--muted);">No payment proof attached.</p>'}
         `;
         document.getElementById('order-detail-modal').classList.add('open');
-    }
-
-    async function dispatchNotifications() {
-        try {
-            await supabase.rpc('dispatch_ad_notification_outbox', { p_limit: 10 });
-        } catch(_) { /* Vault may not be configured — silent fail */ }
     }
 
     // ── PACKAGES ──
@@ -1810,11 +2153,9 @@
         const container = document.getElementById('packages-list');
         container.innerHTML = '<p style="color:var(--muted);">Loading...</p>';
         try {
-            const { data: pkgs, error } = await supabase.from('ad_packages')
-                .select('*').order('sort_order').order('name');
-            if (error) throw error;
-
-            const { data: accounts } = await supabase.from('payment_accounts').select('id,label,currency').eq('is_active', true);
+            const configuration = await getAdvertisingConfiguration();
+            const pkgs = configuration.packages || [];
+            const accounts = configuration.accounts || [];
             const accountMap = {}; (accounts||[]).forEach(a => { accountMap[a.id] = a; });
 
             if (!pkgs || pkgs.length === 0) {
@@ -1832,7 +2173,7 @@
                         </div>
                         <div style="display:flex;gap:8px;">
                             <button class="btn btn-ghost btn-sm" onclick="openEditPackageModal(this)" data-pkg="${escHtml(JSON.stringify(p))}">✎ Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deletePackage('${p.id}')">🗑 Delete</button>
+                            ${p.is_active === false ? `<button class="btn btn-danger btn-sm" onclick="deletePackage('${p.id}')">🗑 Delete</button>` : ''}
                         </div>
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;">
@@ -1865,10 +2206,9 @@
     };
 
     window.deletePackage = async function(id) {
-        if (!confirm('Are you sure you want to delete this package? This action cannot be undone.')) return;
+        if (!confirm('Permanently delete this inactive package? The request will fail if order history depends on it.')) return;
         try {
-            const { error } = await supabase.from('ad_packages').delete().eq('id', id);
-            if (error) throw error;
+            await advertisingCrud('package', 'delete', { id });
             showToast('Package deleted.', 'success');
             await loadPackages();
         } catch(err) {
@@ -1893,7 +2233,14 @@
 
     async function savePackage() {
         const id = document.getElementById('pkg-id').value;
+        if (!id) {
+            closePackageModal();
+            showToast('Create complete packages in Advertising Operations.', 'info');
+            window.location.href = 'ajm-ad-management.html#packages';
+            return;
+        }
         const payload = {
+            id,
             name: document.getElementById('pkg-name').value.trim(),
             code: document.getElementById('pkg-code').value.trim().toLowerCase().replace(/\s+/g,'-') || null,
             description: document.getElementById('pkg-description').value.trim() || null,
@@ -1901,15 +2248,24 @@
             currency: document.getElementById('pkg-currency').value,
             duration_days: parseInt(document.getElementById('pkg-duration').value) || 30,
             payment_account_id: document.getElementById('pkg-payment-account').value || null,
-            is_active: document.getElementById('pkg-is-active').checked,
-            updated_at: new Date().toISOString()
+            is_active: document.getElementById('pkg-is-active').checked
         };
         if (!payload.name) { showToast('Package name is required.', 'error'); return; }
+        if (payload.is_active && payload.price <= 0) { showToast('Enter a price greater than zero before making this package active.', 'error'); return; }
+        if (payload.is_active && payload.duration_days < 1) { showToast('Enter a duration of at least one day.', 'error'); return; }
         try {
-            const { error } = id
-                ? await supabase.from('ad_packages').update(payload).eq('id', id)
-                : await supabase.from('ad_packages').insert(payload);
-            if (error) throw error;
+            if (payload.is_active) {
+                const configuration = await getAdvertisingConfiguration();
+                const accounts = configuration.accounts || [];
+                const destination = payload.payment_account_id
+                    ? accounts.find((account) => account.id === payload.payment_account_id)
+                    : accounts.find((account) => account.is_default && account.is_active !== false && account.currency === payload.currency);
+                if (!destination || destination.is_active === false || destination.currency !== payload.currency) {
+                    showToast(`Select an active ${payload.currency} payment destination, or configure a matching default in Accounts Receivable.`, 'error');
+                    return;
+                }
+            }
+            await advertisingCrud('package', 'upsert', payload);
             showToast('Package saved!', 'success');
             closePackageModal();
             await loadPackages();
@@ -1921,9 +2277,8 @@
         const container = document.getElementById('payment-accounts-list');
         container.innerHTML = '<p style="color:var(--muted);">Loading...</p>';
         try {
-            const { data: accounts, error } = await supabase.from('payment_accounts')
-                .select('*').order('sort_order').order('label');
-            if (error) throw error;
+            const configuration = await getAdvertisingConfiguration();
+            const accounts = configuration.accounts || [];
 
             if (!accounts || accounts.length === 0) {
                 container.innerHTML = '<p style="color:var(--muted);">No payment accounts yet. Add one above.</p>'; return;
@@ -1937,8 +2292,8 @@
                             <small style="color:var(--muted)">${escHtml(a.currency)} · ${a.is_active ? '<span style="color:var(--green)">Active</span>' : '<span style="color:var(--muted)">Inactive</span>'}</small>
                         </div>
                         <div style="display:flex;gap:8px;">
-                            <button class="btn btn-ghost btn-sm" onclick="openPaymentAccountModal(${JSON.stringify(JSON.stringify(a))})">✎ Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deletePaymentAccount('${a.id}')">🗑</button>
+                            <button class="btn btn-ghost btn-sm" onclick="openPaymentAccountModal(this)" data-account="${escHtml(JSON.stringify(a))}">✎ Edit</button>
+                            ${a.is_active === false ? `<button class="btn btn-danger btn-sm" onclick="deletePaymentAccount('${a.id}')">🗑</button>` : ''}
                         </div>
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
@@ -1956,16 +2311,17 @@
     }
 
     async function loadPaymentAccountsIntoSelects() {
-        const { data: accounts } = await supabase.from('payment_accounts').select('id,label,currency').eq('is_active', true).order('sort_order');
+        const configuration = await getAdvertisingConfiguration();
+        const accounts = (configuration.accounts || []).filter((account) => account.is_active !== false);
         const sel = document.getElementById('pkg-payment-account');
         if (!sel || !accounts) return;
         while (sel.options.length > 1) sel.remove(1);
         (accounts || []).forEach(a => { sel.add(new Option(`${a.label} (${a.currency})`, a.id)); });
     }
 
-    function openPaymentAccountModal(jsonStrOrNull) {
-        const a = jsonStrOrNull ? JSON.parse(jsonStrOrNull) : null;
-        document.getElementById('pa-modal-title').textContent = a ? 'Edit Payment Account' : 'Add Payment Account';
+    function openPaymentAccountModal(source) {
+        const a = source?.getAttribute ? JSON.parse(source.getAttribute('data-account')) : null;
+        document.getElementById('pa-modal-title').textContent = a ? 'Edit Payment Destination' : 'Add Payment Destination';
         document.getElementById('pa-id').value = a?.id || '';
         document.getElementById('pa-label').value = a?.label || '';
         document.getElementById('pa-currency').value = a?.currency || 'JMD';
@@ -1987,6 +2343,8 @@
         const id = document.getElementById('pa-id').value;
         const code = id ? undefined : (document.getElementById('pa-label').value.trim().toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now().toString(36));
         const payload = {
+            id: id || null,
+            code: code || undefined,
             label: document.getElementById('pa-label').value.trim(),
             currency: document.getElementById('pa-currency').value,
             bank_name: document.getElementById('pa-bank-name').value.trim() || null,
@@ -1997,16 +2355,19 @@
             routing_number: document.getElementById('pa-routing').value.trim() || null,
             instructions: document.getElementById('pa-instructions').value.trim() || null,
             is_default: document.getElementById('pa-is-default').checked,
-            is_active: document.getElementById('pa-is-active').checked,
-            updated_by: currentUser.id
+            is_active: document.getElementById('pa-is-active').checked
         };
-        if (!payload.label) { showToast('Label is required.', 'error'); return; }
+        const missing = [
+            ['label', 'label'],
+            ['bank_name', 'bank name'],
+            ['account_name', 'account name'],
+            ['account_number', 'account number'],
+            ['instructions', 'payment instructions']
+        ].filter(([key]) => !payload[key]).map(([, label]) => label);
+        if (missing.length) { showToast(`Complete the required destination details: ${missing.join(', ')}.`, 'error'); return; }
         try {
-            const { error } = id
-                ? await supabase.from('payment_accounts').update(payload).eq('id', id)
-                : await supabase.from('payment_accounts').insert({ ...payload, code, created_by: currentUser.id });
-            if (error) throw error;
-            showToast('Payment account saved!', 'success');
+            await advertisingCrud('bank', 'upsert', payload);
+            showToast('Payment destination saved!', 'success');
             closePaymentAccountModal();
             await loadPaymentAccounts();
             await loadPaymentAccountsIntoSelects();
@@ -2014,10 +2375,9 @@
     }
 
     async function deletePaymentAccount(id) {
-        if (!confirm('Delete this payment account? Make sure no packages still reference it.')) return;
+        if (!confirm('Permanently delete this inactive payment account? The request will fail if packages or orders depend on it.')) return;
         try {
-            const { error } = await supabase.from('payment_accounts').delete().eq('id', id);
-            if (error) throw error;
+            await advertisingCrud('bank', 'delete', { id });
             showToast('Payment account deleted.', 'success');
             await loadPaymentAccounts();
         } catch(err) { showToast('Error: ' + err.message, 'error'); }
@@ -2123,80 +2483,69 @@
             });
         } catch(_) {}
 
-        // ── Ad KPIs ──
+        // ── Advertising analytics ──
         try {
-            const { data: orders } = await supabase.from('ad_orders').select('status,total_price_snapshot,currency_snapshot');
-            const total = (orders||[]).reduce((s,o) => o.status==='approved' ? s + Number(o.total_price_snapshot||0) : s, 0);
-            const pending = (orders||[]).filter(o=>['pending_payment','payment_submitted'].includes(o.status)).length;
-            const active = (orders||[]).filter(o=>o.status==='approved').length;
-            document.getElementById('ad-kpis').innerHTML = [
-                {v:'J$ '+total.toLocaleString(),l:'Total Approved Revenue',c:'var(--green)'},
-                {v:(orders||[]).length,l:'Total Orders',c:'var(--blue)'},
-                {v:active,l:'Active Ads',c:'var(--green)'},
-                {v:pending,l:'Awaiting Review',c:'var(--yellow)'}
-            ].map(k => `<div class="chart-kpi"><div class="kpi-val" style="color:${k.c}">${typeof k.v==='number'?k.v.toLocaleString():k.v}</div><div class="kpi-lbl">${k.l}</div></div>`).join('');
-        } catch(_) {}
+            const { data, error } = await supabase.rpc('get_admin_advertising_analytics', { p_days: 30 });
+            if (error) throw error;
+            const analytics = data || {};
+            const kpis = analytics.kpis || {};
+            const dailyOrders = Array.isArray(analytics.daily_orders) ? analytics.daily_orders : [];
+            const statusRows = Array.isArray(analytics.orders_by_status) ? analytics.orders_by_status : [];
+            const packageRows = Array.isArray(analytics.package_performance) ? analytics.package_performance : [];
+            const currency = kpis.currency || 'JMD';
+            const revenue = Number(kpis.confirmed_revenue ?? kpis.revenue ?? 0);
+            const revenueLabel = `${currency} ${revenue.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+            const totalOrders = statusRows.reduce(
+                (total, row) => total + Number(row.count ?? row.orders ?? row.value ?? 0),
+                0
+            );
 
-        // ── Orders over 30 days ──
-        try {
-            const since = new Date(Date.now()-30*86400000).toISOString();
-            const { data: rows } = await supabase.from('ad_orders').select('created_at').gte('created_at',since);
-            const days = {};
-            for (let i=29; i>=0; i--) { const d=new Date(Date.now()-i*86400000); days[d.toISOString().slice(0,10)]=0; }
-            (rows||[]).forEach(r => { const d=r.created_at.slice(0,10); if (d in days) days[d]++; });
-            const labels = Object.keys(days).map(d=>d.slice(5));
+            document.getElementById('ad-kpis').innerHTML = [
+                {v:revenueLabel,l:'Confirmed Revenue',c:'var(--green)'},
+                {v:Number(kpis.total_orders ?? totalOrders),l:'Total Orders',c:'var(--blue)'},
+                {v:Number(kpis.active_ads || 0),l:'Active Ads',c:'var(--green)'},
+                {v:Number(kpis.payment_queue ?? kpis.pending_payments ?? 0),l:'Awaiting Review',c:'var(--yellow)'}
+            ].map(k => `<div class="chart-kpi"><div class="kpi-val" style="color:${k.c}">${typeof k.v==='number'?k.v.toLocaleString():escHtml(k.v)}</div><div class="kpi-lbl">${k.l}</div></div>`).join('');
+
             destroyChart('orders-timeline');
             chartInstances['orders-timeline'] = new Chart(document.getElementById('chart-orders-timeline'), {
-                type:'line', data: { labels, datasets: [{ label:'Orders', data: Object.values(days), borderColor:'#ffcf33', backgroundColor:'rgba(255,207,51,0.1)', tension:0.4, fill:true, pointRadius:3 }] },
+                type:'line',
+                data: {
+                    labels: dailyOrders.map((row) => String(row.day || row.date || row.period || '').slice(5)),
+                    datasets: [{ label:'Orders', data:dailyOrders.map((row) => Number(row.orders ?? row.order_count ?? row.count ?? 0)), borderColor:'#ffcf33', backgroundColor:'rgba(255,207,51,0.1)', tension:0.4, fill:true, pointRadius:3 }]
+                },
                 options: { ...chartDefaults(), plugins: { legend: { display: false } } }
             });
-        } catch(_) {}
 
-        // ── Order status ──
-        try {
-            const { data: rows } = await supabase.from('ad_orders').select('status');
-            const counts = {};
-            (rows||[]).forEach(r => { counts[r.status] = (counts[r.status]||0)+1; });
-            const labels = Object.keys(counts);
             destroyChart('orders-status');
             chartInstances['orders-status'] = new Chart(document.getElementById('chart-orders-status'), {
-                type:'pie', data: { labels, datasets: [{ data: labels.map(l=>counts[l]), backgroundColor: PALETTE }] },
+                type:'pie',
+                data: { labels:statusRows.map((row) => String(row.status || row.label || row.key || '').replace(/_/g, ' ')), datasets:[{ data:statusRows.map((row) => Number(row.count ?? row.orders ?? row.value ?? 0)), backgroundColor:PALETTE }] },
                 options: { responsive:true, plugins: { legend: { labels: { color:'#b9c0d4', font:{family:'Space Grotesk',size:11} } } } }
             });
-        } catch(_) {}
 
-        // ── Revenue by package (bar) ──
-        try {
-            const { data: rows } = await supabase.from('ad_orders').select('package_name_snapshot,total_price_snapshot').eq('status','approved');
-            const revMap = {};
-            (rows||[]).forEach(r => { revMap[r.package_name_snapshot] = (revMap[r.package_name_snapshot]||0) + Number(r.total_price_snapshot||0); });
-            const sorted = Object.entries(revMap).sort((a,b)=>b[1]-a[1]);
+            const packageLabels = packageRows.map((row) => row.package_name || row.name || row.label || 'Package');
+            const packageRevenue = packageRows.map((row) => Number(row.revenue ?? row.confirmed_revenue ?? row.amount ?? 0));
+            const packageOrders = packageRows.map((row) => Number(row.orders ?? row.order_count ?? row.count ?? 0));
             destroyChart('revenue-package');
             chartInstances['revenue-package'] = new Chart(document.getElementById('chart-revenue-package'), {
-                type:'bar', data: { labels: sorted.map(s=>s[0]), datasets: [{ label:'Revenue (JMD)', data: sorted.map(s=>s[1]), backgroundColor: PALETTE }] },
+                type:'bar', data:{ labels:packageLabels, datasets:[{ label:`Revenue (${currency})`, data:packageRevenue, backgroundColor:PALETTE }] },
                 options: { ...chartDefaults(), plugins: { legend: { display: false } } }
             });
-
-            // Revenue donut
             destroyChart('revenue-donut');
             chartInstances['revenue-donut'] = new Chart(document.getElementById('chart-revenue-donut'), {
-                type:'doughnut', data: { labels: sorted.map(s=>s[0]), datasets: [{ data: sorted.map(s=>s[1]), backgroundColor: PALETTE }] },
+                type:'doughnut', data:{ labels:packageLabels, datasets:[{ data:packageRevenue, backgroundColor:PALETTE }] },
                 options: { responsive:true, plugins: { legend: { labels: { color:'#b9c0d4', font:{family:'Space Grotesk',size:10} } } } }
             });
-        } catch(_) {}
-
-        // ── Package popularity (all orders) ──
-        try {
-            const { data: rows } = await supabase.from('ad_orders').select('package_name_snapshot');
-            const counts = {};
-            (rows||[]).forEach(r => { counts[r.package_name_snapshot] = (counts[r.package_name_snapshot]||0)+1; });
-            const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
             destroyChart('package-popularity');
             chartInstances['package-popularity'] = new Chart(document.getElementById('chart-package-popularity'), {
-                type:'bar', data: { labels: sorted.map(s=>s[0]), datasets: [{ label:'Orders', data: sorted.map(s=>s[1]), backgroundColor: PALETTE }] },
+                type:'bar', data:{ labels:packageLabels, datasets:[{ label:'Orders', data:packageOrders, backgroundColor:PALETTE }] },
                 options: { ...chartDefaults(), plugins: { legend: { display: false } }, indexAxis:'y' }
             });
-        } catch(_) {}
+        } catch(error) {
+            document.getElementById('ad-kpis').innerHTML = `<div class="chart-kpi"><div class="kpi-lbl" style="color:var(--red);">Advertising analytics unavailable: ${escHtml(error.message)}</div></div>`;
+            showToast('Advertising analytics could not be loaded.', 'error');
+        }
     }
 
     // ── HELPERS ──
@@ -2241,6 +2590,8 @@
             document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
         }
     });
+
+    document.getElementById('webpage-package-code').addEventListener('change', () => updateWebpagePackageSummary(true));
 
     // ── RUN ──
     init();

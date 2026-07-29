@@ -2,6 +2,27 @@ import { serve } from 'server'
 import { createClient } from '@supabase/supabase-js'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
 
+interface ListingMediaRow {
+  storage_path: string
+  listings?: {
+    expires_at?: string | null
+  } | null
+}
+
+const isListingMediaRow = (value: unknown): value is ListingMediaRow => {
+  if (typeof value !== 'object' || value === null) return false
+
+  const row = value as Record<string, unknown>
+  if (typeof row.storage_path !== 'string') return false
+
+  const listing = row.listings
+  if (listing === undefined || listing === null) return true
+  if (typeof listing !== 'object' || Array.isArray(listing)) return false
+
+  const expiresAt = (listing as Record<string, unknown>).expires_at
+  return expiresAt === undefined || expiresAt === null || typeof expiresAt === 'string'
+}
+
 serve(async (req: Request) => {
   const corsResponse = handleCors(req)
   if (corsResponse) return corsResponse
@@ -29,9 +50,10 @@ serve(async (req: Request) => {
         .eq('listings.status', 'approved')
 
       if (media) {
-        storagePaths = media
-          .filter((m: any) => !m.listings?.expires_at || new Date(m.listings.expires_at) > new Date())
-          .map((m: any) => m.storage_path)
+        storagePaths = (media as unknown[])
+          .filter(isListingMediaRow)
+          .filter((item) => !item.listings?.expires_at || new Date(item.listings.expires_at) > new Date())
+          .map((item) => item.storage_path)
       }
     }
 
