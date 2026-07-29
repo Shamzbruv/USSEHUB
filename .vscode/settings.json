@@ -1,5 +1,6 @@
 {
   "deno.enablePaths": [
     "supabase/functions"
-  ]
+  ],
+  "mssql.autoDisableNonTSqlLanguageService": true
 }
