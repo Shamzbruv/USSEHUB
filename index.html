@@ -512,6 +512,27 @@
             outline-offset: 4px;
         }
 
+        .stat-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .stat-head strong {
+            margin-bottom: 0;
+        }
+
+        .stat-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.35));
+        }
+
         .stat strong {
             display: block;
             font-size: 1.35rem;
@@ -816,6 +837,29 @@
         .spotlight-card span {
             position: relative;
             z-index: 2;
+        }
+
+        .spotlight-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 12px;
+        }
+
+        .spotlight-card-head small {
+            margin-bottom: 0;
+        }
+
+        .spotlight-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
         }
 
         .spotlight-card small {
@@ -1915,15 +1959,24 @@
 
                     <div class="hero-stats">
                         <a class="stat" href="usse-consultancy.html" aria-label="Visit the USSE Consultancy page">
-                            <strong>USSE Consultancy</strong>
+                            <div class="stat-head">
+                                <strong>USSE Consultancy</strong>
+                                <img class="stat-logo" src="consultancy%20favicon.png" alt="" loading="lazy">
+                            </div>
                             <span>Strategy, research, and real estate advisory anchored to the parent enterprise.</span>
                         </a>
                         <a class="stat" href="ajm-aloe-jamaica.html" aria-label="Visit the AJM Aloe Jamaica page">
-                            <strong>AJM</strong>
+                            <div class="stat-head">
+                                <strong>AJM</strong>
+                                <img class="stat-logo" src="aloe%20favicon.png" alt="" loading="lazy">
+                            </div>
                             <span>Aloe Jamaica functions as the creative, digital design, and branding lab.</span>
                         </a>
                         <a class="stat" href="pistol-operations-logistics.html" aria-label="Visit the PISTOL page">
-                            <strong>PISTOL</strong>
+                            <div class="stat-head">
+                                <strong>PISTOL</strong>
+                                <img class="stat-logo" src="pistal%20favicon.png" alt="" loading="lazy">
+                            </div>
                             <span>The operations, HR, and logistics powerhouse for execution-heavy business support.</span>
                         </a>
                     </div>
@@ -2023,21 +2076,30 @@
 
                 <div class="spotlight-grid">
                     <div class="spotlight-card reveal active" data-branch="consultancy" style="--spotlight-color: rgba(13, 110, 253, 0.5);" tabindex="0">
-                        <small>Strategy &amp; Advisory</small>
+                        <div class="spotlight-card-head">
+                            <small>Strategy &amp; Advisory</small>
+                            <img class="spotlight-logo" src="consultancy%20favicon.png" alt="USSE Consultancy logo" loading="lazy">
+                        </div>
                         <h3>USSE Consultancy</h3>
                         <p>Where big decisions get sharper. Strategy, research, and real estate advisory for investors, executives, and market movers.</p>
                         <a href="usse-consultancy.html" class="spotlight-link" onclick="event.stopPropagation()">Explore this arm →</a>
                     </div>
 
                     <div class="spotlight-card reveal" data-branch="ajm" style="--spotlight-color: rgba(23, 214, 111, 0.52);" tabindex="0">
-                        <small>Creative &amp; Brand</small>
+                        <div class="spotlight-card-head">
+                            <small>Creative &amp; Brand</small>
+                            <img class="spotlight-logo" src="aloe%20favicon.png" alt="AJM Aloe Jamaica logo" loading="lazy">
+                        </div>
                         <h3>AJM<br>Aloe Jamaica</h3>
                         <p>Where brands come alive. Identity systems, digital design, and creative assets that make your business impossible to ignore.</p>
                         <a href="ajm-aloe-jamaica.html" class="spotlight-link" onclick="event.stopPropagation()">Explore this arm →</a>
                     </div>
 
                     <div class="spotlight-card reveal" data-branch="pistol" style="--spotlight-color: rgba(255, 43, 79, 0.52);" tabindex="0">
-                        <small>Operations &amp; Logistics</small>
+                        <div class="spotlight-card-head">
+                            <small>Operations &amp; Logistics</small>
+                            <img class="spotlight-logo" src="pistal%20favicon.png" alt="PISTOL logo" loading="lazy">
+                        </div>
                         <h3>PISTOL</h3>
                         <p>Where chaos becomes order. HR, admin, logistics, and operational muscle for businesses that need the back-end handled properly.</p>
                         <a href="pistol-operations-logistics.html" class="spotlight-link" onclick="event.stopPropagation()">Explore this arm →</a>
