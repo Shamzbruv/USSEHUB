@@ -172,7 +172,9 @@
         }
         .savebar span { color: var(--muted); font-size: .82rem; }
         .save-actions { display: flex; gap: 10px; }
-        .loading { display: grid; place-items: center; min-height: 42vh; color: var(--muted); }
+        .loading { display: grid; place-items: center; min-height: 42vh; color: var(--muted); text-align: center; padding: 0 20px; }
+        .loading-message { max-width: 480px; line-height: 1.7; }
+        .loading-message a { word-break: break-word; }
         .hidden { display: none !important; }
 
         @media (max-width: 900px) {
@@ -617,34 +619,46 @@
             return String(value ?? '').replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
         }
 
+        // `.loading` is a CSS grid with place-items:center, built for a single
+        // plain-text status line. Setting innerHTML with a mix of text and
+        // <a>/<strong> tags makes each of those tags its own grid item —
+        // every phrase lands on its own centered line with a huge gap. This
+        // wraps any rich message in one block so the grid only ever sees one
+        // item, and the message reads and wraps normally inside it.
+        function setLoadingMessage(html) {
+            loading.innerHTML = `<div class="loading-message">${html}</div>`;
+        }
+
         async function handleMissingListing() {
             loading.textContent = 'No listing was selected. Looking for your business listings…';
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.user) {
-                loading.innerHTML = 'No listing was selected. Please <a href="ajm-advertising-hub.html" style="color:var(--green);text-decoration:underline">log in through the AJM Advertising Hub</a>, then open the builder again from your dashboard.';
+                setLoadingMessage('No listing was selected. Please <a href="ajm-advertising-hub.html" style="color:var(--green);text-decoration:underline">log in through the AJM Advertising Hub</a>, then open the builder again from your dashboard.');
                 return;
             }
-            const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
-            if (profile?.role === 'admin') {
-                loading.innerHTML = 'No listing was selected. Open the builder from a listing’s <strong>Step 4 — Edit webpage content</strong> link in the <a href="ajm-admin-panel.html" style="color:var(--green);text-decoration:underline">Admin Panel</a>.';
-                return;
-            }
-            const { data: myListings, error } = await supabase
-                .from('listings')
-                .select('id, business_name')
-                .eq('owner_user_id', session.user.id)
-                .order('created_at', { ascending: false });
-            if (error || !myListings || myListings.length === 0) {
-                loading.innerHTML = 'No listing was selected, and no business listing is linked to your account yet. <a href="ajm-advertising-hub.html" style="color:var(--green);text-decoration:underline">Post a listing in the AJM Advertising Hub</a> first, then open the builder from your dashboard.';
-                return;
-            }
-            if (myListings.length === 1) {
+            const [{ data: profile }, { data: myListings, error }] = await Promise.all([
+                supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle(),
+                supabase.from('listings').select('id, business_name').eq('owner_user_id', session.user.id).order('created_at', { ascending: false })
+            ]);
+            const isAdmin = profile?.role === 'admin';
+
+            if (!error && myListings && myListings.length === 1) {
                 const url = new URL(location.href);
                 url.searchParams.set('listing', myListings[0].id);
                 location.replace(url.toString());
                 return;
             }
-            loading.innerHTML = `No listing was selected. Choose one of your businesses:<br><br>${myListings.map((item) => `<a href="?listing=${encodeURIComponent(item.id)}" style="color:var(--green);text-decoration:underline;display:block;margin:6px 0;">${escapeHtml(item.business_name || 'Untitled business')}</a>`).join('')}`;
+            if (!error && myListings && myListings.length > 1) {
+                setLoadingMessage(`No listing was selected. Choose one of your businesses:<br><br>${myListings.map((item) => `<a href="?listing=${encodeURIComponent(item.id)}" style="color:var(--green);text-decoration:underline;display:block;margin:6px 0;">${escapeHtml(item.business_name || 'Untitled business')}</a>`).join('')}`);
+                return;
+            }
+            // No listings owned by this account. An admin can still open the
+            // builder for any customer's listing from the Admin Panel.
+            if (isAdmin) {
+                setLoadingMessage('No listing was selected. In the <a href="ajm-admin-panel.html" style="color:var(--green);text-decoration:underline">Admin Panel</a>, open a business listing and use its “Step 4 — Edit webpage content” button — that opens this builder already pointed at that listing.');
+                return;
+            }
+            setLoadingMessage('No listing was selected, and no business listing is linked to your account yet. <a href="ajm-advertising-hub.html" style="color:var(--green);text-decoration:underline">Post a listing in the AJM Advertising Hub</a> first, then open the builder from your dashboard.');
         }
 
         async function init() {
@@ -655,7 +669,7 @@
 
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.user) {
-                loading.innerHTML = 'Please <a href="ajm-advertising-hub.html" style="color:var(--green);text-decoration:underline">log in through the AJM Advertising Hub</a>, then open the builder again.';
+                setLoadingMessage('Please <a href="ajm-advertising-hub.html" style="color:var(--green);text-decoration:underline">log in through the AJM Advertising Hub</a>, then open the builder again.');
                 return;
             }
 
