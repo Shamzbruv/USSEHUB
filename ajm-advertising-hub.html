@@ -1696,12 +1696,38 @@
                                     <th style="padding:10px;">Business Name</th>
                                     <th style="padding:10px;">Status</th>
                                     <th style="padding:10px;">Type</th>
+                                    <th style="padding:10px;">Expires</th>
                                     <th style="padding:10px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="md-listings-tbody">
                                 <!-- Listings injected here -->
-                                <tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">Loading...</td></tr>
+                                <tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Ad performance -->
+                <div class="dashboard-section" style="background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:16px; padding:20px;">
+                    <div style="margin-bottom:16px;">
+                        <h4 style="margin:0 0 4px;">Ad Performance</h4>
+                        <p style="margin:0; color:var(--muted); font-size:.82rem;">Views (impressions) and clicks recorded for each of your live advertisements.</p>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left;">
+                            <thead>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--muted); font-size:0.8rem;">
+                                    <th style="padding:10px;">Advertisement</th>
+                                    <th style="padding:10px;">Placement</th>
+                                    <th style="padding:10px;">Status</th>
+                                    <th style="padding:10px;">Views</th>
+                                    <th style="padding:10px;">Clicks</th>
+                                    <th style="padding:10px;">Expires</th>
+                                </tr>
+                            </thead>
+                            <tbody id="md-performance-tbody">
+                                <tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">Open the dashboard to load your ad performance.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1950,7 +1976,7 @@
             'contact_phone', 'whatsapp', 'email', 'website', 'image_url', 'listing_type',
             'status', 'is_featured', 'created_at'
         ].join(',');
-        const MEMBER_LISTING_FIELDS = `${PUBLIC_LISTING_FIELDS},requested_tier`;
+        const MEMBER_LISTING_FIELDS = `${PUBLIC_LISTING_FIELDS},requested_tier,expires_at`;
         const listingCache = new Map();
         let webpageTableUnavailable = false;
         let webpageSubscriptionFieldsUnavailable = false;
@@ -2097,6 +2123,9 @@
             if (typeof window.loadMyAdOrders === 'function') {
                 window.loadMyAdOrders(true);
             }
+            if (typeof window.loadMyAdPerformance === 'function') {
+                window.loadMyAdPerformance();
+            }
             
             const role = currentProfile?.role || 'member';
             const statusEl = document.getElementById('md-sub-status');
@@ -2112,7 +2141,7 @@
             }
 
             const tbody = document.getElementById('md-listings-tbody');
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">Loading...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">Loading...</td></tr>';
 
             try {
                 const { data, error } = await supabase
@@ -2130,7 +2159,7 @@
                 cacheListings(data || []);
 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">You have no active or pending ads.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">You have no active or pending ads.</td></tr>';
                     return;
                 }
 
@@ -2153,11 +2182,23 @@
                     else if (l.is_featured) typeHtml = '<span style="color:var(--yellow);font-size:0.85rem;">Featured</span>';
                     else typeHtml = '<span style="color:var(--muted);font-size:0.85rem;">Free Directory</span>';
 
+                    const expiresAt = l.expires_at ? new Date(l.expires_at) : null;
+                    const isLapsed = expiresAt ? expiresAt <= new Date() : false;
+                    const expiresSoon = expiresAt ? !isLapsed && (expiresAt - new Date()) < 7 * 24 * 60 * 60 * 1000 : false;
+                    let expiresHtml = '<span style="color:var(--muted);font-size:0.8rem;">—</span>';
+                    if (expiresAt) {
+                        expiresHtml = `<span style="color:${isLapsed ? 'var(--red)' : expiresSoon ? 'var(--yellow)' : 'var(--muted)'};font-size:0.8rem;">${isLapsed ? 'Expired' : 'Expires'} ${expiresAt.toLocaleDateString()}</span>`;
+                    }
+                    if (['approved', 'expired'].includes(l.status) && (isLapsed || expiresSoon || l.status === 'expired')) {
+                        expiresHtml += `<br><button type="button" data-renew-listing="${escHtml(l.id)}" style="border:0;padding:0;margin-top:2px;background:none;color:var(--green);font:inherit;font-size:.78rem;cursor:pointer;text-decoration:underline;">Renew free listing (30 days)</button>`;
+                    }
+
                     return `
                         <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
                             <td style="padding:12px 10px;"><strong>${escHtml(l.business_name)}</strong></td>
                             <td style="padding:12px 10px;">${statusHtml}</td>
                             <td style="padding:12px 10px;">${typeHtml}</td>
+                            <td style="padding:12px 10px;">${expiresHtml}</td>
                             <td style="padding:12px 10px;">
                                 <a href="#" data-open-listing-id="${escHtml(l.id)}" data-close-modal="member-dashboard-modal" style="color:var(--blue); font-size:0.85rem;">View</a>
                                 ${activeSubscription
@@ -2176,7 +2217,7 @@
                 }).join('');
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--red);">Failed to load listings.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--red);">Failed to load listings.</td></tr>';
             }
         };
 
@@ -2210,6 +2251,14 @@
                         webpageUpgrade.dataset.upgradeWebpage,
                         webpageUpgrade.dataset.preferredTier || 'silver'
                     );
+                    return;
+                }
+
+                const renewListing = event.target.closest('[data-renew-listing]');
+                if (renewListing) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    window.renewFreeListing?.(renewListing.dataset.renewListing);
                     return;
                 }
 
@@ -4372,6 +4421,60 @@
         advMyOrders = Array.isArray(data?.orders) ? data.orders : [];
         renderMyAdOrders();
         return advMyOrders;
+    };
+
+    function renderMyAdPerformance(rows) {
+        const tbody = advEl('md-performance-tbody');
+        if (!tbody) return;
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No live advertisements yet. Views and clicks appear here once an order is approved.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = rows.map((row) => {
+            const expires = row.expires_at ? new Date(row.expires_at).toLocaleDateString() : '—';
+            return `<tr style="border-bottom:1px solid rgba(255,255,255,.06);">
+                <td style="padding:11px 10px;"><strong>${advEscape(row.headline || row.business_name || row.package_name || 'Advertisement')}</strong><br><small style="color:var(--muted);">${advEscape(row.order_number || '')}</small></td>
+                <td style="padding:11px 10px;">${advEscape(row.placement)}</td>
+                <td style="padding:11px 10px;"><span class="adv-status ${advStatusClass(row.status)}">${advEscape(row.status)}</span></td>
+                <td style="padding:11px 10px;">${Number(row.impressions || 0).toLocaleString()}</td>
+                <td style="padding:11px 10px;">${Number(row.clicks || 0).toLocaleString()}</td>
+                <td style="padding:11px 10px;color:var(--muted);">${advEscape(expires)}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    window.loadMyAdPerformance = async function() {
+        const tbody = advEl('md-performance-tbody');
+        if (!advCurrentUser) {
+            const { data: { session } } = await sb.auth.getSession();
+            advCurrentUser = session?.user || null;
+        }
+        if (!advCurrentUser) {
+            if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Sign in to view ad performance.</td></tr>';
+            return [];
+        }
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
+        const { data, error } = await sb.rpc('get_my_ad_performance');
+        if (error) {
+            if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#ff9aaa;">${advEscape(advFriendlyError(error, 'Ad performance could not be loaded.'))}</td></tr>`;
+            return [];
+        }
+        const rows = Array.isArray(data?.advertisements) ? data.advertisements : [];
+        renderMyAdPerformance(rows);
+        return rows;
+    };
+
+    window.renewFreeListing = async function(listingId) {
+        if (!listingId) return;
+        try {
+            const { data, error } = await sb.rpc('renew_free_listing', { p_listing_id: listingId });
+            if (error) throw error;
+            const expires = data?.expires_at ? new Date(data.expires_at).toLocaleDateString() : 'in 30 days';
+            showToast(`Listing renewed — now expires ${expires}.`, 'success');
+            if (typeof window.openMemberDashboard === 'function') await window.openMemberDashboard();
+        } catch (error) {
+            showToast(advFriendlyError(error, 'This listing could not be renewed.'), 'error');
+        }
     };
 
     window.openAdOrderPayment = function(orderId) {

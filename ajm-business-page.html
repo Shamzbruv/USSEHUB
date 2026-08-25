@@ -172,6 +172,7 @@
                 <div class="info-grid">
                     <div class="card"><h3>Location</h3><div class="address" id="address"></div></div>
                     <div class="card"><h3>Operating hours</h3><div class="hours-list" id="hours-list"></div></div>
+                    <div class="card hidden" id="sponsor-card"><div id="sponsor-content"></div></div>
                 </div>
             </section>
 
@@ -514,6 +515,83 @@
             renderStructuredData();
             hide('loading');
             show('page');
+            loadSponsoredAd();
+        }
+
+        function sponsoredAdSessionToken() {
+            const key = 'ajm_ad_session';
+            try {
+                let token = sessionStorage.getItem(key);
+                if (!token) { token = crypto.randomUUID(); sessionStorage.setItem(key, token); }
+                return token;
+            } catch { return crypto.randomUUID(); }
+        }
+        const sponsoredSessionToken = sponsoredAdSessionToken();
+        function recordSponsoredAdEvent(advertisementId, eventType) {
+            supabase.rpc('record_ad_event', {
+                p_advertisement_id: advertisementId,
+                p_event_type: eventType,
+                p_session_token: sponsoredSessionToken,
+                p_metadata: { page: 'business-page', listing_id: listing?.id || null }
+            }).then(() => {}).catch(() => {});
+        }
+        function sponsoredCreativeUrl(path) {
+            const raw = String(path || '').trim();
+            if (!raw) return '';
+            if (/^https?:\/\//i.test(raw)) return safeUrl(raw);
+            const clean = raw.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+            return clean ? `${SUPABASE_URL}/storage/v1/object/public/ad-creatives/${clean}` : '';
+        }
+        // A single, compact "Sponsored" card in the info sidebar — reuses the
+        // same Advertising Hub sidebar placement shown elsewhere on AJM, so a
+        // business page never has to sell its own separate ad inventory.
+        // Nothing renders at all if there is no active advertisement, keeping
+        // the page unaffected when the network is empty.
+        async function loadSponsoredAd() {
+            try {
+                const { data, error } = await supabase.rpc('get_active_advertisements', { p_placement: 'hub-sidebar', p_limit: 1 });
+                if (error) return;
+                const ad = (Array.isArray(data?.advertisements) ? data.advertisements : [])[0];
+                if (!ad) return;
+                const container = el('sponsor-content');
+                if (!container) return;
+                container.textContent = '';
+                const mediaUrl = sponsoredCreativeUrl(ad.creative_path);
+                if (mediaUrl) {
+                    const img = document.createElement('img');
+                    img.src = mediaUrl;
+                    img.alt = '';
+                    img.loading = 'lazy';
+                    img.style.cssText = 'width:100%;border-radius:8px;margin-bottom:8px;display:block;';
+                    container.appendChild(img);
+                }
+                const label = document.createElement('div');
+                label.textContent = `Sponsored${ad.business_name ? ' · ' + ad.business_name : ''}`;
+                label.style.cssText = 'font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;';
+                const heading = document.createElement('h3');
+                heading.style.margin = '0 0 6px';
+                heading.textContent = ad.headline || ad.package_name || 'Featured business';
+                container.append(label, heading);
+                if (ad.body_text) {
+                    const body = document.createElement('p');
+                    body.textContent = ad.body_text;
+                    body.style.cssText = 'margin:0 0 10px;color:var(--muted);font-size:.9rem;line-height:1.6;';
+                    container.appendChild(body);
+                }
+                const destination = safeUrl(ad.cta_url);
+                if (destination) {
+                    const link = document.createElement('a');
+                    link.className = 'btn';
+                    link.href = destination;
+                    link.target = '_blank';
+                    link.rel = 'noopener sponsored';
+                    link.textContent = ad.cta_label || 'Learn more';
+                    link.addEventListener('click', () => recordSponsoredAdEvent(ad.id, 'click'));
+                    container.appendChild(link);
+                }
+                show('sponsor-card');
+                recordSponsoredAdEvent(ad.id, 'impression');
+            } catch { /* Advertising is a non-critical enhancement here. */ }
         }
 
         async function loadPage() {

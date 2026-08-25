@@ -42,7 +42,9 @@ const migrations = [
     '20260723000000_advertising_commerce_analytics.sql',
     '20260728000000_advertising_workflow_repair.sql',
     '20260728000001_webpage_activation_draft.sql',
-    '20260728000002_webpage_segment_sync.sql'
+    '20260728000002_webpage_segment_sync.sql',
+    '20260824000000_order_admin_and_listing_lifecycle.sql',
+    '20260824000001_listing_approval_expiry_trigger.sql'
 ];
 
 if (!databaseUrl) {

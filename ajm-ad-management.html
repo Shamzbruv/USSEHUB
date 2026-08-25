@@ -791,15 +791,16 @@
             return first(order.payment_reference, order.transfer_reference, order.reference, 'Not submitted');
         }
 
-        function orderActions(order, compact = false) {
-            const buttons = [`<button class="btn btn-sm" type="button" data-order-detail="${safe(order.id)}">View</button>`];
-            if (order.status === 'payment_submitted') buttons.push(`<button class="btn btn-primary btn-sm" type="button" data-order-action="confirm_payment" data-order-id="${safe(order.id)}">Confirm</button>`);
+        function orderActions(order, compact = false, includeView = true) {
+            const buttons = includeView ? [`<button class="btn btn-sm" type="button" data-order-detail="${safe(order.id)}">View</button>`] : [];
+            if (['payment_submitted', 'pending_payment'].includes(order.status)) buttons.push(`<button class="btn btn-primary btn-sm" type="button" data-order-action="confirm_payment" data-order-id="${safe(order.id)}">${order.status === 'pending_payment' ? 'Approve' : 'Confirm'}</button>`);
             if (ORDER_REVIEW_STATES.has(order.status)) buttons.push(`<button class="btn btn-danger btn-sm" type="button" data-order-action="reject_payment" data-order-id="${safe(order.id)}">Reject</button>`);
             if (order.status === 'approved') buttons.push(`<button class="btn btn-warning btn-sm" type="button" data-order-action="pause_ad" data-order-id="${safe(order.id)}">Pause</button>`);
             if (order.status === 'paused') buttons.push(`<button class="btn btn-primary btn-sm" type="button" data-order-action="resume_ad" data-order-id="${safe(order.id)}">Resume</button>`);
             if (['approved', 'paused'].includes(order.status)) buttons.push(`<button class="btn btn-blue btn-sm" type="button" data-order-action="renew_subscription" data-order-id="${safe(order.id)}">Renew</button>`);
             if (!TERMINAL_STATES.has(order.status)) buttons.push(`<button class="btn btn-danger btn-sm" type="button" data-order-action="cancel_subscription" data-order-id="${safe(order.id)}">Cancel</button>`);
-            return compact ? buttons.slice(0, 3).join('') : buttons.join('');
+            if (!['approved', 'paused'].includes(order.status)) buttons.push(`<button class="btn btn-danger btn-sm" type="button" data-order-action="delete_order" data-order-id="${safe(order.id)}">Delete</button>`);
+            return compact ? buttons.slice(0, 4).join('') : buttons.join('');
         }
 
         function filteredOrders() {
@@ -1177,7 +1178,7 @@
                 <div class="detail"><span>Package</span><strong>${safe(pkg.name)}</strong></div><div class="detail"><span>Amount due</span><strong class="amount">${safe(fmtMoney(orderAmount(order), pkg.currency))}</strong></div><div class="detail"><span>Duration</span><strong>${safe(first(order.duration_days, order.duration_days_snapshot, '—'))} days</strong></div>
                 <div class="detail"><span>Payment reference</span><strong>${safe(orderReference(order))}</strong></div><div class="detail"><span>Payment submitted</span><strong>${safe(fmtDate(order.payment_submitted_at, true))}</strong></div><div class="detail"><span>Expiry</span><strong>${safe(fmtDate(order.expires_at))}</strong></div>
             </div>${order.customer_notes ? `<div style="margin-top:14px;"><label>Customer notes</label><div class="danger-copy" style="color:var(--text);border-color:var(--line);background:var(--glass);white-space:pre-wrap;">${safe(order.customer_notes)}</div></div>` : ''}${order.admin_note ? `<div style="margin-top:14px;"><label>Latest admin note</label><div class="danger-copy" style="color:var(--text);border-color:var(--line);background:var(--glass);white-space:pre-wrap;">${safe(order.admin_note)}</div></div>` : ''}${proof ? `<a class="proof-link" href="${safe(proof)}" target="_blank" rel="noopener">Open payment proof ↗</a>` : proofError ? `<div class="danger-copy" style="margin-top:14px;">${safe(proofError)}</div>` : '<div class="cell-sub" style="margin-top:14px;">No payment proof has been attached.</div>'}`;
-            el('order-detail-actions').innerHTML = `<button class="btn modal-close" type="button">Close</button>${orderActions(order)}`;
+            el('order-detail-actions').innerHTML = `<button class="btn modal-close" type="button">Close</button>${orderActions(order, false, false)}`;
             openModal('order-modal');
         }
 
@@ -1188,7 +1189,8 @@
             renew_subscription: ['Renew advertising access', 'This extends the current expiry date by the selected number of days and records the administrator responsible.', false, true],
             pause_ad: ['Pause advertisement', 'The advertisement will stop appearing publicly until an administrator resumes it.', true, false],
             resume_ad: ['Resume advertisement', 'The advertisement will immediately become eligible for its assigned placements again.', false, false],
-            expire_ad: ['Expire advertisement now', 'This ends delivery immediately and records the manual expiry in the audit trail.', true, false]
+            expire_ad: ['Expire advertisement now', 'This ends delivery immediately and records the manual expiry in the audit trail.', true, false],
+            delete_order: ['Delete order permanently', 'This permanently removes the order record and any linked advertisement history. Approved or paused orders must be cancelled first.', false, false]
         };
 
         function queueOrderAction(orderId, action) {

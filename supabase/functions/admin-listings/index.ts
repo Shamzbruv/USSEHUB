@@ -42,7 +42,12 @@ serve(async (req: Request) => {
 
     if (action === 'approve') {
       newStatus = 'approved'
-      updatePayload = { ...updatePayload, status: newStatus, approved_at: new Date().toISOString(), approved_by: user.id, published_at: new Date().toISOString() }
+      // Free directory listings run on a renewable 30-day clock from the
+      // moment they're approved. A listing that already has an active paid
+      // webpage package keeps its longer expiry via the advertising RPCs;
+      // this floor just makes sure a brand-new approval is never left with
+      // no expiry at all.
+      updatePayload = { ...updatePayload, status: newStatus, approved_at: new Date().toISOString(), approved_by: user.id, published_at: new Date().toISOString(), expires_at: new Date(Date.now() + 30*24*60*60*1000).toISOString() }
     } else if (action === 'reject') {
       newStatus = 'rejected'
       if (!rejection_reason) throw new Error('rejection_reason required')
@@ -102,7 +107,7 @@ serve(async (req: Request) => {
         status: insertStatus,
         is_featured: is_featured || false,
         ...(is_featured && { featured_until: new Date(Date.now() + 30*24*60*60*1000).toISOString() }),
-        ...(insertStatus === 'approved' && { approved_at: new Date().toISOString(), approved_by: user.id, published_at: new Date().toISOString() })
+        ...(insertStatus === 'approved' && { approved_at: new Date().toISOString(), approved_by: user.id, published_at: new Date().toISOString(), expires_at: new Date(Date.now() + 30*24*60*60*1000).toISOString() })
       };
       const { data: newListing, error: insertError } = await supabaseAdmin.from('listings').insert([insertPayload]).select().single();
       if (insertError) throw insertError;

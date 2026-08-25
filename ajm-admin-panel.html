@@ -1247,6 +1247,7 @@
                         <span class="badge badge-${l.status}">${l.status}</span>
                         ${l.is_featured ? '<br><span class="badge badge-featured" style="margin-top:4px;">⭐ featured</span>' : ''}
                         ${webpage ? `<br><span class="badge" style="margin-top:4px;color:var(--yellow);background:rgba(255,207,51,.12);">${escHtml(webpage.tier || '')} page · ${escHtml(webpage.page_status || 'draft')}</span>` : (l.requested_tier ? `<br><span class="badge" style="margin-top:4px;color:var(--muted);">${escHtml(l.requested_tier)} requested</span>` : '')}
+                        ${l.expires_at ? `<br><small style="color:${new Date(l.expires_at) <= new Date() ? 'var(--red)' : 'var(--muted)'};">${new Date(l.expires_at) <= new Date() ? 'expired' : 'expires'} ${fmtDate(l.expires_at)}</small>` : ''}
                     </td>
                     <td>
                         <div class="action-row" style="gap:4px;margin-top:4px;">
@@ -1254,6 +1255,7 @@
                             ${l.status !== 'rejected' ? `<button class="btn btn-danger btn-sm" style="padding:4px 8px;" onclick="rejectListing('${l.id}')" title="Reject">✗</button>` : ''}
                             <button class="btn btn-danger btn-sm" style="padding:4px 8px;margin-left:4px;background:#6c757d;" onclick="deleteListing('${l.id}')" title="Delete">🗑</button>
                             ${l.status !== 'expired' ? `<button class="btn btn-warning btn-sm" style="padding:4px 8px;" onclick="expireListing('${l.id}')" title="Expire">🕰</button>` : ''}
+                            ${['approved','expired'].includes(l.status) ? `<button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:var(--green);border-color:rgba(23,214,111,.35);" onclick="renewFreeListing('${l.id}')" title="Renew the free 30-day listing window">↻ 30d</button>` : ''}
                             <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="toggleFeatured('${l.id}', ${l.is_featured})" title="${l.is_featured ? 'Unfeature' : 'Feature'}">${l.is_featured ? '★' : '☆'}</button>
                             <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="openEditModal(window.listingCache['${l.id}'])" title="Edit">✎</button>
                             ${l.status === 'approved' ? `<button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:var(--yellow);border-color:rgba(255,207,51,.35);" onclick="openWebpagePackageModal(window.listingCache['${l.id}'])" title="Upgrade this listing or manage its paid webpage">Upgrade / Page</button>` : ''}
@@ -1283,6 +1285,17 @@
     }
     async function expireListing(id) {
         await updateListingStatus(id, 'expire');
+    }
+
+    async function renewFreeListing(id) {
+        try {
+            const { data, error } = await supabase.rpc('renew_free_listing', { p_listing_id: id });
+            if (error) throw error;
+            showToast(`Free listing renewed — now expires ${fmtDate(data.expires_at)}.`, 'success');
+            await loadListings();
+        } catch (err) {
+            showToast('Error: ' + err.message, 'error');
+        }
     }
 
     async function updateListingStatus(id, action, extraPayload = {}) {
@@ -2002,12 +2015,13 @@
                 const color = statusColors[o.status] || 'var(--muted)';
                 const badge = `<span style="background:rgba(255,255,255,0.05);border:1px solid ${color};color:${color};border-radius:20px;padding:2px 9px;font-size:0.72rem;font-weight:700;">${o.status.replace(/_/g,' ')}</span>`;
                 const customer = adOrderCustomer(o);
-                const canApprove = o.status === 'payment_submitted';
+                const canApprove = ['payment_submitted','pending_payment'].includes(o.status);
                 const canReject = ['pending_payment','payment_submitted'].includes(o.status);
                 const canPause = o.status === 'approved';
                 const canResume = o.status === 'paused';
                 const canRenew = ['approved','paused'].includes(o.status);
                 const canCancel = !['cancelled','expired'].includes(o.status);
+                const canDelete = !['approved','paused'].includes(o.status);
 
                 return `<tr>
                     <td><strong>${escHtml(o.order_number)}</strong></td>
@@ -2025,6 +2039,7 @@
                             ${canResume ? `<button class="btn btn-primary btn-sm" onclick="resumeOrder('${o.id}')" title="Resume">▶ Resume</button>` : ''}
                             ${canRenew ? `<button class="btn btn-ghost btn-sm" onclick="renewOrder('${o.id}')" title="Renew">↻ Renew</button>` : ''}
                             ${canCancel ? `<button class="btn btn-danger btn-sm" style="opacity:0.7" onclick="cancelOrder('${o.id}')" title="Cancel">✕</button>` : ''}
+                            ${canDelete ? `<button class="btn btn-danger btn-sm" style="opacity:0.7" onclick="deleteOrder('${o.id}')" title="Delete">🗑 Delete</button>` : ''}
                         </div>
                     </td>
                 </tr>`;
@@ -2035,10 +2050,24 @@
     }
 
     async function approveOrder(id) {
-        if (!confirm('Confirm the bank transfer and activate this advertising order? The customer will be notified by email.')) return;
+        const order = adOrdersCache.find((item) => item.id === id);
+        const noProof = order?.status === 'pending_payment';
+        const confirmMessage = noProof
+            ? 'No payment proof was submitted for this order. Approve it anyway as an administrator override (phone-confirmed, complimentary, etc.)? The customer will be notified by email.'
+            : 'Confirm the bank transfer and activate this advertising order? The customer will be notified by email.';
+        if (!confirm(confirmMessage)) return;
         try {
             await adminAdvertisingCommand('confirm_payment', { order_id: id });
             showToast('Order approved — customer notified!', 'success');
+            await loadAdOrders();
+        } catch(err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function deleteOrder(id) {
+        if (!confirm('Permanently delete this order and any linked advertisement history? This cannot be undone. Approved or paused orders must be cancelled first.')) return;
+        try {
+            await adminAdvertisingCommand('delete_order', { order_id: id });
+            showToast('Order deleted.', 'info');
             await loadAdOrders();
         } catch(err) { showToast('Error: ' + err.message, 'error'); }
     }

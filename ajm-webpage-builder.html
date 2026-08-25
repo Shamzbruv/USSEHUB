@@ -613,9 +613,43 @@
             updateSegmentNote();
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+        }
+
+        async function handleMissingListing() {
+            loading.textContent = 'No listing was selected. Looking for your business listings…';
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) {
+                loading.innerHTML = 'No listing was selected. Please <a href="ajm-advertising-hub.html" style="color:var(--green);text-decoration:underline">log in through the AJM Advertising Hub</a>, then open the builder again from your dashboard.';
+                return;
+            }
+            const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+            if (profile?.role === 'admin') {
+                loading.innerHTML = 'No listing was selected. Open the builder from a listing’s <strong>Step 4 — Edit webpage content</strong> link in the <a href="ajm-admin-panel.html" style="color:var(--green);text-decoration:underline">Admin Panel</a>.';
+                return;
+            }
+            const { data: myListings, error } = await supabase
+                .from('listings')
+                .select('id, business_name')
+                .eq('owner_user_id', session.user.id)
+                .order('created_at', { ascending: false });
+            if (error || !myListings || myListings.length === 0) {
+                loading.innerHTML = 'No listing was selected, and no business listing is linked to your account yet. <a href="ajm-advertising-hub.html" style="color:var(--green);text-decoration:underline">Post a listing in the AJM Advertising Hub</a> first, then open the builder from your dashboard.';
+                return;
+            }
+            if (myListings.length === 1) {
+                const url = new URL(location.href);
+                url.searchParams.set('listing', myListings[0].id);
+                location.replace(url.toString());
+                return;
+            }
+            loading.innerHTML = `No listing was selected. Choose one of your businesses:<br><br>${myListings.map((item) => `<a href="?listing=${encodeURIComponent(item.id)}" style="color:var(--green);text-decoration:underline;display:block;margin:6px 0;">${escapeHtml(item.business_name || 'Untitled business')}</a>`).join('')}`;
+        }
+
         async function init() {
             if (!listingId) {
-                loading.textContent = 'No listing was selected. Open the builder from your AJM dashboard.';
+                await handleMissingListing();
                 return;
             }
 
