@@ -1293,10 +1293,97 @@
 
         .home-ad-network-head {
             display: flex;
-            align-items: end;
+            align-items: center;
             justify-content: space-between;
             gap: 18px;
             margin-bottom: 18px;
+        }
+
+        .home-ad-cta {
+            white-space: nowrap;
+        }
+
+        .home-ad-section-label {
+            margin: 26px 0 14px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .home-pkg-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        @media (max-width: 900px) {
+            .home-pkg-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 560px) {
+            .home-pkg-grid, .home-ad-network-head { grid-template-columns: 1fr; }
+            .home-ad-network-head { align-items: flex-start; }
+        }
+
+        .home-pkg-card {
+            --accent: rgba(255, 255, 255, 0.25);
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            padding: 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-left: 3px solid var(--accent);
+            background: rgba(255, 255, 255, 0.035);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .home-pkg-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+
+        .home-pkg-card-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--accent-bg, rgba(255, 255, 255, 0.08));
+            margin-bottom: 10px;
+        }
+
+        .home-pkg-card-name {
+            font-family: "Syne", "Trebuchet MS", sans-serif;
+            font-size: 1.05rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .home-pkg-card-price {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #17d66f;
+            margin-bottom: 2px;
+        }
+
+        .home-pkg-card-duration {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .home-ad-placeholder-copy {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            max-width: 420px;
         }
 
         .home-ad-network-head h3 {
@@ -2162,17 +2249,19 @@
                     <div class="home-ad-network-head">
                         <div>
                             <span class="mini-label">AJM Advertising Network</span>
-                            <h3>Featured businesses and campaigns</h3>
-                        </div>
-                        <div>
+                            <h3>Advertise your business here</h3>
                             <p>Put your offer in front of visitors across the USSE homepage and AJM directory. Packages, pricing, durations, and placement options are available in the Advertising Hub.</p>
-                            <a class="btn btn-primary" style="margin-top:14px;" href="ajm-advertising-hub?advertise=1">Advertise on USSE</a>
                         </div>
+                        <a class="btn btn-primary home-ad-cta" href="ajm-advertising-hub?advertise=1">View packages &amp; advertise</a>
                     </div>
+
+                    <div id="home-pkg-strip"></div>
+
+                    <div class="home-ad-section-label">Currently featured</div>
                     <div class="home-ad-grid" id="homepage-ad-grid" aria-live="polite">
                         <div class="home-ad-placeholder">
-                            <div>
-                                <strong style="display:block;color:white;margin-bottom:7px;">Your business could be featured here.</strong>
+                            <div class="home-ad-placeholder-copy">
+                                <strong style="color:white;">Your business could be featured here.</strong>
                                 <span>Choose a homepage advertising package and submit your creative for approval.</span>
                             </div>
                         </div>
@@ -2771,12 +2860,12 @@
         const placeholder = document.createElement('div');
         placeholder.className = 'home-ad-placeholder';
         const copy = document.createElement('div');
-        appendText(copy, 'strong', 'Your business could be featured here.', 'display:block;color:white;margin-bottom:7px;');
+        copy.className = 'home-ad-placeholder-copy';
+        appendText(copy, 'strong', 'Your business could be featured here.', 'color:white;');
         appendText(copy, 'span', 'Choose a homepage advertising package and submit your creative for approval.');
         const link = document.createElement('a');
         link.href = 'ajm-advertising-hub?advertise=1';
         link.className = 'btn btn-primary';
-        link.style.marginTop = '16px';
         link.textContent = 'View advertising packages';
         copy.appendChild(link);
         placeholder.appendChild(copy);
@@ -2848,59 +2937,42 @@
         });
     }
 
-    function tierGradient(code) {
+    function tierMeta(code) {
         const value = String(code || '').toLowerCase();
-        if (value.includes('platinum')) return 'linear-gradient(135deg,rgba(91,156,246,.15),rgba(91,156,246,.06))';
-        if (value.includes('gold')) return 'linear-gradient(135deg,rgba(255,207,51,.12),rgba(255,207,51,.04))';
-        if (value.includes('banner')) return 'linear-gradient(135deg,rgba(255,77,94,.12),rgba(255,77,94,.04))';
-        if (value.includes('advanced')) return 'linear-gradient(135deg,rgba(23,214,111,.12),rgba(23,214,111,.04))';
-        return 'linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02))';
+        if (value.includes('platinum')) return { color: '#5b9cf6', bg: 'rgba(91,156,246,.16)', label: 'Platinum' };
+        if (value.includes('gold')) return { color: '#ffcf33', bg: 'rgba(255,207,51,.16)', label: 'Gold' };
+        if (value.includes('banner')) return { color: '#ff4d5e', bg: 'rgba(255,77,94,.16)', label: 'Banner' };
+        if (value.includes('advanced')) return { color: '#17d66f', bg: 'rgba(23,214,111,.16)', label: 'Advanced' };
+        if (value.includes('silver')) return { color: '#b9c0d4', bg: 'rgba(185,192,212,.16)', label: 'Silver' };
+        if (value.includes('basic')) return { color: '#8891a8', bg: 'rgba(136,145,168,.16)', label: 'Basic' };
+        return { color: 'rgba(255,255,255,.5)', bg: 'rgba(255,255,255,.08)', label: '' };
     }
 
     async function renderHomePackagePricing() {
-        if (document.getElementById('home-pkg-strip')) return;
-        const adNetwork = document.getElementById('advertising');
-        if (!adNetwork) return;
+        const mount = document.getElementById('home-pkg-strip');
+        if (!mount || mount.childElementCount) return;
 
         const { data, error } = await adSupabase.rpc('get_ad_catalog');
         const packages = (Array.isArray(data) ? data : (data?.packages || [])).slice(0, 6);
         if (error || !packages.length) return;
 
-        const strip = document.createElement('div');
-        strip.id = 'home-pkg-strip';
-        strip.style.marginBottom = '40px';
-        const heading = document.createElement('div');
-        heading.style.cssText = 'text-align:center;margin-bottom:24px;';
-        appendText(heading, 'span', 'Advertising Packages', 'font-size:.78rem;font-weight:700;letter-spacing:1.5px;color:#17d66f;text-transform:uppercase;');
-        appendText(heading, 'h3', 'Get Your Business Seen', 'font-size:1.6rem;font-weight:800;margin:8px 0 4px;');
-        appendText(heading, 'p', 'Choose a package and advertise across the USSE & AJM network', 'color:#b9c0d4;font-size:.9rem;');
-        strip.appendChild(heading);
-
         const packageGrid = document.createElement('div');
-        packageGrid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;';
+        packageGrid.className = 'home-pkg-grid';
         packages.forEach((pkg) => {
+            const meta = tierMeta(pkg.code);
             const card = document.createElement('a');
+            card.className = 'home-pkg-card';
             card.href = `ajm-advertising-hub?advertise=1&package=${encodeURIComponent(pkg.code || pkg.id)}`;
-            card.style.cssText = `text-decoration:none;color:inherit;display:block;background:${tierGradient(pkg.code)};border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:20px;transition:transform .2s,box-shadow .2s;`;
-            card.addEventListener('mouseenter', () => { card.style.transform = 'translateY(-4px)'; card.style.boxShadow = '0 16px 40px rgba(0,0,0,.3)'; });
-            card.addEventListener('mouseleave', () => { card.style.transform = ''; card.style.boxShadow = ''; });
-            appendText(card, 'div', pkg.name, 'font-size:1rem;font-weight:800;margin-bottom:4px;');
+            card.style.setProperty('--accent', meta.color);
+            card.style.setProperty('--accent-bg', meta.bg);
+            if (meta.label) appendText(card, 'span', meta.label).className = 'home-pkg-card-badge';
+            appendText(card, 'div', pkg.name).className = 'home-pkg-card-name';
             const price = Number(pkg.price) > 0 ? `${pkg.currency} ${Number(pkg.price).toLocaleString()}` : 'Contact AJM for pricing';
-            appendText(card, 'div', price, 'font-size:1.4rem;font-weight:800;color:#17d66f;');
-            appendText(card, 'div', `${pkg.duration_days} days${pkg.is_orderable ? '' : ' · setup pending'}`, 'font-size:.75rem;color:#b9c0d4;margin-top:2px;');
+            appendText(card, 'div', price).className = 'home-pkg-card-price';
+            appendText(card, 'div', `${pkg.duration_days} days${pkg.is_orderable ? '' : ' · setup pending'}`).className = 'home-pkg-card-duration';
             packageGrid.appendChild(card);
         });
-        strip.appendChild(packageGrid);
-
-        const actions = document.createElement('div');
-        actions.style.textAlign = 'center';
-        const cta = document.createElement('a');
-        cta.href = 'ajm-advertising-hub?advertise=1';
-        cta.className = 'btn btn-primary';
-        cta.textContent = '📢 View All Packages & Advertise Now';
-        actions.appendChild(cta);
-        strip.appendChild(actions);
-        adNetwork.insertAdjacentElement('beforebegin', strip);
+        mount.appendChild(packageGrid);
     }
 
     await Promise.allSettled([renderHomePackagePricing(), renderLiveHomepageAds()]);

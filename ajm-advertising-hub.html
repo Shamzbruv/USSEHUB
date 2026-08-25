@@ -2084,14 +2084,16 @@
             const isJob = l.category === 'JOBS & CAREERS';
             const webpage = Array.isArray(l.listing_webpages) ? l.listing_webpages[0] : l.listing_webpages;
             const websiteUrl = normalizeWebsiteUrl(l.website);
-            
+            const canManageThisListing = Boolean(currentUser) && (currentProfile?.role === 'admin' || l.owner_user_id === currentUser.id);
+            const tierLabel = (webpage?.tier || l.requested_tier || '').replace(/^\w/, (c) => c.toUpperCase());
+
             content.innerHTML = `
                 <div style="display:flex; gap: 16px; margin-bottom: 20px;">
                     ${l.image_url ? `<img src="${escHtml(l.image_url)}" style="width:100px; height:100px; object-fit:cover; border-radius:12px; border:1px solid var(--glass-border); flex-shrink:0;">` : `<div style="width:100px; height:100px; background:var(--glass-bg); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--muted); border:1px solid var(--glass-border);">🏢</div>`}
                     <div>
-                        <h2 style="margin:0 0 8px 0; font-size:1.5rem;">${escHtml(l.business_name)}</h2>
+                        <h2 style="margin:0 0 8px 0; font-size:1.5rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">${escHtml(l.business_name)}${webpage ? `<span style="font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:3px 10px;border-radius:999px;color:var(--yellow);background:rgba(255,207,51,.14);border:1px solid rgba(255,207,51,.3);">${escHtml(tierLabel)} · ${webpage.page_status === 'published' ? 'Published' : 'Draft'}</span>` : ''}</h2>
                         <div style="color:var(--muted); font-size:0.9rem; margin-bottom: 4px;">
-                            <strong>${isJob ? 'Industry' : 'Category'}:</strong> ${escHtml(l.category)} 
+                            <strong>${isJob ? 'Industry' : 'Category'}:</strong> ${escHtml(l.category)}
                             ${l.subcategory ? ` &bull; <strong>${isJob ? 'Job Type' : 'Subcategory'}:</strong> ${escHtml(l.subcategory)}` : ''}
                         </div>
                         <div style="color:var(--muted); font-size:0.9rem;">
@@ -2099,12 +2101,17 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div style="background:var(--glass-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 20px;">
                     <h3 style="margin-top:0; margin-bottom:12px; font-size:1.1rem;">${isJob ? 'Job Description & Requirements' : 'Description'}</h3>
                     <p style="white-space: pre-wrap; font-size:0.95rem; line-height:1.6; color:var(--text); margin:0;">${escHtml(l.description)}</p>
                 </div>
-                
+
+                ${webpage && canManageThisListing ? `<div style="background:rgba(255,207,51,.06); padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,207,51,.25); margin-bottom: 20px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+                    <span style="font-size:0.88rem; color:var(--text);">${webpage.page_status === 'published' ? `This listing's ${escHtml(tierLabel)} webpage is live.` : `This listing's ${escHtml(tierLabel)} webpage is paid and active, but the content is still a draft — nothing publishes until it's built and published.`}</span>
+                    <a href="ajm-webpage-builder.html?listing=${encodeURIComponent(l.id)}" class="btn btn-primary" style="padding:6px 12px;white-space:nowrap;">✎ Edit webpage content</a>
+                </div>` : ''}
+
                 <div style="display:flex; gap: 12px; flex-wrap:wrap; justify-content: flex-end; align-items:center; border-top: 1px solid var(--glass-border); padding-top:16px;">
                     <span style="color:var(--muted); font-size:0.85rem; margin-right:auto;">Posted: ${new Date(l.created_at).toLocaleDateString()}</span>
                     ${l.contact_phone ? `<a href="tel:${escHtml(l.contact_phone).replace(/\D/g,'')}" class="btn btn-ghost" style="border:1px solid var(--glass-border); padding:6px 12px;">📞 ${escHtml(l.contact_phone)}</a>` : ''}
