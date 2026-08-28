@@ -237,7 +237,7 @@
                     <p id="workflow-description">Checking the package and page prerequisites for this listing…</p>
                 </div>
                 <div class="workflow-actions">
-                    <a class="btn hidden" id="upgrade-package-link" href="ajm-advertising-hub.html?advertise=1&amp;package=ajm-webpage-silver">Choose a webpage package</a>
+                    <a class="btn hidden" id="upgrade-package-link" href="ajm-advertising-hub?advertise=1&amp;package=ajm-webpage-silver">Choose a webpage package</a>
                     <a class="btn" id="return-dashboard-link" href="ajm-advertising-hub.html">Return to Advertising Hub</a>
                 </div>
             </section>
@@ -248,9 +248,10 @@
                 <nav class="step-nav" aria-label="Builder sections">
                     <button type="button" class="step-link active" data-target="setup"><span>1</span>Setup</button>
                     <button type="button" class="step-link" data-target="silver"><span>2</span>Silver</button>
-                    <button type="button" class="step-link" data-target="gold"><span>3</span>Gold</button>
-                    <button type="button" class="step-link" data-target="platinum"><span>4</span>Platinum</button>
-                    <button type="button" class="step-link" data-target="publish"><span>5</span>Publish</button>
+                    <button type="button" class="step-link" data-target="promotion"><span>3</span>Promotion</button>
+                    <button type="button" class="step-link" data-target="gold"><span>4</span>Gold</button>
+                    <button type="button" class="step-link" data-target="platinum"><span>5</span>Platinum</button>
+                    <button type="button" class="step-link" data-target="publish"><span>6</span>Publish</button>
                 </nav>
 
                 <form id="page-form" class="form-stack">
@@ -338,6 +339,34 @@
                         </div>
                     </section>
 
+                    <section class="panel" id="promotion">
+                        <div class="panel-head">
+                            <div><h2>Network promotion</h2><p>Your paid webpage can also run as a clearly labelled, tracked advertisement across the USSE and AJM network.</p></div>
+                            <span class="feature-lock">Included</span>
+                        </div>
+                        <div class="grid-2">
+                            <div class="field">
+                                <label for="promotion-style">Advertisement format</label>
+                                <select id="promotion-style">
+                                    <option value="native">Native card — balanced and unobtrusive</option>
+                                    <option value="banner">Banner — compact horizontal feature</option>
+                                    <option value="spotlight">Spotlight — dismissible, frequency-capped notice</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="promotion-enabled">Network delivery</label>
+                                <div class="toggle"><input id="promotion-enabled" type="checkbox" checked /><label for="promotion-enabled">Promote this webpage while the package is active</label></div>
+                            </div>
+                        </div>
+                        <div class="segment-note" id="promotion-style-note">Native cards blend into public pages without interrupting visitors.</div>
+                        <div class="grid-2" style="margin-top:18px;">
+                            <div class="field"><label for="promotion-headline">Ad headline <small>(uses the business name if blank)</small></label><input id="promotion-headline" type="text" maxlength="120" placeholder="A clear reason to visit your business" /></div>
+                            <div class="field"><label for="promotion-cta">Button label</label><input id="promotion-cta" type="text" maxlength="40" value="View business" placeholder="View business" /></div>
+                        </div>
+                        <div class="field"><label for="promotion-text">Ad message <small>(uses the tagline or About section if blank)</small></label><textarea id="promotion-text" class="compact" maxlength="500" placeholder="Keep this short, useful and specific."></textarea></div>
+                        <div class="help">Spotlights appear after a short delay, are always dismissible, and are limited to once per advertisement per visitor every seven days.</div>
+                    </section>
+
                     <section class="panel tier-section" id="gold" data-min-tier="gold">
                         <div class="panel-head">
                             <div><h2>Gold engagement</h2><p>Add richer media, location, reviews, lead capture and a promotion.</p></div>
@@ -372,7 +401,7 @@
 
                     <section class="panel" id="publish">
                         <div class="panel-head">
-                            <div><h2>Review and publish</h2><p>Save privately as a draft, or publish once the directory listing is approved.</p></div>
+                            <div><h2>Review and publish</h2><p>Save privately as a draft, or publish the webpage and start its tracked network promotion once the directory listing is approved.</p></div>
                         </div>
                         <div class="notice info show" id="publish-note">Drafts are visible only to the listing owner and AJM administrators.</div>
                     </section>
@@ -482,6 +511,15 @@
             });
         }
 
+        function updatePromotionNote() {
+            const notes = {
+                native: 'Native cards blend into public pages without interrupting visitors.',
+                banner: 'Banners use a compact horizontal layout in available network placements.',
+                spotlight: 'Spotlights are dismissible, delayed and limited to once per advertisement per visitor every seven days.'
+            };
+            el('promotion-style-note').textContent = notes[el('promotion-style').value] || notes.native;
+        }
+
         function segmentValue(id) {
             return emptyToNull(value(id));
         }
@@ -541,7 +579,7 @@
                 const isPublic = existingPage?.page_status === 'published'
                     && Boolean(activeSubscription)
                     && listing?.status === 'approved';
-                preview.href = `ajm-business-page.html?listing=${encodeURIComponent(listingId)}${isPublic ? '' : '&preview=1'}`;
+                preview.href = `ajm-business-page?listing=${encodeURIComponent(listingId)}${isPublic ? '' : '&preview=1'}`;
                 preview.textContent = isPublic ? 'View live webpage' : 'Preview saved webpage';
                 preview.removeAttribute('aria-disabled');
                 preview.removeAttribute('title');
@@ -581,7 +619,7 @@
                 help.textContent = 'Step 1: choose Silver, Gold or Platinum for this listing. Step 2: transfer the displayed amount and upload the receipt. Step 3: wait for AJM’s confirmation email. Step 4: return here to build and publish the page.';
                 upgrade.classList.remove('hidden');
                 const preferredTier = ['silver', 'gold', 'platinum'].includes(listing?.requested_tier) ? listing.requested_tier : 'silver';
-                upgrade.href = `ajm-advertising-hub.html?advertise=1&product=webpage&listing=${encodeURIComponent(listingId)}&package=ajm-webpage-${encodeURIComponent(preferredTier)}`;
+                upgrade.href = `ajm-advertising-hub?advertise=1&product=webpage&listing=${encodeURIComponent(listingId)}&package=ajm-webpage-${encodeURIComponent(preferredTier)}`;
             } else {
                 help.textContent = 'Payment and package activation are complete. Add the content included in your tier, save a draft, preview it, then publish. The public View Page link appears in your member dashboard after publishing.';
             }
@@ -611,8 +649,14 @@
             el('virtual-tour-url').value = page?.virtual_tour_url || '';
             el('call-phone').value = page?.call_tracking_phone || '';
             el('chat-url').value = page?.live_chat_url || '';
+            el('promotion-enabled').checked = page?.promotion_enabled !== false;
+            el('promotion-style').value = ['native', 'banner', 'spotlight'].includes(page?.promotion_style) ? page.promotion_style : 'native';
+            el('promotion-headline').value = page?.promotion_headline || '';
+            el('promotion-text').value = page?.promotion_text || '';
+            el('promotion-cta').value = page?.promotion_cta_label || 'View business';
             updateTierUI();
             updateSegmentNote();
+            updatePromotionNote();
         }
 
         function escapeHtml(value) {
@@ -774,6 +818,12 @@
                 virtual_tour_url: null,
                 call_tracking_phone: null,
                 live_chat_url: null,
+                promotion_enabled: el('promotion-enabled').checked,
+                promotion_style: el('promotion-style').value,
+                promotion_headline: emptyToNull(value('promotion-headline')),
+                promotion_text: emptyToNull(value('promotion-text')),
+                promotion_cta_label: value('promotion-cta') || 'View business',
+                starter_generated: false,
                 created_by: currentUser.id
             };
 
@@ -862,6 +912,7 @@
 
         el('tier').addEventListener('change', updateTierUI);
         el('market-segment').addEventListener('change', updateSegmentNote);
+        el('promotion-style').addEventListener('change', updatePromotionNote);
         el('save-draft').addEventListener('click', () => save('draft'));
         el('publish-btn').addEventListener('click', () => save('published'));
         el('upload-btn').addEventListener('click', uploadGallery);

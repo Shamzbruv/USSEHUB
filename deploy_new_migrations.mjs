@@ -44,7 +44,8 @@ const migrations = [
     '20260728000001_webpage_activation_draft.sql',
     '20260728000002_webpage_segment_sync.sql',
     '20260824000000_order_admin_and_listing_lifecycle.sql',
-    '20260824000001_listing_approval_expiry_trigger.sql'
+    '20260824000001_listing_approval_expiry_trigger.sql',
+    '20260827175628_paid_webpage_promotion_analytics.sql'
 ];
 
 if (!databaseUrl) {
@@ -178,6 +179,9 @@ async function main() {
               to_regclass('public.advertisements') IS NOT NULL AS advertisements,
               to_regprocedure('public.admin_manage_advertising(text,jsonb)') IS NOT NULL AS admin_lifecycle,
               to_regprocedure('public.get_active_advertisements(text,integer)') IS NOT NULL AS public_delivery,
+              to_regprocedure('public.record_webpage_event(uuid,text,text,jsonb)') IS NOT NULL AS webpage_events,
+              to_regprocedure('public.get_my_ad_performance(integer)') IS NOT NULL AS member_performance,
+              to_regprocedure('public.get_admin_advertisement_delivery(integer)') IS NOT NULL AS admin_delivery,
               (SELECT count(*) FROM public.listings WHERE status = 'approved') AS approved_listings
         `);
         console.log('Verification:', verification.rows[0]);

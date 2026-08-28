@@ -1,0 +1,16 @@
+{
+  "cleanUrls": false,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/index", "destination": "/index.html" },
+    { "source": "/ajm-ad-management", "destination": "/ajm-ad-management.html" },
+    { "source": "/ajm-admin-panel", "destination": "/ajm-admin-panel.html" },
+    { "source": "/ajm-advertising-hub", "destination": "/ajm-advertising-hub.html" },
+    { "source": "/ajm-aloe-jamaica", "destination": "/ajm-aloe-jamaica.html" },
+    { "source": "/ajm-business-page", "destination": "/ajm-business-page.html" },
+    { "source": "/ajm-webpage-builder", "destination": "/ajm-webpage-builder.html" },
+    { "source": "/master-admin", "destination": "/master-admin.html" },
+    { "source": "/pistol-operations-logistics", "destination": "/pistol-operations-logistics.html" },
+    { "source": "/usse-consultancy", "destination": "/usse-consultancy.html" }
+  ]
+}

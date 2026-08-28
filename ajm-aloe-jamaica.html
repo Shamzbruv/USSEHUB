@@ -1609,6 +1609,8 @@
         </section>
     </main>
 
+    <aside class="ajm-ad-network-mount" id="ajm-aloe-network-ad" data-ajm-ad-network hidden aria-label="Sponsored advertisements"></aside>
+
     <footer class="footer">
         <div class="container footer-inner">
             <p>© <span id="year"></span> AJM - Aloe Jamaica | A subsidiary of USSE.</p>
@@ -1630,6 +1632,11 @@
         <span class="floating-whatsapp-mark">WA</span>
         <span class="floating-whatsapp-label">WhatsApp AJM</span>
     </a>
+
+    <script type="module">
+        import { mountAjmAdDelivery } from './assets/ajm-ad-delivery.mjs';
+        mountAjmAdDelivery({ target: '#ajm-aloe-network-ad', pageKey: 'ajm-aloe-jamaica' });
+    </script>
 
     <script>
         const topbar = document.getElementById("topbar");

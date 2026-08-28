@@ -58,7 +58,8 @@ try {
     const migrationFiles = [
         '20260728000000_advertising_workflow_repair.sql',
         '20260728000001_webpage_activation_draft.sql',
-        '20260728000002_webpage_segment_sync.sql'
+        '20260728000002_webpage_segment_sync.sql',
+        '20260827175628_paid_webpage_promotion_analytics.sql'
     ];
     for (const filename of migrationFiles) {
         const migration = fs.readFileSync(path.join(root, 'supabase/migrations', filename), 'utf8');
@@ -217,8 +218,8 @@ try {
             business_name, owner_user_id, listing_type, status, market_segment,
             published_at, approved_at, expires_at
          ) VALUES (
-            $1, $2, 'basic', 'approved', 'local-business',
-            now() - interval '1 day', now() - interval '1 day', now() + interval '1 year'
+            $1, $2, 'basic', 'pending', 'local-business',
+            NULL, NULL, now() + interval '1 year'
          ) RETURNING id`,
         [`Transactional webpage listing ${nonce}`, memberId]
     );
@@ -272,7 +273,7 @@ try {
 
     const webpageOrder = await rpc(
         'SELECT public.create_ad_order($1::uuid, $2::uuid, $3::uuid[], $4, $5::jsonb) AS result',
-        [webpagePkg.id, listingId, [], 'Transactional Gold webpage order', JSON.stringify({})]
+        [webpagePkg.id, listingId, [], 'Transactional Gold webpage order', JSON.stringify({ promotion_style: 'spotlight' })]
     );
     check(
         webpageOrder?.status === 'pending_payment' && webpageOrder?.product_type_snapshot === 'webpage',
@@ -356,8 +357,52 @@ try {
     check(webpageApproved?.status === 'approved', 'admin confirmation activates the paid webpage order');
 
     await client.query('RESET ROLE');
+    const pendingWebpageActivation = await client.query(
+        `SELECT
+            s.id AS subscription_id,
+            s.status AS subscription_status,
+            s.user_id,
+            s.listing_id,
+            s.package_id,
+            w.tier,
+            w.page_status,
+            w.market_segment
+         FROM public.ad_subscriptions s
+         LEFT JOIN public.listing_webpages w ON w.listing_id = s.listing_id
+         WHERE s.ad_order_id = $1`,
+        [webpageOrder.id]
+    );
+    const pendingActivatedWebpage = pendingWebpageActivation.rows[0];
+    check(
+        pendingActivatedWebpage?.subscription_status === 'active'
+            && pendingActivatedWebpage.user_id === memberId
+            && pendingActivatedWebpage.listing_id === listingId
+            && pendingActivatedWebpage.package_id === webpagePkg.id,
+        'payment confirmation creates the correct active listing subscription'
+    );
+    check(
+        pendingActivatedWebpage?.tier === 'gold'
+            && pendingActivatedWebpage.page_status === 'draft'
+            && pendingActivatedWebpage.market_segment === 'local-business',
+        'payment confirmation safely provisions a draft while its directory listing is still pending'
+    );
+    const pendingPromotion = await client.query(
+        "SELECT id FROM public.advertisements WHERE listing_id = $1 AND placement = 'webpage-network'",
+        [listingId]
+    );
+    check(pendingPromotion.rowCount === 0, 'a pending directory listing is not delivered as a public advertisement');
+
+    await become('authenticated', adminId);
+    await client.query(
+        `UPDATE public.listings
+         SET status = 'approved', approved_at = clock_timestamp(), published_at = now() - interval '1 second'
+         WHERE id = $1`,
+        [listingId]
+    );
+    await client.query('RESET ROLE');
     const webpageActivation = await client.query(
         `SELECT
+            s.id AS subscription_id,
             s.status AS subscription_status,
             s.user_id,
             s.listing_id,
@@ -372,18 +417,75 @@ try {
     );
     const activatedWebpage = webpageActivation.rows[0];
     check(
-        activatedWebpage?.subscription_status === 'active'
-            && activatedWebpage.user_id === memberId
-            && activatedWebpage.listing_id === listingId
-            && activatedWebpage.package_id === webpagePkg.id,
-        'payment confirmation creates the correct active listing subscription'
+        activatedWebpage?.tier === 'gold'
+            && activatedWebpage.page_status === 'published'
+            && activatedWebpage.market_segment === 'local-business',
+        'approving the directory listing publishes its safe paid starter page and unlocks promotion'
+    );
+
+    const webpagePromotionQuery = await client.query(
+        `SELECT
+            id,
+            order_id,
+            subscription_id,
+            status,
+            placement,
+            cta_url,
+            creative_metadata
+         FROM public.advertisements
+         WHERE listing_id = $1
+           AND placement = 'webpage-network'`,
+        [listingId]
+    );
+    const webpagePromotion = webpagePromotionQuery.rows[0];
+    check(
+        webpagePromotion?.status === 'active'
+            && webpagePromotion.order_id === webpageOrder.id
+            && webpagePromotion.subscription_id === activatedWebpage.subscription_id
+            && webpagePromotion.creative_metadata?.source === 'paid_webpage'
+            && webpagePromotion.creative_metadata?.format === 'spotlight',
+        'paid webpage approval creates one active network promotion using the format selected with the order'
     );
     check(
-        activatedWebpage?.tier === 'gold'
-            && activatedWebpage.page_status === 'draft'
-            && activatedWebpage.market_segment === 'local-business',
-        'payment confirmation provisions a draft Gold webpage for the listing market segment'
+        webpagePromotion?.cta_url === `https://www.ussehub.com/ajm-business-page?listing=${listingId}`,
+        'the paid webpage promotion links to the extensionless business-page route without losing its listing ID'
     );
+
+    await become('anon');
+    const webpageDelivery = await rpc("SELECT public.get_active_advertisements('webpage-network', 20) AS result");
+    const deliveredWebpage = webpageDelivery?.advertisements?.find((item) => item.id === webpagePromotion.id);
+    check(
+        deliveredWebpage?.listing_id === listingId && deliveredWebpage.rotation_key === undefined,
+        'public delivery includes the active webpage promotion without exposing its internal rotation key'
+    );
+    const firstWebpageView = await rpc(
+        "SELECT public.record_webpage_event($1::uuid, 'view', $2, $3::jsonb) AS result",
+        [listingId, `webpage-session-${nonce}`, JSON.stringify({ page: 'integration-test' })]
+    );
+    const duplicateWebpageView = await rpc(
+        "SELECT public.record_webpage_event($1::uuid, 'view', $2, $3::jsonb) AS result",
+        [listingId, `webpage-session-${nonce}`, JSON.stringify({ page: 'integration-test' })]
+    );
+    const webpageClick = await rpc(
+        "SELECT public.record_webpage_event($1::uuid, 'click', $2, $3::jsonb) AS result",
+        [listingId, `webpage-session-${nonce}`, JSON.stringify({ action: 'website' })]
+    );
+    const webpageLead = await rpc(
+        "SELECT public.record_webpage_event($1::uuid, 'lead', $2, $3::jsonb) AS result",
+        [listingId, `webpage-session-${nonce}`, JSON.stringify({ action: 'contact-form' })]
+    );
+    check(
+        firstWebpageView?.recorded === true
+            && duplicateWebpageView?.deduplicated === true
+            && webpageClick?.recorded === true
+            && webpageLead?.recorded === true,
+        'webpage views, clicks and leads are recorded with privacy-preserving daily deduplication'
+    );
+    const anonymousPublishedPage = await client.query(
+        'SELECT listing_id FROM public.listing_webpages WHERE listing_id = $1',
+        [listingId]
+    );
+    check(anonymousPublishedPage.rowCount === 1, 'anonymous visitors can read the published paid webpage');
 
     await become('authenticated', memberId);
     const ownerPage = await client.query(
@@ -391,21 +493,102 @@ try {
         [listingId]
     );
     check(
-        ownerPage.rows[0]?.tier === 'gold' && ownerPage.rows[0]?.page_status === 'draft',
-        'listing owner can read their provisioned draft webpage'
+        ownerPage.rows[0]?.tier === 'gold' && ownerPage.rows[0]?.page_status === 'published',
+        'listing owner can read their published starter webpage'
     );
     const ownerUpdate = await client.query(
-        'UPDATE public.listing_webpages SET tagline = $2 WHERE listing_id = $1 RETURNING tagline',
+        `UPDATE public.listing_webpages
+         SET
+           tagline = $2,
+           promotion_style = 'banner',
+           promotion_headline = 'Owner-controlled banner',
+           promotion_cta_label = 'See our services',
+           starter_generated = false
+         WHERE listing_id = $1
+         RETURNING tagline, promotion_style`,
         [listingId, `Owner-edited Gold page ${nonce}`]
     );
-    check(ownerUpdate.rows[0]?.tagline === `Owner-edited Gold page ${nonce}`, 'listing owner can update allowed draft webpage content');
+    check(
+        ownerUpdate.rows[0]?.tagline === `Owner-edited Gold page ${nonce}`
+            && ownerUpdate.rows[0]?.promotion_style === 'banner',
+        'listing owner can update webpage content and choose the network promotion format'
+    );
 
-    await become('anon');
-    const anonymousDraft = await client.query(
-        'SELECT listing_id FROM public.listing_webpages WHERE listing_id = $1',
+    const pausedPromotion = await client.query(
+        `UPDATE public.listing_webpages
+         SET page_status = 'draft'
+         WHERE listing_id = $1
+         RETURNING page_status`,
         [listingId]
     );
-    check(anonymousDraft.rowCount === 0, 'anonymous visitors cannot read an unpublished webpage draft');
+    check(pausedPromotion.rows[0]?.page_status === 'draft', 'listing owner can save the webpage as a draft');
+    await client.query('RESET ROLE');
+    const pausedPromotionState = await client.query(
+        "SELECT status FROM public.advertisements WHERE listing_id = $1 AND placement = 'webpage-network'",
+        [listingId]
+    );
+    check(pausedPromotionState.rows[0]?.status === 'paused', 'saving a webpage as a draft immediately pauses network delivery');
+
+    await become('authenticated', memberId);
+    await client.query(
+        "UPDATE public.listing_webpages SET page_status = 'published' WHERE listing_id = $1",
+        [listingId]
+    );
+    const memberPerformance = await rpc('SELECT public.get_my_ad_performance(30) AS result');
+    const memberWebpagePerformance = memberPerformance?.advertisements?.find((item) => item.listing_id === listingId);
+    check(
+        Number(memberPerformance?.kpis?.active_webpages) >= 1
+            && Number(memberPerformance?.kpis?.live_campaigns) >= 1
+            && Number(memberPerformance?.kpis?.impressions) >= 1
+            && Number(memberPerformance?.kpis?.clicks) >= 1
+            && Number(memberPerformance?.kpis?.leads) >= 1,
+        'member reporting summarizes active webpages, live campaigns, impressions, clicks and leads'
+    );
+    check(
+        memberWebpagePerformance?.format === 'banner'
+            && Number(memberWebpagePerformance?.impressions) === 1
+            && Number(memberWebpagePerformance?.clicks) === 1
+            && Number(memberWebpagePerformance?.leads) === 1,
+        'member reporting includes per-webpage format and engagement totals'
+    );
+
+    await become('authenticated', adminId);
+    const pausedWebpageOrder = await rpc(
+        "SELECT public.admin_manage_advertising('pause_ad', $1::jsonb) AS result",
+        [JSON.stringify({ order_id: webpageOrder.id, reason: 'Transactional webpage pause test' })]
+    );
+    check(pausedWebpageOrder?.status === 'paused', 'admin can pause an approved paid webpage order');
+    await client.query('RESET ROLE');
+    const pausedWebpageLifecycle = await client.query(
+        `SELECT a.status AS promotion_status, s.status AS subscription_status
+         FROM public.advertisements a
+         JOIN public.ad_subscriptions s ON s.id = a.subscription_id
+         WHERE a.listing_id = $1
+           AND a.placement = 'webpage-network'`,
+        [listingId]
+    );
+    check(
+        pausedWebpageLifecycle.rows[0]?.promotion_status === 'paused'
+            && pausedWebpageLifecycle.rows[0]?.subscription_status === 'paused',
+        'pausing a paid webpage keeps its promotion paused rather than incorrectly cancelling it'
+    );
+
+    await become('authenticated', adminId);
+    const resumedWebpageOrder = await rpc(
+        "SELECT public.admin_manage_advertising('resume_ad', $1::jsonb) AS result",
+        [JSON.stringify({ order_id: webpageOrder.id })]
+    );
+    check(resumedWebpageOrder?.status === 'approved', 'admin can resume a paused paid webpage order');
+    await client.query('RESET ROLE');
+    const resumedWebpagePromotion = await client.query(
+        "SELECT status, creative_metadata FROM public.advertisements WHERE listing_id = $1 AND placement = 'webpage-network'",
+        [listingId]
+    );
+    check(
+        resumedWebpagePromotion.rows[0]?.status === 'active'
+            && resumedWebpagePromotion.rows[0]?.creative_metadata?.format === 'banner',
+        'resuming the paid webpage restores delivery without overwriting the member’s newer format choice'
+    );
 
     // Reproduce the exact AJM Paid Webpage modal lifecycle from the client's
     // screenshots. This path must not depend on an Edge Function.
@@ -430,6 +613,7 @@ try {
         `SELECT
             l.market_segment AS listing_segment,
             l.requested_tier,
+            s.id AS subscription_id,
             s.status AS subscription_status,
             s.expires_at,
             w.tier,
@@ -448,13 +632,27 @@ try {
         manuallyActivated?.subscription_status === 'active'
             && manuallyActivated.requested_tier === 'gold'
             && manuallyActivated.tier === 'gold'
-            && manuallyActivated.page_status === 'draft',
-        'manual activation provisions the correct active Gold draft webpage'
+            && manuallyActivated.page_status === 'published',
+        'manual activation publishes the correct safe Gold starter webpage'
     );
     check(
         manuallyActivated?.listing_segment === 'professional-services'
             && manuallyActivated.webpage_segment === 'professional-services',
         'manual activation synchronizes the administrator-selected segment to the starter webpage'
+    );
+
+    const manualPromotionQuery = await client.query(
+        `SELECT order_id, subscription_id, status
+         FROM public.advertisements
+         WHERE listing_id = $1
+           AND placement = 'webpage-network'`,
+        [manualListingId]
+    );
+    check(
+        manualPromotionQuery.rows[0]?.order_id === null
+            && manualPromotionQuery.rows[0]?.subscription_id === manuallyActivated.subscription_id
+            && manualPromotionQuery.rows[0]?.status === 'active',
+        'admin-activated webpages receive tracked network promotion even when no customer order exists'
     );
 
     const firstManualExpiry = new Date(manuallyActivated.expires_at).getTime();
@@ -488,6 +686,15 @@ try {
     );
 
     await client.query('RESET ROLE');
+    const cancelledManualPromotion = await client.query(
+        "SELECT status FROM public.advertisements WHERE listing_id = $1 AND placement = 'webpage-network'",
+        [manualListingId]
+    );
+    check(
+        ['cancelled', 'expired'].includes(cancelledManualPromotion.rows[0]?.status),
+        'cancelling a manual webpage entitlement stops its network promotion'
+    );
+
     const manualAudit = await client.query(
         `SELECT
             (SELECT count(*)::integer
@@ -532,6 +739,8 @@ try {
     await client.query(
         `UPDATE public.listing_webpages
          SET
+           page_status = 'draft',
+           starter_generated = false,
            segment_content = $2::jsonb,
            gallery_urls = $3::text[],
            hero_media_url = 'https://example.com/hero.jpg',
@@ -789,6 +998,17 @@ try {
     const analytics = await rpc('SELECT public.get_admin_advertising_analytics(30) AS result');
     check(Number(analytics?.kpis?.active_ads) >= 2, 'advertising analytics include active placements');
     check(analytics?.placement_performance?.some((row) => row.placement === 'homepage'), 'advertising analytics include placement performance');
+
+    const adminDelivery = await rpc('SELECT public.get_admin_advertisement_delivery(30) AS result');
+    const trackedWebpagePromotion = adminDelivery?.advertisements?.find((item) => item.listing_id === listingId);
+    check(
+        trackedWebpagePromotion?.placement === 'webpage-network'
+            && Number(trackedWebpagePromotion?.impressions) === 1
+            && Number(trackedWebpagePromotion?.clicks) === 1
+            && Number(trackedWebpagePromotion?.leads) === 1
+            && Number(trackedWebpagePromotion?.ctr) === 100,
+        'admin campaign delivery exposes webpage impressions, clicks, leads and click-through rate'
+    );
 
     const paused = await rpc(
         "SELECT public.admin_manage_advertising('pause_ad', $1::jsonb) AS result",

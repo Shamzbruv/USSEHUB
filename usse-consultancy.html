@@ -1667,6 +1667,8 @@
         </section>
     </main>
 
+    <aside class="ajm-ad-network-mount" id="usse-consultancy-network-ad" data-ajm-ad-network hidden aria-label="Sponsored advertisements"></aside>
+
     <footer class="footer">
         <div class="container footer-inner">
             <p>&copy; <span id="year"></span> USSE Consultancy &mdash; Strategy &amp; Advisory. Part of the USSE Group.</p>
@@ -1689,6 +1691,11 @@
         <span class="floating-whatsapp-mark">WA</span>
         <span class="floating-whatsapp-label">WhatsApp USSE</span>
     </a>
+
+    <script type="module">
+        import { mountAjmAdDelivery } from './assets/ajm-ad-delivery.mjs';
+        mountAjmAdDelivery({ target: '#usse-consultancy-network-ad', pageKey: 'usse-consultancy' });
+    </script>
 
     <script>
         const topbar = document.getElementById("topbar");

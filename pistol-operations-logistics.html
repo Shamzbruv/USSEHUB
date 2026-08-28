@@ -1604,6 +1604,8 @@
         </section>
     </main>
 
+    <aside class="ajm-ad-network-mount" id="pistol-network-ad" data-ajm-ad-network hidden aria-label="Sponsored advertisements"></aside>
+
     <footer class="footer">
         <div class="container footer-inner">
             <p>© <span id="year"></span> PISTOL | A subsidiary of USSE.</p>
@@ -1625,6 +1627,11 @@
         <span class="floating-whatsapp-mark">WA</span>
         <span class="floating-whatsapp-label">WhatsApp PISTOL</span>
     </a>
+
+    <script type="module">
+        import { mountAjmAdDelivery } from './assets/ajm-ad-delivery.mjs';
+        mountAjmAdDelivery({ target: '#pistol-network-ad', pageKey: 'pistol-operations-logistics' });
+    </script>
 
     <script>
         const topbar = document.getElementById("topbar");

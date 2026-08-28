@@ -403,6 +403,7 @@
                 action.target = '_blank';
                 action.rel = 'noopener';
             }
+            action.addEventListener('click', () => recordWebpageEvent('click', { source: 'segment_action', label }));
             container.appendChild(action);
         }
 
@@ -512,10 +513,25 @@
                 setAction('live-chat', safeUrl(webpage.live_chat_url));
             }
 
+            const engagementActions = {
+                'phone-action': ['call', 'primary_phone'],
+                'whatsapp-action': ['chat', 'whatsapp'],
+                'email-action': ['lead', 'email'],
+                'website-action': ['click', 'website'],
+                'booking-action': ['booking', 'primary_booking'],
+                'platinum-book': ['booking', 'platinum_booking'],
+                'tracked-call': ['call', 'tracked_call'],
+                'live-chat': ['chat', 'live_chat']
+            };
+            Object.entries(engagementActions).forEach(([id, [eventType, source]]) => {
+                el(id)?.addEventListener('click', () => recordWebpageEvent(eventType, { source }));
+            });
+
             renderStructuredData();
             hide('loading');
             show('page');
             loadSponsoredAd();
+            recordWebpageEvent('view', { source: 'business_page' });
         }
 
         function sponsoredAdSessionToken() {
@@ -527,6 +543,25 @@
             } catch { return crypto.randomUUID(); }
         }
         const sponsoredSessionToken = sponsoredAdSessionToken();
+        function sponsoredAdRank(ad) {
+            const value = `${sponsoredSessionToken}:${listing?.id || ''}:${ad?.id || ''}`;
+            let hash = 2166136261;
+            for (let index = 0; index < value.length; index += 1) {
+                hash ^= value.charCodeAt(index);
+                hash = Math.imul(hash, 16777619);
+            }
+            return hash >>> 0;
+        }
+        function recordWebpageEvent(eventType, metadata = {}) {
+            if (isPreview || !listing?.id) return;
+            supabase.rpc('record_webpage_event', {
+                p_listing_id: listing.id,
+                p_event_type: eventType,
+                p_session_token: sponsoredSessionToken,
+                p_metadata: { page: 'business-page', ...metadata }
+            }).then(() => {}).catch(() => {});
+        }
+
         function recordSponsoredAdEvent(advertisementId, eventType) {
             supabase.rpc('record_ad_event', {
                 p_advertisement_id: advertisementId,
@@ -549,9 +584,15 @@
         // the page unaffected when the network is empty.
         async function loadSponsoredAd() {
             try {
-                const { data, error } = await supabase.rpc('get_active_advertisements', { p_placement: 'hub-sidebar', p_limit: 1 });
-                if (error) return;
-                const ad = (Array.isArray(data?.advertisements) ? data.advertisements : [])[0];
+                const results = await Promise.all([
+                    supabase.rpc('get_active_advertisements', { p_placement: 'hub-sidebar', p_limit: 4 }),
+                    supabase.rpc('get_active_advertisements', { p_placement: 'webpage-network', p_limit: 4 })
+                ]);
+                const candidates = results
+                    .flatMap(({ data, error }) => error || !Array.isArray(data?.advertisements) ? [] : data.advertisements)
+                    .filter((candidate) => String(candidate.listing_id || '') !== String(listing?.id || ''));
+                const ad = [...new Map(candidates.map((candidate) => [candidate.id, candidate])).values()]
+                    .sort((left, right) => sponsoredAdRank(left) - sponsoredAdRank(right))[0];
                 if (!ad) return;
                 const container = el('sponsor-content');
                 if (!container) return;
@@ -619,7 +660,7 @@
                     throw new Error('Private previews are available only to this listing’s owner and AJM administrators. Sign in through the Advertising Hub, then open the preview again.');
                 }
                 const builderLink = el('unavailable-builder-link');
-                builderLink.href = `ajm-webpage-builder.html?listing=${encodeURIComponent(listing.id)}`;
+                builderLink.href = `ajm-webpage-builder?listing=${encodeURIComponent(listing.id)}`;
                 builderLink.classList.remove('hidden');
             }
 
@@ -645,7 +686,7 @@
                 el('preview-banner-message').textContent = hasActiveAccess
                     ? `Private preview: this page is ${webpage.page_status === 'published' ? 'currently published' : 'still a draft'}. Return to the Builder to make changes.`
                     : 'Private preview: no current paid webpage package is active. Activate a package before this page can be published or viewed by the public.';
-                el('preview-builder-link').href = `ajm-webpage-builder.html?listing=${encodeURIComponent(listing.id)}`;
+                el('preview-builder-link').href = `ajm-webpage-builder?listing=${encodeURIComponent(listing.id)}`;
                 banner.classList.remove('hidden');
             }
             renderPage();
@@ -690,6 +731,7 @@
             event.target.reset();
             message.textContent = 'Your enquiry was sent successfully.';
             message.className = 'form-message success show';
+            recordWebpageEvent('lead', { source: 'lead_form' });
             if (turnstileWidgetId !== null) window.turnstile?.reset(turnstileWidgetId);
         });
 

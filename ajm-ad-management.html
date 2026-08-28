@@ -685,9 +685,10 @@
         }
 
         async function loadAdvertisements() {
-            let result = await supabase.from('advertisements').select('*').order('created_at', { ascending: false }).limit(500);
-            if (result.error) throw new Error(`Advertisements: ${result.error.message}`);
-            state.advertisements = result.data || [];
+            const days = Number(el('analytics-range')?.value || 30);
+            const { data, error } = await supabase.rpc('get_admin_advertisement_delivery', { p_days: days });
+            if (error) throw new Error(`Advertisements: ${error.message}`);
+            state.advertisements = Array.isArray(data?.advertisements) ? data.advertisements : [];
         }
 
         async function loadAnalytics() {
@@ -845,7 +846,7 @@
             return state.advertisements.filter((ad) => {
                 if (status && ad.status !== status) return false;
                 const order = advertisementOrder(ad);
-                return !query || [ad.title, ad.headline, ad.id, ad.placement, ...(ad.placements || []), orderCustomer(order).name, orderPackage(order).name].some((value) => text(value).toLowerCase().includes(query));
+                return !query || [ad.title, ad.headline, ad.business_name, ad.package_name, ad.id, ad.placement, ...(ad.placements || []), orderCustomer(order).name, orderPackage(order).name].some((value) => text(value).toLowerCase().includes(query));
             });
         }
 
@@ -861,16 +862,20 @@
                 const pkg = orderPackage(order);
                 const impressions = first(ad.impressions, ad.metrics?.impressions, 0);
                 const clicks = first(ad.clicks, ad.metrics?.clicks, 0);
+                const leads = first(ad.leads, ad.metrics?.leads, 0);
                 const placements = first(ad.placements, ad.placement ? [ad.placement] : [], []);
-                const actions = [`<button class="btn btn-sm" type="button" data-order-detail="${safe(order.id || ad.order_id || '')}">Details</button>`];
-                if (ad.status === 'active') actions.push(`<button class="btn btn-warning btn-sm" type="button" data-order-action="pause_ad" data-order-id="${safe(order.id || ad.order_id)}">Pause</button>`);
-                if (ad.status === 'paused') actions.push(`<button class="btn btn-primary btn-sm" type="button" data-order-action="resume_ad" data-order-id="${safe(order.id || ad.order_id)}">Resume</button>`);
-                if (!TERMINAL_STATES.has(ad.status)) actions.push(`<button class="btn btn-danger btn-sm" type="button" data-order-action="expire_ad" data-order-id="${safe(order.id || ad.order_id)}">Expire</button>`);
+                const orderId = order.id || ad.order_id || '';
+                const actions = orderId
+                    ? [`<button class="btn btn-sm" type="button" data-order-detail="${safe(orderId)}">Details</button>`]
+                    : [`<a class="btn btn-sm" href="ajm-webpage-builder?listing=${encodeURIComponent(ad.listing_id || '')}">Edit webpage</a>`];
+                if (orderId && ad.status === 'active') actions.push(`<button class="btn btn-warning btn-sm" type="button" data-order-action="pause_ad" data-order-id="${safe(orderId)}">Pause</button>`);
+                if (orderId && ad.status === 'paused') actions.push(`<button class="btn btn-primary btn-sm" type="button" data-order-action="resume_ad" data-order-id="${safe(orderId)}">Resume</button>`);
+                if (orderId && !TERMINAL_STATES.has(ad.status)) actions.push(`<button class="btn btn-danger btn-sm" type="button" data-order-action="expire_ad" data-order-id="${safe(orderId)}">Expire</button>`);
                 return `<tr>
                     <td><span class="cell-title">${safe(first(ad.title, ad.headline, order.creative?.title, 'Untitled advertisement'))}</span><span class="cell-sub">${safe(text(ad.id).slice(0, 8))}</span></td>
-                    <td><span class="cell-title">${safe(customer.name)}</span><span class="cell-sub">${safe(pkg.name)}</span></td>
+                    <td><span class="cell-title">${safe(first(ad.business_name, customer.name, 'Customer'))}</span><span class="cell-sub">${safe(first(ad.package_name, pkg.name, ad.product_type === 'webpage' ? 'Paid webpage' : 'Advertising package'))}</span></td>
                     <td>${placements.length ? placements.map((item) => `<span class="tag">${safe(item)}</span>`).join(' ') : '—'}</td>
-                    <td><span class="metric-pair"><strong>${number(impressions).toLocaleString()}</strong> views · ${number(clicks).toLocaleString()} clicks</span><span class="cell-sub">${fmtPercent(impressions ? clicks / impressions * 100 : 0)} CTR</span></td>
+                    <td><span class="metric-pair"><strong>${number(impressions).toLocaleString()}</strong> views · ${number(clicks).toLocaleString()} clicks · ${number(leads).toLocaleString()} leads</span><span class="cell-sub">${fmtPercent(impressions ? clicks / impressions * 100 : 0)} CTR</span></td>
                     <td>${safe(fmtDate(first(ad.starts_at, order.starts_at)))}<span class="cell-sub">to ${safe(fmtDate(first(ad.expires_at, order.expires_at)))}</span></td>
                     <td>${statusBadge(ad.status)}</td>
                     <td><div class="row-actions">${actions.join('')}</div></td>
@@ -1308,7 +1313,16 @@
             if (button.dataset.deleteBank) queueEntityAction('bank', button.dataset.deleteBank, 'delete', 'Delete bank account', true);
         });
         el('refresh-btn').addEventListener('click', refreshAll);
-        el('analytics-range').addEventListener('change', async () => { try { await loadAnalytics(); renderKpis(); renderAnalytics(); } catch (error) { toast(error.message, 'error'); } });
+        el('analytics-range').addEventListener('change', async () => {
+            try {
+                await Promise.all([loadAdvertisements(), loadAnalytics()]);
+                renderAdvertisements();
+                renderKpis();
+                renderAnalytics();
+            } catch (error) {
+                toast(error.message, 'error');
+            }
+        });
         el('order-status').addEventListener('change', async () => { try { await loadOrders(); renderOrders(); renderKpis(); } catch (error) { showNotice('orders-notice', error.message, 'error'); } });
         el('order-search').addEventListener('input', renderOrders);
         el('ad-search').addEventListener('input', renderAdvertisements);

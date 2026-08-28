@@ -1159,6 +1159,329 @@
         }
         .login-prompt-actions .btn { flex: 1; }
 
+        /* Member dashboard */
+        .member-dashboard-box {
+            width: min(1180px, calc(100vw - 32px));
+            max-width: 1180px;
+            max-height: min(94vh, 980px);
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background:
+                radial-gradient(circle at 12% 0%, rgba(23,214,111,.08), transparent 29%),
+                radial-gradient(circle at 88% 2%, rgba(91,156,246,.09), transparent 27%),
+                #0d111c;
+        }
+        .member-dashboard-header {
+            position: relative;
+            flex: 0 0 auto;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 28px 76px 24px 30px;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(5,7,13,.62);
+        }
+        .member-dashboard-header .modal-close { top: 22px; right: 24px; }
+        .md-eyebrow {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--green);
+            font-size: .68rem;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+        .member-dashboard-header h3 {
+            margin: 0;
+            font-family: "Syne", sans-serif;
+            font-size: clamp(1.4rem, 2.6vw, 2rem);
+        }
+        .member-dashboard-header p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: .84rem;
+            line-height: 1.5;
+        }
+        .md-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding-top: 3px;
+        }
+        .md-toolbar label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        .md-toolbar select,
+        .md-toolbar button {
+            min-height: 40px;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            font: inherit;
+            font-size: .8rem;
+            font-weight: 750;
+        }
+        .md-toolbar select {
+            padding: 0 34px 0 12px;
+            color: #fff;
+            background: #111725;
+        }
+        .md-toolbar select option { background: #111725; }
+        .md-toolbar button {
+            padding: 0 14px;
+            color: #fff;
+            background: rgba(255,255,255,.06);
+            cursor: pointer;
+        }
+        .md-toolbar button:hover { border-color: rgba(23,214,111,.48); background: rgba(23,214,111,.08); }
+        .md-toolbar button:disabled { opacity: .58; cursor: wait; }
+        .member-dashboard-body {
+            min-height: 0;
+            overflow-y: auto;
+            padding: 24px 30px 32px;
+            scrollbar-gutter: stable;
+        }
+        .md-account-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 18px;
+            padding: 19px 21px;
+            border: 1px solid rgba(23,214,111,.24);
+            border-radius: 18px;
+            background: linear-gradient(120deg, rgba(23,214,111,.09), rgba(91,156,246,.055));
+        }
+        .md-account-copy { min-width: 0; }
+        .md-account-heading {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-bottom: 5px;
+        }
+        .md-account-heading h4 { margin: 0; font-size: 1rem; }
+        .md-account-status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 25px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            color: #d9deeb;
+            background: rgba(255,255,255,.08);
+            font-size: .68rem;
+            font-weight: 850;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+        }
+        .md-account-status.active { color: #a9f6c8; background: rgba(23,214,111,.14); }
+        .md-account-status.pending { color: #ffe47e; background: rgba(255,207,51,.13); }
+        .md-account-detail { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+        .md-account-actions { display: flex; flex: 0 0 auto; gap: 9px; }
+        .md-account-actions .btn { padding: 9px 13px; font-size: .78rem; white-space: nowrap; }
+        .md-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 11px;
+            margin-bottom: 22px;
+        }
+        .md-kpi {
+            min-width: 0;
+            padding: 15px 16px;
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 16px;
+            background: rgba(255,255,255,.035);
+        }
+        .md-kpi:nth-child(1) { box-shadow: inset 0 2px 0 rgba(255,207,51,.45); }
+        .md-kpi:nth-child(2) { box-shadow: inset 0 2px 0 rgba(23,214,111,.45); }
+        .md-kpi:nth-child(3), .md-kpi:nth-child(4) { box-shadow: inset 0 2px 0 rgba(91,156,246,.46); }
+        .md-kpi:nth-child(5), .md-kpi:nth-child(6) { box-shadow: inset 0 2px 0 rgba(168,140,255,.45); }
+        .md-kpi-label { display: block; color: var(--muted); font-size: .67rem; font-weight: 800; letter-spacing: .045em; text-transform: uppercase; }
+        .md-kpi-value { display: block; margin-top: 7px; color: #fff; font-size: clamp(1.18rem, 2vw, 1.55rem); font-weight: 900; line-height: 1; }
+        .md-kpi-note { display: block; margin-top: 7px; color: #7f899e; font-size: .65rem; line-height: 1.3; }
+        .md-dashboard-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(320px, .8fr);
+            gap: 18px;
+            align-items: start;
+        }
+        .md-dashboard-column { display: grid; gap: 18px; min-width: 0; }
+        .md-panel {
+            min-width: 0;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            background: rgba(255,255,255,.026);
+        }
+        .md-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 17px 19px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+        .md-panel-header h4 { margin: 0 0 3px; font-size: .96rem; }
+        .md-panel-header p { margin: 0; color: var(--muted); font-size: .73rem; line-height: 1.45; }
+        .md-panel-header .btn { padding: 7px 10px; font-size: .72rem; white-space: nowrap; }
+        .md-panel-content { padding: 13px; }
+        .md-listing-grid { display: grid; gap: 11px; }
+        .md-listing-card {
+            display: grid;
+            grid-template-columns: minmax(170px, 1fr) minmax(230px, 1.35fr) auto;
+            gap: 16px;
+            align-items: center;
+            padding: 15px 16px;
+            border: 1px solid rgba(255,255,255,.085);
+            border-radius: 14px;
+            background: rgba(6,8,14,.48);
+        }
+        .md-listing-card:hover { border-color: rgba(255,255,255,.16); }
+        .md-listing-name { margin: 0 0 7px; color: #fff; font-size: .9rem; line-height: 1.35; }
+        .md-listing-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+        .md-chip {
+            display: inline-flex;
+            padding: 3px 7px;
+            border-radius: 999px;
+            color: #cbd3e3;
+            background: rgba(255,255,255,.075);
+            font-size: .61rem;
+            font-weight: 800;
+            text-transform: capitalize;
+        }
+        .md-chip.success { color: #97efba; background: rgba(23,214,111,.13); }
+        .md-chip.warning { color: #ffe27a; background: rgba(255,207,51,.12); }
+        .md-chip.danger { color: #ff9aaa; background: rgba(255,77,94,.12); }
+        .md-workflow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+        .md-workflow-step {
+            position: relative;
+            min-width: 0;
+            padding-top: 9px;
+            color: #717b90;
+            font-size: .57rem;
+            font-weight: 800;
+            letter-spacing: .02em;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .md-workflow-step::before {
+            content: '';
+            position: absolute;
+            inset: 0 2px auto;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.09);
+        }
+        .md-workflow-step.complete { color: #96edb9; }
+        .md-workflow-step.complete::before { background: var(--green); }
+        .md-workflow-step.current { color: #ffe27a; }
+        .md-workflow-step.current::before { background: var(--yellow); }
+        .md-workflow-note { margin: 7px 0 0; color: #8791a5; font-size: .67rem; text-align: center; line-height: 1.35; }
+        .md-listing-actions { display: flex; flex-direction: column; align-items: stretch; gap: 7px; min-width: 130px; }
+        .md-listing-actions .btn { padding: 7px 10px; font-size: .7rem; text-align: center; }
+        .md-text-action {
+            border: 0;
+            padding: 2px;
+            color: var(--blue);
+            background: none;
+            font: inherit;
+            font-size: .68rem;
+            text-align: center;
+            cursor: pointer;
+        }
+        .md-text-action:hover { color: #fff; }
+        .md-table-scroll { overflow-x: auto; }
+        .md-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .md-table th {
+            padding: 10px 11px;
+            color: var(--muted);
+            border-bottom: 1px solid rgba(255,255,255,.09);
+            font-size: .64rem;
+            font-weight: 800;
+            letter-spacing: .035em;
+            text-transform: uppercase;
+        }
+        .md-table td { padding: 11px; border-bottom: 1px solid rgba(255,255,255,.055); color: #e8ecff; font-size: .74rem; vertical-align: middle; }
+        .md-table tbody tr:last-child td { border-bottom: 0; }
+        .md-table td strong { color: #fff; font-size: .77rem; }
+        .md-table td small { color: var(--muted); line-height: 1.4; }
+        .md-empty {
+            padding: 24px 16px;
+            color: var(--muted);
+            font-size: .78rem;
+            line-height: 1.55;
+            text-align: center;
+        }
+        .md-empty strong { display: block; margin-bottom: 4px; color: #fff; font-size: .88rem; }
+        .md-table-empty { padding: 24px 12px !important; color: var(--muted) !important; text-align: center; }
+
+        @media (max-width: 1040px) {
+            .md-kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .md-dashboard-grid { grid-template-columns: 1fr; }
+            .md-dashboard-column { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .md-dashboard-column .md-panel { min-width: 0; }
+        }
+
+        @media (max-width: 780px) {
+            .member-dashboard-box { width: calc(100vw - 18px); max-height: 96vh; border-radius: 20px; }
+            .member-dashboard-header { display: block; padding: 22px 62px 18px 20px; }
+            .member-dashboard-header .modal-close { top: 17px; right: 17px; }
+            .md-toolbar { margin-top: 14px; }
+            .member-dashboard-body { padding: 18px 18px 24px; }
+            .md-account-card { align-items: flex-start; }
+            .md-account-actions { flex-direction: column; }
+            .md-listing-card { grid-template-columns: 1fr; gap: 12px; }
+            .md-listing-actions { flex-direction: row; min-width: 0; }
+            .md-listing-actions .btn, .md-listing-actions .md-text-action { flex: 1; }
+            .md-dashboard-column { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 620px) {
+            .md-toolbar { display: grid; grid-template-columns: 1fr auto; }
+            .md-toolbar select { width: 100%; }
+            .md-account-card { display: block; }
+            .md-account-actions { flex-direction: row; margin-top: 14px; }
+            .md-account-actions .btn { flex: 1; white-space: normal; }
+            .md-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .md-panel-header { align-items: flex-start; }
+            .md-workflow-step { font-size: .53rem; }
+            .md-table-scroll { overflow: visible; }
+            .md-table, .md-table tbody, .md-table tr, .md-table td { display: block; width: 100%; }
+            .md-table thead { display: none; }
+            .md-table tr { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+            .md-table tbody tr:last-child { border-bottom: 0; }
+            .md-table td {
+                display: grid;
+                grid-template-columns: minmax(90px, .75fr) minmax(0, 1.25fr);
+                gap: 12px;
+                align-items: center;
+                padding: 6px 0;
+                border: 0;
+                text-align: right;
+            }
+            .md-table td::before {
+                content: attr(data-label);
+                color: var(--muted);
+                font-size: .61rem;
+                font-weight: 800;
+                letter-spacing: .035em;
+                text-align: left;
+                text-transform: uppercase;
+            }
+            .md-table td.md-table-empty { display: block; text-align: center; }
+            .md-table td.md-table-empty::before { content: none; }
+        }
+
         @media (max-width: 980px) {
             .packages-head { grid-template-columns: 1fr; }
             .package-grid { grid-template-columns: 1fr; }
@@ -1655,107 +1978,102 @@
 
     <!-- Member Dashboard Modal -->
     <div id="member-dashboard-modal" class="modal-overlay" role="dialog" aria-modal="true">
-        <div class="modal-box" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3 id="md-title">Member Dashboard</h3>
+        <div class="modal-box member-dashboard-box">
+            <div class="member-dashboard-header">
+                <div>
+                    <span class="md-eyebrow">Your AJM workspace</span>
+                    <h3 id="md-title">Member Dashboard</h3>
+                    <p>Manage business webpages, advertising orders and campaign performance in one place.</p>
+                </div>
+                <div class="md-toolbar">
+                    <label for="md-performance-range">Analytics date range</label>
+                    <select id="md-performance-range" onchange="loadMyAdPerformance()">
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                        <option value="365">Last 365 days</option>
+                    </select>
+                    <button type="button" id="md-refresh-btn" onclick="refreshMemberDashboard()">↻ Refresh</button>
+                </div>
                 <button class="modal-close" onclick="closeModal('member-dashboard-modal')" aria-label="Close modal">×</button>
             </div>
-            <div class="modal-body" style="display:flex; flex-direction:column; gap:24px;">
-                <!-- Subscription Section -->
-                <div class="dashboard-section" style="background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:16px; padding:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <h4 style="margin:0 0 4px 0;">Subscription Plan</h4>
-                            <p style="margin:0; font-size:0.9rem; color:var(--muted);">Current Status: <strong id="md-sub-status" style="color:white;">Free Member</strong></p>
+            <div class="member-dashboard-body">
+                <div class="md-account-card">
+                    <div class="md-account-copy">
+                        <div class="md-account-heading">
+                            <h4 id="md-account-title">Checking your account</h4>
+                            <span id="md-sub-status" class="md-account-status">Loading</span>
                         </div>
-                        <button class="btn btn-primary" onclick="closeModal('member-dashboard-modal'); openAdvertiseModal();">Browse Paid Packages</button>
+                        <p class="md-account-detail" id="md-account-detail">Checking active webpage packages and advertising orders…</p>
+                    </div>
+                    <div class="md-account-actions">
+                        <button class="btn btn-ghost" type="button" onclick="closeModal('member-dashboard-modal'); handlePostListingClick();">＋ New listing</button>
+                        <button class="btn btn-primary" type="button" onclick="closeModal('member-dashboard-modal'); openAdvertiseModal();">Browse paid packages</button>
                     </div>
                 </div>
 
-                <div class="dashboard-section" style="background:rgba(77,163,255,.06); border:1px solid rgba(77,163,255,.24); border-radius:16px; padding:20px;">
-                    <h4 style="margin:0 0 10px;">How to upgrade a listing to a business webpage</h4>
-                    <ol style="margin:0;padding-left:20px;color:var(--muted);font-size:.86rem;line-height:1.7;">
-                        <li>Post a free directory listing, or choose an existing listing below.</li>
-                        <li>Select Silver, Gold or Platinum and create the order.</li>
-                        <li>Transfer the displayed amount to AJM and upload the payment receipt.</li>
-                        <li>AJM verifies payment and activates the package; the member receives an email.</li>
-                        <li>Use <strong style="color:#fff;">Build Webpage</strong> to add content, then publish. The live-page link appears after publishing.</li>
-                    </ol>
+                <div class="md-kpi-grid" aria-label="Account and advertising summary">
+                    <article class="md-kpi"><span class="md-kpi-label">Active webpages</span><strong class="md-kpi-value" id="md-kpi-webpages">—</strong><span class="md-kpi-note">Paid pages with current access</span></article>
+                    <article class="md-kpi"><span class="md-kpi-label">Live campaigns</span><strong class="md-kpi-value" id="md-kpi-campaigns">—</strong><span class="md-kpi-note">Currently delivering ads</span></article>
+                    <article class="md-kpi"><span class="md-kpi-label">Impressions</span><strong class="md-kpi-value" id="md-kpi-impressions">—</strong><span class="md-kpi-note md-period-note">Last 30 days</span></article>
+                    <article class="md-kpi"><span class="md-kpi-label">Clicks</span><strong class="md-kpi-value" id="md-kpi-clicks">—</strong><span class="md-kpi-note md-period-note">Last 30 days</span></article>
+                    <article class="md-kpi"><span class="md-kpi-label">Leads</span><strong class="md-kpi-value" id="md-kpi-leads">—</strong><span class="md-kpi-note md-period-note">Calls, chats, forms &amp; bookings</span></article>
+                    <article class="md-kpi"><span class="md-kpi-label">Click-through rate</span><strong class="md-kpi-value" id="md-kpi-ctr">—</strong><span class="md-kpi-note">Clicks ÷ impressions</span></article>
                 </div>
 
-                <!-- Active Ads Section -->
-                <div class="dashboard-section" style="background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:16px; padding:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <h4 style="margin:0;">My Listings / Ads</h4>
-                        <button class="btn btn-ghost" style="padding:6px 12px; font-size:0.85rem;" onclick="closeModal('member-dashboard-modal'); handlePostListingClick();">Post New Listing</button>
-                    </div>
-                    <div id="md-listings-container" style="overflow-x:auto;">
-                        <table style="width:100%; border-collapse:collapse; text-align:left;">
-                            <thead>
-                                <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--muted); font-size:0.85rem;">
-                                    <th style="padding:10px;">Business Name</th>
-                                    <th style="padding:10px;">Status</th>
-                                    <th style="padding:10px;">Type</th>
-                                    <th style="padding:10px;">Expires</th>
-                                    <th style="padding:10px;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="md-listings-tbody">
-                                <!-- Listings injected here -->
-                                <tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">Loading...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <div class="md-dashboard-grid">
+                    <div class="md-dashboard-column">
+                        <section class="md-panel" aria-labelledby="md-listings-heading">
+                            <div class="md-panel-header">
+                                <div>
+                                    <h4 id="md-listings-heading">Listings &amp; webpages</h4>
+                                    <p>See each listing’s approval, package, draft and publishing progress.</p>
+                                </div>
+                                <button class="btn btn-ghost" type="button" onclick="closeModal('member-dashboard-modal'); handlePostListingClick();">＋ Add listing</button>
+                            </div>
+                            <div class="md-panel-content">
+                                <div id="md-listings-grid" class="md-listing-grid" aria-live="polite">
+                                    <div class="md-empty">Loading your business listings…</div>
+                                </div>
+                            </div>
+                        </section>
 
-                <!-- Ad performance -->
-                <div class="dashboard-section" style="background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:16px; padding:20px;">
-                    <div style="margin-bottom:16px;">
-                        <h4 style="margin:0 0 4px;">Ad Performance</h4>
-                        <p style="margin:0; color:var(--muted); font-size:.82rem;">Views (impressions) and clicks recorded for each of your live advertisements.</p>
+                        <section class="md-panel" aria-labelledby="md-performance-heading">
+                            <div class="md-panel-header">
+                                <div>
+                                    <h4 id="md-performance-heading">Campaign performance</h4>
+                                    <p id="md-performance-period">Impressions and engagement from the last 30 days.</p>
+                                </div>
+                            </div>
+                            <div class="md-table-scroll">
+                                <table class="md-table">
+                                    <thead><tr><th>Advertisement</th><th>Placement</th><th>Status</th><th>Impressions</th><th>Clicks</th><th>Leads</th><th>CTR</th><th>Ends</th></tr></thead>
+                                    <tbody id="md-performance-tbody">
+                                        <tr><td colspan="8" class="md-table-empty">Loading campaign performance…</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
                     </div>
-                    <div style="overflow-x:auto;">
-                        <table style="width:100%; border-collapse:collapse; text-align:left;">
-                            <thead>
-                                <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--muted); font-size:0.8rem;">
-                                    <th style="padding:10px;">Advertisement</th>
-                                    <th style="padding:10px;">Placement</th>
-                                    <th style="padding:10px;">Status</th>
-                                    <th style="padding:10px;">Views</th>
-                                    <th style="padding:10px;">Clicks</th>
-                                    <th style="padding:10px;">Expires</th>
-                                </tr>
-                            </thead>
-                            <tbody id="md-performance-tbody">
-                                <tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">Open the dashboard to load your ad performance.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
-                <!-- Customer advertising orders -->
-                <div class="dashboard-section" style="background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:16px; padding:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px;">
-                        <div>
-                            <h4 style="margin:0 0 4px;">My Advertising Orders</h4>
-                            <p style="margin:0; color:var(--muted); font-size:.82rem;">Review payment, approval and campaign status.</p>
-                        </div>
-                        <button class="btn btn-primary" style="padding:8px 13px; font-size:.8rem;" onclick="closeModal('member-dashboard-modal'); openAdvertiseModal();">Place Ad</button>
-                    </div>
-                    <div style="overflow-x:auto;">
-                        <table style="width:100%; border-collapse:collapse; text-align:left;">
-                            <thead>
-                                <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--muted); font-size:0.8rem;">
-                                    <th style="padding:10px;">Order</th>
-                                    <th style="padding:10px;">Package</th>
-                                    <th style="padding:10px;">Status</th>
-                                    <th style="padding:10px;">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="md-orders-tbody">
-                                <tr><td colspan="4" style="text-align:center; padding:20px; color:var(--muted);">Open the dashboard to load your orders.</td></tr>
-                            </tbody>
-                        </table>
+                    <div class="md-dashboard-column">
+                        <section class="md-panel" aria-labelledby="md-orders-heading">
+                            <div class="md-panel-header">
+                                <div>
+                                    <h4 id="md-orders-heading">Orders &amp; payments</h4>
+                                    <p>Track bank-transfer review, activation and campaign status.</p>
+                                </div>
+                                <button class="btn btn-primary" type="button" onclick="closeModal('member-dashboard-modal'); openAdvertiseModal();">Place ad</button>
+                            </div>
+                            <div class="md-table-scroll">
+                                <table class="md-table">
+                                    <thead><tr><th>Order</th><th>Package</th><th>Status</th><th>Next step</th></tr></thead>
+                                    <tbody id="md-orders-tbody">
+                                        <tr><td colspan="4" class="md-table-empty">Loading orders…</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </div>
@@ -1976,7 +2294,7 @@
             'contact_phone', 'whatsapp', 'email', 'website', 'image_url', 'listing_type',
             'status', 'is_featured', 'created_at'
         ].join(',');
-        const MEMBER_LISTING_FIELDS = `${PUBLIC_LISTING_FIELDS},requested_tier,expires_at`;
+        const MEMBER_LISTING_FIELDS = `${PUBLIC_LISTING_FIELDS},owner_user_id,requested_tier,expires_at`;
         const listingCache = new Map();
         let webpageTableUnavailable = false;
         let webpageSubscriptionFieldsUnavailable = false;
@@ -2109,7 +2427,7 @@
 
                 ${webpage && canManageThisListing ? `<div style="background:rgba(255,207,51,.06); padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,207,51,.25); margin-bottom: 20px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
                     <span style="font-size:0.88rem; color:var(--text);">${webpage.page_status === 'published' ? `This listing's ${escHtml(tierLabel)} webpage is live.` : `This listing's ${escHtml(tierLabel)} webpage is paid and active, but the content is still a draft — nothing publishes until it's built and published.`}</span>
-                    <a href="ajm-webpage-builder.html?listing=${encodeURIComponent(l.id)}" class="btn btn-primary" style="padding:6px 12px;white-space:nowrap;">✎ Edit webpage content</a>
+                    <a href="ajm-webpage-builder?listing=${encodeURIComponent(l.id)}" class="btn btn-primary" style="padding:6px 12px;white-space:nowrap;">✎ Edit webpage content</a>
                 </div>` : ''}
 
                 <div style="display:flex; gap: 12px; flex-wrap:wrap; justify-content: flex-end; align-items:center; border-top: 1px solid var(--glass-border); padding-top:16px;">
@@ -2118,37 +2436,171 @@
                     ${l.whatsapp ? `<a href="#" data-consultation-listing="${escHtml(l.id)}" data-consultation-source="whatsapp" data-consultation-target="${escHtml(l.whatsapp.replace(/\D/g,''))}" data-close-modal="listing-details-modal" class="btn btn-ghost" style="border:1px solid var(--green); color:var(--green); padding:6px 12px;">💬 WhatsApp</a>` : ''}
                     ${l.email ? `<a href="#" data-consultation-listing="${escHtml(l.id)}" data-consultation-source="email" data-consultation-target="${escHtml(l.email)}" data-close-modal="listing-details-modal" class="btn btn-ghost" style="border:1px solid var(--blue); color:var(--blue); padding:6px 12px;">✉️ Email</a>` : ''}
                     ${websiteUrl ? `<a href="${escHtml(websiteUrl)}" target="_blank" rel="noopener" class="btn btn-primary" style="padding:6px 12px;">🌐 Visit Website</a>` : ''}
-                    ${webpage?.page_status === 'published' ? `<a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" class="btn btn-primary" style="padding:6px 12px;background:linear-gradient(135deg,var(--yellow),var(--green));">View AJM Webpage</a>` : ''}
+                    ${webpage?.page_status === 'published' ? `<a href="ajm-business-page?listing=${encodeURIComponent(l.id)}" class="btn btn-primary" style="padding:6px 12px;background:linear-gradient(135deg,var(--yellow),var(--green));">View AJM Webpage</a>` : ''}
                 </div>
             `;
             openModal('listing-details-modal');
         };
 
+        function memberActiveWebpageSubscription(listing) {
+            return [...(listing?.ad_subscriptions || [])]
+                .filter((subscription) => {
+                    const current = !subscription.expires_at || new Date(subscription.expires_at) > new Date();
+                    return subscription.status === 'active' && current && subscription.ad_packages?.webpage_enabled;
+                })
+                .sort((a, b) => new Date(b.expires_at || 8640000000000000) - new Date(a.expires_at || 8640000000000000))[0] || null;
+        }
+
+        function memberDate(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function renderMemberListingWorkflows(listings) {
+            const grid = document.getElementById('md-listings-grid');
+            if (!grid) return;
+            if (!listings.length) {
+                grid.innerHTML = '<div class="md-empty"><strong>No business listings yet</strong>Post a free listing first, then upgrade it to a managed AJM webpage whenever you are ready.</div>';
+                return;
+            }
+
+            grid.innerHTML = listings.map((listing) => {
+                const webpage = Array.isArray(listing.listing_webpages) ? listing.listing_webpages[0] : listing.listing_webpages;
+                const subscription = memberActiveWebpageSubscription(listing);
+                const isPublished = webpage?.page_status === 'published';
+                const canUpgrade = ['approved', 'pending'].includes(listing.status);
+                const listingExpiry = listing.expires_at ? new Date(listing.expires_at) : null;
+                const listingLapsed = listing.status === 'expired' || Boolean(listingExpiry && listingExpiry <= new Date());
+                const listingExpiresSoon = listingExpiry && !listingLapsed && listingExpiry - new Date() < 7 * 24 * 60 * 60 * 1000;
+                const statusClass = listing.status === 'approved' ? 'success' : listing.status === 'pending' ? 'warning' : 'danger';
+                const tier = subscription?.ad_packages?.webpage_tier || listing.requested_tier || '';
+                const packageName = subscription?.ad_packages?.name || (tier ? `${tier} webpage` : '');
+                const expiry = subscription?.expires_at || listing.expires_at;
+                const listingState = listing.status === 'approved' ? 'complete' : 'current';
+                const packageState = subscription ? 'complete' : listing.status === 'approved' ? 'current' : '';
+                const draftState = isPublished ? 'complete' : subscription ? 'current' : '';
+                const liveState = isPublished ? 'complete' : '';
+                const workflowNote = isPublished
+                    ? `Webpage live${expiry ? ` · package ends ${memberDate(expiry)}` : ''}`
+                    : subscription
+                        ? `Package active${expiry ? ` until ${memberDate(expiry)}` : ''} · ${webpage ? 'continue your draft and publish' : 'start the webpage draft'}`
+                        : listing.status === 'pending'
+                            ? 'Listing review is pending; a webpage package can still be ordered now.'
+                            : listing.status === 'approved'
+                                ? 'Directory listing is live. Choose a package to build a business webpage.'
+                                : 'Renew or resolve this listing before publishing a webpage.';
+
+                let primaryAction;
+                if (subscription) {
+                    primaryAction = `<a class="btn btn-primary" href="ajm-webpage-builder?listing=${encodeURIComponent(listing.id)}">${isPublished ? 'Edit webpage' : webpage ? 'Continue draft' : 'Start webpage'}</a>`;
+                } else if (listingLapsed) {
+                    primaryAction = `<button type="button" class="btn btn-primary" data-renew-listing="${escHtml(listing.id)}">Renew listing</button>`;
+                } else if (canUpgrade) {
+                    primaryAction = `<button type="button" class="btn btn-primary" data-upgrade-webpage="${escHtml(listing.id)}" data-preferred-tier="${escHtml(listing.requested_tier || 'silver')}">Choose webpage plan</button>`;
+                } else {
+                    primaryAction = `<button type="button" class="btn btn-ghost" data-open-listing-id="${escHtml(listing.id)}" data-close-modal="member-dashboard-modal">View listing</button>`;
+                }
+
+                const secondaryAction = isPublished
+                    ? `<a class="md-text-action" href="ajm-business-page?listing=${encodeURIComponent(listing.id)}" target="_blank" rel="noopener">Open live page ↗</a>`
+                    : webpage
+                        ? `<a class="md-text-action" href="ajm-business-page?listing=${encodeURIComponent(listing.id)}&preview=1" target="_blank" rel="noopener">Preview saved draft ↗</a>`
+                        : `<button type="button" class="md-text-action" data-open-listing-id="${escHtml(listing.id)}" data-close-modal="member-dashboard-modal">View listing details</button>`;
+                const renewAction = listing.status === 'approved' && listingExpiresSoon && !listingLapsed
+                    ? `<button type="button" class="md-text-action" data-renew-listing="${escHtml(listing.id)}">Renew free listing</button>`
+                    : '';
+
+                return `<article class="md-listing-card">
+                    <div>
+                        <h5 class="md-listing-name">${escHtml(listing.business_name || 'Untitled business')}</h5>
+                        <div class="md-listing-meta">
+                            <span class="md-chip ${statusClass}">${escHtml(listing.status || 'unknown')}</span>
+                            ${packageName ? `<span class="md-chip ${subscription ? 'warning' : ''}">${escHtml(packageName)}</span>` : '<span class="md-chip">Free directory</span>'}
+                            ${expiry ? `<span class="md-chip">${subscription ? 'Package' : 'Listing'} to ${escHtml(memberDate(expiry))}</span>` : ''}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="md-workflow" aria-label="Webpage progress">
+                            <span class="md-workflow-step ${listingState}">Listing</span>
+                            <span class="md-workflow-step ${packageState}">Package</span>
+                            <span class="md-workflow-step ${draftState}">Draft</span>
+                            <span class="md-workflow-step ${liveState}">Live</span>
+                        </div>
+                        <p class="md-workflow-note">${escHtml(workflowNote)}</p>
+                    </div>
+                    <div class="md-listing-actions">${primaryAction}${secondaryAction}${renewAction}</div>
+                </article>`;
+            }).join('');
+        }
+
+        function updateMemberAccountSummary(listings, orders) {
+            const activeSubscriptions = listings
+                .map((listing) => ({ listing, subscription: memberActiveWebpageSubscription(listing) }))
+                .filter((entry) => entry.subscription);
+            const activeWebpageOrderListings = new Set(activeSubscriptions.map((entry) => entry.listing.id));
+            (orders || []).forEach((order) => {
+                const current = !order.expires_at || new Date(order.expires_at) > new Date();
+                if (order.product_type_snapshot === 'webpage' && order.status === 'approved' && current && order.listing_id) {
+                    activeWebpageOrderListings.add(order.listing_id);
+                }
+            });
+            const liveDisplayOrders = (orders || []).filter((order) => {
+                const current = !order.expires_at || new Date(order.expires_at) > new Date();
+                return order.product_type_snapshot === 'display_ad' && order.status === 'approved' && current;
+            });
+            const pendingOrders = (orders || []).filter((order) => ['pending_payment', 'payment_submitted'].includes(order.status));
+            const webpageCount = activeWebpageOrderListings.size;
+            const status = document.getElementById('md-sub-status');
+            const title = document.getElementById('md-account-title');
+            const detail = document.getElementById('md-account-detail');
+            document.getElementById('md-kpi-webpages').textContent = webpageCount.toLocaleString();
+
+            if (webpageCount || liveDisplayOrders.length) {
+                status.textContent = 'Paid access active';
+                status.className = 'md-account-status active';
+                const packageLabels = [...new Set(activeSubscriptions.map(({ subscription }) => subscription.ad_packages?.name).filter(Boolean))];
+                title.textContent = webpageCount === 1 && packageLabels.length === 1 ? `${packageLabels[0]} active` : 'Your paid advertising is active';
+                const parts = [];
+                if (webpageCount) parts.push(`${webpageCount} active business webpage${webpageCount === 1 ? '' : 's'}`);
+                if (liveDisplayOrders.length) parts.push(`${liveDisplayOrders.length} live campaign${liveDisplayOrders.length === 1 ? '' : 's'}`);
+                if (pendingOrders.length) parts.push(`${pendingOrders.length} order${pendingOrders.length === 1 ? '' : 's'} awaiting action`);
+                detail.textContent = `${parts.join(' · ')}. Use the cards below for the next step on each listing or order.`;
+            } else if (pendingOrders.length) {
+                status.textContent = 'Upgrade in progress';
+                status.className = 'md-account-status pending';
+                title.textContent = `${pendingOrders.length} paid order${pendingOrders.length === 1 ? '' : 's'} in progress`;
+                detail.textContent = 'Complete the bank transfer or wait for AJM to review the submitted payment proof.';
+            } else {
+                status.textContent = 'Free member';
+                status.className = 'md-account-status';
+                title.textContent = 'Your free directory account';
+                detail.textContent = listings.length
+                    ? 'Your directory listings remain available. Choose a webpage or display-ad package whenever you are ready to promote one.'
+                    : 'Post your first free business listing, then choose a paid webpage or advertising package when you are ready.';
+            }
+        }
+
         window.openMemberDashboard = async function() {
             if (!currentUser) return;
             openModal('member-dashboard-modal');
-            if (typeof window.loadMyAdOrders === 'function') {
-                window.loadMyAdOrders(true);
-            }
-            if (typeof window.loadMyAdPerformance === 'function') {
-                window.loadMyAdPerformance();
-            }
-            
-            const role = currentProfile?.role || 'member';
-            const statusEl = document.getElementById('md-sub-status');
-            if (role === 'admin') {
-                statusEl.textContent = 'Administrator';
-                statusEl.style.color = 'var(--yellow)';
-            } else if (role === 'subscriber') {
-                statusEl.textContent = 'Active Subscriber';
-                statusEl.style.color = 'var(--green)';
-            } else {
-                statusEl.textContent = 'Free Member';
-                statusEl.style.color = 'white';
-            }
+            const grid = document.getElementById('md-listings-grid');
+            grid.innerHTML = '<div class="md-empty">Loading your business listings…</div>';
+            document.getElementById('md-account-title').textContent = 'Checking your account';
+            document.getElementById('md-account-detail').textContent = 'Checking active webpage packages and advertising orders…';
+            document.getElementById('md-sub-status').textContent = 'Loading';
+            document.getElementById('md-sub-status').className = 'md-account-status';
+            ['webpages', 'campaigns', 'impressions', 'clicks', 'leads', 'ctr'].forEach((key) => {
+                document.getElementById(`md-kpi-${key}`).textContent = '—';
+            });
 
-            const tbody = document.getElementById('md-listings-tbody');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">Loading...</td></tr>';
+            const ordersPromise = typeof window.loadMyAdOrders === 'function'
+                ? window.loadMyAdOrders(true)
+                : Promise.resolve([]);
+            const performancePromise = typeof window.loadMyAdPerformance === 'function'
+                ? window.loadMyAdPerformance()
+                : Promise.resolve([]);
+            let listings = [];
 
             try {
                 const { data, error } = await supabase
@@ -2156,75 +2608,34 @@
                     .select(MEMBER_LISTING_FIELDS)
                     .eq('owner_user_id', currentUser.id)
                     .order('created_at', { ascending: false });
-
                 if (error) throw error;
 
+                listings = data || [];
                 await Promise.all([
-                    attachOptionalWebpages(data || []),
-                    attachOptionalSubscriptions(data || [])
+                    attachOptionalWebpages(listings),
+                    attachOptionalSubscriptions(listings)
                 ]);
-                cacheListings(data || []);
+                cacheListings(listings);
+                renderMemberListingWorkflows(listings);
+            } catch (error) {
+                console.error(error);
+                grid.innerHTML = '<div class="md-empty" style="color:#ff9aaa;"><strong>Listings could not be loaded</strong>Please refresh the dashboard or sign in again.</div>';
+            }
 
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">You have no active or pending ads.</td></tr>';
-                    return;
-                }
+            const [orders] = await Promise.all([ordersPromise, performancePromise]);
+            updateMemberAccountSummary(listings, Array.isArray(orders) ? orders : []);
+        };
 
-                tbody.innerHTML = data.map(l => {
-                    const webpage = Array.isArray(l.listing_webpages) ? l.listing_webpages[0] : l.listing_webpages;
-                    const activeSubscription = (l.ad_subscriptions || []).find((subscription) => {
-                        const active = subscription.status === 'active';
-                        const current = !subscription.expires_at || new Date(subscription.expires_at) > new Date();
-                        return active && current && subscription.ad_packages?.webpage_enabled;
-                    });
-                    const canUpgradeListing = ['approved', 'pending'].includes(l.status);
-                    let statusHtml = '';
-                    if (l.status === 'approved') statusHtml = '<span class="listing-badge" style="background:rgba(23,214,111,0.15);color:var(--green);font-size:0.75rem;padding:4px 8px;">Approved</span>';
-                    else if (l.status === 'pending') statusHtml = '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);font-size:0.75rem;padding:4px 8px;">Pending</span>';
-                    else statusHtml = `<span class="listing-badge" style="background:rgba(255,51,51,0.15);color:var(--red);font-size:0.75rem;padding:4px 8px;">${escHtml(l.status)}</span>`;
-
-                    let typeHtml = '';
-                    if (activeSubscription) typeHtml = `<span style="color:var(--yellow);font-size:0.85rem;text-transform:capitalize;">${escHtml(activeSubscription.ad_packages?.webpage_tier || 'Paid')} Webpage</span>`;
-                    else if (l.requested_tier) typeHtml = `<span style="color:var(--muted);font-size:0.85rem;text-transform:capitalize;">${escHtml(l.requested_tier)} Requested</span>`;
-                    else if (l.is_featured) typeHtml = '<span style="color:var(--yellow);font-size:0.85rem;">Featured</span>';
-                    else typeHtml = '<span style="color:var(--muted);font-size:0.85rem;">Free Directory</span>';
-
-                    const expiresAt = l.expires_at ? new Date(l.expires_at) : null;
-                    const isLapsed = expiresAt ? expiresAt <= new Date() : false;
-                    const expiresSoon = expiresAt ? !isLapsed && (expiresAt - new Date()) < 7 * 24 * 60 * 60 * 1000 : false;
-                    let expiresHtml = '<span style="color:var(--muted);font-size:0.8rem;">—</span>';
-                    if (expiresAt) {
-                        expiresHtml = `<span style="color:${isLapsed ? 'var(--red)' : expiresSoon ? 'var(--yellow)' : 'var(--muted)'};font-size:0.8rem;">${isLapsed ? 'Expired' : 'Expires'} ${expiresAt.toLocaleDateString()}</span>`;
-                    }
-                    if (['approved', 'expired'].includes(l.status) && (isLapsed || expiresSoon || l.status === 'expired')) {
-                        expiresHtml += `<br><button type="button" data-renew-listing="${escHtml(l.id)}" style="border:0;padding:0;margin-top:2px;background:none;color:var(--green);font:inherit;font-size:.78rem;cursor:pointer;text-decoration:underline;">Renew free listing (30 days)</button>`;
-                    }
-
-                    return `
-                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                            <td style="padding:12px 10px;"><strong>${escHtml(l.business_name)}</strong></td>
-                            <td style="padding:12px 10px;">${statusHtml}</td>
-                            <td style="padding:12px 10px;">${typeHtml}</td>
-                            <td style="padding:12px 10px;">${expiresHtml}</td>
-                            <td style="padding:12px 10px;">
-                                <a href="#" data-open-listing-id="${escHtml(l.id)}" data-close-modal="member-dashboard-modal" style="color:var(--blue); font-size:0.85rem;">View</a>
-                                ${activeSubscription
-                                    ? `<br><a href="ajm-webpage-builder.html?listing=${encodeURIComponent(l.id)}" style="color:var(--yellow);font-size:0.85rem;">${webpage ? 'Edit Webpage' : 'Start Webpage'}</a>`
-                                    : canUpgradeListing
-                                        ? `<br><button type="button" data-upgrade-webpage="${escHtml(l.id)}" data-preferred-tier="${escHtml(l.requested_tier || 'silver')}" style="border:0;padding:0;background:none;color:var(--yellow);font:inherit;font-size:.85rem;cursor:pointer;">Upgrade to Webpage</button>`
-                                        : '<br><span style="color:var(--muted);font-size:.76rem;">Listing approval required</span>'}
-                                ${webpage?.page_status === 'published'
-                                    ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" target="_blank" rel="noopener" style="color:var(--green);font-size:0.85rem;">Open Live Page</a>`
-                                    : webpage
-                                        ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}&preview=1" target="_blank" rel="noopener" style="color:var(--blue);font-size:.85rem;">Preview Saved Draft</a>`
-                                        : activeSubscription ? '<br><span style="color:var(--muted);font-size:.76rem;">Save a draft in the builder to enable preview</span>' : ''}
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            } catch (err) {
-                console.error(err);
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--red);">Failed to load listings.</td></tr>';
+        window.refreshMemberDashboard = async function() {
+            const button = document.getElementById('md-refresh-btn');
+            if (!button || button.disabled) return;
+            button.disabled = true;
+            button.textContent = '↻ Refreshing…';
+            try {
+                await window.openMemberDashboard();
+            } finally {
+                button.disabled = false;
+                button.textContent = '↻ Refresh';
             }
         };
 
@@ -2852,7 +3263,7 @@
                         ${l.email ? `<a href="#" data-consultation-listing="${escHtml(l.id)}" data-consultation-source="email" data-consultation-target="${escHtml(l.email)}" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Email</a>` : ''}
                         ${websiteUrl ? `<a href="${escHtml(websiteUrl)}" target="_blank" rel="noopener" class="btn btn-ghost" style="padding: 6px 16px; font-size: 0.85rem; border-color: rgba(255,255,255,0.1); width: 100%; text-align: center;">Website</a>` : ''}
                         ${l.whatsapp ? `<a href="#" data-consultation-listing="${escHtml(l.id)}" data-consultation-source="whatsapp" data-consultation-target="${escHtml(l.whatsapp.replace(/\D/g,''))}" class="btn btn-primary" style="padding: 6px 16px; font-size: 0.85rem; width: 100%; text-align: center;">WhatsApp</a>` : ''}
-                        ${webpage?.page_status === 'published' ? `<a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" class="btn btn-primary" style="padding:6px 16px;font-size:.85rem;width:100%;text-align:center;background:linear-gradient(135deg,var(--yellow),var(--green));">Business Webpage</a>` : ''}
+                        ${webpage?.page_status === 'published' ? `<a href="ajm-business-page?listing=${encodeURIComponent(l.id)}" class="btn btn-primary" style="padding:6px 16px;font-size:.85rem;width:100%;text-align:center;background:linear-gradient(135deg,var(--yellow),var(--green));">Business Webpage</a>` : ''}
                     </div>
                 </div>
             `;
@@ -2867,7 +3278,7 @@
                         ${l.image_url ? `<img src="${escHtml(l.image_url)}" alt="Logo" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: var(--glass-bg); border: 1px solid var(--glass-border);">` : `<div style="width: 48px; height: 48px; border-radius: 6px; flex-shrink: 0; background: var(--glass-bg); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.2rem;">🏢</div>`}
                         <div>
                             <strong>${escHtml(l.business_name)}</strong>${l.status === 'pending' ? ' <span style="font-size:0.7rem;color:var(--yellow);">(pending)</span>' : ''}
-                            ${webpage?.page_status === 'published' ? `<br><a href="ajm-business-page.html?listing=${encodeURIComponent(l.id)}" style="font-size:.74rem;color:var(--yellow);text-transform:capitalize;">${escHtml(webpage.tier)} Webpage</a>` : ''}
+                            ${webpage?.page_status === 'published' ? `<br><a href="ajm-business-page?listing=${encodeURIComponent(l.id)}" style="font-size:.74rem;color:var(--yellow);text-transform:capitalize;">${escHtml(webpage.tier)} Webpage</a>` : ''}
                         </div>
                     </td>
                     <td>${escHtml(l.subcategory || formatCategory(l.category) || '—')}</td>
@@ -3649,6 +4060,15 @@
                     <select id="adv-listing-select"><option value="">Select your listing</option></select>
                     <small>A paid webpage must be attached to a listing you own.</small>
                 </div>
+                <div class="adv-field">
+                    <label for="adv-webpage-promotion-style">How should the webpage be promoted? *</label>
+                    <select id="adv-webpage-promotion-style">
+                        <option value="native">Native card — balanced and unobtrusive</option>
+                        <option value="banner">Banner — stronger horizontal feature</option>
+                        <option value="spotlight">Spotlight — dismissible, frequency-capped notice</option>
+                    </select>
+                    <small>This starts after AJM approves the payment and publishes the starter page. You can change it later in the webpage builder.</small>
+                </div>
                 <div id="adv-no-listings" class="adv-alert info">You need an approved or pending directory listing before ordering a business webpage. Close this window and choose “Post Listing” first.</div>
             </div>
 
@@ -3955,6 +4375,7 @@
         advEl('adv-selected-pkg-name').textContent = advSelectedPkg.name || 'Advertising package';
         advEl('adv-selected-pkg-price').textContent = `${advMoney(advSelectedPkg.price, advSelectedPkg.currency)} for ${advSelectedPkg.duration_days} days`;
         advEl('adv-customer-notes').value = '';
+        advEl('adv-webpage-promotion-style').value = 'native';
         ['adv-headline', 'adv-body-text', 'adv-cta-label', 'adv-cta-url'].forEach((id) => { if (advEl(id)) advEl(id).value = ''; });
         if (advEl('adv-creative-file')) advEl('adv-creative-file').value = '';
         renderAdvOptions();
@@ -4124,19 +4545,24 @@
     async function loadDeliveredAds(placement, containerId, limit) {
         const container = advEl(containerId);
         if (!container) return;
-        const { data, error } = await sb.rpc('get_active_advertisements', {
-            p_placement: placement,
+        const placements = Array.isArray(placement) ? placement : [placement];
+        const results = await Promise.all(placements.map((name) => sb.rpc('get_active_advertisements', {
+            p_placement: name,
             p_limit: limit
+        })));
+        results.forEach(({ error }, index) => {
+            if (error) console.warn(`Could not load ${placements[index]} advertisements:`, error.message);
         });
-        if (error) {
-            console.warn(`Could not load ${placement} advertisements:`, error.message);
-            renderDeliveredAdFallback(container, placement === 'hub-sidebar');
-            return;
+        const pools = results.map(({ data }) => Array.isArray(data?.advertisements) ? data.advertisements : []);
+        const interleaved = [];
+        const poolSize = Math.max(0, ...pools.map((pool) => pool.length));
+        for (let index = 0; index < poolSize; index += 1) {
+            pools.forEach((pool) => { if (pool[index]) interleaved.push(pool[index]); });
         }
-        const advertisements = Array.isArray(data?.advertisements) ? data.advertisements : [];
+        const advertisements = [...new Map(interleaved.map((ad) => [ad.id, ad])).values()].slice(0, limit);
         container.textContent = '';
         if (!advertisements.length) {
-            renderDeliveredAdFallback(container, placement === 'hub-sidebar');
+            renderDeliveredAdFallback(container, placements.includes('hub-sidebar'));
             return;
         }
         advertisements.forEach((ad) => container.appendChild(buildDeliveredAd(ad)));
@@ -4144,7 +4570,7 @@
 
     async function loadHubAdvertisements() {
         await Promise.all([
-            loadDeliveredAds('directory-featured', 'directory-featured-ads', 4),
+            loadDeliveredAds(['directory-featured', 'webpage-network'], 'directory-featured-ads', 4),
             loadDeliveredAds('hub-sidebar', 'hub-sidebar-ads', 4)
         ]);
     }
@@ -4163,6 +4589,9 @@
         if (advSelectedPkg.product_type === 'webpage') {
             configuration.listingId = advEl('adv-listing-select').value || null;
             if (!configuration.listingId) throw new Error('Select the business listing for this webpage package.');
+            const promotionStyle = advEl('adv-webpage-promotion-style').value;
+            if (!['native', 'banner', 'spotlight'].includes(promotionStyle)) throw new Error('Choose a valid webpage promotion format.');
+            configuration.creative = { promotion_style: promotionStyle };
             return configuration;
         }
 
@@ -4396,7 +4825,7 @@
                 <td style="padding:11px 10px;">${canPay
                     ? `<button type="button" class="btn btn-ghost" data-adv-resume-order="${advEscape(order.id)}" style="padding:6px 10px;font-size:.75rem;">${order.status === 'payment_submitted' ? 'View payment' : 'Pay / upload proof'}</button>`
                     : canBuild
-                        ? `<a class="btn btn-ghost" href="ajm-webpage-builder.html?listing=${encodeURIComponent(order.listing_id)}" style="padding:6px 10px;font-size:.75rem;">Open builder</a>`
+                        ? `<a class="btn btn-ghost" href="ajm-webpage-builder?listing=${encodeURIComponent(order.listing_id)}" style="padding:6px 10px;font-size:.75rem;">Open builder</a>`
                         : '<span style="color:var(--muted);font-size:.75rem;">—</span>'}</td>
             </tr>`;
         }).join('');
@@ -4434,18 +4863,28 @@
         const tbody = advEl('md-performance-tbody');
         if (!tbody) return;
         if (!rows.length) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No live advertisements yet. Views and clicks appear here once an order is approved.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="md-table-empty">No delivery yet. Publish an active paid webpage or activate a display campaign to begin collecting engagement.</td></tr>';
             return;
         }
         tbody.innerHTML = rows.map((row) => {
             const expires = row.expires_at ? new Date(row.expires_at).toLocaleDateString() : '—';
-            return `<tr style="border-bottom:1px solid rgba(255,255,255,.06);">
-                <td style="padding:11px 10px;"><strong>${advEscape(row.headline || row.business_name || row.package_name || 'Advertisement')}</strong><br><small style="color:var(--muted);">${advEscape(row.order_number || '')}</small></td>
-                <td style="padding:11px 10px;">${advEscape(row.placement)}</td>
-                <td style="padding:11px 10px;"><span class="adv-status ${advStatusClass(row.status)}">${advEscape(row.status)}</span></td>
-                <td style="padding:11px 10px;">${Number(row.impressions || 0).toLocaleString()}</td>
-                <td style="padding:11px 10px;">${Number(row.clicks || 0).toLocaleString()}</td>
-                <td style="padding:11px 10px;color:var(--muted);">${advEscape(expires)}</td>
+            const impressions = Number(row.impressions || 0);
+            const clicks = Number(row.clicks || 0);
+            const leads = Number(row.leads || 0);
+            const ctr = Number.isFinite(Number(row.ctr)) ? Number(row.ctr) : impressions ? (100 * clicks / impressions) : 0;
+            const placement = row.placement === 'webpage-network'
+                ? `USSE network · ${String(row.format || 'native').replace(/_/g, ' ')}`
+                : String(row.placement || 'Campaign').replace(/-/g, ' ');
+            const reference = row.order_number || (row.product_type === 'webpage' ? 'Paid webpage promotion' : row.package_name || '');
+            return `<tr>
+                <td data-label="Advertisement"><strong>${advEscape(row.headline || row.business_name || row.package_name || 'Advertisement')}</strong><br><small>${advEscape(reference)}</small></td>
+                <td data-label="Placement">${advEscape(placement)}</td>
+                <td data-label="Status"><span class="adv-status ${advStatusClass(row.status)}">${advEscape(advStatusLabel(row.status))}</span></td>
+                <td data-label="Impressions">${impressions.toLocaleString()}</td>
+                <td data-label="Clicks">${clicks.toLocaleString()}</td>
+                <td data-label="Leads">${leads.toLocaleString()}</td>
+                <td data-label="CTR">${ctr.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%</td>
+                <td data-label="Ends" style="color:var(--muted);">${advEscape(expires)}</td>
             </tr>`;
         }).join('');
     }
@@ -4457,15 +4896,26 @@
             advCurrentUser = session?.user || null;
         }
         if (!advCurrentUser) {
-            if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Sign in to view ad performance.</td></tr>';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="md-table-empty">Sign in to view ad performance.</td></tr>';
             return [];
         }
-        if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Loading…</td></tr>';
-        const { data, error } = await sb.rpc('get_my_ad_performance');
+        const days = Math.max(1, Math.min(3650, Number(advEl('md-performance-range')?.value || 30)));
+        const periodLabel = `Last ${days} days`;
+        advEl('md-performance-period').textContent = `Impressions and engagement from the last ${days} days.`;
+        document.querySelectorAll('.md-period-note').forEach((note) => { note.textContent = periodLabel; });
+        if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="md-table-empty">Loading campaign performance…</td></tr>';
+        const { data, error } = await sb.rpc('get_my_ad_performance', { p_days: days });
         if (error) {
-            if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#ff9aaa;">${advEscape(advFriendlyError(error, 'Ad performance could not be loaded.'))}</td></tr>`;
+            if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="md-table-empty" style="color:#ff9aaa;">${advEscape(advFriendlyError(error, 'Ad performance could not be loaded.'))}</td></tr>`;
             return [];
         }
+        const kpis = data?.kpis && typeof data.kpis === 'object' ? data.kpis : {};
+        advEl('md-kpi-webpages').textContent = Number(kpis.active_webpages || 0).toLocaleString();
+        advEl('md-kpi-campaigns').textContent = Number(kpis.live_campaigns || 0).toLocaleString();
+        advEl('md-kpi-impressions').textContent = Number(kpis.impressions || 0).toLocaleString();
+        advEl('md-kpi-clicks').textContent = Number(kpis.clicks || 0).toLocaleString();
+        advEl('md-kpi-leads').textContent = Number(kpis.leads || 0).toLocaleString();
+        advEl('md-kpi-ctr').textContent = `${Number(kpis.ctr || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%`;
         const rows = Array.isArray(data?.advertisements) ? data.advertisements : [];
         renderMyAdPerformance(rows);
         return rows;

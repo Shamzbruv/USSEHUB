@@ -1,6 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 import ws from 'ws';
+import { fileURLToPath } from 'url';
 globalThis.WebSocket = ws;
+
+const root = path.dirname(fileURLToPath(import.meta.url));
+const envPath = path.join(root, '.env');
+if (fs.existsSync(envPath)) {
+  for (const rawLine of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const match = rawLine.trim().match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+    if (!match || process.env[match[1]]) continue;
+    let value = match[2].trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
+    process.env[match[1]] = value;
+  }
+}
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
@@ -61,7 +76,13 @@ async function runTests() {
   }
 
   console.log('RLS tests complete.');
-  
+
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY is unavailable; skipping sign-up tests so no disposable user is left behind.');
+    if (failed) process.exitCode = 1;
+    return;
+  }
+
   console.log('Testing authenticated RLS rules...');
   const testEmail = `test_${Date.now()}@example.com`;
   const { data: authData, error: authErr } = await supabase.auth.signUp({
@@ -97,17 +118,13 @@ async function runTests() {
       failed = true;
     }
     // Test cleanup
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.log('Cleaning up test user...');
-      const adminSupabase = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-      const { error: deleteErr } = await adminSupabase.auth.admin.deleteUser(userId);
-      if (deleteErr) {
-        console.error('⚠️ Could not clean up test user:', deleteErr.message);
-      } else {
-        console.log('✅ Test user cleaned up successfully.');
-      }
+    console.log('Cleaning up test user...');
+    const adminSupabase = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    const { error: deleteErr } = await adminSupabase.auth.admin.deleteUser(userId);
+    if (deleteErr) {
+      console.error('⚠️ Could not clean up test user:', deleteErr.message);
     } else {
-      console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY not provided. Skipping test user cleanup.');
+      console.log('✅ Test user cleaned up successfully.');
     }
   }
 
@@ -116,4 +133,7 @@ async function runTests() {
   }
 }
 
-runTests();
+runTests().catch((error) => {
+  console.error('❌ RLS test failed:', error.message);
+  process.exitCode = 1;
+});

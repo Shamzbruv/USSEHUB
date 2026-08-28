@@ -2875,12 +2875,22 @@
     async function renderLiveHomepageAds() {
         const grid = document.getElementById('homepage-ad-grid');
         if (!grid) return;
-        const { data, error } = await adSupabase.rpc('get_active_advertisements', {
-            p_placement: 'homepage',
-            p_limit: 6
-        });
-        const ads = Array.isArray(data) ? data : (data?.advertisements || []);
-        if (error || !ads.length) {
+        const [homepageResult, webpageResult] = await Promise.all([
+            adSupabase.rpc('get_active_advertisements', { p_placement: 'homepage', p_limit: 6 }),
+            adSupabase.rpc('get_active_advertisements', { p_placement: 'webpage-network', p_limit: 6 })
+        ]);
+        const homepageAds = Array.isArray(homepageResult.data) ? homepageResult.data : (homepageResult.data?.advertisements || []);
+        const webpageAds = Array.isArray(webpageResult.data) ? webpageResult.data : (webpageResult.data?.advertisements || []);
+        // Keep premium homepage inventory prominent while reserving network
+        // space for paid webpages so they cannot be starved by a full pool.
+        const combined = [
+            ...homepageAds.slice(0, 4),
+            ...webpageAds.slice(0, 2),
+            ...homepageAds.slice(4),
+            ...webpageAds.slice(2)
+        ];
+        const ads = [...new Map(combined.map((ad) => [ad.id, ad])).values()].slice(0, 6);
+        if (!ads.length) {
             renderAdPlaceholder(grid);
             return;
         }

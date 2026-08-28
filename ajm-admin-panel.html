@@ -1469,8 +1469,8 @@
         document.getElementById('webpage-market-segment').value = listing.market_segment || 'local-business';
         document.getElementById('webpage-duration').value = '30';
         document.getElementById('webpage-payment-reference').value = '';
-        document.getElementById('admin-webpage-builder-link').dataset.target = `ajm-webpage-builder.html?listing=${encodeURIComponent(listing.id)}`;
-        document.getElementById('admin-live-webpage-link').dataset.target = `ajm-business-page.html?listing=${encodeURIComponent(listing.id)}&preview=1`;
+        document.getElementById('admin-webpage-builder-link').dataset.target = `ajm-webpage-builder?listing=${encodeURIComponent(listing.id)}`;
+        document.getElementById('admin-live-webpage-link').dataset.target = `ajm-business-page?listing=${encodeURIComponent(listing.id)}&preview=1`;
         const status = document.getElementById('webpage-package-status');
         status.textContent = 'Checking current access…';
         document.getElementById('webpage-package-summary').textContent = 'Loading current package price, duration and payment readiness…';
