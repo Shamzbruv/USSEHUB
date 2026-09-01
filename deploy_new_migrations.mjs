@@ -45,7 +45,8 @@ const migrations = [
     '20260728000002_webpage_segment_sync.sql',
     '20260824000000_order_admin_and_listing_lifecycle.sql',
     '20260824000001_listing_approval_expiry_trigger.sql',
-    '20260827175628_paid_webpage_promotion_analytics.sql'
+    '20260827175628_paid_webpage_promotion_analytics.sql',
+    '20260831000000_fix_starter_hero_image_zoom.sql'
 ];
 
 if (!databaseUrl) {

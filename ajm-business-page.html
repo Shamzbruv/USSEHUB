@@ -471,11 +471,19 @@
             setText('lead-business-name', listing.business_name);
             setText('tier-badge', `AJM ${tier[0].toUpperCase() + tier.slice(1)} ${tier === 'platinum' ? 'Premier Partner' : tier === 'gold' ? 'Verified Member' : 'Member'}`);
 
-            const heroUrl = safeUrl(webpage.hero_media_url || webpage.gallery_urls?.[0] || listing.image_url);
-            if (heroUrl) { el('hero-image').src = heroUrl; el('hero-image').alt = listing.business_name; show('hero-image'); }
             const logoUrl = safeUrl(webpage.logo_url || listing.image_url);
             if (logoUrl) { el('business-logo').src = logoUrl; el('business-logo').alt = `${listing.business_name} logo`; show('business-logo'); hide('logo-fallback'); }
             else setText('logo-fallback', (listing.business_name || 'A').charAt(0).toUpperCase());
+
+            // The hero banner is a large, full-width, object-fit:cover section —
+            // right for a dedicated wide photo, but it crops and upscales a
+            // small logo/promo graphic into a distorted, "zoomed in" mess.
+            // A gallery photo is only used as hero when it isn't just the same
+            // image already shown correctly, small, as the logo; the listing's
+            // own image_url (effectively always the logo) is never used here.
+            const galleryHeroUrl = safeUrl(webpage.gallery_urls?.[0]);
+            const heroUrl = safeUrl(webpage.hero_media_url) || (galleryHeroUrl !== logoUrl ? galleryHeroUrl : '');
+            if (heroUrl) { el('hero-image').src = heroUrl; el('hero-image').alt = listing.business_name; show('hero-image'); }
 
             const directPhone = webpage.call_tracking_phone || listing.contact_phone;
             setAction('phone-action', directPhone ? phoneHref(directPhone) : '');

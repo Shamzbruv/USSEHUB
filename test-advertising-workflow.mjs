@@ -59,9 +59,23 @@ try {
         '20260728000000_advertising_workflow_repair.sql',
         '20260728000001_webpage_activation_draft.sql',
         '20260728000002_webpage_segment_sync.sql',
-        '20260827175628_paid_webpage_promotion_analytics.sql'
+        '20260827175628_paid_webpage_promotion_analytics.sql',
+        '20260831000000_fix_starter_hero_image_zoom.sql'
     ];
+    // Some of these were written once, permanently applied by
+    // deploy_new_migrations.mjs, and are not safe to replay verbatim a
+    // second time (e.g. a plain, non-idempotent CREATE FUNCTION after a
+    // signature-changing DROP). Once a migration is recorded as applied,
+    // its effects are already live on this exact schema, so only replay the
+    // ones this database doesn't have yet — keeping the test usable against
+    // a database that lags behind deploy_new_migrations.mjs's own list.
+    const { rows: appliedRows } = await client.query(
+        `SELECT filename FROM private.ajm_schema_migrations WHERE filename = ANY($1::text[])`,
+        [migrationFiles]
+    ).catch(() => ({ rows: [] }));
+    const alreadyApplied = new Set(appliedRows.map((row) => row.filename));
     for (const filename of migrationFiles) {
+        if (alreadyApplied.has(filename)) continue;
         const migration = fs.readFileSync(path.join(root, 'supabase/migrations', filename), 'utf8');
         await client.query(migration);
     }
