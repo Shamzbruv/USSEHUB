@@ -102,7 +102,7 @@ function appendText(parent, tag, text, className) {
     return node;
 }
 
-function buildMedia(ad, destination) {
+function buildMedia(ad) {
     const url = creativeUrl(ad);
     if (!url) return null;
 
@@ -110,11 +110,12 @@ function buildMedia(ad, destination) {
         const video = document.createElement('video');
         video.className = 'ajm-network-ad__media';
         video.src = url;
-        video.controls = true;
+        video.autoplay = true;
         video.muted = true;
+        video.loop = true;
         video.playsInline = true;
         video.preload = 'metadata';
-        video.setAttribute('aria-label', ad.headline || ad.business_name || 'Sponsored video');
+        video.setAttribute('aria-hidden', 'true');
         return video;
     }
 
@@ -125,15 +126,7 @@ function buildMedia(ad, destination) {
     image.loading = 'lazy';
     image.decoding = 'async';
     image.referrerPolicy = 'no-referrer';
-
-    if (!destination) return image;
-    const link = document.createElement('a');
-    link.className = 'ajm-network-ad__media-link';
-    link.href = destination;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer sponsored';
-    link.appendChild(image);
-    return link;
+    return image;
 }
 
 function recordEvent(ad, eventType, sessionToken, pageKey) {
@@ -171,32 +164,32 @@ function observeImpression(node, ad, sessionToken, pageKey) {
     observer.observe(node);
 }
 
+// The whole tile is one element - a single anchor when there's a
+// destination - so a visitor reaches the advertised page in exactly one
+// click, with no separate nested link to miss.
 function buildAd(ad, sessionToken, pageKey) {
     const format = adFormat(ad);
     const destination = safeHttpUrl(ad.cta_url);
-    const article = document.createElement('article');
+    const article = document.createElement(destination ? 'a' : 'article');
     article.className = `ajm-network-ad ajm-network-ad--${format}`;
     article.dataset.advertisementId = ad.id;
     article.dataset.format = format;
-    article.setAttribute('role', 'region');
     article.setAttribute('aria-label', 'Sponsored advertisement');
-
-    const media = buildMedia(ad, destination);
-    if (media) {
-        media.addEventListener('click', () => {
-            if (destination) recordEvent(ad, 'click', sessionToken, pageKey);
-        });
-        article.appendChild(media);
+    if (destination) {
+        article.href = destination;
+        article.target = '_blank';
+        article.rel = 'noopener noreferrer sponsored';
+        article.addEventListener('click', () => recordEvent(ad, 'click', sessionToken, pageKey));
+    } else {
+        article.setAttribute('role', 'region');
     }
+
+    const media = buildMedia(ad);
+    if (media) article.appendChild(media);
 
     const copy = document.createElement('div');
     copy.className = 'ajm-network-ad__copy';
-    appendText(
-        copy,
-        'span',
-        ad.business_name ? `Sponsored · ${ad.business_name}` : 'Sponsored advertisement',
-        'ajm-network-ad__label'
-    );
+    appendText(copy, 'span', 'Sponsored', 'ajm-network-ad__label');
     appendText(
         copy,
         'h2',
@@ -204,17 +197,7 @@ function buildAd(ad, sessionToken, pageKey) {
         'ajm-network-ad__title'
     );
     if (ad.body_text) appendText(copy, 'p', ad.body_text, 'ajm-network-ad__body');
-
-    if (destination) {
-        const cta = document.createElement('a');
-        cta.className = 'ajm-network-ad__cta';
-        cta.href = destination;
-        cta.target = '_blank';
-        cta.rel = 'noopener noreferrer sponsored';
-        cta.textContent = `${ad.cta_label || 'Learn more'} →`;
-        cta.addEventListener('click', () => recordEvent(ad, 'click', sessionToken, pageKey));
-        copy.appendChild(cta);
-    }
+    if (destination) appendText(copy, 'span', `${ad.cta_label || 'Learn more'} →`, 'ajm-network-ad__cta');
 
     article.appendChild(copy);
     return article;
@@ -238,27 +221,35 @@ function injectStyles() {
     const style = document.createElement('style');
     style.id = STYLE_ID;
     style.textContent = `
-        .ajm-ad-network-mount:not([hidden]){display:block;width:min(1180px,calc(100% - 32px));margin:26px auto 42px}
-        .ajm-network-ad{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(180px,.72fr) minmax(0,1.28fr);color:#f8f9ff;background:linear-gradient(145deg,#101625,#090d17);border:1px solid rgba(255,255,255,.14);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.24);font-family:"Space Grotesk",system-ui,sans-serif}
-        .ajm-network-ad--native{grid-template-columns:minmax(150px,.48fr) minmax(0,1.52fr)}
-        .ajm-network-ad--banner{grid-template-columns:minmax(240px,.9fr) minmax(0,1.1fr);border-color:rgba(255,207,51,.3)}
-        .ajm-network-ad__media-link{display:block;min-height:100%}
-        .ajm-network-ad__media{display:block;width:100%;height:100%;min-height:180px;max-height:300px;object-fit:cover;background:#070a11}
-        video.ajm-network-ad__media{object-fit:contain}
-        .ajm-network-ad__copy{display:flex;min-width:0;flex-direction:column;align-items:flex-start;justify-content:center;padding:clamp(22px,4vw,42px)}
-        .ajm-network-ad__label{margin-bottom:9px;color:#6ff0ab;font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-        .ajm-network-ad__title{margin:0;color:#fff;font-size:clamp(1.3rem,3vw,2rem);line-height:1.08;letter-spacing:-.025em}
-        .ajm-network-ad__body{max-width:680px;margin:12px 0 0;color:#c1c9db;font-size:.95rem;line-height:1.65}
-        .ajm-network-ad__cta{display:inline-flex;margin-top:18px;padding:10px 16px;color:#06100b;background:linear-gradient(135deg,#2dd6a4,#ffcf33);border-radius:999px;font-size:.84rem;font-weight:800;text-decoration:none}
-        .ajm-network-ad__cta:hover{filter:brightness(1.06);transform:translateY(-1px)}
-        .ajm-network-ad__cta:focus-visible,.ajm-network-ad__media-link:focus-visible,.ajm-network-ad__dismiss:focus-visible{outline:3px solid #ffcf33;outline-offset:3px}
-        .ajm-network-ad--spotlight{position:fixed;right:18px;bottom:86px;z-index:1000;width:min(430px,calc(100vw - 36px));grid-template-columns:1fr;border-color:rgba(45,214,164,.38);box-shadow:0 28px 90px rgba(0,0,0,.58);animation:ajm-ad-arrive .28s ease-out}
-        .ajm-network-ad--spotlight .ajm-network-ad__media{min-height:0;max-height:190px;aspect-ratio:16/8}
-        .ajm-network-ad--spotlight .ajm-network-ad__copy{padding:22px}
-        .ajm-network-ad__dismiss{position:absolute;top:10px;right:10px;z-index:2;width:36px;height:36px;display:grid;place-items:center;padding:0;color:#fff;background:rgba(5,7,13,.86);border:1px solid rgba(255,255,255,.25);border-radius:50%;font:700 1.25rem/1 system-ui;cursor:pointer}
+        /* A compact tile, capped well below the mount's own max width, so a
+           single promotion never dominates the page - and never force-crops
+           a small source image (a typical small-business logo/promo card)
+           into a giant, distorted "zoomed in" mess the way a wide banner
+           would. Every format is one anchor: exactly one click reaches the
+           advertised page. */
+        .ajm-ad-network-mount:not([hidden]){display:flex;justify-content:flex-start;width:min(1180px,calc(100% - 32px));margin:26px auto 42px}
+        .ajm-network-ad{position:relative;isolation:isolate;overflow:hidden;display:block;width:220px;text-decoration:none;color:#f8f9ff;background:linear-gradient(145deg,#101625,#090d17);border:1px solid rgba(255,255,255,.14);border-radius:18px;box-shadow:0 16px 44px rgba(0,0,0,.24);font-family:"Space Grotesk",system-ui,sans-serif;transition:transform .2s ease,box-shadow .2s ease}
+        a.ajm-network-ad:hover{transform:translateY(-3px);box-shadow:0 22px 54px rgba(0,0,0,.32)}
+        .ajm-network-ad--banner{width:320px;display:grid;grid-template-columns:112px 1fr;border-color:rgba(255,207,51,.3)}
+        .ajm-network-ad--banner .ajm-network-ad__media{aspect-ratio:1/1}
+        .ajm-network-ad__media{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#070a11}
+        video.ajm-network-ad__media{object-fit:cover}
+        .ajm-network-ad__copy{display:flex;min-width:0;flex-direction:column;align-items:flex-start;padding:12px 13px 14px}
+        .ajm-network-ad--banner .ajm-network-ad__copy{padding:10px 12px;justify-content:center}
+        .ajm-network-ad__label{margin-bottom:5px;color:#6ff0ab;font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+        .ajm-network-ad__title{margin:0;color:#fff;font-size:.85rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .ajm-network-ad__body{display:none}
+        .ajm-network-ad__cta{display:inline-flex;margin-top:7px;color:#8cf0b5;font-size:.72rem;font-weight:800}
+        .ajm-network-ad__cta:focus-visible,.ajm-network-ad__dismiss:focus-visible{outline:3px solid #ffcf33;outline-offset:3px}
+        .ajm-network-ad--spotlight{position:fixed;right:18px;bottom:86px;z-index:1000;width:min(340px,calc(100vw - 36px));border-color:rgba(45,214,164,.38);box-shadow:0 28px 90px rgba(0,0,0,.58);animation:ajm-ad-arrive .28s ease-out}
+        .ajm-network-ad--spotlight .ajm-network-ad__media{aspect-ratio:16/9}
+        .ajm-network-ad--spotlight .ajm-network-ad__copy{padding:16px}
+        .ajm-network-ad--spotlight .ajm-network-ad__title{-webkit-line-clamp:3}
+        .ajm-network-ad--spotlight .ajm-network-ad__body{display:block;max-width:100%;margin:8px 0 0;color:#c1c9db;font-size:.85rem;line-height:1.5}
+        .ajm-network-ad__dismiss{position:absolute;top:10px;right:10px;z-index:2;width:32px;height:32px;display:grid;place-items:center;padding:0;color:#fff;background:rgba(5,7,13,.86);border:1px solid rgba(255,255,255,.25);border-radius:50%;font:700 1.15rem/1 system-ui;cursor:pointer}
         @keyframes ajm-ad-arrive{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-        @media (max-width:680px){.ajm-network-ad,.ajm-network-ad--native,.ajm-network-ad--banner{grid-template-columns:1fr}.ajm-network-ad__media{min-height:0;max-height:220px;aspect-ratio:16/9}.ajm-network-ad__copy{padding:22px}.ajm-network-ad--spotlight{bottom:82px}.ajm-network-ad--spotlight .ajm-network-ad__media{max-height:150px}}
-        @media (prefers-reduced-motion:reduce){.ajm-network-ad--spotlight{animation:none}.ajm-network-ad__cta{transition:none}}
+        @media (max-width:480px){.ajm-network-ad{width:100%;max-width:220px}.ajm-network-ad--banner{width:100%;max-width:320px}}
+        @media (prefers-reduced-motion:reduce){.ajm-network-ad--spotlight{animation:none}.ajm-network-ad,a.ajm-network-ad:hover{transition:none;transform:none}}
     `;
     document.head.appendChild(style);
 }
@@ -287,7 +278,13 @@ function showSpotlight(ad, sessionToken, pageKey, delayMs) {
         dismiss.className = 'ajm-network-ad__dismiss';
         dismiss.setAttribute('aria-label', 'Dismiss sponsored advertisement');
         dismiss.textContent = '×';
-        dismiss.addEventListener('click', () => article.remove());
+        // The article may itself be the sponsored link now (single-click
+        // delivery); stop the dismiss click from also triggering that link.
+        dismiss.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            article.remove();
+        });
         article.prepend(dismiss);
         document.body.appendChild(article);
         markSpotlightSeen(ad.id);

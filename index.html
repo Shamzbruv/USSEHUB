@@ -1398,70 +1398,74 @@
             line-height: 1.65;
         }
 
+        /* Fixed-width tiles (never `1fr`) so one lone ad never stretches to
+           fill the whole row - a single promotion previously expanded to
+           the full available width, then a small logo image cropped across
+           that width read as "several times zoomed in". */
         .home-ad-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(152px, 168px));
+            justify-content: start;
+            gap: 12px;
         }
 
         .home-ad-card {
             position: relative;
-            min-height: 230px;
             overflow: hidden;
-            display: flex;
-            align-items: flex-end;
+            min-width: 0;
+            display: block;
+            text-decoration: none;
+            color: inherit;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 24px;
+            border-radius: 16px;
             background: linear-gradient(145deg, rgba(13, 17, 28, 0.92), rgba(5, 7, 13, 0.98));
-            isolation: isolate;
+            opacity: 1;
+            transition: opacity .28s ease, transform .2s ease;
         }
+
+        a.home-ad-card:hover { transform: translateY(-2px); box-shadow: 0 18px 46px rgba(0,0,0,.3); }
+        .home-ad-card.is-swapping { opacity: 0; }
 
         .home-ad-card-media {
-            position: absolute;
-            inset: 0;
+            display: block;
             width: 100%;
-            height: 100%;
+            aspect-ratio: 4 / 3;
             object-fit: cover;
-            z-index: -2;
-        }
-
-        .home-ad-card::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-            background: linear-gradient(to top, rgba(5, 7, 13, 0.98), rgba(5, 7, 13, 0.08) 78%);
+            background: #111623;
         }
 
         .home-ad-card-copy {
-            width: 100%;
-            padding: 20px;
+            padding: 10px 11px 12px;
         }
 
         .home-ad-card-copy small {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             color: var(--yellow);
             font-weight: 900;
+            font-size: .6rem;
             letter-spacing: 0.1em;
             text-transform: uppercase;
         }
 
         .home-ad-card-copy strong {
-            display: block;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
             font-family: "Syne", "Trebuchet MS", sans-serif;
-            font-size: 1.25rem;
-            margin-bottom: 5px;
+            font-size: .8rem;
+            line-height: 1.3;
         }
 
-        .home-ad-card-copy span {
-            display: block;
-            color: #dbe2f4;
-            font-size: 0.88rem;
-            line-height: 1.5;
+        .home-ad-card-copy span { display: none; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .home-ad-card, a.home-ad-card:hover { transition: none; transform: none; }
         }
 
         .home-ad-placeholder {
+            grid-column: 1 / -1;
             min-height: 180px;
             display: grid;
             place-items: center;
@@ -2872,79 +2876,123 @@
         grid.appendChild(placeholder);
     }
 
+    function observeHomeAdImpression(card, ad) {
+        if (!('IntersectionObserver' in window)) { recordAdEvent(ad.id, 'impression'); return; }
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting || entry.intersectionRatio < 0.5) return;
+                recordAdEvent(ad.id, 'impression');
+                observer.disconnect();
+            });
+        }, { threshold: [0.5] });
+        observer.observe(card);
+    }
+
+    function buildHomeAdCard(ad) {
+        const targetUrl = safeHttpUrl(ad.cta_url);
+        const card = document.createElement(targetUrl ? 'a' : 'article');
+        card.className = 'home-ad-card';
+        card.dataset.advertisementId = ad.id;
+        if (targetUrl) {
+            card.href = targetUrl;
+            card.target = '_blank';
+            card.rel = 'noopener sponsored';
+            card.addEventListener('click', () => recordAdEvent(ad.id, 'click'));
+        }
+
+        const mediaUrl = publicCreativeUrl(ad.creative_path);
+        if (mediaUrl) {
+            const mime = String(ad.creative_metadata?.mime_type || '');
+            const isVideo = mime.startsWith('video/') || /\.(mp4|webm)(?:$|\?)/i.test(mediaUrl);
+            const media = document.createElement(isVideo ? 'video' : 'img');
+            media.className = 'home-ad-card-media';
+            if (isVideo) {
+                media.autoplay = true;
+                media.muted = true;
+                media.loop = true;
+                media.playsInline = true;
+            } else {
+                media.alt = '';
+                media.loading = 'lazy';
+            }
+            media.src = mediaUrl;
+            card.appendChild(media);
+        }
+
+        const copy = document.createElement('div');
+        copy.className = 'home-ad-card-copy';
+        appendText(copy, 'small', 'Sponsored');
+        appendText(copy, 'strong', ad.headline || ad.business_name || ad.package_name || 'Featured business');
+        card.appendChild(copy);
+        return card;
+    }
+
+    function renderHomeAdWindow(grid, ads, animate) {
+        const paint = () => {
+            grid.textContent = '';
+            ads.forEach((ad) => {
+                const card = buildHomeAdCard(ad);
+                if (animate) card.classList.add('is-swapping');
+                grid.appendChild(card);
+                observeHomeAdImpression(card, ad);
+            });
+            if (animate) requestAnimationFrame(() => {
+                grid.querySelectorAll('.is-swapping').forEach((card) => card.classList.remove('is-swapping'));
+            });
+        };
+        if (!animate || !grid.children.length) { paint(); return; }
+        [...grid.children].forEach((card) => card.classList.add('is-swapping'));
+        window.setTimeout(paint, 260);
+    }
+
+    let homeAdRotationTimer = null;
+    function stopHomeAdRotation() {
+        if (homeAdRotationTimer) { clearInterval(homeAdRotationTimer); homeAdRotationTimer = null; }
+    }
+
+    // A placement can hold more paid promotions than fit in one row. Rather
+    // than crowding them into one oversized tile, a fixed-size window
+    // rotates through the full pool with a gentle crossfade, pausing while a
+    // visitor is hovering or focused inside so nothing changes mid-click.
+    function startHomeAdRotation(grid, pool, limit) {
+        stopHomeAdRotation();
+        if (pool.length <= limit) return;
+        const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+        let offset = 0;
+        homeAdRotationTimer = window.setInterval(() => {
+            if (grid.matches(':hover') || grid.contains(document.activeElement)) return;
+            offset = (offset + limit) % pool.length;
+            const windowAds = Array.from({ length: limit }, (_, index) => pool[(offset + index) % pool.length]);
+            renderHomeAdWindow(grid, windowAds, !reducedMotion);
+        }, 7000);
+    }
+
     async function renderLiveHomepageAds() {
         const grid = document.getElementById('homepage-ad-grid');
         if (!grid) return;
         const [homepageResult, webpageResult] = await Promise.all([
-            adSupabase.rpc('get_active_advertisements', { p_placement: 'homepage', p_limit: 6 }),
-            adSupabase.rpc('get_active_advertisements', { p_placement: 'webpage-network', p_limit: 6 })
+            adSupabase.rpc('get_active_advertisements', { p_placement: 'homepage', p_limit: 18 }),
+            adSupabase.rpc('get_active_advertisements', { p_placement: 'webpage-network', p_limit: 18 })
         ]);
         const homepageAds = Array.isArray(homepageResult.data) ? homepageResult.data : (homepageResult.data?.advertisements || []);
         const webpageAds = Array.isArray(webpageResult.data) ? webpageResult.data : (webpageResult.data?.advertisements || []);
         // Keep premium homepage inventory prominent while reserving network
         // space for paid webpages so they cannot be starved by a full pool.
-        const combined = [
-            ...homepageAds.slice(0, 4),
-            ...webpageAds.slice(0, 2),
-            ...homepageAds.slice(4),
-            ...webpageAds.slice(2)
-        ];
-        const ads = [...new Map(combined.map((ad) => [ad.id, ad])).values()].slice(0, 6);
-        if (!ads.length) {
+        const combined = [];
+        const maxLen = Math.max(homepageAds.length, webpageAds.length);
+        for (let index = 0; index < maxLen; index += 1) {
+            if (homepageAds[index]) combined.push(homepageAds[index]);
+            if (index < 6 && webpageAds[index]) combined.push(webpageAds[index]);
+        }
+        const pool = [...new Map(combined.map((ad) => [ad.id, ad])).values()];
+        stopHomeAdRotation();
+        if (!pool.length) {
             renderAdPlaceholder(grid);
             return;
         }
-
-        grid.textContent = '';
-        const observer = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                recordAdEvent(entry.target.dataset.advertisementId, 'impression');
-                observer.unobserve(entry.target);
-            });
-        }, { threshold: 0.5 }) : null;
-
-        ads.forEach((ad) => {
-            const targetUrl = safeHttpUrl(ad.cta_url);
-            const card = document.createElement(targetUrl ? 'a' : 'article');
-            card.className = 'home-ad-card';
-            card.dataset.advertisementId = ad.id;
-            if (targetUrl) {
-                card.href = targetUrl;
-                card.target = '_blank';
-                card.rel = 'noopener sponsored';
-                card.addEventListener('click', () => recordAdEvent(ad.id, 'click'));
-            }
-
-            const mediaUrl = publicCreativeUrl(ad.creative_path);
-            if (mediaUrl) {
-                const mime = String(ad.creative_metadata?.mime_type || '');
-                const isVideo = mime.startsWith('video/') || /\.(mp4|webm)(?:$|\?)/i.test(mediaUrl);
-                const media = document.createElement(isVideo ? 'video' : 'img');
-                media.className = 'home-ad-card-media';
-                if (isVideo) {
-                    media.autoplay = true;
-                    media.muted = true;
-                    media.loop = true;
-                    media.playsInline = true;
-                } else {
-                    media.alt = '';
-                    media.loading = 'lazy';
-                }
-                media.src = mediaUrl;
-                card.appendChild(media);
-            }
-
-            const copy = document.createElement('div');
-            copy.className = 'home-ad-card-copy';
-            appendText(copy, 'small', ad.business_name ? `Sponsored · ${ad.business_name}` : 'Sponsored');
-            appendText(copy, 'strong', ad.headline || ad.package_name || 'Featured business');
-            appendText(copy, 'span', ad.body_text || (targetUrl ? (ad.cta_label || 'Learn more') : 'Featured on the AJM advertising network.'));
-            card.appendChild(copy);
-            grid.appendChild(card);
-            if (observer) observer.observe(card);
-            else recordAdEvent(ad.id, 'impression');
-        });
+        const limit = 6;
+        renderHomeAdWindow(grid, pool.slice(0, limit), false);
+        startHomeAdRotation(grid, pool, limit);
     }
 
     function tierMeta(code) {
