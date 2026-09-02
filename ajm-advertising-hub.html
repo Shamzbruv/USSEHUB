@@ -3983,22 +3983,31 @@
     .adv-status.approved { color:#8cf0b5; background:rgba(23,214,111,.13); }
     .adv-status.rejected, .adv-status.cancelled { color:#ff9aaa; background:rgba(255,77,94,.12); }
     .adv-status.paused, .adv-status.expired { color:#c0c6d3; background:rgba(255,255,255,.08); }
-    .delivered-ads { display:grid; gap:14px; }
-    .directory-featured-ads:not(:empty) { margin-bottom:24px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+    /* Tiles are fixed-width (never `1fr`) so one lone ad never stretches to
+       fill the row — the exact "still too big" a client flagged came from a
+       single promotion expanding across the full available width. */
+    .delivered-ads { display:grid; grid-template-columns:repeat(auto-fill,minmax(152px,168px)); justify-content:start; gap:12px; }
+    .directory-featured-ads:not(:empty) { margin-bottom:24px; }
     .delivered-ad {
-        position:relative; overflow:hidden; min-width:0; border:1px solid rgba(255,255,255,.11);
-        border-radius:18px; background:linear-gradient(145deg,rgba(23,214,111,.07),rgba(255,255,255,.025));
+        position:relative; overflow:hidden; min-width:0; display:block; text-decoration:none; color:inherit;
+        border:1px solid rgba(255,255,255,.11);
+        border-radius:16px; background:linear-gradient(145deg,rgba(23,214,111,.07),rgba(255,255,255,.025));
         box-shadow:0 14px 38px rgba(0,0,0,.2);
+        opacity:1; transition:opacity .28s ease, transform .2s ease;
     }
-    .delivered-ad-media { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; background:#111623; }
-    .hub-sidebar-ads .delivered-ad-media { aspect-ratio:4/3; }
-    .delivered-ad-copy { padding:16px; }
-    .delivered-ad-label { display:block; margin-bottom:7px; color:#17d66f; font-size:.65rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
-    .delivered-ad h4 { margin:0 0 7px; color:#fff; font-size:1.02rem; line-height:1.3; }
-    .delivered-ad p { margin:0; color:#b9c0d4; font-size:.8rem; line-height:1.55; }
-    .delivered-ad-cta { display:inline-flex; margin-top:12px; color:#8cf0b5; font-size:.78rem; font-weight:800; }
-    .delivered-ad-house { padding:20px; border-style:dashed; text-align:center; }
-    .delivered-ad-house button { margin-top:12px; }
+    a.delivered-ad:hover { transform:translateY(-2px); box-shadow:0 18px 46px rgba(0,0,0,.3); }
+    .delivered-ad.is-swapping { opacity:0; }
+    .delivered-ad-media { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; background:#111623; }
+    .delivered-ad-copy { padding:10px 11px 12px; }
+    .delivered-ad-label { display:block; margin-bottom:4px; color:#17d66f; font-size:.6rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
+    .delivered-ad h4 { margin:0; color:#fff; font-size:.8rem; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .delivered-ad p { display:none; }
+    .delivered-ad-cta { display:block; margin-top:5px; color:#8cf0b5; font-size:.68rem; font-weight:800; }
+    .delivered-ad-house { padding:16px; border-style:dashed; text-align:center; min-width:152px; }
+    .delivered-ad-house button { margin-top:10px; }
+    @media (prefers-reduced-motion: reduce) {
+        .delivered-ad, a.delivered-ad:hover { transition:none; transform:none; }
+    }
 
     @media (max-width: 640px) {
         .adv-modal-box { padding: 24px 18px; }
@@ -4464,16 +4473,27 @@
         observer.observe(article);
     }
 
+    // The whole tile is one element — a single anchor when there's a
+    // destination — so a visitor reaches the advertised webpage in exactly
+    // one click, with no dead space and no separate nested link to miss.
     function buildDeliveredAd(ad) {
-        const article = document.createElement('article');
-        article.className = 'delivered-ad';
-        const media = deliveredAdMedia(ad);
         const destination = advHttpUrl(ad.cta_url);
+        const article = document.createElement(destination ? 'a' : 'article');
+        article.className = 'delivered-ad';
+        if (destination) {
+            article.href = destination;
+            article.target = '_blank';
+            article.rel = 'noopener noreferrer sponsored';
+            article.addEventListener('click', () => recordDeliveredAdEvent(ad, 'click'));
+        }
+
+        const media = deliveredAdMedia(ad);
         let mediaElement = null;
         if (media.url && media.type.toLowerCase().startsWith('video')) {
             mediaElement = document.createElement('video');
-            mediaElement.controls = true;
+            mediaElement.autoplay = true;
             mediaElement.muted = true;
+            mediaElement.loop = true;
             mediaElement.playsInline = true;
             mediaElement.preload = 'metadata';
             mediaElement.src = media.url;
@@ -4486,38 +4506,21 @@
         }
         if (mediaElement) {
             mediaElement.className = 'delivered-ad-media';
-            if (destination) {
-                const mediaLink = document.createElement('a');
-                mediaLink.href = destination;
-                mediaLink.target = '_blank';
-                mediaLink.rel = 'noopener noreferrer sponsored';
-                mediaLink.addEventListener('click', () => recordDeliveredAdEvent(ad, 'click'));
-                mediaLink.appendChild(mediaElement);
-                article.appendChild(mediaLink);
-            } else article.appendChild(mediaElement);
+            article.appendChild(mediaElement);
         }
 
         const copy = document.createElement('div');
         copy.className = 'delivered-ad-copy';
         const label = document.createElement('span');
         label.className = 'delivered-ad-label';
-        label.textContent = `Sponsored${ad.business_name ? ` · ${ad.business_name}` : ''}`;
+        label.textContent = 'Sponsored';
         const heading = document.createElement('h4');
         heading.textContent = ad.headline || ad.business_name || ad.package_name || 'Featured advertisement';
         copy.append(label, heading);
-        if (ad.body_text) {
-            const body = document.createElement('p');
-            body.textContent = ad.body_text;
-            copy.appendChild(body);
-        }
         if (destination) {
-            const cta = document.createElement('a');
+            const cta = document.createElement('span');
             cta.className = 'delivered-ad-cta';
-            cta.href = destination;
-            cta.target = '_blank';
-            cta.rel = 'noopener noreferrer sponsored';
             cta.textContent = `${ad.cta_label || 'Learn more'} →`;
-            cta.addEventListener('click', () => recordDeliveredAdEvent(ad, 'click'));
             copy.appendChild(cta);
         }
         article.appendChild(copy);
@@ -4542,13 +4545,59 @@
         container.appendChild(card);
     }
 
+    const deliveredAdRotationTimers = new Map();
+    const DELIVERED_AD_ROTATION_MS = 7000;
+    const DELIVERED_AD_FADE_MS = 260;
+
+    function stopDeliveredAdRotation(containerId) {
+        const timer = deliveredAdRotationTimers.get(containerId);
+        if (timer) { clearInterval(timer); deliveredAdRotationTimers.delete(containerId); }
+    }
+
+    function renderDeliveredAdWindow(container, ads, { animate = false } = {}) {
+        const paint = () => {
+            container.textContent = '';
+            ads.forEach((ad) => {
+                const tile = buildDeliveredAd(ad);
+                if (animate) tile.classList.add('is-swapping');
+                container.appendChild(tile);
+            });
+            if (animate) requestAnimationFrame(() => {
+                container.querySelectorAll('.is-swapping').forEach((tile) => tile.classList.remove('is-swapping'));
+            });
+        };
+        if (!animate || !container.children.length) { paint(); return; }
+        [...container.children].forEach((tile) => tile.classList.add('is-swapping'));
+        window.setTimeout(paint, DELIVERED_AD_FADE_MS);
+    }
+
+    // A directory placement can hold far more paid promotions than fit on
+    // screen at once. Rather than crowding them into one oversized row, a
+    // small fixed-size window rotates through the full pool with a gentle
+    // crossfade, pausing while a visitor is actually looking at (or focused
+    // inside) the tiles so nothing changes out from under a pending click.
+    function startDeliveredAdRotation(container, containerId, pool, limit) {
+        stopDeliveredAdRotation(containerId);
+        if (pool.length <= limit) return;
+        const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+        let offset = 0;
+        const timer = window.setInterval(() => {
+            if (container.matches(':hover') || container.contains(document.activeElement)) return;
+            offset = (offset + limit) % pool.length;
+            const windowAds = Array.from({ length: limit }, (_, index) => pool[(offset + index) % pool.length]);
+            renderDeliveredAdWindow(container, windowAds, { animate: !reducedMotion });
+        }, DELIVERED_AD_ROTATION_MS);
+        deliveredAdRotationTimers.set(containerId, timer);
+    }
+
     async function loadDeliveredAds(placement, containerId, limit) {
         const container = advEl(containerId);
         if (!container) return;
         const placements = Array.isArray(placement) ? placement : [placement];
+        const poolLimit = Math.max(limit * 3, 12);
         const results = await Promise.all(placements.map((name) => sb.rpc('get_active_advertisements', {
             p_placement: name,
-            p_limit: limit
+            p_limit: poolLimit
         })));
         results.forEach(({ error }, index) => {
             if (error) console.warn(`Could not load ${placements[index]} advertisements:`, error.message);
@@ -4559,13 +4608,15 @@
         for (let index = 0; index < poolSize; index += 1) {
             pools.forEach((pool) => { if (pool[index]) interleaved.push(pool[index]); });
         }
-        const advertisements = [...new Map(interleaved.map((ad) => [ad.id, ad])).values()].slice(0, limit);
-        container.textContent = '';
-        if (!advertisements.length) {
+        const pool = [...new Map(interleaved.map((ad) => [ad.id, ad])).values()];
+        stopDeliveredAdRotation(containerId);
+        if (!pool.length) {
+            container.textContent = '';
             renderDeliveredAdFallback(container, placements.includes('hub-sidebar'));
             return;
         }
-        advertisements.forEach((ad) => container.appendChild(buildDeliveredAd(ad)));
+        renderDeliveredAdWindow(container, pool.slice(0, limit));
+        startDeliveredAdRotation(container, containerId, pool, limit);
     }
 
     async function loadHubAdvertisements() {
