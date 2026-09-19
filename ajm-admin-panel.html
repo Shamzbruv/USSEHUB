@@ -714,6 +714,7 @@
         <button class="tab-btn" id="tab-all" onclick="switchTab('all')" role="tab">📋 All</button>
         <button class="tab-btn" id="tab-members" onclick="switchTab('members')" role="tab">👥 Members</button>
         <button class="tab-btn" id="tab-charts" onclick="switchTab('charts')" role="tab">📊 Analytics</button>
+        <button class="tab-btn" id="tab-reports" onclick="switchTab('reports')" role="tab">📄 Reports</button>
         <button class="tab-btn" id="tab-advertising" onclick="window.location.href='ajm-ad-management.html#overview'" role="tab">💰 Accounts Receivable &amp; Ads ↗</button>
     </div>
 
@@ -798,6 +799,102 @@
                 <div class="chart-card"><h4>Revenue by Package</h4><canvas id="chart-revenue-package"></canvas></div>
                 <div class="chart-card"><h4>Revenue Share (Donut)</h4><canvas id="chart-revenue-donut"></canvas></div>
                 <div class="chart-card"><h4>Package Popularity</h4><canvas id="chart-package-popularity"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════
+         REPORTS PANEL — admin-only printable / exportable reports
+    ════════════════════════════════════════════════════ -->
+    <div id="reports-panel" style="display:none;">
+        <div class="adv-sub-tabs">
+            <button class="adv-sub-tab active" onclick="switchReportTab('directory')">🗂️ Directory Listing</button>
+            <button class="adv-sub-tab" onclick="switchReportTab('registrations')">🆕 New Registrations</button>
+            <button class="adv-sub-tab" onclick="switchReportTab('calls')">📞 Contact Call List</button>
+            <button class="adv-sub-tab" onclick="switchReportTab('performance')">📈 Performance</button>
+        </div>
+
+        <!-- General Directory Listing Report -->
+        <div class="adv-panel active" id="report-panel-directory">
+            <p style="color:var(--muted);font-size:0.85rem;margin-bottom:14px;">Every current listing — business, region, webpage status and status. Admin-only; tick the box below to add contact, expiry and payment columns for internal use.</p>
+            <div class="order-filter-bar">
+                <select id="report-directory-status" onchange="renderDirectoryReport()">
+                    <option value="">All statuses</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending">Pending</option>
+                    <option value="changes_requested">Changes requested</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="expired">Expired</option>
+                    <option value="archived">Archived</option>
+                </select>
+                <label style="display:flex;align-items:center;gap:6px;font-size:0.84rem;color:var(--muted);cursor:pointer;">
+                    <input type="checkbox" id="report-directory-extra" onchange="renderDirectoryReport()" /> Include contact, expiry &amp; paid columns
+                </label>
+                <button class="btn" type="button" onclick="loadDirectoryReport()">↻ Refresh</button>
+                <button class="btn btn-primary" type="button" onclick="exportDirectoryReport()">⬇ Export CSV</button>
+                <button class="btn" type="button" onclick="printReport('report-directory-table', 'AJM Directory Listing Report')">🖨️ Print</button>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="report-directory-table">
+                    <thead id="report-directory-thead"><tr><th>#</th><th>Business Name</th><th>Region</th><th>WebPage</th><th>Status</th><th>Comment</th></tr></thead>
+                    <tbody id="report-directory-tbody"><tr class="loading-row"><td colspan="6">Loading…</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- New Registration Listing -->
+        <div class="adv-panel" id="report-panel-registrations">
+            <p style="color:var(--muted);font-size:0.85rem;margin-bottom:14px;">New member accounts, most recent first.</p>
+            <div class="order-filter-bar">
+                <select id="report-registrations-range" onchange="loadRegistrationsReport()">
+                    <option value="7">Last 7 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="0">All time</option>
+                </select>
+                <button class="btn" type="button" onclick="loadRegistrationsReport()">↻ Refresh</button>
+                <button class="btn btn-primary" type="button" onclick="exportRegistrationsReport()">⬇ Export CSV</button>
+                <button class="btn" type="button" onclick="printReport('report-registrations-table', 'AJM New Registration Report')">🖨️ Print</button>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="report-registrations-table">
+                    <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Listings</th></tr></thead>
+                    <tbody id="report-registrations-tbody"><tr class="loading-row"><td colspan="6">Loading…</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Customer Contact Call List -->
+        <div class="adv-panel" id="report-panel-calls">
+            <p style="color:var(--muted);font-size:0.85rem;margin-bottom:14px;">A ready-to-work call list for outreach — new signups to welcome, or listings whose free 30-day window is expiring soon and could be renewed or upgraded.</p>
+            <div class="order-filter-bar">
+                <select id="report-calls-segment" onchange="loadCallListReport()">
+                    <option value="expiring">Expiring within 14 days</option>
+                    <option value="pending">Pending approval</option>
+                    <option value="all">All approved listings</option>
+                </select>
+                <button class="btn" type="button" onclick="loadCallListReport()">↻ Refresh</button>
+                <button class="btn btn-primary" type="button" onclick="exportCallListReport()">⬇ Export CSV</button>
+                <button class="btn" type="button" onclick="printReport('report-calls-table', 'AJM Customer Contact Call List')">🖨️ Print</button>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="report-calls-table">
+                    <thead><tr><th>#</th><th>Business</th><th>Contact</th><th>Phone</th><th>WhatsApp</th><th>Email</th><th>Reason</th></tr></thead>
+                    <tbody id="report-calls-tbody"><tr class="loading-row"><td colspan="7">Loading…</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Performance Report — by new registrations -->
+        <div class="adv-panel" id="report-panel-performance">
+            <p style="color:var(--muted);font-size:0.85rem;margin-bottom:14px;">New registrations per week, and how many converted to an approved or paid listing.</p>
+            <div class="chart-kpi-grid" id="report-performance-kpis"></div>
+            <div class="chart-card"><h4>Weekly New Registrations (Last 12 Weeks)</h4><canvas id="chart-report-performance"></canvas></div>
+            <div class="admin-table-wrap" style="margin-top:16px;">
+                <table class="admin-table" id="report-performance-table">
+                    <thead><tr><th>Week of</th><th>New registrations</th><th>New listings</th><th>Approved</th><th>Paid webpages</th></tr></thead>
+                    <tbody id="report-performance-tbody"><tr class="loading-row"><td colspan="5">Loading…</td></tr></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -1021,6 +1118,16 @@
     window.activateWebpagePackage = activateWebpagePackage;
     window.renewWebpagePackage = renewWebpagePackage;
     window.cancelWebpagePackage = cancelWebpagePackage;
+    // Reports
+    window.switchReportTab = switchReportTab;
+    window.loadDirectoryReport = loadDirectoryReport;
+    window.renderDirectoryReport = renderDirectoryReport;
+    window.exportDirectoryReport = exportDirectoryReport;
+    window.loadRegistrationsReport = loadRegistrationsReport;
+    window.exportRegistrationsReport = exportRegistrationsReport;
+    window.loadCallListReport = loadCallListReport;
+    window.exportCallListReport = exportCallListReport;
+    window.printReport = printReport;
     // Advertising management
     window.switchAdvTab = switchAdvTab;
     window.loadAdOrders = loadAdOrders;
@@ -1153,7 +1260,8 @@
         const isMembers = tab === 'members';
         const isCharts = tab === 'charts';
         const isAdvertising = tab === 'advertising';
-        const isListings = !isMembers && !isCharts && !isAdvertising;
+        const isReports = tab === 'reports';
+        const isListings = !isMembers && !isCharts && !isAdvertising && !isReports;
 
         document.getElementById('listings-panel').style.display = isListings ? '' : 'none';
         document.getElementById('members-panel').style.display = isMembers ? '' : 'none';
@@ -1161,10 +1269,12 @@
         document.getElementById('pagination-row').style.display = isListings ? '' : 'none';
         document.getElementById('charts-panel').style.display = isCharts ? '' : 'none';
         document.getElementById('advertising-panel').style.display = isAdvertising ? '' : 'none';
+        document.getElementById('reports-panel').style.display = isReports ? '' : 'none';
 
         if (isMembers) { loadMembers(); }
         else if (isCharts) { loadCharts(); }
         else if (isAdvertising) { loadAdvertisingPanel(); }
+        else if (isReports) { loadReportsPanel(); }
         else { reloadListings(); }
     }
 
@@ -2574,6 +2684,271 @@
         } catch(error) {
             document.getElementById('ad-kpis').innerHTML = `<div class="chart-kpi"><div class="kpi-lbl" style="color:var(--red);">Advertising analytics unavailable: ${escHtml(error.message)}</div></div>`;
             showToast('Advertising analytics could not be loaded.', 'error');
+        }
+    }
+
+    // ── REPORTS ──
+    const reportsState = { directoryListings: [], registrations: [], calls: [], performance: [] };
+    const REPORT_TAB_ORDER = ['directory', 'registrations', 'calls', 'performance'];
+
+    function switchReportTab(name) {
+        document.querySelectorAll('#reports-panel .adv-sub-tab').forEach((btn, index) => {
+            btn.classList.toggle('active', REPORT_TAB_ORDER[index] === name);
+        });
+        document.querySelectorAll('#reports-panel .adv-panel').forEach((panel) => {
+            panel.classList.toggle('active', panel.id === `report-panel-${name}`);
+        });
+        if (name === 'directory' && !reportsState.directoryListings.length) loadDirectoryReport();
+        if (name === 'registrations' && !reportsState.registrations.length) loadRegistrationsReport();
+        if (name === 'calls' && !reportsState.calls.length) loadCallListReport();
+        if (name === 'performance' && !reportsState.performance.length) loadPerformanceReport();
+    }
+
+    async function loadReportsPanel() {
+        await loadDirectoryReport();
+    }
+
+    // Jamaica's 14 parishes grouped into a compass region. `parish` is
+    // rarely filled in directly, so the free-text location/address is
+    // matched by substring instead — it almost always names the parish.
+    const PARISH_REGIONS = [
+        ['kingston', 'E'], ['st. andrew', 'E'], ['st andrew', 'E'], ['st. thomas', 'E'], ['st thomas', 'E'], ['portland', 'E'],
+        ['st. mary', 'N'], ['st mary', 'N'], ['st. ann', 'N'], ['st ann', 'N'], ['trelawny', 'N'], ['st. james', 'N'], ['st james', 'N'],
+        ['hanover', 'W'], ['westmoreland', 'W'],
+        ['st. elizabeth', 'S'], ['st elizabeth', 'S'], ['manchester', 'S'], ['clarendon', 'S'], ['st. catherine', 'S'], ['st catherine', 'S']
+    ];
+    function regionForListing(listing) {
+        const haystack = `${listing.parish || ''} ${listing.location_display || ''} ${listing.location || ''}`.toLowerCase();
+        const match = PARISH_REGIONS.find(([name]) => haystack.includes(name));
+        return match ? match[1] : '—';
+    }
+
+    function downloadCsv(filename, headings, rows) {
+        const csv = [headings, ...rows].map((row) => row.map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`).join(',')).join('\n');
+        const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function printReport(tableId, title) {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+        const win = window.open('', '_blank', 'width=1000,height=800');
+        if (!win) { showToast('Please allow pop-ups to print this report.', 'error'); return; }
+        win.document.write(`<!DOCTYPE html><html><head><title>${escHtml(title)}</title><style>
+            body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:24px;}
+            h1{font-size:18px;margin:0 0 4px;}
+            p.meta{color:#555;font-size:12px;margin:0 0 18px;}
+            table{width:100%;border-collapse:collapse;font-size:12px;}
+            th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;}
+            th{background:#f2f2f2;}
+            @media print { button { display:none; } }
+        </style></head><body>
+            <h1>${escHtml(title)}</h1>
+            <p class="meta">AJM Advertising Hub · Generated ${new Date().toLocaleString()}</p>
+            ${table.outerHTML}
+            <script>window.onload = () => window.print();<\/script>
+        </body></html>`);
+        win.document.close();
+    }
+
+    // -- General Directory Listing Report --
+    async function loadDirectoryReport() {
+        const tbody = document.getElementById('report-directory-tbody');
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Loading…</td></tr>';
+        try {
+            const { data, error } = await supabase
+                .from('listings')
+                .select('id, business_name, parish, location, location_display, status, requested_tier, admin_note, expires_at, contact_phone, whatsapp, email')
+                .order('business_name', { ascending: true });
+            if (error) throw error;
+            const listingIds = (data || []).map((l) => l.id);
+            const webpageMap = {};
+            const paidSet = new Set();
+            if (listingIds.length) {
+                const [{ data: pages }, { data: subs }] = await Promise.all([
+                    supabase.from('listing_webpages').select('listing_id, page_status').in('listing_id', listingIds),
+                    supabase.from('ad_subscriptions').select('listing_id, status, expires_at').in('listing_id', listingIds).eq('status', 'active')
+                ]);
+                (pages || []).forEach((p) => { webpageMap[p.listing_id] = p.page_status; });
+                (subs || []).forEach((s) => { if (!s.expires_at || new Date(s.expires_at) > new Date()) paidSet.add(s.listing_id); });
+            }
+            reportsState.directoryListings = (data || []).map((l) => ({
+                ...l,
+                region: regionForListing(l),
+                hasWebpage: Boolean(webpageMap[l.id]),
+                isPaid: paidSet.has(l.id)
+            }));
+            renderDirectoryReport();
+        } catch (err) {
+            tbody.innerHTML = `<tr class="loading-row"><td colspan="6" style="color:var(--red);">${escHtml(err.message)}</td></tr>`;
+        }
+    }
+
+    function renderDirectoryReport() {
+        const status = document.getElementById('report-directory-status').value;
+        const extra = document.getElementById('report-directory-extra').checked;
+        const thead = document.getElementById('report-directory-thead');
+        const tbody = document.getElementById('report-directory-tbody');
+        thead.innerHTML = extra
+            ? '<tr><th>#</th><th>Business Name</th><th>Region</th><th>WebPage</th><th>Status</th><th>Comment</th><th>Contact</th><th>Expires</th><th>Paid</th></tr>'
+            : '<tr><th>#</th><th>Business Name</th><th>Region</th><th>WebPage</th><th>Status</th><th>Comment</th></tr>';
+        const rows = reportsState.directoryListings.filter((l) => !status || l.status === status);
+        if (!rows.length) { tbody.innerHTML = `<tr class="loading-row"><td colspan="${extra ? 9 : 6}">No listings match this filter.</td></tr>`; return; }
+        tbody.innerHTML = rows.map((l, index) => `<tr>
+            <td>${index + 1}</td>
+            <td>${escHtml(l.business_name)}</td>
+            <td>${escHtml(l.region)}</td>
+            <td>${l.hasWebpage ? 'Y' : 'N'}</td>
+            <td>${escHtml(l.status)}</td>
+            <td>${escHtml(l.admin_note || '—')}</td>
+            ${extra ? `<td>${escHtml(l.contact_phone || l.whatsapp || l.email || '—')}</td><td>${l.expires_at ? escHtml(fmtDate(l.expires_at)) : '—'}</td><td>${l.isPaid ? 'Y' : 'N'}</td>` : ''}
+        </tr>`).join('');
+    }
+
+    function exportDirectoryReport() {
+        const status = document.getElementById('report-directory-status').value;
+        const extra = document.getElementById('report-directory-extra').checked;
+        const rows = reportsState.directoryListings.filter((l) => !status || l.status === status);
+        if (!rows.length) return showToast('No listings to export.', 'error');
+        const headings = extra
+            ? ['#', 'Business Name', 'Region', 'WebPage', 'Status', 'Comment', 'Contact', 'Expires', 'Paid']
+            : ['#', 'Business Name', 'Region', 'WebPage', 'Status', 'Comment'];
+        const csvRows = rows.map((l, index) => extra
+            ? [index + 1, l.business_name, l.region, l.hasWebpage ? 'Y' : 'N', l.status, l.admin_note || '', l.contact_phone || l.whatsapp || l.email || '', l.expires_at ? fmtDate(l.expires_at) : '', l.isPaid ? 'Y' : 'N']
+            : [index + 1, l.business_name, l.region, l.hasWebpage ? 'Y' : 'N', l.status, l.admin_note || '']);
+        downloadCsv(`ajm-directory-listing-${new Date().toISOString().slice(0, 10)}.csv`, headings, csvRows);
+    }
+
+    // -- New Registration Listing --
+    async function loadRegistrationsReport() {
+        const tbody = document.getElementById('report-registrations-tbody');
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Loading…</td></tr>';
+        try {
+            const rangeDays = Number(document.getElementById('report-registrations-range').value);
+            let query = supabase.from('profiles').select('id, email, full_name, role, created_at').order('created_at', { ascending: false });
+            if (rangeDays > 0) query = query.gte('created_at', new Date(Date.now() - rangeDays * 86400000).toISOString());
+            const { data, error } = await query;
+            if (error) throw error;
+            const ids = (data || []).map((p) => p.id);
+            const listingCounts = {};
+            if (ids.length) {
+                const { data: listings } = await supabase.from('listings').select('owner_user_id').in('owner_user_id', ids);
+                (listings || []).forEach((l) => { listingCounts[l.owner_user_id] = (listingCounts[l.owner_user_id] || 0) + 1; });
+            }
+            reportsState.registrations = (data || []).map((p) => ({ ...p, listingCount: listingCounts[p.id] || 0 }));
+            if (!reportsState.registrations.length) { tbody.innerHTML = '<tr class="loading-row"><td colspan="6">No registrations in this period.</td></tr>'; return; }
+            tbody.innerHTML = reportsState.registrations.map((p, index) => `<tr>
+                <td>${index + 1}</td>
+                <td>${escHtml(p.full_name || '—')}</td>
+                <td>${escHtml(p.email || '—')}</td>
+                <td>${escHtml(p.role)}</td>
+                <td>${escHtml(fmtDate(p.created_at))}</td>
+                <td>${p.listingCount}</td>
+            </tr>`).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr class="loading-row"><td colspan="6" style="color:var(--red);">${escHtml(err.message)}</td></tr>`;
+        }
+    }
+
+    function exportRegistrationsReport() {
+        if (!reportsState.registrations.length) return showToast('No registrations to export.', 'error');
+        const headings = ['#', 'Name', 'Email', 'Role', 'Joined', 'Listings'];
+        const rows = reportsState.registrations.map((p, index) => [index + 1, p.full_name || '', p.email || '', p.role, fmtDate(p.created_at), p.listingCount]);
+        downloadCsv(`ajm-new-registrations-${new Date().toISOString().slice(0, 10)}.csv`, headings, rows);
+    }
+
+    // -- Customer Contact Call List --
+    async function loadCallListReport() {
+        const tbody = document.getElementById('report-calls-tbody');
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="7">Loading…</td></tr>';
+        try {
+            const segment = document.getElementById('report-calls-segment').value;
+            let query = supabase.from('listings').select('id, business_name, contact_phone, whatsapp, email, status, expires_at, profiles(full_name, email)');
+            if (segment === 'pending') query = query.eq('status', 'pending');
+            else if (segment === 'expiring') {
+                query = query.eq('status', 'approved')
+                    .not('expires_at', 'is', null)
+                    .lte('expires_at', new Date(Date.now() + 14 * 86400000).toISOString())
+                    .gte('expires_at', new Date().toISOString());
+            } else query = query.eq('status', 'approved');
+            const { data, error } = await query.order('business_name', { ascending: true });
+            if (error) throw error;
+            reportsState.calls = (data || []).map((l) => ({
+                ...l,
+                reason: segment === 'pending' ? 'Awaiting approval' : segment === 'expiring' ? `Free listing expires ${fmtDate(l.expires_at)}` : 'Approved listing'
+            }));
+            if (!reportsState.calls.length) { tbody.innerHTML = '<tr class="loading-row"><td colspan="7">No listings match this list.</td></tr>'; return; }
+            tbody.innerHTML = reportsState.calls.map((l, index) => `<tr>
+                <td>${index + 1}</td>
+                <td>${escHtml(l.business_name)}</td>
+                <td>${escHtml(l.profiles?.full_name || '—')}</td>
+                <td>${escHtml(l.contact_phone || '—')}</td>
+                <td>${escHtml(l.whatsapp || '—')}</td>
+                <td>${escHtml(l.email || l.profiles?.email || '—')}</td>
+                <td>${escHtml(l.reason)}</td>
+            </tr>`).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr class="loading-row"><td colspan="7" style="color:var(--red);">${escHtml(err.message)}</td></tr>`;
+        }
+    }
+
+    function exportCallListReport() {
+        if (!reportsState.calls.length) return showToast('No contacts to export.', 'error');
+        const headings = ['#', 'Business', 'Contact', 'Phone', 'WhatsApp', 'Email', 'Reason'];
+        const rows = reportsState.calls.map((l, index) => [index + 1, l.business_name, l.profiles?.full_name || '', l.contact_phone || '', l.whatsapp || '', l.email || l.profiles?.email || '', l.reason]);
+        downloadCsv(`ajm-contact-call-list-${new Date().toISOString().slice(0, 10)}.csv`, headings, rows);
+    }
+
+    // -- Performance Report - by new registrations --
+    async function loadPerformanceReport() {
+        const tbody = document.getElementById('report-performance-tbody');
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="5">Loading…</td></tr>';
+        try {
+            const since = new Date(Date.now() - 84 * 86400000); // 12 weeks
+            const [{ data: profiles }, { data: listings }, { data: subs }] = await Promise.all([
+                supabase.from('profiles').select('created_at').gte('created_at', since.toISOString()),
+                supabase.from('listings').select('created_at, status').gte('created_at', since.toISOString()),
+                supabase.from('ad_subscriptions').select('created_at, status').gte('created_at', since.toISOString())
+            ]);
+            const weeks = [];
+            for (let i = 11; i >= 0; i -= 1) {
+                const start = new Date(); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() - start.getDay() - (i * 7));
+                const end = new Date(start); end.setDate(end.getDate() + 7);
+                weeks.push({ start, end, registrations: 0, listings: 0, approved: 0, paid: 0 });
+            }
+            const bucket = (dateStr) => weeks.find((w) => { const d = new Date(dateStr); return d >= w.start && d < w.end; });
+            (profiles || []).forEach((p) => { const w = bucket(p.created_at); if (w) w.registrations += 1; });
+            (listings || []).forEach((l) => { const w = bucket(l.created_at); if (w) { w.listings += 1; if (l.status === 'approved') w.approved += 1; } });
+            (subs || []).forEach((s) => { const w = bucket(s.created_at); if (w) w.paid += 1; });
+
+            document.getElementById('report-performance-kpis').innerHTML = [
+                { v: weeks.reduce((sum, w) => sum + w.registrations, 0), l: 'New registrations (12wk)', c: 'var(--blue)' },
+                { v: weeks.reduce((sum, w) => sum + w.listings, 0), l: 'New listings (12wk)', c: 'var(--green)' },
+                { v: weeks.reduce((sum, w) => sum + w.paid, 0), l: 'New paid webpages (12wk)', c: 'var(--yellow)' }
+            ].map((k) => `<div class="chart-kpi"><div class="kpi-val" style="color:${k.c}">${k.v.toLocaleString()}</div><div class="kpi-lbl">${k.l}</div></div>`).join('');
+
+            const labels = weeks.map((w) => w.start.toLocaleDateString('en-JM', { month: 'short', day: 'numeric' }));
+            destroyChart('report-performance');
+            chartInstances['report-performance'] = new Chart(document.getElementById('chart-report-performance'), {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'New registrations', data: weeks.map((w) => w.registrations), backgroundColor: '#5b9cf6' }] },
+                options: { ...chartDefaults(), plugins: { legend: { display: false } } }
+            });
+
+            reportsState.performance = weeks;
+            tbody.innerHTML = weeks.map((w) => `<tr>
+                <td>${w.start.toLocaleDateString()}</td>
+                <td>${w.registrations}</td>
+                <td>${w.listings}</td>
+                <td>${w.approved}</td>
+                <td>${w.paid}</td>
+            </tr>`).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr class="loading-row"><td colspan="5" style="color:var(--red);">${escHtml(err.message)}</td></tr>`;
         }
     }
 

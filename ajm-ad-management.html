@@ -410,7 +410,7 @@
             <section class="panel" id="panel-payments" role="tabpanel">
                 <div class="panel-toolbar">
                     <div><h2>Orders and bank-transfer reviews</h2><p>Nothing becomes active until an administrator confirms the payment.</p></div>
-                    <div class="toolbar-actions"><input id="order-search" type="search" placeholder="Search customer, business or reference" /><select id="order-status"><option value="">All statuses</option><option value="payment_submitted">Payment submitted</option><option value="pending_payment">Pending payment</option><option value="approved">Approved</option><option value="paused">Paused</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option><option value="expired">Expired</option></select><button class="btn" type="button" id="export-orders">Export CSV</button></div>
+                    <div class="toolbar-actions"><input id="order-search" type="search" placeholder="Search customer, business or reference" /><select id="order-status"><option value="">All statuses</option><option value="payment_submitted">Payment submitted</option><option value="pending_payment">Pending payment</option><option value="approved">Approved</option><option value="paused">Paused</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option><option value="expired">Expired</option></select><button class="btn" type="button" id="export-orders">Export CSV</button><button class="btn" type="button" id="generate-statement">🖨️ Customer statement</button></div>
                 </div>
                 <div class="notice" id="orders-notice"></div>
                 <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Order / customer</th><th>Package</th><th>Amount</th><th>Payment</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead><tbody id="orders-body"><tr class="empty-row"><td colspan="7">Loading orders…</td></tr></tbody></table></div></div>
@@ -801,6 +801,7 @@
             if (['approved', 'paused'].includes(order.status)) buttons.push(`<button class="btn btn-blue btn-sm" type="button" data-order-action="renew_subscription" data-order-id="${safe(order.id)}">Renew</button>`);
             if (!TERMINAL_STATES.has(order.status)) buttons.push(`<button class="btn btn-danger btn-sm" type="button" data-order-action="cancel_subscription" data-order-id="${safe(order.id)}">Cancel</button>`);
             if (!['approved', 'paused'].includes(order.status)) buttons.push(`<button class="btn btn-danger btn-sm" type="button" data-order-action="delete_order" data-order-id="${safe(order.id)}">Delete</button>`);
+            buttons.push(`<button class="btn btn-sm" type="button" data-order-invoice="${safe(order.id)}" title="Print invoice">🖨️ Invoice</button>`);
             return compact ? buttons.slice(0, 4).join('') : buttons.join('');
         }
 
@@ -1271,6 +1272,79 @@
             URL.revokeObjectURL(url);
         }
 
+        function printDocument(title, bodyHtml) {
+            const win = window.open('', '_blank', 'width=900,height=1000');
+            if (!win) return toast('Please allow pop-ups to print or save this document.', 'error');
+            win.document.write(`<!DOCTYPE html><html><head><title>${safe(title)}</title><style>
+                body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:32px;max-width:720px;margin:0 auto;}
+                .doc-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:14px;margin-bottom:20px;}
+                .doc-head h1{font-size:20px;margin:0 0 4px;}
+                .doc-head p{margin:0;font-size:12px;color:#555;}
+                .doc-meta{text-align:right;font-size:12px;color:#333;}
+                table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+                th,td{border:1px solid #ccc;padding:7px 9px;text-align:left;}
+                th{background:#f2f2f2;}
+                td.amount,th.amount{text-align:right;}
+                tfoot td{font-weight:700;}
+                .doc-footer{margin-top:28px;font-size:11px;color:#777;}
+                @media print { button { display:none; } }
+            </style></head><body>${bodyHtml}
+                <p class="doc-footer">AJM Advertising Hub · Generated ${new Date().toLocaleString()}</p>
+                <script>window.onload = () => window.print();<\/script>
+            </body></html>`);
+            win.document.close();
+        }
+
+        function printInvoice(orderId) {
+            const order = orderById(orderId);
+            if (!order) return toast('Order details are unavailable. Refresh and try again.', 'error');
+            const customer = orderCustomer(order);
+            const pkg = orderPackage(order);
+            printDocument(`Invoice ${first(order.order_number, orderId)}`, `
+                <div class="doc-head">
+                    <div><h1>AJM Advertising Hub</h1><p>Invoice</p></div>
+                    <div class="doc-meta">
+                        <div><strong>Invoice #</strong> ${safe(first(order.order_number, orderId))}</div>
+                        <div><strong>Date</strong> ${safe(fmtDate(order.created_at))}</div>
+                        <div><strong>Status</strong> ${safe(order.status)}</div>
+                    </div>
+                </div>
+                <p><strong>Bill to:</strong><br>${safe(customer.name)}${customer.email ? `<br>${safe(customer.email)}` : ''}</p>
+                <table>
+                    <thead><tr><th>Description</th><th>Duration</th><th class="amount">Amount</th></tr></thead>
+                    <tbody><tr><td>${safe(pkg.name)}${order.business_name ? `<br><span style="color:#777;font-size:12px;">${safe(order.business_name)}</span>` : ''}</td><td>${safe(first(order.duration_days, order.duration_days_snapshot, '—'))} days</td><td class="amount">${safe(fmtMoney(orderAmount(order), pkg.currency))}</td></tr></tbody>
+                    <tfoot><tr><td colspan="2">Total</td><td class="amount">${safe(fmtMoney(orderAmount(order), pkg.currency))}</td></tr></tfoot>
+                </table>
+                <p style="margin-top:16px;font-size:12px;color:#555;">Payment reference: ${safe(orderReference(order))}${order.expires_at ? ` &middot; Access expires ${safe(fmtDate(order.expires_at))}` : ''}</p>
+            `);
+        }
+
+        function printCustomerStatement() {
+            const query = (prompt('Print a statement for which customer? Enter their email address:') || '').trim().toLowerCase();
+            if (!query) return;
+            const rows = state.orders.filter((order) => orderCustomer(order).email.toLowerCase() === query);
+            if (!rows.length) return toast(`No orders found for ${query}.`, 'error');
+            const customer = orderCustomer(rows[0]);
+            const sorted = [...rows].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            const currency = orderPackage(sorted[0]).currency;
+            const total = sorted.reduce((sum, order) => sum + Number(orderAmount(order) || 0), 0);
+            printDocument(`Statement — ${customer.name}`, `
+                <div class="doc-head">
+                    <div><h1>AJM Advertising Hub</h1><p>Account statement</p></div>
+                    <div class="doc-meta">
+                        <div><strong>Customer</strong> ${safe(customer.name)}</div>
+                        <div>${safe(customer.email)}</div>
+                        <div><strong>Period</strong> ${safe(fmtDate(sorted[0].created_at))} – ${safe(fmtDate(sorted[sorted.length - 1].created_at))}</div>
+                    </div>
+                </div>
+                <table>
+                    <thead><tr><th>Date</th><th>Order</th><th>Package</th><th>Status</th><th class="amount">Amount</th></tr></thead>
+                    <tbody>${sorted.map((order) => `<tr><td>${safe(fmtDate(order.created_at))}</td><td>${safe(first(order.order_number, order.id))}</td><td>${safe(orderPackage(order).name)}</td><td>${safe(order.status)}</td><td class="amount">${safe(fmtMoney(orderAmount(order), orderPackage(order).currency))}</td></tr>`).join('')}</tbody>
+                    <tfoot><tr><td colspan="4">Total (${sorted.length} order${sorted.length === 1 ? '' : 's'})</td><td class="amount">${safe(fmtMoney(total, currency))}</td></tr></tfoot>
+                </table>
+            `);
+        }
+
         function activatePanel(requestedPanel, updateHash = true) {
             const allowed = new Set(['overview', 'banks', 'packages', 'payments', 'ads']);
             const panelName = allowed.has(requestedPanel) ? requestedPanel : 'overview';
@@ -1297,6 +1371,7 @@
             if (button.matches('[data-new-bank]')) openBankForm();
             if (button.dataset.orderDetail) openOrderDetail(button.dataset.orderDetail);
             if (button.dataset.orderAction) queueOrderAction(button.dataset.orderId, button.dataset.orderAction);
+            if (button.dataset.orderInvoice) printInvoice(button.dataset.orderInvoice);
             if (button.dataset.editPackage) openPackageForm(packageById(button.dataset.editPackage));
             if (button.dataset.addOption) openOptionForm(button.dataset.addOption);
             if (button.dataset.editOption) { const pkg = packageById(button.dataset.packageId); openOptionForm(pkg?.id, pkg?.options?.find((item) => item.id === button.dataset.editOption)); }
@@ -1334,6 +1409,7 @@
         el('bank-form').addEventListener('submit', saveBank);
         el('confirm-form').addEventListener('submit', executeConfirmation);
         el('export-orders').addEventListener('click', exportOrders);
+        el('generate-statement').addEventListener('click', printCustomerStatement);
         el('logout-btn').addEventListener('click', async () => { await supabase.auth.signOut(); location.href = 'ajm-advertising-hub.html'; });
         el('package-type').addEventListener('change', () => { el('package-tier').disabled = el('package-type').value !== 'webpage'; if (el('package-type').value !== 'webpage') el('package-tier').value = ''; });
         el('package-currency').addEventListener('change', () => populateAccountSelect(el('package-bank').value));
