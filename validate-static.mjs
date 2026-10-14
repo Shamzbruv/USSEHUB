@@ -4,6 +4,8 @@ import { execFileSync } from 'child_process';
 
 const htmlFiles = [
     'index.html',
+    'referral-agreements.html',
+    'sign-referral-agreement.html',
     'ajm-advertising-hub.html',
     'ajm-admin-panel.html',
     'ajm-ad-management.html',
@@ -40,6 +42,11 @@ for (const filename of htmlFiles) {
     const ids = [...source.matchAll(/(?:^|\s)id\s*=\s*["']([^"']+)["']/gi)].map((match) => match[1]);
     const duplicates = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
     assert(!duplicates.length, `${filename} contains duplicate DOM ids: ${duplicates.join(', ')}`);
+}
+
+for (const name of fs.readdirSync('assets').filter(name => name.startsWith('usse-referral') && name.endsWith('.mjs'))) {
+    try { new vm.SourceTextModule(fs.readFileSync(`assets/${name}`, 'utf8'), {identifier: name}); }
+    catch(error) { errors.push(`${name}: ${error.message}`); }
 }
 
 const trackedText = [

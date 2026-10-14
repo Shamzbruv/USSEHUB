@@ -85,6 +85,8 @@ async function stopServer() {
 }
 
 const pages = [
+    { route: 'referral-agreements', title: 'Referral Agreements — USSE Admin' },
+    { route: 'sign-referral-agreement', title: 'Review &amp; Sign Referral Agreement — USSE' },
     { route: 'ajm-webpage-builder', title: 'AJM Webpage Builder | Advertising Hub' },
     { route: 'ajm-business-page', title: 'AJM Business Webpage | Advertising Hub' },
     { route: 'ajm-advertising-hub', title: 'AJM Advertising Hub Jamaica | Classifieds, Promotions &amp; Business Listings' }

@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en-JM">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Referral Agreements — USSE Admin</title>
+    <link rel="icon" href="usse%20favicon.png" />
+    <link rel="stylesheet" href="assets/usse-referrals.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <img src="usse.png" alt="USSE" />
+        <div>
+          <strong>USSE Partner Programme</strong
+          ><small>Referral agreements &amp; commissions</small>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="master-admin.html" class="button">Master Admin</a
+        ><a href="ajm-admin-panel.html" class="button">Standard Admin</a>
+      </div>
+    </header>
+    <main>
+      <div class="head">
+        <div>
+          <div class="eyebrow">One programme. Every USSE subsidiary.</div>
+          <h1>Grow through trusted introductions.</h1>
+          <p class="muted">
+            Create agreements, collect signatures and track earned referral
+            commissions.
+          </p>
+        </div>
+        <button class="primary" id="new-agreement" disabled>
+          + New agreement
+        </button>
+      </div>
+      <div id="notice" role="status" aria-live="polite">
+        Checking administrator access…
+      </div>
+      <div id="workspace" hidden>
+        <div class="stats">
+          <div class="stat">
+            <small>Total agreements</small><strong id="count-all">0</strong>
+          </div>
+          <div class="stat">
+            <small>Awaiting signatures</small
+            ><strong id="count-pending">0</strong>
+          </div>
+          <div class="stat">
+            <small>Signed partners</small><strong id="count-signed">0</strong>
+          </div>
+          <div class="stat">
+            <small>Registered referrals</small
+            ><strong id="count-referrals">0</strong>
+          </div>
+        </div>
+        <nav class="tabs" aria-label="Referral programme sections">
+          <button data-tab="agreements" aria-selected="true">Agreements</button
+          ><button data-tab="register" aria-selected="false">
+            Referral register</button
+          ><button data-tab="settings" aria-selected="false">
+            Company &amp; signature
+          </button>
+        </nav>
+        <section id="agreements-tab" class="card">
+          <div class="filters">
+            <input
+              id="search"
+              placeholder="Search partner or agreement reference"
+              aria-label="Search agreements"
+            /><select id="status-filter" aria-label="Filter by status">
+              <option value="">All statuses</option>
+              <option>draft</option>
+              <option>pending</option>
+              <option>signed</option>
+              <option>cancelled</option>
+            </select>
+          </div>
+          <div id="agreements-list"></div>
+        </section>
+        <section id="register-tab" class="card" hidden>
+          <div class="head">
+            <div>
+              <h2>Referral register</h2>
+              <p class="muted">
+                Record cleared client receipts in the agreement currency.
+                Commissions follow the signed terms.
+              </p>
+            </div>
+            <button id="new-referral" class="primary">
+              + Register referral
+            </button>
+          </div>
+          <div id="referrals-list"></div>
+          <p class="help">
+            Marking a commission paid records an external payment; it does not
+            transfer funds.
+          </p>
+        </section>
+        <section id="settings-tab" class="card" hidden>
+          <h2>Company identity &amp; authorized signature</h2>
+          <p class="muted">
+            These details are copied into new agreements. Issued and signed
+            agreements retain their original details.
+          </p>
+          <form id="settings-form" class="grid">
+            <div>
+              <label for="company-name">Contracting company name</label
+              ><input
+                id="company-name"
+                required
+                maxlength="500"
+                value="Unique Services and Supplies Enterprise (USSE)"
+              />
+            </div>
+            <div>
+              <label for="company-email">Company contact email</label
+              ><input
+                id="company-email"
+                type="email"
+                required
+                value="info@ussehub.com"
+                maxlength="500"
+              />
+            </div>
+            <div>
+              <label for="company-signer"
+                >Authorized signatory’s full name</label
+              ><input id="company-signer" required maxlength="500" />
+            </div>
+            <div>
+              <label for="company-position">Signatory’s title / position</label
+              ><input id="company-position" required maxlength="500" />
+            </div>
+            <div class="full">
+              <label for="company-signature">Upload company signature</label
+              ><input
+                id="company-signature"
+                type="file"
+                accept="image/png,image/webp"
+              />
+              <p class="help">
+                <strong
+                  >Please keep the signature background transparent.</strong
+                >
+                Upload a PNG or WebP under 2 MB. A transparent background keeps
+                the signature clean on the agreement and printed copy.
+              </p>
+              <img
+                id="company-signature-preview"
+                class="signature-preview"
+                alt="Company signature preview"
+                hidden
+              />
+              <p id="signature-note" class="help"></p>
+            </div>
+            <div class="full">
+              <button class="primary" type="submit">
+                Save company details
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+    <dialog id="editor">
+      <div class="head">
+        <h2 id="editor-title">New referral agreement</h2>
+        <button
+          type="button"
+          data-close="editor"
+          aria-label="Close agreement editor"
+        >
+          Close
+        </button>
+      </div>
+      <form id="agreement-form" class="grid">
+        <input id="agreement-id" type="hidden" />
+        <div>
+          <label for="partner-name">Partner’s full name</label
+          ><input id="partner-name" required maxlength="500" />
+        </div>
+        <div>
+          <label for="partner-email">Partner email</label
+          ><input id="partner-email" type="email" required maxlength="500" />
+        </div>
+        <div>
+          <label for="partner-address">Partner address</label
+          ><input id="partner-address" required maxlength="500" />
+        </div>
+        <div>
+          <label for="partner-phone">Partner phone</label
+          ><input id="partner-phone" required maxlength="500" />
+        </div>
+        <div class="full">
+          <fieldset>
+            <legend>Covered subsidiaries</legend>
+            <label
+              ><input type="checkbox" name="unit" value="consultancy" checked />
+              USSE Consultancy</label
+            ><label
+              ><input type="checkbox" name="unit" value="ajm" checked /> AJM –
+              Aloe Jamaica</label
+            ><label
+              ><input type="checkbox" name="unit" value="pistol" checked />
+              PISTOL</label
+            >
+          </fieldset>
+        </div>
+        <div>
+          <label for="effective-date">Effective date</label
+          ><input id="effective-date" type="date" required />
+        </div>
+        <div>
+          <label for="currency">Agreement currency</label
+          ><select id="currency">
+            <option>JMD</option>
+            <option>USD</option>
+          </select>
+        </div>
+        <div>
+          <label for="commission-mode">Commission structure</label
+          ><select id="commission-mode">
+            <option value="percentage">Percentage of cleared receipts</option>
+            <option value="flat">Flat fee per fully paid referral</option>
+            <option value="tiered">
+              Flat below threshold / percentage above
+            </option>
+          </select>
+        </div>
+        <div id="percent-field">
+          <label for="commission-percent">Commission percentage</label
+          ><input
+            id="commission-percent"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            placeholder="Set USSE’s agreed rate"
+          />
+        </div>
+        <div id="flat-field">
+          <label for="flat-amount">Flat commission amount</label
+          ><input
+            id="flat-amount"
+            type="number"
+            min="0"
+            max="100000000"
+            step="0.01"
+          />
+        </div>
+        <div id="threshold-field">
+          <label for="threshold-amount">Contracted value threshold</label
+          ><input
+            id="threshold-amount"
+            type="number"
+            min="0.01"
+            max="10000000000"
+            step="0.01"
+          />
+        </div>
+        <div>
+          <label for="payment-days"
+            >Payment due after clearance (business days)</label
+          ><input
+            id="payment-days"
+            type="number"
+            min="1"
+            max="365"
+            required
+            value="14"
+          />
+        </div>
+        <div>
+          <label for="notice-days">Termination notice (days)</label
+          ><input
+            id="notice-days"
+            type="number"
+            min="0"
+            max="365"
+            required
+            value="30"
+          />
+        </div>
+        <div class="full">
+          <label for="additional-terms"
+            >Additional agreed terms (optional)</label
+          ><textarea id="additional-terms" maxlength="6000"></textarea>
+          <p class="help">
+            Review the agreement before issuing. Commission rates must be
+            explicitly set for USSE.
+          </p>
+        </div>
+        <div class="full actions">
+          <button type="submit" class="primary">Save draft</button
+          ><button type="button" id="preview-draft">Preview agreement</button>
+        </div>
+      </form>
+      <p id="editor-error" role="alert"></p>
+    </dialog>
+    <dialog id="viewer">
+      <div class="head no-print">
+        <h2>Agreement</h2>
+        <div class="actions">
+          <button id="download-copy">Download copy</button
+          ><button id="print-copy">Print / Save PDF</button
+          ><button data-close="viewer">Close</button>
+        </div>
+      </div>
+      <div id="agreement-document" class="document"></div>
+      <div id="agreement-audit" class="no-print"></div>
+    </dialog>
+    <dialog id="link-dialog">
+      <div class="head">
+        <h2>Partner signing link</h2>
+        <button data-close="link-dialog">Close</button>
+      </div>
+      <p>
+        The agreement terms and company signature are now fixed. The link
+        expires in 30 days. Share it only with the intended partner.
+      </p>
+      <label for="signing-link">Signing link</label
+      ><input id="signing-link" readonly />
+      <div class="actions" style="margin-top: 16px">
+        <button id="copy-link" class="primary">Copy link</button
+        ><a
+          id="open-link"
+          class="button"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Open signing page</a
+        >
+      </div>
+      <p class="help">
+        If you need another link later, use “New signing link”. That replaces
+        and invalidates the old link.
+      </p>
+    </dialog>
+    <dialog id="referral-editor">
+      <div class="head">
+        <h2>Register referral</h2>
+        <button data-close="referral-editor">Close</button>
+      </div>
+      <form id="referral-form" class="grid">
+        <input type="hidden" id="referral-id" />
+        <div class="full">
+          <label for="referral-agreement">Signed partner agreement</label
+          ><select id="referral-agreement" required></select>
+        </div>
+        <div>
+          <label for="client-name">Client name</label
+          ><input id="client-name" required minlength="2" maxlength="300" />
+        </div>
+        <div>
+          <label for="opportunity-ref"
+            >Unique opportunity / invoice reference</label
+          ><input id="opportunity-ref" required minlength="2" maxlength="300" />
+        </div>
+        <div>
+          <label for="referral-unit">USSE subsidiary</label
+          ><select id="referral-unit" required></select>
+        </div>
+        <div>
+          <label for="referral-status">Referral status</label
+          ><select id="referral-status">
+            <option value="pending">Pending qualification</option>
+            <option value="qualified">Qualified</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div>
+          <label for="project-value">Contracted project value</label
+          ><input
+            id="project-value"
+            type="number"
+            min="0.01"
+            max="10000000000"
+            step="0.01"
+            required
+          />
+        </div>
+        <div>
+          <label for="cleared-amount">Total cleared receipts</label
+          ><input
+            id="cleared-amount"
+            type="number"
+            min="0"
+            step="0.01"
+            value="0"
+            required
+          />
+        </div>
+        <div>
+          <label for="refunded-amount">Refunds / reversals</label
+          ><input
+            id="refunded-amount"
+            type="number"
+            min="0"
+            step="0.01"
+            value="0"
+            required
+          />
+        </div>
+        <div>
+          <label>Commission estimate</label>
+          <p id="commission-estimate">—</p>
+        </div>
+        <div class="full">
+          <label for="referral-notes">Notes / introduction evidence</label
+          ><textarea id="referral-notes" maxlength="4000"></textarea>
+        </div>
+        <div class="full">
+          <button type="submit" class="primary">Save referral</button>
+        </div>
+      </form>
+      <p id="referral-error" role="alert"></p>
+    </dialog>
+    <script type="module" src="assets/usse-referral-admin.mjs"></script>
+  </body>
+</html>

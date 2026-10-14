@@ -11,6 +11,8 @@
     { "source": "/ajm-webpage-builder", "destination": "/ajm-webpage-builder.html" },
     { "source": "/master-admin", "destination": "/master-admin.html" },
     { "source": "/pistol-operations-logistics", "destination": "/pistol-operations-logistics.html" },
-    { "source": "/usse-consultancy", "destination": "/usse-consultancy.html" }
+    { "source": "/usse-consultancy", "destination": "/usse-consultancy.html" },
+    { "source": "/referral-agreements", "destination": "/referral-agreements.html" },
+    { "source": "/sign-referral-agreement", "destination": "/sign-referral-agreement.html" }
   ]
 }

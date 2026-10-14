@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en-JM">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Review &amp; Sign Referral Agreement — USSE</title>
+    <link rel="stylesheet" href="assets/usse-referrals.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <img src="usse.png" alt="USSE" />
+        <div>
+          <strong>USSE Partner Programme</strong
+          ><small>Review &amp; sign your agreement</small>
+        </div>
+      </div>
+    </header>
+    <main id="sign-page">
+      <div id="notice" role="status" aria-live="polite">
+        Loading your agreement…
+      </div>
+      <div id="signed-actions" class="actions no-print" hidden>
+        <button id="download-copy">Download copy</button
+        ><button id="print-copy">Print / Save PDF</button>
+      </div>
+      <div id="agreement-document" class="document"></div>
+      <form id="sign-form" class="card" style="margin-top: 24px" hidden>
+        <h2>Your signature</h2>
+        <p class="muted">Review the full agreement above before confirming.</p>
+        <div class="grid">
+          <div>
+            <label for="signer-name">Your full legal name</label
+            ><input
+              id="signer-name"
+              required
+              minlength="2"
+              maxlength="200"
+              autocomplete="name"
+            />
+          </div>
+          <div>
+            <label for="signer-email"
+              >Email address shown on this agreement</label
+            ><input
+              id="signer-email"
+              type="email"
+              required
+              autocomplete="email"
+            />
+          </div>
+        </div>
+        <div id="acknowledgements" class="ack"></div>
+        <label for="signature-pad">Draw your signature below</label
+        ><canvas
+          id="signature-pad"
+          class="signature-pad"
+          aria-label="Draw your signature"
+          width="1000"
+          height="300"
+        ></canvas>
+        <div class="actions" style="margin: 12px 0">
+          <button type="button" id="clear-signature">Clear signature</button>
+        </div>
+        <label for="partner-signature">Or upload your signature</label
+        ><input
+          id="partner-signature"
+          type="file"
+          accept="image/png,image/webp"
+        />
+        <p class="help">
+          Please keep the signature background transparent. PNG or WebP, under 2
+          MB.
+        </p>
+        <p id="partner-signature-note" class="help"></p>
+        <img
+          id="partner-signature-preview"
+          class="signature-preview"
+          alt="Uploaded signature preview"
+          hidden
+        /><button id="submit-signature" type="submit" class="primary">
+          Sign &amp; accept agreement
+        </button>
+        <p id="sign-error" role="alert"></p>
+      </form>
+    </main>
+    <script type="module" src="assets/usse-referral-sign.mjs"></script>
+  </body>
+</html>
