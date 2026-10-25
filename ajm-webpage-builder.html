@@ -57,7 +57,7 @@
         .brand { display: flex; align-items: center; gap: 12px; }
         .brand img { width: 48px; height: 48px; object-fit: contain; border-radius: 12px; }
         .brand strong { display: block; letter-spacing: .11em; font-size: .92rem; }
-        .brand span { display: block; color: var(--muted); font-size: .72rem; text-transform: uppercase; margin-top: 3px; }
+        .brand span { display: block; color: var(--muted); font-size: .8125rem; text-transform: uppercase; margin-top: 3px; }
         .nav-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
 
         .btn {
@@ -84,13 +84,13 @@
             box-shadow: 0 24px 70px rgba(0,0,0,.25);
         }
         .intro-card { padding: 30px; }
-        .eyebrow { color: var(--green); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: .74rem; }
+        .eyebrow { color: var(--green); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: .8125rem; }
         .intro h1 { font-size: clamp(2rem, 4vw, 3.7rem); line-height: 1; margin: 10px 0 12px; }
         .intro p { max-width: 720px; color: var(--muted); line-height: 1.65; margin: 0; }
         .access-card { padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 10px; }
         .access-card small { color: var(--muted); }
         .access-value { font-family: "Syne", sans-serif; font-size: 1.35rem; }
-        .tier-pill { width: max-content; border-radius: 999px; padding: 7px 11px; font-weight: 800; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; background: rgba(255,255,255,.1); }
+        .tier-pill { width: max-content; border-radius: 999px; padding: 7px 11px; font-weight: 800; font-size: .8125rem; text-transform: uppercase; letter-spacing: .08em; background: rgba(255,255,255,.1); }
         .tier-pill.silver { color: var(--silver); }
         .tier-pill.gold { color: var(--gold); }
         .tier-pill.platinum { color: var(--platinum); }
@@ -112,9 +112,9 @@
 
         .notice { display: none; margin-bottom: 24px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--line); line-height: 1.5; }
         .notice.show { display: block; }
-        .notice.error { color: #ffd7de; background: rgba(255,85,112,.1); border-color: rgba(255,85,112,.35); }
-        .notice.success { color: #c9ffdf; background: rgba(23,214,111,.1); border-color: rgba(23,214,111,.35); }
-        .notice.info { color: #d5eaff; background: rgba(77,163,255,.1); border-color: rgba(77,163,255,.35); }
+        .notice.error { color: #a62c48; background: rgba(255,85,112,.1); border-color: rgba(255,85,112,.35); }
+        .notice.success { color: #09634f; background: rgba(23,214,111,.1); border-color: rgba(23,214,111,.35); }
+        .notice.info { color: #225b89; background: rgba(77,163,255,.1); border-color: rgba(77,163,255,.35); }
 
         .workspace { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }
         .step-nav { position: sticky; top: 100px; display: grid; gap: 8px; }
@@ -127,12 +127,12 @@
         .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
         .panel h2 { margin: 0 0 7px; font-size: 1.35rem; }
         .panel p { margin: 0; color: var(--muted); line-height: 1.5; font-size: .91rem; }
-        .feature-lock { color: var(--yellow); font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; }
+        .feature-lock { color: var(--yellow); font-size: .8125rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; }
         .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
         .field { display: grid; gap: 7px; margin-bottom: 16px; }
         .field:last-child { margin-bottom: 0; }
-        label { color: #e9ecf7; font-size: .86rem; font-weight: 700; }
+        label { color: #52627a; font-size: .86rem; font-weight: 700; }
         label small { color: var(--muted); font-weight: 400; }
         input, textarea, select {
             width: 100%;
@@ -146,13 +146,13 @@
         input:focus, textarea:focus, select:focus { border-color: rgba(23,214,111,.72); box-shadow: 0 0 0 3px rgba(23,214,111,.1); }
         textarea { min-height: 118px; resize: vertical; line-height: 1.5; }
         .compact { min-height: 82px; }
-        .help { color: var(--muted); font-size: .75rem; line-height: 1.45; }
+        .help { color: var(--muted); font-size: .8125rem; line-height: 1.45; }
         .toggle { display: flex; align-items: center; gap: 10px; }
         .toggle input { width: 18px; height: 18px; accent-color: var(--green); }
         .toggle label { cursor: pointer; }
         .tier-section.locked { opacity: .38; pointer-events: none; filter: grayscale(.35); }
 
-        .segment-note { padding: 13px 15px; border-radius: 13px; color: #dce8ff; background: rgba(77,163,255,.08); border: 1px solid rgba(77,163,255,.22); font-size: .84rem; line-height: 1.5; }
+        .segment-note { padding: 13px 15px; border-radius: 13px; color: #225b89; background: rgba(77,163,255,.08); border: 1px solid rgba(77,163,255,.22); font-size: .84rem; line-height: 1.5; }
         .upload-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .upload-row input { flex: 1; min-width: 230px; }
         .savebar {
@@ -180,7 +180,7 @@
         @media (max-width: 900px) {
             .intro, .workspace { grid-template-columns: 1fr; }
             .step-nav { position: static; grid-template-columns: repeat(3, minmax(0,1fr)); }
-            .step-link { text-align: center; padding: 10px 6px; font-size: .76rem; }
+            .step-link { text-align: center; padding: 10px 6px; font-size: .8125rem; }
             .step-link span { display: block; margin: 0 0 4px; }
         }
         @media (max-width: 650px) {
@@ -198,7 +198,7 @@
             .workflow-actions { justify-content: flex-start; }
         }
     </style>
-<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025-text2">
 <script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 <body class="hub-admin" data-hub-page="ajm-webpage-builder">

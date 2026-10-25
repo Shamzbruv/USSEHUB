@@ -43,7 +43,7 @@
         .hero-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .52; }
         .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 0%, rgba(7,9,16,.28) 55%, rgba(7,9,16,.68) 100%); }
         .hero-grid { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 36px; align-items: end; padding: 160px 0 76px; }
-        .tier-badge { display: inline-flex; border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); border-radius: 999px; padding: 7px 11px; color: var(--accent); background: var(--panel); font-size: .72rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+        .tier-badge { display: inline-flex; border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); border-radius: 999px; padding: 7px 11px; color: var(--accent); background: var(--panel); font-size: .8125rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
         .hero h1 { max-width: 880px; margin: 18px 0 12px; font-size: clamp(3rem, 8vw, 6.8rem); line-height: .92; }
         .tagline { max-width: 700px; margin: 0; color: var(--hub-ink); font-size: clamp(1.05rem, 2vw, 1.35rem); line-height: 1.55; }
         .logo-card { width: 170px; height: 170px; border: 1px solid var(--line); border-radius: 28px; padding: 18px; background: rgba(255,255,255,.92); box-shadow: 0 22px 60px rgba(0,0,0,.42); }
@@ -59,7 +59,7 @@
         main { padding: 90px 0; }
         .section { padding: 44px 0; }
         .section-head { display: grid; grid-template-columns: .7fr 1.3fr; gap: 34px; margin-bottom: 28px; }
-        .kicker { color: var(--accent); font-size: .74rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+        .kicker { color: var(--accent); font-size: .8125rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
         .section h2 { margin: 8px 0 0; font-size: clamp(2rem, 4vw, 3.4rem); }
         .section-head p { color: var(--muted); line-height: 1.8; font-size: 1.05rem; margin: 3px 0 0; white-space: pre-wrap; }
         .info-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 20px; }
@@ -80,19 +80,19 @@
         .offer { border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, transparent), rgba(255,255,255,.025)); }
         .offer-code { display: inline-block; margin-top: 12px; padding: 8px 12px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 9px; font-weight: 800; letter-spacing: .08em; }
         .reviews { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
-        .review p { color: #dce2ee; line-height: 1.6; }
+        .review p { color: #52627a; line-height: 1.6; }
         .stars { color: var(--accent); letter-spacing: .1em; }
         .review small { color: var(--muted); }
         .lead-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 22px; }
         .field { display: grid; gap: 7px; margin-bottom: 13px; }
-        label { color: #e6e9f3; font-size: .84rem; font-weight: 700; }
+        label { color: #52627a; font-size: .84rem; font-weight: 700; }
         input, textarea { width: 100%; padding: 12px 13px; color: var(--hub-ink); border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,.22); outline: none; }
         input:focus, textarea:focus { border-color: var(--accent); }
         textarea { min-height: 120px; resize: vertical; }
         .form-message { display: none; margin-bottom: 13px; padding: 11px 13px; border-radius: 11px; font-size: .86rem; }
         .form-message.show { display: block; }
-        .form-message.error { color: #ffd9df; background: rgba(255,95,120,.12); }
-        .form-message.success { color: #c9ffdf; background: rgba(35,212,119,.12); }
+        .form-message.error { color: #a62c48; background: rgba(255,95,120,.12); }
+        .form-message.success { color: #09634f; background: rgba(35,212,119,.12); }
         .platinum-band { padding: 32px; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 28px; background: radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 18%, transparent), transparent 45%), var(--panel); }
         .platinum-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
         footer { padding: 34px 0; border-top: 1px solid var(--line); color: var(--muted); }
@@ -102,7 +102,7 @@
         .state-card h1 { margin: 0 0 10px; }
         .state-card p { color: var(--muted); line-height: 1.6; }
         .state-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
-        .preview-banner { margin: -18px 0 14px; padding: 10px 18px; color: #d5eaff; background: #10213b; border-bottom: 1px solid rgba(117,197,255,.32); text-align: center; font-size: .84rem; line-height: 1.5; }
+        .preview-banner { margin: -18px 0 14px; padding: 10px 18px; color: #225b89; background: #10213b; border-bottom: 1px solid rgba(117,197,255,.32); text-align: center; font-size: .84rem; line-height: 1.5; }
         .preview-banner a { display: inline-block; margin-left: 8px; color: var(--hub-ink); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
         .hidden { display: none !important; }
         @media (max-width: 850px) {
@@ -126,7 +126,7 @@
             .footer-row { align-items: flex-start; flex-direction: column; }
         }
     </style>
-<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025-text2">
 <script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 <body class="hub-business" data-hub-page="ajm-business-page">
@@ -463,7 +463,8 @@
 
         function renderPage() {
             const tier = webpage.tier || 'silver';
-            document.body.className = `tier-${tier}`;
+            document.body.classList.remove('tier-silver', 'tier-gold', 'tier-platinum');
+            document.body.classList.add(`tier-${tier}`);
             document.title = `${listing.business_name} | AJM ${tier[0].toUpperCase() + tier.slice(1)} Webpage`;
             document.querySelector('meta[name="description"]').content = (webpage.about_text || listing.description || '').slice(0, 155);
             setText('business-name', listing.business_name);
@@ -618,7 +619,7 @@
                 }
                 const label = document.createElement('div');
                 label.textContent = `Sponsored${ad.business_name ? ' · ' + ad.business_name : ''}`;
-                label.style.cssText = 'font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;';
+                label.style.cssText = 'font-size:.8125rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;';
                 const heading = document.createElement('h3');
                 heading.style.margin = '0 0 6px';
                 heading.textContent = ad.headline || ad.package_name || 'Featured business';
@@ -708,7 +709,7 @@
                 attempts += 1;
                 if (window.turnstile?.render) {
                     clearInterval(timer);
-                    turnstileWidgetId = window.turnstile.render('#turnstile-widget', { sitekey: TURNSTILE_SITE_KEY, theme: 'dark', size: 'flexible' });
+                    turnstileWidgetId = window.turnstile.render('#turnstile-widget', { sitekey: TURNSTILE_SITE_KEY, theme: 'light', size: 'flexible' });
                 } else if (attempts > 80) clearInterval(timer);
             }, 100);
         }

@@ -287,7 +287,7 @@ dialog::backdrop {
   letter-spacing: -0.02em;
 }
 .document-brand {
-  font: 700 11px system-ui;
+  font: 700 12px system-ui;
   letter-spacing: 0.15em;
   color: #186950;
 }
@@ -306,7 +306,7 @@ dialog::backdrop {
 }
 .agreement small {
   color: #586579;
-  font: 700 10px system-ui;
+  font: 700 12px system-ui;
 }
 .agreement section {
   margin: 22px 0;

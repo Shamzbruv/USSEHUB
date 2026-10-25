@@ -65,7 +65,7 @@
             background: linear-gradient(135deg, rgba(255,77,94,0.2), rgba(255,140,66,0.2));
             border: 1px solid rgba(255,77,94,0.4);
             color: var(--red);
-            font-size: 0.75rem;
+            font-size: .8125rem;
             font-weight: 700;
             padding: 4px 10px;
             border-radius: 20px;
@@ -89,7 +89,7 @@
         .btn-warning:hover { background: rgba(255,207,51,0.25); }
         .btn-ghost { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--white); }
         .btn-ghost:hover { background: rgba(255,255,255,0.08); }
-        .btn-sm { padding: 6px 12px; font-size: 0.78rem; border-radius: 8px; }
+        .btn-sm { padding: 6px 12px; font-size: .8125rem; border-radius: 8px; }
         .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -112,9 +112,9 @@
         .receivables-callout h2 { margin-bottom: 5px; font-size: 1.04rem; }
         .receivables-callout p { max-width: 820px; color: var(--muted); font-size: .82rem; line-height: 1.55; }
         .receivables-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
-        .webpage-steps { margin: 14px 0 16px; padding: 13px 14px; border: 1px solid rgba(91,156,246,.24); border-radius: 12px; background: rgba(91,156,246,.07); color: var(--muted); font-size: .78rem; line-height: 1.55; }
+        .webpage-steps { margin: 14px 0 16px; padding: 13px 14px; border: 1px solid rgba(91,156,246,.24); border-radius: 12px; background: rgba(91,156,246,.07); color: var(--muted); font-size: .8125rem; line-height: 1.55; }
         .webpage-steps strong { color: var(--white); }
-        .webpage-summary { margin: -7px 0 14px; color: var(--muted); font-size: .76rem; line-height: 1.45; }
+        .webpage-summary { margin: -7px 0 14px; color: var(--muted); font-size: .8125rem; line-height: 1.45; }
         a.btn[aria-disabled="true"] { opacity: .46; pointer-events: none; cursor: not-allowed; }
 
         /* ── STATS ROW ── */
@@ -137,7 +137,7 @@
             line-height: 1;
             margin-bottom: 6px;
         }
-        .stat-card .stat-label { font-size: 0.78rem; color: var(--muted); }
+        .stat-card .stat-label { font-size: .8125rem; color: var(--muted); }
         .stat-pending .stat-value { color: var(--yellow); }
         .stat-approved .stat-value { color: var(--green); }
         .stat-rejected .stat-value { color: var(--red); }
@@ -191,7 +191,7 @@
             padding: 14px 16px;
             text-align: left;
             color: var(--muted);
-            font-size: 0.78rem;
+            font-size: .8125rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -205,14 +205,14 @@
         .admin-table tr:last-child td { border-bottom: none; }
         .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
         .admin-table td strong { display: block; margin-bottom: 2px; }
-        .admin-table td small { color: var(--muted); font-size: 0.78rem; }
+        .admin-table td small { color: var(--muted); font-size: .8125rem; }
 
         /* Status badges */
         .badge {
             display: inline-block;
             padding: 3px 10px;
             border-radius: 20px;
-            font-size: 0.72rem;
+            font-size: .8125rem;
             font-weight: 700;
             letter-spacing: 0.3px;
         }
@@ -328,7 +328,7 @@
             border-radius: 12px; padding: 16px; text-align: center;
         }
         .chart-kpi .kpi-val { font-size: 1.6rem; font-weight: 800; line-height: 1; }
-        .chart-kpi .kpi-lbl { font-size: 0.74rem; color: var(--muted); margin-top: 4px; }
+        .chart-kpi .kpi-lbl { font-size: .8125rem; color: var(--muted); margin-top: 4px; }
         /* Advertising panels */
         .adv-sub-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
         .adv-sub-tab { padding: 7px 16px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--muted); font-family: inherit; font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
@@ -363,7 +363,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="taxonomy.js"></script>
 
-<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025-text2">
 <script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 <body class="hub-admin" data-hub-page="ajm-admin-panel">
@@ -649,7 +649,7 @@
             <img src="aloe%20logo.png" alt="AJM" style="height:40px;width:auto;border-radius:8px;">
             <div>
                 <strong>Admin Panel</strong><br>
-                <span style="font-size:0.75rem;color:var(--muted);">AJM Advertising Hub</span>
+                <span style="font-size:.8125rem;color:var(--muted);">AJM Advertising Hub</span>
             </div>
         </a>
         <div class="nav-right">
@@ -970,7 +970,7 @@
     <div class="modal-box" style="max-width:560px;">
         <button class="modal-close" onclick="closePaymentAccountModal()" aria-label="Close">&times;</button>
         <h2 class="modal-title" id="pa-modal-title">Add Payment Destination</h2>
-        <div style="padding:11px 12px;margin-bottom:14px;border:1px solid rgba(255,207,51,.25);border-radius:10px;background:rgba(255,207,51,.06);color:var(--muted);font-size:.78rem;line-height:1.5;"><strong style="color:var(--yellow);">Transfer details only.</strong> Authorized admins can manage these details and the selected account is disclosed to the ordering customer after order creation. Never enter an online-banking login, password, PIN, one-time code or card credentials.</div>
+        <div style="padding:11px 12px;margin-bottom:14px;border:1px solid rgba(255,207,51,.25);border-radius:10px;background:rgba(255,207,51,.06);color:var(--muted);font-size:.8125rem;line-height:1.5;"><strong style="color:var(--yellow);">Transfer details only.</strong> Authorized admins can manage these details and the selected account is disclosed to the ordering customer after order creation. Never enter an online-banking login, password, PIN, one-time code or card credentials.</div>
         <input type="hidden" id="pa-id" />
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div class="form-group"><label>Label (e.g. JMD Main Account) *</label><input type="text" id="pa-label" placeholder="JMD Main Account" required /></div>
@@ -2126,7 +2126,7 @@
 
             tbody.innerHTML = orders.map(o => {
                 const color = statusColors[o.status] || 'var(--muted)';
-                const badge = `<span style="background:rgba(255,255,255,0.05);border:1px solid ${color};color:${color};border-radius:20px;padding:2px 9px;font-size:0.72rem;font-weight:700;">${o.status.replace(/_/g,' ')}</span>`;
+                const badge = `<span style="background:rgba(255,255,255,0.05);border:1px solid ${color};color:${color};border-radius:20px;padding:2px 9px;font-size:.8125rem;font-weight:700;">${o.status.replace(/_/g,' ')}</span>`;
                 const customer = adOrderCustomer(o);
                 const canApprove = ['payment_submitted','pending_payment'].includes(o.status);
                 const canReject = ['pending_payment','payment_submitted'].includes(o.status);
@@ -2430,7 +2430,7 @@
                 <div class="pkg-card" style="margin-bottom:12px;">
                     <div class="pkg-card-header">
                         <div>
-                            <h4>${escHtml(a.label)} ${a.is_default ? '<span style="background:rgba(23,214,111,0.15);color:var(--green);border:1px solid rgba(23,214,111,0.3);border-radius:20px;padding:1px 8px;font-size:0.7rem;">Default</span>' : ''}</h4>
+                            <h4>${escHtml(a.label)} ${a.is_default ? '<span style="background:rgba(23,214,111,0.15);color:var(--green);border:1px solid rgba(23,214,111,0.3);border-radius:20px;padding:1px 8px;font-size:.8125rem;">Default</span>' : ''}</h4>
                             <small style="color:var(--muted)">${escHtml(a.currency)} · ${a.is_active ? '<span style="color:var(--green)">Active</span>' : '<span style="color:var(--muted)">Inactive</span>'}</small>
                         </div>
                         <div style="display:flex;gap:8px;">
@@ -2532,7 +2532,7 @@
     const CHART_DEFAULTS = {
         responsive: true,
         maintainAspectRatio: true,
-        plugins: { legend: { labels: { color: '#b9c0d4', font: { family: 'Space Grotesk', size: 11 } } } },
+        plugins: { legend: { labels: { color: '#52627a', font: { family: 'Space Grotesk', size: 11 } } } },
         scales: {}
     };
     const PALETTE = ['#17d66f','#ffcf33','#5b9cf6','#ff4d5e','#ff8c42','#a78bfa','#22d3ee','#fb7185','#4ade80','#fbbf24'];
@@ -2541,8 +2541,8 @@
         return {
             ...CHART_DEFAULTS,
             scales: {
-                x: { ticks: { color: '#b9c0d4', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                y: { ticks: { color: '#b9c0d4', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.07)' }, beginAtZero: true },
+                x: { ticks: { color: '#52627a', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { ticks: { color: '#52627a', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.07)' }, beginAtZero: true },
                 ...extraScales
             }
         };
@@ -2595,7 +2595,7 @@
             destroyChart('listings-status');
             chartInstances['listings-status'] = new Chart(document.getElementById('chart-listings-status'), {
                 type:'pie', data: { labels, datasets: [{ data: labels.map(l=>counts[l]), backgroundColor: PALETTE }] },
-                options: { responsive:true, plugins: { legend: { labels: { color:'#b9c0d4', font:{family:'Space Grotesk',size:11} } } } }
+                options: { responsive:true, plugins: { legend: { labels: { color:'#52627a', font:{family:'Space Grotesk',size:11} } } } }
             });
         } catch(_) {}
 
@@ -2621,7 +2621,7 @@
             destroyChart('members-roles');
             chartInstances['members-roles'] = new Chart(document.getElementById('chart-members-roles'), {
                 type:'doughnut', data: { labels, datasets: [{ data: labels.map(l=>counts[l]), backgroundColor: PALETTE }] },
-                options: { responsive:true, plugins: { legend: { labels: { color:'#b9c0d4', font:{family:'Space Grotesk',size:11} } } } }
+                options: { responsive:true, plugins: { legend: { labels: { color:'#52627a', font:{family:'Space Grotesk',size:11} } } } }
             });
         } catch(_) {}
 
@@ -2663,7 +2663,7 @@
             chartInstances['orders-status'] = new Chart(document.getElementById('chart-orders-status'), {
                 type:'pie',
                 data: { labels:statusRows.map((row) => String(row.status || row.label || row.key || '').replace(/_/g, ' ')), datasets:[{ data:statusRows.map((row) => Number(row.count ?? row.orders ?? row.value ?? 0)), backgroundColor:PALETTE }] },
-                options: { responsive:true, plugins: { legend: { labels: { color:'#b9c0d4', font:{family:'Space Grotesk',size:11} } } } }
+                options: { responsive:true, plugins: { legend: { labels: { color:'#52627a', font:{family:'Space Grotesk',size:11} } } } }
             });
 
             const packageLabels = packageRows.map((row) => row.package_name || row.name || row.label || 'Package');
@@ -2677,7 +2677,7 @@
             destroyChart('revenue-donut');
             chartInstances['revenue-donut'] = new Chart(document.getElementById('chart-revenue-donut'), {
                 type:'doughnut', data:{ labels:packageLabels, datasets:[{ data:packageRevenue, backgroundColor:PALETTE }] },
-                options: { responsive:true, plugins: { legend: { labels: { color:'#b9c0d4', font:{family:'Space Grotesk',size:10} } } } }
+                options: { responsive:true, plugins: { legend: { labels: { color:'#52627a', font:{family:'Space Grotesk',size:10} } } } }
             });
             destroyChart('package-popularity');
             chartInstances['package-popularity'] = new Chart(document.getElementById('chart-package-popularity'), {

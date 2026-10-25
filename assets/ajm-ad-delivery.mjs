@@ -236,10 +236,10 @@ function injectStyles() {
         video.ajm-network-ad__media{object-fit:cover}
         .ajm-network-ad__copy{display:flex;min-width:0;flex-direction:column;align-items:flex-start;padding:12px 13px 14px}
         .ajm-network-ad--banner .ajm-network-ad__copy{padding:10px 12px;justify-content:center}
-        .ajm-network-ad__label{margin-bottom:5px;color:#6ff0ab;font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+        .ajm-network-ad__label{margin-bottom:5px;color:#6ff0ab;font-size:.8125rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
         .ajm-network-ad__title{margin:0;color:#fff;font-size:.85rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
         .ajm-network-ad__body{display:none}
-        .ajm-network-ad__cta{display:inline-flex;margin-top:7px;color:#8cf0b5;font-size:.72rem;font-weight:800}
+        .ajm-network-ad__cta{display:inline-flex;margin-top:7px;color:#8cf0b5;font-size:.8125rem;font-weight:800}
         .ajm-network-ad__cta:focus-visible,.ajm-network-ad__dismiss:focus-visible{outline:3px solid #ffcf33;outline-offset:3px}
         .ajm-network-ad--spotlight{position:fixed;right:18px;bottom:86px;z-index:1000;width:min(340px,calc(100vw - 36px));border-color:rgba(45,214,164,.38);box-shadow:0 28px 90px rgba(0,0,0,.58);animation:ajm-ad-arrive .28s ease-out}
         .ajm-network-ad--spotlight .ajm-network-ad__media{aspect-ratio:16/9}

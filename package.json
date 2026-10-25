@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "npm run validate && npm run test:referrals && npm run test:routing",
+    "test": "npm run validate && npm run test:text && npm run test:referrals && npm run test:routing",
     "test:rls": "node test-rls.mjs",
     "test:commerce": "node test-advertising-workflow.mjs",
     "test:routing": "node test-routing.mjs",
     "validate": "node --experimental-vm-modules validate-static.mjs",
     "lint": "npm run validate",
     "start": "serve -l tcp://0.0.0.0:${PORT:-3000} .",
-    "test:referrals": "node tests/referral-agreements.test.mjs"
+    "test:referrals": "node tests/referral-agreements.test.mjs",
+    "test:text": "node tests/text-contrast.test.mjs"
   },
   "keywords": [],
   "author": "",

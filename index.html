@@ -267,7 +267,7 @@
 
         .brand-text span {
             color: var(--muted);
-            font-size: 0.72rem;
+            font-size: .8125rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
@@ -606,7 +606,7 @@
         .center-logo span {
             display: block;
             color: var(--yellow);
-            font-size: 0.72rem;
+            font-size: .8125rem;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             margin-top: 4px;
@@ -865,7 +865,7 @@
         .spotlight-card small {
             display: block;
             color: var(--muted);
-            font-size: 0.78rem;
+            font-size: .8125rem;
             font-weight: 900;
             letter-spacing: 0.16em;
             text-transform: uppercase;
@@ -1305,7 +1305,7 @@
 
         .home-ad-section-label {
             margin: 26px 0 14px;
-            font-size: 0.78rem;
+            font-size: .8125rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -1350,7 +1350,7 @@
             display: inline-block;
             padding: 3px 10px;
             border-radius: 999px;
-            font-size: 0.68rem;
+            font-size: .8125rem;
             font-weight: 800;
             letter-spacing: 0.04em;
             text-transform: uppercase;
@@ -1369,12 +1369,12 @@
         .home-pkg-card-price {
             font-size: 1.35rem;
             font-weight: 800;
-            color: #17d66f;
+            color: #09634f;
             margin-bottom: 2px;
         }
 
         .home-pkg-card-duration {
-            font-size: 0.78rem;
+            font-size: .8125rem;
             color: var(--muted);
         }
 
@@ -1443,7 +1443,7 @@
             margin-bottom: 4px;
             color: var(--yellow);
             font-weight: 900;
-            font-size: .6rem;
+            font-size: .8125rem;
             letter-spacing: 0.1em;
             text-transform: uppercase;
         }
@@ -1823,7 +1823,7 @@
             }
 
             .brand-text strong {
-                font-size: 0.78rem;
+                font-size: .8125rem;
             }
 
             .brand {
@@ -1986,7 +1986,7 @@
 
   gtag('config', 'G-LSFXN90KHS');
 </script>
-<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025-text2">
 <script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 
@@ -2826,7 +2826,7 @@
         placeholder.className = 'home-ad-placeholder';
         const copy = document.createElement('div');
         copy.className = 'home-ad-placeholder-copy';
-        appendText(copy, 'strong', 'Your business could be featured here.', 'color:white;');
+        appendText(copy, 'strong', 'Your business could be featured here.', 'color:var(--hub-ink);');
         appendText(copy, 'span', 'Choose a homepage advertising package and submit your creative for approval.');
         const link = document.createElement('a');
         link.href = 'ajm-advertising-hub?advertise=1';
@@ -2958,12 +2958,12 @@
 
     function tierMeta(code) {
         const value = String(code || '').toLowerCase();
-        if (value.includes('platinum')) return { color: '#5b9cf6', bg: 'rgba(91,156,246,.16)', label: 'Platinum' };
-        if (value.includes('gold')) return { color: '#ffcf33', bg: 'rgba(255,207,51,.16)', label: 'Gold' };
-        if (value.includes('banner')) return { color: '#ff4d5e', bg: 'rgba(255,77,94,.16)', label: 'Banner' };
-        if (value.includes('advanced')) return { color: '#17d66f', bg: 'rgba(23,214,111,.16)', label: 'Advanced' };
-        if (value.includes('silver')) return { color: '#b9c0d4', bg: 'rgba(185,192,212,.16)', label: 'Silver' };
-        if (value.includes('basic')) return { color: '#8891a8', bg: 'rgba(136,145,168,.16)', label: 'Basic' };
+        if (value.includes('platinum')) return { color: '#225b89', bg: 'rgba(91,156,246,.16)', label: 'Platinum' };
+        if (value.includes('gold')) return { color: '#76520d', bg: 'rgba(255,207,51,.16)', label: 'Gold' };
+        if (value.includes('banner')) return { color: '#a62c48', bg: 'rgba(255,77,94,.16)', label: 'Banner' };
+        if (value.includes('advanced')) return { color: '#09634f', bg: 'rgba(23,214,111,.16)', label: 'Advanced' };
+        if (value.includes('silver')) return { color: '#52627a', bg: 'rgba(185,192,212,.16)', label: 'Silver' };
+        if (value.includes('basic')) return { color: '#52627a', bg: 'rgba(136,145,168,.16)', label: 'Basic' };
         return { color: 'rgba(255,255,255,.5)', bg: 'rgba(255,255,255,.08)', label: '' };
     }
 
