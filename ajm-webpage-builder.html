@@ -50,7 +50,7 @@
             top: 0;
             z-index: 30;
             border-bottom: 1px solid var(--line);
-            background: rgba(5,7,13,.86);
+            background: var(--panel);
             backdrop-filter: blur(18px);
         }
         .nav { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
@@ -71,7 +71,7 @@
         }
         .btn:hover { transform: translateY(-1px); background: rgba(255,255,255,.12); }
         .btn-primary { color: #051009; border: 0; background: linear-gradient(135deg, var(--green), var(--yellow)); }
-        .btn-danger { color: #fff; background: rgba(255,85,112,.15); border-color: rgba(255,85,112,.35); }
+        .btn-danger { color: var(--hub-ink); background: rgba(255,85,112,.15); border-color: rgba(255,85,112,.35); }
         .btn:disabled { cursor: not-allowed; opacity: .45; transform: none; }
         .btn[aria-disabled="true"] { cursor: not-allowed; opacity: .45; pointer-events: none; transform: none; }
 
@@ -80,7 +80,7 @@
         .intro-card, .access-card, .panel {
             border: 1px solid var(--line);
             border-radius: 26px;
-            background: rgba(13,17,28,.9);
+            background: var(--panel);
             box-shadow: 0 24px 70px rgba(0,0,0,.25);
         }
         .intro-card { padding: 30px; }
@@ -119,7 +119,7 @@
         .workspace { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }
         .step-nav { position: sticky; top: 100px; display: grid; gap: 8px; }
         .step-link { width: 100%; text-align: left; border: 1px solid transparent; border-radius: 13px; padding: 12px 14px; color: var(--muted); background: transparent; }
-        .step-link:hover, .step-link.active { color: #fff; background: rgba(255,255,255,.07); border-color: var(--line); }
+        .step-link:hover, .step-link.active { color: var(--hub-ink); background: rgba(255,255,255,.07); border-color: var(--line); }
         .step-link span { color: var(--green); font-weight: 800; margin-right: 8px; }
 
         .form-stack { display: grid; gap: 20px; }
@@ -138,7 +138,7 @@
             width: 100%;
             border: 1px solid var(--line);
             border-radius: 13px;
-            color: #fff;
+            color: var(--hub-ink);
             background: rgba(0,0,0,.22);
             outline: none;
             padding: 12px 13px;
@@ -166,7 +166,7 @@
             padding: 14px;
             border: 1px solid var(--line);
             border-radius: 18px;
-            background: rgba(13,17,28,.94);
+            background: var(--panel);
             backdrop-filter: blur(16px);
             box-shadow: 0 18px 50px rgba(0,0,0,.45);
         }
@@ -198,8 +198,10 @@
             .workflow-actions { justify-content: flex-start; }
         }
     </style>
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
-<body>
+<body class="hub-admin" data-hub-page="ajm-webpage-builder">
     <header class="topbar">
         <div class="shell nav">
             <a class="brand" href="ajm-advertising-hub.html">

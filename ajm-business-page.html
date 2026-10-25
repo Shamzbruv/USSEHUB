@@ -38,20 +38,20 @@
         .nav { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
         .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .08em; font-size: .82rem; }
         .brand img { width: 44px; height: 44px; object-fit: contain; border-radius: 11px; }
-        .back-link { border: 1px solid var(--line); border-radius: 999px; padding: 10px 15px; background: rgba(7,9,16,.55); backdrop-filter: blur(12px); font-size: .86rem; }
+        .back-link { border: 1px solid var(--line); border-radius: 999px; padding: 10px 15px; background: var(--panel); backdrop-filter: blur(12px); font-size: .86rem; }
         .hero { position: relative; min-height: 680px; display: flex; align-items: flex-end; overflow: hidden; background: linear-gradient(135deg, #141a28, #070910); }
         .hero-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .52; }
         .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 0%, rgba(7,9,16,.28) 55%, rgba(7,9,16,.68) 100%); }
         .hero-grid { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 36px; align-items: end; padding: 160px 0 76px; }
-        .tier-badge { display: inline-flex; border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); border-radius: 999px; padding: 7px 11px; color: var(--accent); background: rgba(7,9,16,.58); font-size: .72rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+        .tier-badge { display: inline-flex; border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); border-radius: 999px; padding: 7px 11px; color: var(--accent); background: var(--panel); font-size: .72rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
         .hero h1 { max-width: 880px; margin: 18px 0 12px; font-size: clamp(3rem, 8vw, 6.8rem); line-height: .92; }
-        .tagline { max-width: 700px; margin: 0; color: #dbe1ef; font-size: clamp(1.05rem, 2vw, 1.35rem); line-height: 1.55; }
+        .tagline { max-width: 700px; margin: 0; color: var(--hub-ink); font-size: clamp(1.05rem, 2vw, 1.35rem); line-height: 1.55; }
         .logo-card { width: 170px; height: 170px; border: 1px solid var(--line); border-radius: 28px; padding: 18px; background: rgba(255,255,255,.92); box-shadow: 0 22px 60px rgba(0,0,0,.42); }
         .logo-card img { width: 100%; height: 100%; object-fit: contain; }
         .logo-fallback { width: 100%; height: 100%; display: grid; place-items: center; color: #0d1421; font: 800 4rem/1 "Manrope", sans-serif; }
         .quick-actions { position: relative; z-index: 4; margin-top: -30px; }
-        .action-bar { display: flex; gap: 10px; flex-wrap: wrap; padding: 14px; border: 1px solid var(--line); border-radius: 20px; background: rgba(16,21,34,.94); backdrop-filter: blur(18px); box-shadow: 0 22px 60px rgba(0,0,0,.32); }
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 12px 17px; color: #fff; background: rgba(255,255,255,.06); font-weight: 700; transition: .2s ease; cursor: pointer; }
+        .action-bar { display: flex; gap: 10px; flex-wrap: wrap; padding: 14px; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); backdrop-filter: blur(18px); box-shadow: 0 22px 60px rgba(0,0,0,.32); }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 12px 17px; color: var(--hub-ink); background: rgba(255,255,255,.06); font-weight: 700; transition: .2s ease; cursor: pointer; }
         .btn:hover { transform: translateY(-2px); background: rgba(255,255,255,.12); }
         .btn-primary { color: #07100b; border: 0; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
         .btn-green { color: #04150c; border: 0; background: var(--green); }
@@ -67,7 +67,7 @@
         .card h3 { margin: 0 0 14px; font-size: 1.12rem; }
         .hours-list { display: grid; gap: 10px; }
         .hours-row { display: flex; justify-content: space-between; gap: 22px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,.08); color: var(--muted); }
-        .hours-row strong { color: #fff; }
+        .hours-row strong { color: var(--hub-ink); }
         .address { color: var(--muted); line-height: 1.65; white-space: pre-wrap; }
         .gallery { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
         .gallery img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border: 1px solid var(--line); border-radius: 20px; transition: .25s ease; }
@@ -86,7 +86,7 @@
         .lead-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 22px; }
         .field { display: grid; gap: 7px; margin-bottom: 13px; }
         label { color: #e6e9f3; font-size: .84rem; font-weight: 700; }
-        input, textarea { width: 100%; padding: 12px 13px; color: #fff; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,.22); outline: none; }
+        input, textarea { width: 100%; padding: 12px 13px; color: var(--hub-ink); border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,.22); outline: none; }
         input:focus, textarea:focus { border-color: var(--accent); }
         textarea { min-height: 120px; resize: vertical; }
         .form-message { display: none; margin-bottom: 13px; padding: 11px 13px; border-radius: 11px; font-size: .86rem; }
@@ -103,7 +103,7 @@
         .state-card p { color: var(--muted); line-height: 1.6; }
         .state-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
         .preview-banner { margin: -18px 0 14px; padding: 10px 18px; color: #d5eaff; background: #10213b; border-bottom: 1px solid rgba(117,197,255,.32); text-align: center; font-size: .84rem; line-height: 1.5; }
-        .preview-banner a { display: inline-block; margin-left: 8px; color: #fff; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+        .preview-banner a { display: inline-block; margin-left: 8px; color: var(--hub-ink); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
         .hidden { display: none !important; }
         @media (max-width: 850px) {
             .hero { min-height: 620px; }
@@ -126,8 +126,10 @@
             .footer-row { align-items: flex-start; flex-direction: column; }
         }
     </style>
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
-<body>
+<body class="hub-business" data-hub-page="ajm-business-page">
     <div id="loading" class="state"><div class="state-card"><h1>Loading business webpage…</h1><p>Please wait while AJM retrieves this listing.</p></div></div>
     <div id="unavailable" class="state hidden"><div class="state-card"><h1>Webpage unavailable</h1><p id="unavailable-message">This paid business webpage is not published or could not be found.</p><div class="state-actions"><a class="btn btn-primary" href="ajm-advertising-hub.html">Browse the AJM Directory</a><a class="btn hidden" id="unavailable-builder-link" href="#">Open Webpage Builder</a></div></div></div>
 

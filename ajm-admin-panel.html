@@ -40,7 +40,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(5,7,13,0.9);
+            background: var(--panel);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--glass-border);
         }
@@ -231,14 +231,14 @@
         /* ── MODALS ── */
         .modal-overlay {
             position: fixed; inset: 0; z-index: 999;
-            background: rgba(5,7,13,0.85);
+            background: var(--panel);
             backdrop-filter: blur(10px);
             display: none; align-items: center; justify-content: center;
             padding: 24px;
         }
         .modal-overlay.open { display: flex; }
         .modal-box {
-            background: #0d111c;
+            background: var(--panel);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
             padding: 32px;
@@ -268,7 +268,7 @@
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             border-color: var(--green);
         }
-        .form-group select option { background: #0d111c; }
+        .form-group select option { background: var(--panel); }
 
         /* ── Toast ── */
         .toast {
@@ -363,8 +363,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="taxonomy.js"></script>
 
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
-<body>
+<body class="hub-admin" data-hub-page="ajm-admin-panel">
 
 <div id="toast" class="toast" role="alert"></div>
 
@@ -663,8 +665,8 @@
 
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
         <div>
-            <h1>🛡️ Admin Dashboard</h1>
-            <p>Manage listings, members, and platform stats.</p>
+            <h1>Directory & reporting</h1>
+            <p>Review business listings, support members and track activity across the directory.</p>
         </div>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
             <button class="btn btn-primary" style="background:var(--blue);color:var(--white);font-weight:800;" onclick="openAddModal()">➕ Add Listing</button>
@@ -677,7 +679,7 @@
     <section class="receivables-callout" aria-labelledby="receivables-title">
         <div>
             <h2 id="receivables-title">🏦 Accounts Receivable &amp; paid advertising setup</h2>
-            <p>This is where administrators enter the business bank-transfer destinations disclosed to a signed-in customer after an order is created, set or change every package price and duration, add optional upgrades, review uploaded receipts and confirm payment before an advertisement or paid webpage becomes active.</p>
+            <p>Manage package pricing and bank-transfer destinations, then review payment proof before activating an advertisement or paid webpage.</p>
         </div>
         <div class="receivables-actions">
             <a class="btn btn-warning" href="ajm-ad-management.html#banks">Manage banking details</a>
@@ -1206,7 +1208,7 @@
             loc: 'Location (Parish/Town)*',
             desc: 'Description*'
         };
-        
+
         const nameLabel = document.getElementById(mode + '-business-name').previousElementSibling;
         const subcatLabel = document.getElementById(mode + '-subcategory').previousElementSibling;
         const locLabel = document.getElementById(mode + '-location').previousElementSibling;
@@ -1720,7 +1722,7 @@
         document.getElementById('edit-listing-id').value = listing.id;
         document.getElementById('edit-business-name').value = listing.business_name || '';
         document.getElementById('edit-image').value = ''; // Reset file input
-        
+
         const catSelect = document.getElementById('edit-category');
         if (listing.category && !Array.from(catSelect.options).some(option => option.value === listing.category)) {
             const existingCategory = document.createElement('option');
@@ -1735,7 +1737,7 @@
             window.populateSubcategorySelect('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific');
             document.getElementById('edit-subcategory').value = listing.subcategory || '';
         }
-        
+
         updateLabels('edit');
 
         document.getElementById('edit-listing-type').value = listing.listing_type || '';

@@ -14,7 +14,7 @@
     <link rel="canonical" href="https://www.usse-hub.com/usse-consultancy.html" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-    <meta name="theme-color" content="#05070d" />
+    <meta name="theme-color" content="#302358" />
     <meta name="author" content="USSE Consultancy" />
     <meta name="geo.region" content="JM" />
     <meta name="geo.placename" content="Jamaica" />
@@ -190,7 +190,7 @@
             width: min(var(--max), calc(100% - 28px));
             z-index: 50;
             border: 1px solid var(--glass-border);
-            background: rgba(5, 7, 13, 0.76);
+            background: var(--panel);
             backdrop-filter: blur(18px);
             border-radius: 999px;
             box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
@@ -218,7 +218,7 @@
             display: grid;
             place-items: center;
             font-weight: 900;
-            color: white;
+            color: var(--hub-ink);
             background: linear-gradient(135deg, rgba(13, 110, 253, 0.95), rgba(255, 255, 255, 0.88), rgba(255, 207, 51, 0.92));
             box-shadow: 0 0 30px rgba(13, 110, 253, 0.3);
         }
@@ -247,7 +247,7 @@
         }
 
         .nav-links a {
-            color: #e8ecff;
+            color: var(--hub-ink);
             font-size: 0.88rem;
             padding: 10px 12px;
             border-radius: 999px;
@@ -271,7 +271,7 @@
             border-radius: 14px;
             border: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.08);
-            color: white;
+            color: var(--hub-ink);
             font-size: 1.3rem;
         }
 
@@ -303,7 +303,7 @@
         }
 
         .btn-ghost {
-            color: white;
+            color: var(--hub-ink);
             border: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.08);
         }
@@ -333,7 +333,7 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            color: #f5f7ff;
+            color: var(--hub-ink);
             border: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.08);
             padding: 8px 13px;
@@ -603,7 +603,7 @@
         .check-list li {
             position: relative;
             padding-left: 34px;
-            color: #e9eeff;
+            color: var(--hub-ink);
             line-height: 1.55;
         }
 
@@ -776,7 +776,7 @@
         .asset-list li {
             position: relative;
             padding-left: 18px;
-            color: #eef2ff;
+            color: var(--hub-ink);
             line-height: 1.55;
             font-size: 0.92rem;
         }
@@ -853,7 +853,7 @@
         }
 
         label {
-            color: #eef2ff;
+            color: var(--hub-ink);
             font-weight: 800;
             font-size: 0.9rem;
         }
@@ -864,7 +864,7 @@
             width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.16);
             background: rgba(255, 255, 255, 0.09);
-            color: white;
+            color: var(--hub-ink);
             border-radius: 17px;
             padding: 14px 15px;
             outline: none;
@@ -967,7 +967,7 @@
         }
 
         .footer-links a {
-            color: #e9eeff;
+            color: var(--hub-ink);
         }
 
         .reveal {
@@ -1009,7 +1009,7 @@
                 width: 100%;
                 flex-direction: column;
                 align-items: stretch;
-                background: rgba(5, 7, 13, 0.96);
+                background: var(--panel);
                 border: 1px solid var(--glass-border);
                 border-radius: 24px;
                 padding: 14px;
@@ -1162,9 +1162,11 @@
 
   gtag('config', 'G-LSFXN90KHS');
 </script>
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 
-<body>
+<body class="hub-public" data-hub-page="usse-consultancy">
     <div class="page-noise"></div>
 
     <header class="topbar" id="topbar">
@@ -1203,14 +1205,9 @@
                         <span class="pulse-dot"></span>
                         Strategy &amp; Advisory &mdash; Kingston, Jamaica &amp; Remote Global Support
                     </div>
-                    <h1>
-                        USSE Consultancy
-                        <span>Strategic Insight. Local Expertise. Global Standards.</span>
-                    </h1>
+                    <h1>Think clearly.<span>Move with confidence.</span></h1>
 
-                    <p>
-                        Jamaica's premier corporate advisory firm. We help boards, investors, and entrepreneurs think more clearly, move more decisively, and find the right ground — literally and strategically.
-                    </p>
+                    <p>Strategic planning, market research and real estate advisory for businesses and investors with their sights on Jamaica. Start with insight. Build with direction.</p>
 
                     <div class="hero-actions">
                         <a class="btn btn-primary" href="#contact">Start a Consultancy Enquiry</a>
@@ -1236,9 +1233,7 @@
                     </div>
                 </div>
 
-                <div class="hero-logo reveal" style="display: flex; align-items: center; justify-content: center;">
-                    <img src="consultancy%20logo.png" alt="USSE Consultancy Logo" style="width: 100%; max-width: 500px; height: auto; object-fit: contain; filter: drop-shadow(0 30px 60px rgba(0,0,0,0.6));">
-                </div>
+                <div class="hero-logo"><div class="hub-visual"><img src="assets/consultancy_visual_1778518668416.png" alt="Clarity for your next move." width="600" height="380" fetchpriority="high"><div class="hub-visual-note"><small>The USSE advantage</small><strong>Clarity for your next move.</strong><span>Local insight. Informed decisions. Practical direction.</span></div></div></div>
             </div>
         </section>
 
@@ -1445,114 +1440,9 @@
             </div>
         </section>
 
-        <section class="section" id="assets-legacy" hidden>
-            <div class="container">
-                <div class="section-header reveal">
-                    <div class="section-kicker">Brand Assets</div>
-                    <h2>A visual identity that says: we know what we're talking about.</h2>
-                    <p>
-                        Blue and yellow on black and white — precision, clarity, and authority. The consultancy looks the part because the work demands it.
-                    </p>
-                </div>
 
-                <div class="assets-grid">
-                    <div class="asset-card reveal" style="--accent: var(--blue);">
-                        <span class="note-pill">Logo Direction</span>
-                        <div class="asset-icon">CP</div>
-                        <h3>Graph or Compass Icon</h3>
-                        <p>
-                            Recommended visual identity: a professional graph or compass symbol using the blue and
-                            yellow palette to communicate trust, research, direction, and clarity.
-                        </p>
-                    </div>
 
-                    <div class="asset-card reveal" style="--accent: var(--yellow);">
-                        <span class="note-pill">Brand Media</span>
-                        <div class="asset-icon">CS</div>
-                        <h3>Case Studies and White Papers</h3>
-                        <p>
-                            Featured supporting media should include client testimonials, case studies, and white
-                            papers focused on Jamaican market trends and strategic insight.
-                        </p>
-                    </div>
-
-                    <div class="asset-card reveal" style="--accent: var(--blue);">
-                        <span class="note-pill">Field Proof</span>
-                        <div class="asset-icon">SI</div>
-                        <h3>Site Inspection Imagery</h3>
-                        <p>
-                            Photography of successful site inspections and real estate review activity should reinforce
-                            the consultancy’s bridge between strategic thinking and physical location decisions.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section" id="assets">
-            <div class="container">
-                <div class="section-header reveal">
-                    <div class="section-kicker">Client Impression</div>
-                    <h2>Serious decisions deserve a consultancy that already looks prepared before the first conversation.</h2>
-                    <p>
-                        For investors, boards, developers, and founders assessing Jamaica, USSE presents the kind of confidence, local intelligence, and decision-making clarity that makes the next move feel more secure.
-                    </p>
-                </div>
-
-                <div class="assets-grid">
-                    <div class="asset-card reveal" style="--accent: var(--blue);">
-                        <span class="note-pill">First Impression</span>
-                        <div class="asset-media">
-                            <img src="consultancy%20logo.png" alt="USSE Consultancy primary logo">
-                        </div>
-                        <h3>Boardroom-ready presence from the very first glance</h3>
-                        <ul class="asset-list">
-                            <li>It feels right at home on investor decks, briefing papers, referral introductions, and executive presentations.</li>
-                            <li>The palette reads credible and controlled, giving the brand presence without turning it into corporate wallpaper.</li>
-                            <li>The mark helps USSE look like a consultancy trusted to advise before capital moves.</li>
-                        </ul>
-                    </div>
-
-                    <div class="asset-card reveal" style="--accent: var(--yellow);">
-                        <span class="note-pill">Client Confidence</span>
-                        <div class="asset-media asset-media-copy">
-                            <span class="asset-media-label">What prospects should expect</span>
-                            <strong>Clear recommendations</strong>
-                            <strong>Sharp market reads</strong>
-                            <strong>Board-ready thinking</strong>
-                        </div>
-                        <h3>Insight that turns complicated decisions into clear next steps</h3>
-                        <p>
-                            USSE brings structure to unclear opportunities, sharpens risky decisions, and makes complex situations easier to evaluate. Clients come away with clarity they can actually use, not vague strategy language.
-                        </p>
-                        <ul class="asset-list">
-                            <li>Market intelligence should feel precise enough for investors and practical enough for operators.</li>
-                            <li>Recommendations should read like they came from people who know the local terrain, not from a generic playbook.</li>
-                            <li>Every deck, brief, or summary should strengthen the impression that USSE thinks before others move.</li>
-                        </ul>
-                    </div>
-
-                    <div class="asset-card reveal" style="--accent: var(--blue);">
-                        <span class="note-pill">Proof On Site</span>
-                        <div class="asset-media asset-media-copy">
-                            <span class="asset-media-label">What builds trust</span>
-                            <strong>Grounded site insight</strong>
-                            <strong>Practical observations</strong>
-                            <strong>Actionable reporting</strong>
-                        </div>
-                        <h3>On-the-ground intelligence that removes expensive guesswork</h3>
-                        <p>
-                            USSE does not stop at theory. It reads the physical reality, identifies what matters on site, and translates local conditions into smarter, safer business decisions.
-                        </p>
-                        <ul class="asset-list">
-                            <li>Site reviews should feel practical, measured, and useful to the people carrying the investment risk.</li>
-                            <li>Observations should connect directly to viability, usability, and commercial opportunity.</li>
-                            <li>The overall impression should be simple: USSE helps clients avoid blind spots before they become losses.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <section class="section" id="assets"><div class="container"><div class="section-header"><div class="section-kicker">What you can expect</div><h2>Practical support. A clearer result.</h2><p>Choose the support your business needs. We shape the scope together before work begins.</p></div><div class="hub-start-grid"><article class="hub-start-card"><small>01 / Our focus</small><h3>A clear business direction</h3><p>Translate your objectives into a focused plan with practical priorities and informed next steps.</p></article><article class="hub-start-card"><small>02 / Our focus</small><h3>Jamaican market insight</h3><p>Research opportunities, understand the local landscape and evaluate options before committing capital.</p></article><article class="hub-start-card"><small>03 / Our focus</small><h3>Property & asset advisory</h3><p>Get site-specific guidance and a clearer view of how property decisions support your wider goals.</p></article></div></div></section>
 
         <section class="section" id="contact">
             <div class="container">

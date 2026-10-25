@@ -14,7 +14,7 @@
     <link rel="canonical" href="https://www.usse-hub.com/ajm-aloe-jamaica.html" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-    <meta name="theme-color" content="#05070d" />
+    <meta name="theme-color" content="#302358" />
     <meta name="author" content="AJM - Aloe Jamaica" />
     <meta name="geo.region" content="JM" />
     <meta name="geo.placename" content="Jamaica" />
@@ -182,7 +182,7 @@
             width: min(var(--max), calc(100% - 28px));
             z-index: 50;
             border: 1px solid var(--glass-border);
-            background: rgba(5, 7, 13, 0.76);
+            background: var(--panel);
             backdrop-filter: blur(18px);
             border-radius: 999px;
             box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
@@ -210,7 +210,7 @@
             display: grid;
             place-items: center;
             font-weight: 900;
-            color: white;
+            color: var(--hub-ink);
             background: linear-gradient(135deg, rgba(23, 214, 111, 0.95), rgba(255, 43, 79, 0.88), rgba(255, 207, 51, 0.9));
             box-shadow: 0 0 30px rgba(23, 214, 111, 0.3);
         }
@@ -239,7 +239,7 @@
         }
 
         .nav-links a {
-            color: #e8ecff;
+            color: var(--hub-ink);
             font-size: 0.88rem;
             padding: 10px 12px;
             border-radius: 999px;
@@ -263,7 +263,7 @@
             border-radius: 14px;
             border: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.08);
-            color: white;
+            color: var(--hub-ink);
             font-size: 1.3rem;
         }
 
@@ -295,7 +295,7 @@
         }
 
         .btn-ghost {
-            color: white;
+            color: var(--hub-ink);
             border: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.08);
         }
@@ -325,7 +325,7 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            color: #f5f7ff;
+            color: var(--hub-ink);
             border: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.08);
             padding: 8px 13px;
@@ -596,7 +596,7 @@
         .check-list li {
             position: relative;
             padding-left: 34px;
-            color: #e9eeff;
+            color: var(--hub-ink);
             line-height: 1.55;
         }
 
@@ -762,7 +762,7 @@
         .asset-list li {
             position: relative;
             padding-left: 18px;
-            color: #eef2ff;
+            color: var(--hub-ink);
             line-height: 1.55;
             font-size: 0.92rem;
         }
@@ -839,7 +839,7 @@
         }
 
         label {
-            color: #eef2ff;
+            color: var(--hub-ink);
             font-weight: 800;
             font-size: 0.9rem;
         }
@@ -850,7 +850,7 @@
             width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.16);
             background: rgba(255, 255, 255, 0.09);
-            color: white;
+            color: var(--hub-ink);
             border-radius: 17px;
             padding: 14px 15px;
             outline: none;
@@ -953,7 +953,7 @@
         }
 
         .footer-links a {
-            color: #e9eeff;
+            color: var(--hub-ink);
         }
 
         .reveal {
@@ -994,7 +994,7 @@
                 width: 100%;
                 flex-direction: column;
                 align-items: stretch;
-                background: rgba(5, 7, 13, 0.96);
+                background: var(--panel);
                 border: 1px solid var(--glass-border);
                 border-radius: 24px;
                 padding: 14px;
@@ -1143,9 +1143,11 @@
 
   gtag('config', 'G-LSFXN90KHS');
 </script>
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 
-<body>
+<body class="hub-public" data-hub-page="ajm-aloe-jamaica">
     <div class="page-noise"></div>
 
     <header class="topbar" id="topbar">
@@ -1184,14 +1186,9 @@
                         <span class="pulse-dot"></span>
                         Creative & Brand Development &mdash; Digital-First Studio, Jamaica
                     </div>
-                    <h1>
-                        AJM - Aloe Jamaica
-                        <span>Organic Design. Digital Growth. Authentic Identity.</span>
-                    </h1>
+                    <h1>Make your business<span>impossible to overlook.</span></h1>
 
-                    <p>
-                        AJM turns brand complexity into clarity. From bold visual identities to polished digital platforms, we give modern businesses a look and presence that actually works.
-                    </p>
+                    <p>Aloe Jamaica brings brands to life through thoughtful identities, digital platforms and creative design. From your first idea to your next campaign, make every touchpoint count.</p>
 
                     <div class="hero-actions">
                         <a class="btn btn-primary" href="#contact">Launch My Brand</a>
@@ -1215,9 +1212,7 @@
                     </div>
                 </div>
 
-                <div class="hero-logo reveal" style="display: flex; align-items: center; justify-content: center;">
-                    <img src="aloe%20logo.png" alt="AJM Aloe Jamaica Logo" style="width: 100%; max-width: 500px; height: auto; object-fit: contain; filter: drop-shadow(0 30px 60px rgba(0,0,0,0.6));">
-                </div>
+                <div class="hero-logo"><div class="hub-visual"><img src="assets/ajm_visual_1778518681297.png" alt="A brand with room to grow." width="600" height="380" fetchpriority="high"><div class="hub-visual-note"><small>The USSE advantage</small><strong>A brand with room to grow.</strong><span>Identity, digital experiences and real-world presence.</span></div></div></div>
             </div>
         </section>
 
@@ -1383,112 +1378,9 @@
             </div>
         </section>
 
-        <section class="section" id="assets-legacy" hidden>
-            <div class="container">
-                <div class="section-header reveal">
-                    <div class="section-kicker">Brand Assets</div>
-                    <h2>A visual identity as organic and distinct as the name.</h2>
-                    <p>
-                        AJM’s brand direction combines green and red with black, white, and yellow anchors to create a
-                        look that feels organic, modern, and digitally fluent.
-                    </p>
-                </div>
 
-                <div class="assets-grid">
-                    <div class="asset-card reveal" style="--accent: var(--green);">
-                        <span class="note-pill">Logo Direction</span>
-                        <div class="asset-icon">AL</div>
-                        <h3>Minimal Aloe Leaf + Pixel Cursor</h3>
-                        <p>
-                            Recommended logo concept: a stylized minimalist aloe leaf integrated with a digital pixel or
-                            pen-tool cursor to reflect both natural identity and design precision.
-                        </p>
-                    </div>
 
-                    <div class="asset-card reveal" style="--accent: var(--red);">
-                        <span class="note-pill">Portfolio Media</span>
-                        <div class="asset-icon">LB</div>
-                        <h3>Lookbooks and Platform Walkthroughs</h3>
-                        <p>
-                            AJM should showcase digital portfolio lookbooks, video walkthroughs of designed platforms,
-                            and presentation-led portfolio media that helps clients imagine the final output.
-                        </p>
-                    </div>
-
-                    <div class="asset-card reveal" style="--accent: var(--yellow);">
-                        <span class="note-pill">Print Proof</span>
-                        <div class="asset-icon">PH</div>
-                        <h3>High-Resolution Sample Photography</h3>
-                        <p>
-                            High-resolution photography of printed samples, stationery, menus, and signage should
-                            support the digital-first brand story with selective physical proof.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section" id="assets">
-            <div class="container">
-                <div class="section-header reveal">
-                    <div class="section-kicker">Why Clients Want It</div>
-                    <h2>If the brand looks this good here, clients should expect their own business to look even better with AJM behind it.</h2>
-                    <p>
-                        AJM turns rough ideas into polished brands that people notice, remember, and trust faster. It is creative work built to make a business feel more valuable the moment it is seen.
-                    </p>
-                </div>
-
-                <div class="assets-grid">
-                    <div class="asset-card reveal" style="--accent: var(--green);">
-                        <span class="note-pill">Brand Signature</span>
-                        <div class="asset-media">
-                            <img src="aloe%20logo.png" alt="AJM Aloe Jamaica primary logo">
-                        </div>
-                        <h3>A signature identity that feels fresh, premium, and instantly memorable</h3>
-                        <ul class="asset-list">
-                            <li>It gives AJM a memorable face across social presence, storefront applications, and polished launch materials.</li>
-                            <li>The green-and-gold palette feels rich, natural, and commercially attractive at the same time.</li>
-                            <li>The mark says this is a brand studio with taste, not a bargain-bin design service.</li>
-                        </ul>
-                    </div>
-
-                    <div class="asset-card reveal" style="--accent: var(--red);">
-                        <span class="note-pill">Digital Attraction</span>
-                        <div class="asset-media asset-media-copy">
-                            <span class="asset-media-label">What people imagine</span>
-                            <strong>Launch-ready pages</strong>
-                            <strong>Scroll-stopping visuals</strong>
-                            <strong>Beautiful campaigns</strong>
-                        </div>
-                        <h3>Work that makes the next client instantly picture their own brand at this level</h3>
-                        <ul class="asset-list">
-                            <li>Website concepts should feel polished enough to launch and attractive enough to sell the service on sight.</li>
-                            <li>Campaign visuals should look current, elevated, and made for real attention, not just filler content.</li>
-                            <li>The portfolio should leave clients feeling that AJM can make their brand look more valuable than it does today.</li>
-                        </ul>
-                    </div>
-
-                    <div class="asset-card reveal" style="--accent: var(--yellow);">
-                        <span class="note-pill">Real-World Presence</span>
-                        <div class="asset-media asset-media-copy">
-                            <span class="asset-media-label">What makes it tangible</span>
-                            <strong>Confident print pieces</strong>
-                            <strong>Storefront presence</strong>
-                            <strong>Branded touchpoints</strong>
-                        </div>
-                        <h3>Print and signage that make a brand feel established in the real world</h3>
-                        <p>
-                            Once the brand leaves the screen, it still needs to hold attention. AJM delivers physical touchpoints that feel refined, intentional, and ready to represent a business confidently in public.
-                        </p>
-                        <ul class="asset-list">
-                            <li>Menus, flyers, and printed collateral should make clients feel their business can present at a higher level.</li>
-                            <li>Packaging, stationery, and supporting touchpoints should carry the same taste as the digital work.</li>
-                            <li>Signage should help prospects imagine their own brand looking established, polished, and public-facing.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <section class="section" id="assets"><div class="container"><div class="section-header"><div class="section-kicker">What you can expect</div><h2>Practical support. A clearer result.</h2><p>Choose the support your business needs. We shape the scope together before work begins.</p></div><div class="hub-start-grid"><article class="hub-start-card"><small>01 / Our focus</small><h3>Brand identity</h3><p>A coherent visual language for your business, from logo and colour to launch-ready artwork.</p></article><article class="hub-start-card"><small>02 / Our focus</small><h3>Digital presence</h3><p>Websites, campaign visuals and content that help customers discover and connect with your brand.</p></article><article class="hub-start-card"><small>03 / Our focus</small><h3>Print & signage</h3><p>Menus, stationery, packaging and signage that carry the same identity into the real world.</p></article></div></div></section>
 
         <section class="section" id="contact">
             <div class="container">

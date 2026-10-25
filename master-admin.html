@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Panel — AJM Advertising Hub</title>
+    <title>Enterprise Overview — USSEHub</title>
     <meta name="robots" content="noindex,nofollow" />
     <link rel="icon" href="aloe%20favicon.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,7 +40,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(5,7,13,0.9);
+            background: var(--panel);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--glass-border);
         }
@@ -213,14 +213,14 @@
         /* ── MODALS ── */
         .modal-overlay {
             position: fixed; inset: 0; z-index: 999;
-            background: rgba(5,7,13,0.85);
+            background: var(--panel);
             backdrop-filter: blur(10px);
             display: none; align-items: center; justify-content: center;
             padding: 24px;
         }
         .modal-overlay.open { display: flex; }
         .modal-box {
-            background: #0d111c;
+            background: var(--panel);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
             padding: 32px;
@@ -250,7 +250,7 @@
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             border-color: var(--green);
         }
-        .form-group select option { background: #0d111c; }
+        .form-group select option { background: var(--panel); }
 
         /* ── Toast ── */
         .toast {
@@ -300,8 +300,10 @@
     </style>
     <script src="taxonomy.js"></script>
 
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
-<body>
+<body class="hub-admin" data-hub-page="master-admin">
 
 <div id="toast" class="toast" role="alert"></div>
 
@@ -441,7 +443,7 @@
 
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
         <div>
-            <h1>🛡️ Master Admin Hub</h1>
+            <h1>Enterprise overview</h1>
             <p>Complete system oversight, analytics, and CRM management.</p>
         </div>
         <a href="referral-agreements" class="btn btn-ghost">Referral Agreements &amp; Commissions</a>
@@ -481,7 +483,7 @@
     <!-- Dashboard Panel -->
     <div id="dashboard-panel">
         <div style="background:var(--glass-bg);padding:24px;border-radius:var(--radius);border:1px solid var(--glass-border);margin-bottom:24px;">
-            <h3>System Health & Analytics</h3>
+            <h3>Enterprise activity</h3>
             <p style="color:var(--muted);margin-top:8px;">Real-time metrics will be displayed here.</p>
         </div>
     </div>
@@ -679,7 +681,7 @@
             loc: 'Location (Parish/Town)*',
             desc: 'Description*'
         };
-        
+
         const nameLabel = document.getElementById(mode + '-business-name').previousElementSibling;
         const subcatLabel = document.getElementById(mode + '-subcategory').previousElementSibling;
         const locLabel = document.getElementById(mode + '-location').previousElementSibling;
@@ -730,13 +732,13 @@
         document.getElementById('tab-' + tabId).classList.add('active');
 
         const isListings = ['pending', 'approved', 'rejected', 'expired', 'all'].includes(tabId);
-        
+
         document.getElementById('dashboard-panel').style.display = tabId === 'dashboard' ? 'block' : 'none';
         document.getElementById('consultations-panel').style.display = tabId === 'consultations' ? 'block' : 'none';
         document.getElementById('subscriptions-panel').style.display = tabId === 'subscriptions' ? 'block' : 'none';
         document.getElementById('listings-panel').style.display = isListings ? 'block' : 'none';
         document.getElementById('members-panel').style.display = tabId === 'members' ? 'block' : 'none';
-        
+
         document.getElementById('listings-filter').style.display = isListings ? 'flex' : 'none';
         document.getElementById('pagination-row').style.display = isListings ? 'flex' : 'none';
 
@@ -754,32 +756,37 @@
     }
 
     async function loadDashboard() {
-        // Fetch top level stats
-        const { count: cCount } = await supabase.from('consultations').select('*', { count: 'exact', head: true });
-        const { count: sCount } = await supabase.from('ad_subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active');
-        
+        const [consultations, subscriptions] = await Promise.all([
+            supabase.from('consultations').select('*', { count: 'exact', head: true }),
+            supabase.from('ad_subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active')
+        ]);
+        const pending = Number(document.getElementById('stat-pending').textContent) || 0;
+        const consultationCount = consultations.error ? 'Unavailable' : (consultations.count ?? 0).toLocaleString();
+        const subscriptionCount = subscriptions.error ? 'Unavailable' : (subscriptions.count ?? 0).toLocaleString();
         document.getElementById('dashboard-panel').innerHTML = `
-            <div style="background:var(--glass-bg);padding:24px;border-radius:var(--radius);border:1px solid var(--glass-border);margin-bottom:24px;">
-                <h3>System Health & Analytics</h3>
-                <div style="display:flex;gap:24px;margin-top:16px;flex-wrap:wrap;">
-                    <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;flex:1;min-width:200px;">
-                        <h4 style="color:var(--muted);margin-bottom:8px;">Total Consultations Tracked</h4>
-                        <div style="font-size:2.4rem;font-weight:700;">${cCount || 0}</div>
-                    </div>
-                    <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;flex:1;min-width:200px;">
-                        <h4 style="color:var(--muted);margin-bottom:8px;">Active Ad Subscriptions</h4>
-                        <div style="font-size:2.4rem;font-weight:700;">${sCount || 0}</div>
-                    </div>
-                </div>
+            <div class="hub-summary-grid">
+                <article class="hub-summary-panel">
+                    <div class="eyebrow">Your next actions</div>
+                    <h3 style="margin-top:10px;">A clear view of the work ahead</h3>
+                    <p>Open a workspace to review records and keep the right work moving.</p>
+                    <div class="hub-task"><div><strong>Listing review</strong><small>${pending ? pending.toLocaleString() + ' pending listings to review' : 'No pending listings in the current count'}</small></div><button class="btn btn-ghost" onclick="switchTab('pending')">Open queue →</button></div>
+                    <div class="hub-task"><div><strong>Consultations & enquiries</strong><small>${consultationCount} total consultations recorded</small></div><button class="btn btn-ghost" onclick="switchTab('consultations')">View enquiries →</button></div>
+                    <div class="hub-task"><div><strong>Advertising subscriptions</strong><small>${subscriptionCount} active subscriptions</small></div><button class="btn btn-ghost" onclick="switchTab('subscriptions')">View subscriptions →</button></div>
+                </article>
+                <article class="hub-context-panel"><small>Across the enterprise</small><h3>Better connections.<br>Stronger businesses.</h3><p>Consultancy brings direction. Aloe Jamaica builds visibility. PISTOL supports execution. Use this hub to coordinate the network behind them.</p><a href="index.html#branches">Explore the USSE enterprise →</a></article>
             </div>
-        `;
+            <div class="hub-start-grid">
+                <a class="hub-start-card" href="ajm-admin-panel.html"><small>Directory & reporting</small><h3>Know your network</h3><p>Review members, business registrations, call lists, performance and financial reports.</p><span>Open directory operations →</span></a>
+                <a class="hub-start-card" href="ajm-ad-management.html#payments"><small>Advertising & accounts</small><h3>Follow the commercial journey</h3><p>Check payment proof, manage package pricing and review advertising performance.</p><span>Open payment review →</span></a>
+                <a class="hub-start-card" href="referral-agreements"><small>Partners & commissions</small><h3>Grow through introductions</h3><p>Prepare agreements, collect partner signatures and manage the referral register.</p><span>Open partner programme →</span></a>
+            </div>`;
     }
 
     async function loadConsultations() {
         const tbody = document.getElementById('admin-consultations-tbody');
         tbody.innerHTML = '<tr class="loading-row"><td colspan="8">Loading...</td></tr>';
         const { data, error } = await supabase.from('consultations').select('*, listings(business_name)').order('created_at', { ascending: false }).limit(50);
-        
+
         if (error) {
             tbody.innerHTML = `<tr><td colspan="8" style="color:var(--red);">Error: ${error.message}</td></tr>`;
             return;
@@ -824,7 +831,7 @@
         tbody.innerHTML = '<tr class="loading-row"><td colspan="6">Loading...</td></tr>';
         // Need to join user to profiles via user_id, but profiles might not match foreign key constraints easily in this shorthand if not explicitly foreign keyed. Let's do a basic fetch.
         const { data, error } = await supabase.from('ad_subscriptions').select('*, listings(business_name)').order('created_at', { ascending: false }).limit(50);
-        
+
         if (error) {
             tbody.innerHTML = `<tr><td colspan="6" style="color:var(--red);">Error: ${error.message}</td></tr>`;
             return;
@@ -882,7 +889,7 @@
             if (error) throw error;
 
             const filtered = data || [];
-            
+
             totalCount = count || 0;
             updatePagination(totalCount);
 
@@ -979,7 +986,7 @@
         document.getElementById('edit-listing-id').value = listing.id;
         document.getElementById('edit-business-name').value = listing.business_name || '';
         document.getElementById('edit-image').value = '';
-        
+
         const catSelect = document.getElementById('edit-category');
         if (listing.category && !Array.from(catSelect.options).some(option => option.value === listing.category)) {
             const existingCategory = document.createElement('option');
@@ -994,7 +1001,7 @@
             window.populateSubcategorySelect('edit-category', 'edit-subcategory', 'edit-tertiary', 'edit-specific');
             document.getElementById('edit-subcategory').value = listing.subcategory || '';
         }
-        
+
         updateLabels('edit');
 
         document.getElementById('edit-listing-type').value = listing.listing_type || '';

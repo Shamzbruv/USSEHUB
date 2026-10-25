@@ -14,7 +14,7 @@
     <link rel="canonical" href="https://www.usse-hub.com/pistol-operations-logistics.html" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-    <meta name="theme-color" content="#05070d" />
+    <meta name="theme-color" content="#302358" />
     <meta name="author" content="PISTOL" />
     <meta name="geo.region" content="JM" />
     <meta name="geo.placename" content="Jamaica" />
@@ -182,7 +182,7 @@
             width: min(var(--max), calc(100% - 28px));
             z-index: 50;
             border: 1px solid var(--glass-border);
-            background: rgba(5, 7, 13, 0.76);
+            background: var(--panel);
             backdrop-filter: blur(18px);
             border-radius: 999px;
             box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
@@ -210,7 +210,7 @@
             display: grid;
             place-items: center;
             font-weight: 900;
-            color: white;
+            color: var(--hub-ink);
             background: linear-gradient(135deg, rgba(255, 138, 31, 0.95), rgba(23, 214, 111, 0.88), rgba(255, 207, 51, 0.92));
             box-shadow: 0 0 30px rgba(255, 138, 31, 0.3);
         }
@@ -239,7 +239,7 @@
         }
 
         .nav-links a {
-            color: #e8ecff;
+            color: var(--hub-ink);
             font-size: 0.88rem;
             padding: 10px 12px;
             border-radius: 999px;
@@ -263,7 +263,7 @@
             border-radius: 14px;
             border: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.08);
-            color: white;
+            color: var(--hub-ink);
             font-size: 1.3rem;
         }
 
@@ -295,7 +295,7 @@
         }
 
         .btn-ghost {
-            color: white;
+            color: var(--hub-ink);
             border: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.08);
         }
@@ -325,7 +325,7 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            color: #f5f7ff;
+            color: var(--hub-ink);
             border: 1px solid var(--glass-border);
             background: rgba(255, 255, 255, 0.08);
             padding: 8px 13px;
@@ -596,7 +596,7 @@
         .check-list li {
             position: relative;
             padding-left: 34px;
-            color: #e9eeff;
+            color: var(--hub-ink);
             line-height: 1.55;
         }
 
@@ -762,7 +762,7 @@
         .asset-list li {
             position: relative;
             padding-left: 18px;
-            color: #eef2ff;
+            color: var(--hub-ink);
             line-height: 1.55;
             font-size: 0.92rem;
         }
@@ -839,7 +839,7 @@
         }
 
         label {
-            color: #eef2ff;
+            color: var(--hub-ink);
             font-weight: 800;
             font-size: 0.9rem;
         }
@@ -850,7 +850,7 @@
             width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.16);
             background: rgba(255, 255, 255, 0.09);
-            color: white;
+            color: var(--hub-ink);
             border-radius: 17px;
             padding: 14px 15px;
             outline: none;
@@ -953,7 +953,7 @@
         }
 
         .footer-links a {
-            color: #e9eeff;
+            color: var(--hub-ink);
         }
 
         .reveal {
@@ -994,7 +994,7 @@
                 width: 100%;
                 flex-direction: column;
                 align-items: stretch;
-                background: rgba(5, 7, 13, 0.96);
+                background: var(--panel);
                 border: 1px solid var(--glass-border);
                 border-radius: 24px;
                 padding: 14px;
@@ -1143,9 +1143,11 @@
 
   gtag('config', 'G-LSFXN90KHS');
 </script>
+<link rel="stylesheet" href="assets/usse-design.css?v=20261025">
+<script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 
-<body>
+<body class="hub-public" data-hub-page="pistol-operations-logistics">
     <div class="page-noise"></div>
 
     <header class="topbar" id="topbar">
@@ -1183,14 +1185,9 @@
                         <span class="pulse-dot"></span>
                         Operations & Logistics &mdash; Regional Hub, Runaway Bay, Jamaica
                     </div>
-                    <h1>
-                        PISTOL
-                        <span>Precision in Management. Excellence in Operations.</span>
-                    </h1>
+                    <h1>Stronger systems.<span>Smoother operations.</span></h1>
 
-                    <p>
-                        PISTOL handles what most businesses struggle to build alone — the administrative systems, HR structure, and logistics infrastructure that keep everything running properly behind the scenes.
-                    </p>
+                    <p>From administration and human resources to logistics and IT, PISTOL puts the right structure behind your business so your team can focus on what comes next.</p>
 
                     <div class="hero-actions">
                         <a class="btn btn-primary" href="#contact">Get PISTOL Working For You</a>
@@ -1213,9 +1210,7 @@
                     </div>
                 </div>
 
-                <div class="hero-logo reveal" style="display: flex; align-items: center; justify-content: center;">
-                    <img src="pistal%20logo.png" alt="PISTOL Logo" style="width: 100%; max-width: 500px; height: auto; object-fit: contain; filter: drop-shadow(0 30px 60px rgba(0,0,0,0.6));">
-                </div>
+                <div class="hero-logo"><div class="hub-visual"><img src="assets/pistol_visual_1778518696039.png" alt="The people behind the progress." width="600" height="380" fetchpriority="high"><div class="hub-visual-note"><small>The USSE advantage</small><strong>The people behind the progress.</strong><span>Reliable systems, capable teams and everyday follow-through.</span></div></div></div>
             </div>
         </section>
 
@@ -1381,114 +1376,9 @@
             </div>
         </section>
 
-        <section class="section" id="assets-legacy" hidden>
-            <div class="container">
-                <div class="section-header reveal">
-                    <div class="section-kicker">Brand Assets</div>
-                    <h2>An identity built for people who get things done.</h2>
-                    <p>
-                        Orange, green, yellow, and black. Bold, fast, industrial — a brand that looks as serious as the work it does.
-                    </p>
-                </div>
 
-                <div class="assets-grid">
-                    <div class="asset-card reveal" style="--accent: var(--orange);">
-                        <span class="note-pill">Logo Direction</span>
-                        <div class="asset-icon">GR</div>
-                        <h3>Industrial Emblem or Gear Mark</h3>
-                        <p>
-                            Recommended logo concept: a bold industrial-style emblem or gear icon featuring the PISTOL
-                            acronym in a sharp, modern typeface.
-                        </p>
-                    </div>
 
-                    <div class="asset-card reveal" style="--accent: var(--green);">
-                        <span class="note-pill">Systems Media</span>
-                        <div class="asset-icon">FC</div>
-                        <h3>Operational Flowcharts and Infographics</h3>
-                        <p>
-                            Flowcharts of operational systems and infographics showcasing logistical success rates
-                            should help explain PISTOL’s value visually.
-                        </p>
-                    </div>
-
-                    <div class="asset-card reveal" style="--accent: var(--yellow);">
-                        <span class="note-pill">Team Proof</span>
-                        <div class="asset-icon">BT</div>
-                        <h3>Behind-the-Scenes Training Media</h3>
-                        <p>
-                            Training photography and operational snapshots should reinforce the brand’s manpower,
-                            discipline, and execution capability.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section" id="assets">
-            <div class="container">
-                <div class="section-header reveal">
-                    <div class="section-kicker">Operational Credibility</div>
-                    <h2>When a business needs order, manpower, and follow-through, this brand should already look like the answer.</h2>
-                    <p>
-                        PISTOL presents itself as capable, organized, and dependable from the first glance. For business owners dealing with pressure, moving parts, and operational gaps, that first impression matters.
-                    </p>
-                </div>
-
-                <div class="assets-grid">
-                    <div class="asset-card reveal" style="--accent: var(--orange);">
-                        <span class="note-pill">Instant Recognition</span>
-                        <div class="asset-media">
-                            <img src="pistal%20logo.png" alt="PISTOL primary logo">
-                        </div>
-                        <h3>A mark that signals movement, structure, and command without needing explanation</h3>
-                        <ul class="asset-list">
-                            <li>The monogram gives PISTOL a look that feels active, capable, and easy to recognize in the field.</li>
-                            <li>The color system adds energy without weakening the brand's sense of authority.</li>
-                            <li>The overall identity helps PISTOL look like a business that does not miss details.</li>
-                        </ul>
-                    </div>
-
-                    <div class="asset-card reveal" style="--accent: var(--green);">
-                        <span class="note-pill">Operational Authority</span>
-                        <div class="asset-media asset-media-copy">
-                            <span class="asset-media-label">What serious clients want</span>
-                            <strong>Visible order</strong>
-                            <strong>Clear oversight</strong>
-                            <strong>Reliable control</strong>
-                        </div>
-                        <h3>Systems that make a business feel under control again</h3>
-                        <p>
-                            What PISTOL really sells is relief. Behind the brand is structure, process, oversight, and the kind of operational discipline that takes pressure off leadership and restores control to the business.
-                        </p>
-                        <ul class="asset-list">
-                            <li>Processes should look managed, repeatable, and far removed from guesswork or scrambling.</li>
-                            <li>Audit and HR systems should reassure decision-makers that the business can be tightened up properly.</li>
-                            <li>Control dashboards and logistics views should make complexity look manageable instead of overwhelming.</li>
-                        </ul>
-                    </div>
-
-                    <div class="asset-card reveal" style="--accent: var(--yellow);">
-                        <span class="note-pill">Follow-Through</span>
-                        <div class="asset-media asset-media-copy">
-                            <span class="asset-media-label">What seals the deal</span>
-                            <strong>Ready teams</strong>
-                            <strong>Visible discipline</strong>
-                            <strong>Real delivery</strong>
-                        </div>
-                        <h3>Proof that PISTOL can execute, not just promise</h3>
-                        <p>
-                            PISTOL is not only organized on paper. It has the people, the discipline, and the follow-through to turn plans into real day-to-day performance where it matters most.
-                        </p>
-                        <ul class="asset-list">
-                            <li>Team and training proof should communicate readiness, consistency, and operational discipline.</li>
-                            <li>Delivery records should quietly reinforce accountability and competence.</li>
-                            <li>The closing impression should be simple: if the work needs to run properly, PISTOL looks built for it.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <section class="section" id="assets"><div class="container"><div class="section-header"><div class="section-kicker">What you can expect</div><h2>Practical support. A clearer result.</h2><p>Choose the support your business needs. We shape the scope together before work begins.</p></div><div class="hub-start-grid"><article class="hub-start-card"><small>01 / Our focus</small><h3>Organized administration</h3><p>Bring structure to records, everyday processes and back-office coordination.</p></article><article class="hub-start-card"><small>02 / Our focus</small><h3>People & performance</h3><p>Support recruitment, onboarding and training with clear expectations and reliable workflows.</p></article><article class="hub-start-card"><small>03 / Our focus</small><h3>Coordinated delivery</h3><p>Connect logistics, supply chains and IT support to the way your business actually operates.</p></article></div></div></section>
 
         <section class="section" id="contact">
             <div class="container">
