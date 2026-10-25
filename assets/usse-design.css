@@ -313,7 +313,7 @@ label { color: var(--hub-ink); }
   .hub-directory .hero .categories-grid { grid-template-columns: none; }
   .hub-admin .setup-guide, .hub-admin .chart-grid, .hub-admin .grid { grid-template-columns: 1fr; }
   .hub-admin .filter-bar input, .hub-admin .filter-bar select { flex: none; }
-  .hub-admin .modal-box [style*="grid-template-columns"], .hub-admin .form-grid { grid-template-columns: minmax(0,1fr) !important; }
+  .hub-admin .modal-box [style*="grid-template-columns"], .hub-admin .modal [style*="grid-template-columns"], .hub-admin .form-grid { grid-template-columns: minmax(0,1fr) !important; }
   .hub-summary-grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
