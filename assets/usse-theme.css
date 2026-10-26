@@ -64,8 +64,9 @@ html[data-hub-theme="night"] .hub-pistol {
 .hub-pistol .nav { padding: 12px 20px; gap: 12px; }
 .hub-pistol .brand-text strong { letter-spacing: .12em; }
 .hub-pistol .hero { padding: 75px 0 65px; background: radial-gradient(ellipse at 75% 45%,#879d2d2b,transparent 65%); color: var(--hub-ink); }
-.hub-pistol .hero-grid { grid-template-columns: 1.12fr .88fr; gap: 45px; }
-.hub-pistol .hero h1 { color: var(--hub-ink); font-family: 'Syne','Trebuchet MS',sans-serif; font-weight: 800 !important; font-size: clamp(42px,5.5vw,76px); letter-spacing: -.06em; line-height: .99; }
+.hub-pistol .hero-grid { grid-template-columns: minmax(0,1.12fr) minmax(0,.88fr); gap: 45px; }
+.hub-pistol .hero-grid > * { min-width: 0; }
+.hub-pistol .hero h1 { color: var(--hub-ink); font-family: 'Syne','Trebuchet MS',sans-serif; font-weight: 800 !important; font-size: clamp(34px,4.2vw,58px); max-width: 100%; letter-spacing: -.06em; line-height: .99; }
 .hub-pistol .hero h1 span { color: #80500b; background: none; -webkit-text-fill-color: currentColor; }
 html[data-hub-theme="night"] .hub-pistol .hero h1 span { background: linear-gradient(100deg,#fff2d3,#ffb04d 35%,#e3d739 63%,#84e68e); background-clip: text; -webkit-background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
 .hub-pistol .hero .eyebrow, .hub-pistol .hero-copy > p { color: var(--hub-muted); }
@@ -110,9 +111,11 @@ html[data-hub-theme="night"] .hub-business.tier-platinum { --accent: #a5d4ff; }
   .hub-public .brand { gap: 8px; }
   .hub-public .nav { padding: 10px 14px; gap: 8px; }
   .hub-pistol .hero { padding: 44px 0; }
-  .hub-pistol .hero h1 { font-size: clamp(38px,10vw,60px); }
+  .hub-pistol .hero h1 { font-size: clamp(26px,8.2vw,44px); }
+  .hub-directory.hub-ajm .hero h1 { font-size: clamp(26px,8.2vw,38px); }
   .hub-pistol .hero-logo { max-width: 260px; }
   .hub-directory.hub-ajm .hero > img { width: 106px; height: 106px; }
+  .hub-directory .nav-links a { padding: 8px 6px; font-size: 12px; white-space: nowrap; }
   .hub-admin .nav { gap: 10px; }
   .hub-admin .nav-actions,.hub-admin .nav-right { flex: 1; }
   .hub-theme-header .hub-theme-toggle { margin-left: 0; }
