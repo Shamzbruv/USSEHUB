@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en-JM">
+<html lang="en-JM" data-hub-default-theme="day">
 <head>
+    <script src="assets/usse-theme.js?v=20261026"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Advertising Management — AJM Admin</title>
@@ -140,7 +141,7 @@
         input, select { min-height: 42px; padding: 9px 12px; }
         textarea { min-height: 100px; padding: 11px 12px; resize: vertical; }
         input:focus, select:focus, textarea:focus { border-color: rgba(45,214,164,.55); box-shadow: 0 0 0 3px rgba(45,214,164,.08); }
-        label { display: block; margin-bottom: 7px; color: #52627a; font-size: .8125rem; font-weight: 700; }
+        label { display: block; margin-bottom: 7px; color: var(--hub-muted); font-size: .8125rem; font-weight: 700; }
         label small { color: var(--muted); font-weight: 500; }
 
         .kpi-grid { display: grid; grid-template-columns: repeat(6, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
@@ -225,8 +226,8 @@
         .option-actions { display: flex; align-items: center; gap: 4px; }
         .package-actions { display: flex; gap: 7px; padding: 0 14px 14px; flex-wrap: wrap; }
         .readiness-note { display: flex; align-items: flex-start; gap: 7px; margin-top: 11px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: rgba(0,0,0,.16); font-size: .8125rem; line-height: 1.45; }
-        .readiness-note.ready { color: #09634f; border-color: rgba(45,214,164,.25); background: rgba(45,214,164,.07); }
-        .readiness-note.blocked { color: #a62c48; border-color: rgba(255,93,112,.24); background: rgba(255,93,112,.06); }
+        .readiness-note.ready { color: var(--hub-positive); border-color: rgba(45,214,164,.25); background: rgba(45,214,164,.07); }
+        .readiness-note.blocked { color: var(--hub-danger); border-color: rgba(255,93,112,.24); background: rgba(255,93,112,.06); }
 
         .bank-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
         .bank-card { position: relative; overflow: hidden; padding: 19px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--glass); }
@@ -248,8 +249,8 @@
 
         .notice { display: none; margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); background: var(--glass); font-size: .8125rem; line-height: 1.5; }
         .notice.show { display: block; }
-        .notice.error { color: #a62c48; border-color: rgba(255,93,112,.32); background: rgba(255,93,112,.08); }
-        .notice.success { color: #09634f; border-color: rgba(45,214,164,.3); background: rgba(45,214,164,.08); }
+        .notice.error { color: var(--hub-danger); border-color: rgba(255,93,112,.32); background: rgba(255,93,112,.08); }
+        .notice.success { color: var(--hub-positive); border-color: rgba(45,214,164,.3); background: rgba(45,214,164,.08); }
 
         .modal-backdrop { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; padding: 22px; background: rgba(0,0,0,.76); backdrop-filter: blur(10px); }
         .modal-backdrop.open { display: flex; }
@@ -270,7 +271,7 @@
         .detail span { display: block; color: var(--muted); font-size: .8125rem; }
         .detail strong { display: block; margin-top: 5px; font-size: .8125rem; overflow-wrap: anywhere; }
         .proof-link { display: inline-flex; margin-top: 12px; color: var(--blue); font-size: .8125rem; }
-        .danger-copy { padding: 12px; color: #a62c48; border: 1px solid rgba(255,93,112,.24); border-radius: 11px; background: rgba(255,93,112,.07); font-size: .8125rem; line-height: 1.55; }
+        .danger-copy { padding: 12px; color: var(--hub-danger); border: 1px solid rgba(255,93,112,.24); border-radius: 11px; background: rgba(255,93,112,.07); font-size: .8125rem; line-height: 1.55; }
 
         .toast-stack { position: fixed; right: 20px; bottom: 20px; z-index: 180; display: grid; gap: 8px; width: min(390px, calc(100% - 40px)); }
         .toast { padding: 13px 15px; border: 1px solid var(--line); border-radius: 12px; background: #111824; box-shadow: 0 18px 45px rgba(0,0,0,.34); font-size: .8125rem; animation: toastIn .2s ease; }
@@ -302,7 +303,8 @@
             .brand small, #admin-email { display: none; }
         }
     </style>
-<link rel="stylesheet" href="assets/usse-design.css?v=20261025-text2">
+<link rel="stylesheet" href="assets/usse-design.css?v=20261026-theme">
+<link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
 <script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 <body class="hub-admin" data-hub-page="ajm-ad-management">
@@ -939,7 +941,7 @@
         }
 
         function chartBase() {
-            return { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { labels: { color: '#52627a', usePointStyle: true, boxWidth: 8, font: { family: 'Segoe UI', size: 12 } } }, tooltip: { backgroundColor: '#111824', borderColor: 'rgba(255,255,255,.12)', borderWidth: 1, titleFont: { family: 'Space Grotesk' }, bodyFont: { family: 'Space Grotesk' } } }, scales: { x: { ticks: { color: '#52627a', maxRotation: 0, autoSkip: true }, grid: { color: '#e5eaf2' } }, y: { beginAtZero: true, ticks: { color: '#52627a' }, grid: { color: '#e5eaf2' } } } };
+            return { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { labels: { color: window.usseThemeColour('--hub-muted'), usePointStyle: true, boxWidth: 8, font: { family: 'Segoe UI', size: 12 } } }, tooltip: { backgroundColor: '#111824', borderColor: 'rgba(255,255,255,.12)', borderWidth: 1, titleFont: { family: 'Space Grotesk' }, bodyFont: { family: 'Space Grotesk' } } }, scales: { x: { ticks: { color: window.usseThemeColour('--hub-muted'), maxRotation: 0, autoSkip: true }, grid: { color: '#e5eaf2' } }, y: { beginAtZero: true, ticks: { color: window.usseThemeColour('--hub-muted') }, grid: { color: '#e5eaf2' } } } };
         }
 
         function drawChart(name, cardId, canvasId, config, hasData) {
@@ -1280,17 +1282,17 @@
             const win = window.open('', '_blank', 'width=900,height=1000');
             if (!win) return toast('Please allow pop-ups to print or save this document.', 'error');
             win.document.write(`<!DOCTYPE html><html><head><title>${safe(title)}</title><style>
-                body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:32px;max-width:720px;margin:0 auto;}
+                body{font-family:Arial,Helvetica,sans-serif;color: #111;padding:32px;max-width:720px;margin:0 auto;}
                 .doc-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:14px;margin-bottom:20px;}
                 .doc-head h1{font-size:20px;margin:0 0 4px;}
-                .doc-head p{margin:0;font-size:12px;color:#555;}
-                .doc-meta{text-align:right;font-size:12px;color:#333;}
+                .doc-head p{margin:0;font-size:12px;color: #555;}
+                .doc-meta{text-align:right;font-size:12px;color: #333;}
                 table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
                 th,td{border:1px solid #ccc;padding:7px 9px;text-align:left;}
                 th{background:#f2f2f2;}
                 td.amount,th.amount{text-align:right;}
                 tfoot td{font-weight:700;}
-                .doc-footer{margin-top:28px;font-size:12px;color:#52627a;}
+                .doc-footer{margin-top:28px;font-size:12px;color: var(--hub-muted);}
                 @media print { button { display:none; } }
             </style></head><body>${bodyHtml}
                 <p class="doc-footer">AJM Advertising Hub · Generated ${new Date().toLocaleString()}</p>
@@ -1316,10 +1318,10 @@
                 <p><strong>Bill to:</strong><br>${safe(customer.name)}${customer.email ? `<br>${safe(customer.email)}` : ''}</p>
                 <table>
                     <thead><tr><th>Description</th><th>Duration</th><th class="amount">Amount</th></tr></thead>
-                    <tbody><tr><td>${safe(pkg.name)}${order.business_name ? `<br><span style="color:#52627a;font-size:12px;">${safe(order.business_name)}</span>` : ''}</td><td>${safe(first(order.duration_days, order.duration_days_snapshot, '—'))} days</td><td class="amount">${safe(fmtMoney(orderAmount(order), pkg.currency))}</td></tr></tbody>
+                    <tbody><tr><td>${safe(pkg.name)}${order.business_name ? `<br><span style="color: var(--hub-muted);font-size:12px;">${safe(order.business_name)}</span>` : ''}</td><td>${safe(first(order.duration_days, order.duration_days_snapshot, '—'))} days</td><td class="amount">${safe(fmtMoney(orderAmount(order), pkg.currency))}</td></tr></tbody>
                     <tfoot><tr><td colspan="2">Total</td><td class="amount">${safe(fmtMoney(orderAmount(order), pkg.currency))}</td></tr></tfoot>
                 </table>
-                <p style="margin-top:16px;font-size:12px;color:#555;">Payment reference: ${safe(orderReference(order))}${order.expires_at ? ` &middot; Access expires ${safe(fmtDate(order.expires_at))}` : ''}</p>
+                <p style="margin-top:16px;font-size:12px;color: #555;">Payment reference: ${safe(orderReference(order))}${order.expires_at ? ` &middot; Access expires ${safe(fmtDate(order.expires_at))}` : ''}</p>
             `);
         }
 

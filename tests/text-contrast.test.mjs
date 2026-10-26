@@ -49,13 +49,25 @@ for (const code of ['silver', 'gold', 'platinum', 'basic', 'advanced', 'banner']
     const card = over(rgba(theme.bg), rgba('#fff'));
     const badge = over(rgba(theme.badgeBg), card);
     contrast(rgba(theme.badge), badge, `${code} package badge`);
-    const price = hub.match(/\.pkg-tile-price\s*\{[^}]*\bcolor:\s*(#[\da-f]+)/i)?.[1];
+    const priceValue = hub.match(/\.pkg-tile-price\s*\{[^}]*\bcolor:\s*([^;}]+)/i)?.[1]?.trim();
+    const price = priceValue?.startsWith('var(') ? tokens[priceValue.slice(4,-1)] : priceValue;
     assert.ok(price, 'Package price foreground is missing');
     contrast(rgba(price), card, `${code} price`);
 }
 const template = hub.match(/function renderAdvPackages\(\)\s*\{[\s\S]*?\n    async function loadAdvPackages/)?.[0];
 assert.ok(template, 'Advertising catalogue rendering function is missing');
-for (const match of template.matchAll(/\bcolor:\s*(#[\da-f]{3,8})\b/gi)) {
-    for (const surface of ['#fff', '#fffdf7', '#f5f9ff']) contrast(rgba(match[1]), rgba(surface), `Dynamic package description ${match[1]}`);
+for (const match of template.matchAll(/\bcolor:\s*(#[\da-f]{3,8}\b|var\(--[\w-]+\))/gi)) {
+    const fg = match[1].startsWith('var(') ? tokens[match[1].slice(4,-1)] : match[1];
+    assert.ok(fg, `Unresolved package foreground ${match[1]}`);
+    for (const surface of ['#fff', '#fffdf7', '#f5f9ff']) contrast(rgba(fg), rgba(surface), `Dynamic package description ${match[1]}`);
 }
 console.log(`Text contrast passed: ${checks} semantic foreground, reading surface and dynamic catalogue pairings meet WCAG AA.`);
+
+const nightCss = fs.readFileSync('assets/usse-theme.css','utf8');
+const nightRoot = nightCss.match(/html\[data-hub-theme="night"\]\s*\{([\s\S]*?)\}/)[1];
+const night = Object.fromEntries([...nightRoot.matchAll(/(--[\w-]+):\s*(#[\da-f]{3,8})\b/gi)].map(m => [m[1],m[2]]));
+for (const surface of ['#171b30','#222a40','#2a344c','#20333b','#29414a','#192820','#23362b']) {
+    for (const fg of ['--hub-ink','--hub-muted','--hub-positive','--hub-warning','--hub-danger','--hub-info','--hub-sea']) contrast(rgba(night[fg]),rgba(surface),`Night ${fg} on ${surface}`);
+}
+contrast(rgba('#fff'),rgba(night['--hub-action']),'Night primary action');
+console.log(`Day/night contrast passed: ${checks} total pairings.`);

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en-JM">
+<html lang="en-JM" data-hub-default-theme="day">
 <head>
+    <script src="assets/usse-theme.js?v=20261026"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex,nofollow" />
@@ -112,9 +113,9 @@
 
         .notice { display: none; margin-bottom: 24px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--line); line-height: 1.5; }
         .notice.show { display: block; }
-        .notice.error { color: #a62c48; background: rgba(255,85,112,.1); border-color: rgba(255,85,112,.35); }
-        .notice.success { color: #09634f; background: rgba(23,214,111,.1); border-color: rgba(23,214,111,.35); }
-        .notice.info { color: #225b89; background: rgba(77,163,255,.1); border-color: rgba(77,163,255,.35); }
+        .notice.error { color: var(--hub-danger); background: rgba(255,85,112,.1); border-color: rgba(255,85,112,.35); }
+        .notice.success { color: var(--hub-positive); background: rgba(23,214,111,.1); border-color: rgba(23,214,111,.35); }
+        .notice.info { color: var(--hub-info); background: rgba(77,163,255,.1); border-color: rgba(77,163,255,.35); }
 
         .workspace { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }
         .step-nav { position: sticky; top: 100px; display: grid; gap: 8px; }
@@ -132,7 +133,7 @@
         .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
         .field { display: grid; gap: 7px; margin-bottom: 16px; }
         .field:last-child { margin-bottom: 0; }
-        label { color: #52627a; font-size: .86rem; font-weight: 700; }
+        label { color: var(--hub-muted); font-size: .86rem; font-weight: 700; }
         label small { color: var(--muted); font-weight: 400; }
         input, textarea, select {
             width: 100%;
@@ -150,9 +151,11 @@
         .toggle { display: flex; align-items: center; gap: 10px; }
         .toggle input { width: 18px; height: 18px; accent-color: var(--green); }
         .toggle label { cursor: pointer; }
-        .tier-section.locked { opacity: .38; pointer-events: none; filter: grayscale(.35); }
+        .tier-section.locked { opacity: 1; pointer-events: none; filter: none; border-style: dashed; }
+        .tier-section.locked .feature-lock { white-space: normal; max-width: 110px; text-align: right; }
+        .tier-section.locked .feature-lock::after { content: "Upgrade required"; display: block; font-size: 12px; letter-spacing: 0; }
 
-        .segment-note { padding: 13px 15px; border-radius: 13px; color: #225b89; background: rgba(77,163,255,.08); border: 1px solid rgba(77,163,255,.22); font-size: .84rem; line-height: 1.5; }
+        .segment-note { padding: 13px 15px; border-radius: 13px; color: var(--hub-info); background: rgba(77,163,255,.08); border: 1px solid rgba(77,163,255,.22); font-size: .84rem; line-height: 1.5; }
         .upload-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .upload-row input { flex: 1; min-width: 230px; }
         .savebar {
@@ -198,7 +201,8 @@
             .workflow-actions { justify-content: flex-start; }
         }
     </style>
-<link rel="stylesheet" href="assets/usse-design.css?v=20261025-text2">
+<link rel="stylesheet" href="assets/usse-design.css?v=20261026-theme">
+<link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
 <script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 <body class="hub-admin" data-hub-page="ajm-webpage-builder">

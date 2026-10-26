@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en-JM">
+<html lang="en-JM" data-hub-default-theme="day">
 <head>
+    <script src="assets/usse-theme.js?v=20261026"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AJM Business Webpage | Advertising Hub</title>
@@ -80,19 +81,19 @@
         .offer { border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, transparent), rgba(255,255,255,.025)); }
         .offer-code { display: inline-block; margin-top: 12px; padding: 8px 12px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 9px; font-weight: 800; letter-spacing: .08em; }
         .reviews { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
-        .review p { color: #52627a; line-height: 1.6; }
+        .review p { color: var(--hub-muted); line-height: 1.6; }
         .stars { color: var(--accent); letter-spacing: .1em; }
         .review small { color: var(--muted); }
         .lead-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 22px; }
         .field { display: grid; gap: 7px; margin-bottom: 13px; }
-        label { color: #52627a; font-size: .84rem; font-weight: 700; }
+        label { color: var(--hub-muted); font-size: .84rem; font-weight: 700; }
         input, textarea { width: 100%; padding: 12px 13px; color: var(--hub-ink); border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,.22); outline: none; }
         input:focus, textarea:focus { border-color: var(--accent); }
         textarea { min-height: 120px; resize: vertical; }
         .form-message { display: none; margin-bottom: 13px; padding: 11px 13px; border-radius: 11px; font-size: .86rem; }
         .form-message.show { display: block; }
-        .form-message.error { color: #a62c48; background: rgba(255,95,120,.12); }
-        .form-message.success { color: #09634f; background: rgba(35,212,119,.12); }
+        .form-message.error { color: var(--hub-danger); background: rgba(255,95,120,.12); }
+        .form-message.success { color: var(--hub-positive); background: rgba(35,212,119,.12); }
         .platinum-band { padding: 32px; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 28px; background: radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 18%, transparent), transparent 45%), var(--panel); }
         .platinum-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
         footer { padding: 34px 0; border-top: 1px solid var(--line); color: var(--muted); }
@@ -102,7 +103,7 @@
         .state-card h1 { margin: 0 0 10px; }
         .state-card p { color: var(--muted); line-height: 1.6; }
         .state-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
-        .preview-banner { margin: -18px 0 14px; padding: 10px 18px; color: #225b89; background: #10213b; border-bottom: 1px solid rgba(117,197,255,.32); text-align: center; font-size: .84rem; line-height: 1.5; }
+        .preview-banner { margin: -18px 0 14px; padding: 10px 18px; color: var(--hub-info); background: #10213b; border-bottom: 1px solid rgba(117,197,255,.32); text-align: center; font-size: .84rem; line-height: 1.5; }
         .preview-banner a { display: inline-block; margin-left: 8px; color: var(--hub-ink); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
         .hidden { display: none !important; }
         @media (max-width: 850px) {
@@ -126,7 +127,8 @@
             .footer-row { align-items: flex-start; flex-direction: column; }
         }
     </style>
-<link rel="stylesheet" href="assets/usse-design.css?v=20261025-text2">
+<link rel="stylesheet" href="assets/usse-design.css?v=20261026-theme">
+<link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
 <script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 <body class="hub-business" data-hub-page="ajm-business-page">

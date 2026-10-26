@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en-JM">
+<html lang="en-JM" data-hub-default-theme="day">
 <head>
+    <script src="assets/usse-theme.js?v=20261026"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Panel — AJM Advertising Hub</title>
@@ -363,7 +364,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="taxonomy.js"></script>
 
-<link rel="stylesheet" href="assets/usse-design.css?v=20261025-text2">
+<link rel="stylesheet" href="assets/usse-design.css?v=20261026-theme">
+<link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
 <script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 <body class="hub-admin" data-hub-page="ajm-admin-panel">
@@ -670,7 +672,7 @@
         </div>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
             <button class="btn btn-primary" style="background:var(--blue);color:var(--white);font-weight:800;" onclick="openAddModal()">➕ Add Listing</button>
-            <a href="ajm-ad-management.html#overview" class="btn btn-primary" style="background:linear-gradient(135deg,var(--yellow),#ff9f43);color:#090b10;font-weight:800;">💰 Advertising &amp; Accounts Receivable</a>
+            <a href="ajm-ad-management.html#overview" class="btn btn-primary" style="background:linear-gradient(135deg,var(--yellow),#ff9f43);color: #090b10;font-weight:800;">💰 Advertising &amp; Accounts Receivable</a>
             <a href="referral-agreements" class="btn btn-ghost">Referral Agreements &amp; Commissions</a>
             <a href="master-admin.html" class="btn btn-primary" style="background: linear-gradient(135deg, var(--green) 0%, #17b07f 100%); color: #000; font-weight: 800;">👑 Switch to Master Admin Hub</a>
         </div>
@@ -1105,6 +1107,7 @@
     window.rejectListing = rejectListing;
     window.deleteListing = deleteListing;
     window.expireListing = expireListing;
+    window.renewFreeListing = renewFreeListing;
     window.toggleFeatured = toggleFeatured;
     window.openEditModal = openEditModal;
     window.closeEditModal = closeEditModal;
@@ -1368,7 +1371,7 @@
                             ${l.status !== 'rejected' ? `<button class="btn btn-danger btn-sm" style="padding:4px 8px;" onclick="rejectListing('${l.id}')" title="Reject">✗</button>` : ''}
                             <button class="btn btn-danger btn-sm" style="padding:4px 8px;margin-left:4px;background:#6c757d;" onclick="deleteListing('${l.id}')" title="Delete">🗑</button>
                             ${l.status !== 'expired' ? `<button class="btn btn-warning btn-sm" style="padding:4px 8px;" onclick="expireListing('${l.id}')" title="Expire">🕰</button>` : ''}
-                            ${['approved','expired'].includes(l.status) ? `<button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:var(--green);border-color:rgba(23,214,111,.35);" onclick="renewFreeListing('${l.id}')" title="Renew the free 30-day listing window">↻ 30d</button>` : ''}
+                            ${['approved','expired'].includes(l.status) ? `<button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:var(--green);border-color:rgba(23,214,111,.35);" data-renew-listing="${l.id}" onclick="renewFreeListing('${l.id}', this)" title="Renew the free 30-day listing window">↻ 30d</button>` : ''}
                             <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="toggleFeatured('${l.id}', ${l.is_featured})" title="${l.is_featured ? 'Unfeature' : 'Feature'}">${l.is_featured ? '★' : '☆'}</button>
                             <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="openEditModal(window.listingCache['${l.id}'])" title="Edit">✎</button>
                             ${l.status === 'approved' ? `<button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:var(--yellow);border-color:rgba(255,207,51,.35);" onclick="openWebpagePackageModal(window.listingCache['${l.id}'])" title="Upgrade this listing or manage its paid webpage">Upgrade / Page</button>` : ''}
@@ -1400,14 +1403,33 @@
         await updateListingStatus(id, 'expire');
     }
 
-    async function renewFreeListing(id) {
+    const renewingFreeListings = new Set();
+    async function renewFreeListing(id, button) {
+        if (!id || renewingFreeListings.has(id)) return;
+        renewingFreeListings.add(id);
+        const originalLabel = button?.textContent;
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'Renewing…';
+            button.setAttribute('aria-busy', 'true');
+        }
         try {
             const { data, error } = await supabase.rpc('renew_free_listing', { p_listing_id: id });
             if (error) throw error;
+            if (data?.listing_id !== id || data?.status !== 'approved' || !data?.expires_at || Number.isNaN(Date.parse(data.expires_at))) {
+                throw new Error('The renewal was not confirmed. Refresh the listing and try again.');
+            }
             showToast(`Free listing renewed — now expires ${fmtDate(data.expires_at)}.`, 'success');
-            await loadListings();
+            await Promise.all([loadListings(), loadStats()]);
         } catch (err) {
-            showToast('Error: ' + err.message, 'error');
+            showToast('Could not renew listing: ' + (err.message || 'Please try again.'), 'error');
+        } finally {
+            renewingFreeListings.delete(id);
+            if (button) {
+                button.disabled = false;
+                button.textContent = originalLabel;
+                button.removeAttribute('aria-busy');
+            }
         }
     }
 
@@ -2532,7 +2554,7 @@
     const CHART_DEFAULTS = {
         responsive: true,
         maintainAspectRatio: true,
-        plugins: { legend: { labels: { color: '#52627a', font: { family: 'Space Grotesk', size: 11 } } } },
+        plugins: { legend: { labels: { color: window.usseThemeColour('--hub-muted'), font: { family: 'Space Grotesk', size: 11 } } } },
         scales: {}
     };
     const PALETTE = ['#17d66f','#ffcf33','#5b9cf6','#ff4d5e','#ff8c42','#a78bfa','#22d3ee','#fb7185','#4ade80','#fbbf24'];
@@ -2541,8 +2563,8 @@
         return {
             ...CHART_DEFAULTS,
             scales: {
-                x: { ticks: { color: '#52627a', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                y: { ticks: { color: '#52627a', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.07)' }, beginAtZero: true },
+                x: { ticks: { color: window.usseThemeColour('--hub-muted'), font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { ticks: { color: window.usseThemeColour('--hub-muted'), font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.07)' }, beginAtZero: true },
                 ...extraScales
             }
         };
@@ -2595,7 +2617,7 @@
             destroyChart('listings-status');
             chartInstances['listings-status'] = new Chart(document.getElementById('chart-listings-status'), {
                 type:'pie', data: { labels, datasets: [{ data: labels.map(l=>counts[l]), backgroundColor: PALETTE }] },
-                options: { responsive:true, plugins: { legend: { labels: { color:'#52627a', font:{family:'Space Grotesk',size:11} } } } }
+                options: { responsive:true, plugins: { legend: { labels: { color: window.usseThemeColour('--hub-muted'), font:{family:'Space Grotesk',size:11} } } } }
             });
         } catch(_) {}
 
@@ -2621,7 +2643,7 @@
             destroyChart('members-roles');
             chartInstances['members-roles'] = new Chart(document.getElementById('chart-members-roles'), {
                 type:'doughnut', data: { labels, datasets: [{ data: labels.map(l=>counts[l]), backgroundColor: PALETTE }] },
-                options: { responsive:true, plugins: { legend: { labels: { color:'#52627a', font:{family:'Space Grotesk',size:11} } } } }
+                options: { responsive:true, plugins: { legend: { labels: { color: window.usseThemeColour('--hub-muted'), font:{family:'Space Grotesk',size:11} } } } }
             });
         } catch(_) {}
 
@@ -2663,7 +2685,7 @@
             chartInstances['orders-status'] = new Chart(document.getElementById('chart-orders-status'), {
                 type:'pie',
                 data: { labels:statusRows.map((row) => String(row.status || row.label || row.key || '').replace(/_/g, ' ')), datasets:[{ data:statusRows.map((row) => Number(row.count ?? row.orders ?? row.value ?? 0)), backgroundColor:PALETTE }] },
-                options: { responsive:true, plugins: { legend: { labels: { color:'#52627a', font:{family:'Space Grotesk',size:11} } } } }
+                options: { responsive:true, plugins: { legend: { labels: { color: window.usseThemeColour('--hub-muted'), font:{family:'Space Grotesk',size:11} } } } }
             });
 
             const packageLabels = packageRows.map((row) => row.package_name || row.name || row.label || 'Package');
@@ -2677,7 +2699,7 @@
             destroyChart('revenue-donut');
             chartInstances['revenue-donut'] = new Chart(document.getElementById('chart-revenue-donut'), {
                 type:'doughnut', data:{ labels:packageLabels, datasets:[{ data:packageRevenue, backgroundColor:PALETTE }] },
-                options: { responsive:true, plugins: { legend: { labels: { color:'#52627a', font:{family:'Space Grotesk',size:10} } } } }
+                options: { responsive:true, plugins: { legend: { labels: { color: window.usseThemeColour('--hub-muted'), font:{family:'Space Grotesk',size:10} } } } }
             });
             destroyChart('package-popularity');
             chartInstances['package-popularity'] = new Chart(document.getElementById('chart-package-popularity'), {
@@ -2742,9 +2764,9 @@
         const win = window.open('', '_blank', 'width=1000,height=800');
         if (!win) { showToast('Please allow pop-ups to print this report.', 'error'); return; }
         win.document.write(`<!DOCTYPE html><html><head><title>${escHtml(title)}</title><style>
-            body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:24px;}
+            body{font-family:Arial,Helvetica,sans-serif;color: #111;padding:24px;}
             h1{font-size:18px;margin:0 0 4px;}
-            p.meta{color:#555;font-size:12px;margin:0 0 18px;}
+            p.meta{color: #555;font-size:12px;margin:0 0 18px;}
             table{width:100%;border-collapse:collapse;font-size:12px;}
             th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;}
             th{background:#f2f2f2;}

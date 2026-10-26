@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en-JM">
+<html lang="en-JM" data-hub-default-theme="night">
 
 <head>
+    <script src="assets/usse-theme.js?v=20261026"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AJM Advertising Hub Jamaica | Classifieds, Promotions &amp; Business Listings</title>
@@ -403,7 +404,7 @@
         .package-tier { color:var(--package-accent); font-size:.8125rem; font-weight:900; letter-spacing:.13em; text-transform:uppercase; }
         .package-card h3 { margin:10px 0 4px; font-size:1.5rem; }
         .package-price { color:var(--muted); font-size:.85rem; margin-bottom:17px; }
-        .package-card ul { display:grid; gap:9px; padding:0; margin:0 0 22px; list-style:none; color:#52627a; font-size:.88rem; line-height:1.4; }
+        .package-card ul { display:grid; gap:9px; padding:0; margin:0 0 22px; list-style:none; color: var(--hub-muted); font-size:.88rem; line-height:1.4; }
         .package-card li::before { content:"✓"; color:var(--package-accent); font-weight:900; margin-right:8px; }
         .segment-strip { margin-top:18px; padding:18px; border:1px solid var(--glass-border); border-radius:18px; background:rgba(255,255,255,.025); }
         .segment-strip strong { display:block; margin-bottom:10px; }
@@ -704,7 +705,7 @@
 
         .listing-services p {
             font-size: 0.95rem;
-            color: #52627a;
+            color: var(--hub-muted);
             line-height: 1.5;
         }
 
@@ -1099,9 +1100,9 @@
         }
         @keyframes slideDown { from{transform:translateY(-20px);opacity:0} to{transform:translateY(0);opacity:1} }
         .toast.show { display: flex; align-items: center; gap: 12px; }
-        .toast-success { background: rgba(23,214,111,0.2); border: 1px solid rgba(23,214,111,0.4); color: #09634f; }
-        .toast-error { background: rgba(255,43,79,0.2); border: 1px solid rgba(255,43,79,0.4); color: #a62c48; }
-        .toast-info { background: rgba(13,110,253,0.2); border: 1px solid rgba(13,110,253,0.4); color: #225b89; }
+        .toast-success { background: rgba(23,214,111,0.2); border: 1px solid rgba(23,214,111,0.4); color: var(--hub-positive); }
+        .toast-error { background: rgba(255,43,79,0.2); border: 1px solid rgba(255,43,79,0.4); color: var(--hub-danger); }
+        .toast-info { background: rgba(13,110,253,0.2); border: 1px solid rgba(13,110,253,0.4); color: var(--hub-info); }
         .toast-icon { font-size: 1.2rem; }
 
         /* Form error */
@@ -1119,7 +1120,7 @@
             background: rgba(255,43,79,0.1);
             border: 1px solid rgba(255,43,79,0.3);
             border-radius: 12px;
-            color: #a62c48;
+            color: var(--hub-danger);
             font-size: 0.85rem;
             display: none;
             margin-bottom: 16px;
@@ -1131,7 +1132,7 @@
             background: rgba(23,214,111,0.1);
             border: 1px solid rgba(23,214,111,0.3);
             border-radius: 12px;
-            color: #09634f;
+            color: var(--hub-positive);
             font-size: 0.85rem;
             display: none;
             margin-bottom: 16px;
@@ -1277,15 +1278,15 @@
             min-height: 25px;
             padding: 4px 9px;
             border-radius: 999px;
-            color: #52627a;
+            color: var(--hub-muted);
             background: rgba(255,255,255,.08);
             font-size: .8125rem;
             font-weight: 850;
             letter-spacing: .03em;
             text-transform: uppercase;
         }
-        .md-account-status.active { color: #09634f; background: rgba(23,214,111,.14); }
-        .md-account-status.pending { color: #76520d; background: rgba(255,207,51,.13); }
+        .md-account-status.active { color: var(--hub-positive); background: rgba(23,214,111,.14); }
+        .md-account-status.pending { color: var(--hub-warning); background: rgba(255,207,51,.13); }
         .md-account-detail { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.5; }
         .md-account-actions { display: flex; flex: 0 0 auto; gap: 9px; }
         .md-account-actions .btn { padding: 9px 13px; font-size: .8125rem; white-space: nowrap; }
@@ -1308,7 +1309,7 @@
         .md-kpi:nth-child(5), .md-kpi:nth-child(6) { box-shadow: inset 0 2px 0 rgba(168,140,255,.45); }
         .md-kpi-label { display: block; color: var(--muted); font-size: .8125rem; font-weight: 800; letter-spacing: .045em; text-transform: uppercase; }
         .md-kpi-value { display: block; margin-top: 7px; color: var(--hub-ink); font-size: clamp(1.18rem, 2vw, 1.55rem); font-weight: 900; line-height: 1; }
-        .md-kpi-note { display: block; margin-top: 7px; color: #52627a; font-size: .8125rem; line-height: 1.3; }
+        .md-kpi-note { display: block; margin-top: 7px; color: var(--hub-muted); font-size: .8125rem; line-height: 1.3; }
         .md-dashboard-grid {
             display: grid;
             grid-template-columns: minmax(0, 1.4fr) minmax(320px, .8fr);
@@ -1353,21 +1354,21 @@
             display: inline-flex;
             padding: 3px 7px;
             border-radius: 999px;
-            color: #52627a;
+            color: var(--hub-muted);
             background: rgba(255,255,255,.075);
             font-size: .8125rem;
             font-weight: 800;
             text-transform: capitalize;
         }
-        .md-chip.success { color: #09634f; background: rgba(23,214,111,.13); }
-        .md-chip.warning { color: #76520d; background: rgba(255,207,51,.12); }
-        .md-chip.danger { color: #a62c48; background: rgba(255,77,94,.12); }
+        .md-chip.success { color: var(--hub-positive); background: rgba(23,214,111,.13); }
+        .md-chip.warning { color: var(--hub-warning); background: rgba(255,207,51,.12); }
+        .md-chip.danger { color: var(--hub-danger); background: rgba(255,77,94,.12); }
         .md-workflow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
         .md-workflow-step {
             position: relative;
             min-width: 0;
             padding-top: 9px;
-            color: #52627a;
+            color: var(--hub-muted);
             font-size: .8125rem;
             font-weight: 800;
             letter-spacing: .02em;
@@ -1382,11 +1383,11 @@
             border-radius: 999px;
             background: rgba(255,255,255,.09);
         }
-        .md-workflow-step.complete { color: #09634f; }
+        .md-workflow-step.complete { color: var(--hub-positive); }
         .md-workflow-step.complete::before { background: var(--green); }
-        .md-workflow-step.current { color: #76520d; }
+        .md-workflow-step.current { color: var(--hub-warning); }
         .md-workflow-step.current::before { background: var(--yellow); }
-        .md-workflow-note { margin: 7px 0 0; color: #52627a; font-size: .8125rem; text-align: center; line-height: 1.35; }
+        .md-workflow-note { margin: 7px 0 0; color: var(--hub-muted); font-size: .8125rem; text-align: center; line-height: 1.35; }
         .md-listing-actions { display: flex; flex-direction: column; align-items: stretch; gap: 7px; min-width: 130px; }
         .md-listing-actions .btn { padding: 7px 10px; font-size: .8125rem; text-align: center; }
         .md-text-action {
@@ -1604,13 +1605,13 @@
     .adv-modal-close {
         position: absolute; top: 20px; right: 20px;
         background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-        color: #52627a; font-size: 1.2rem; width: 36px; height: 36px;
+        color: var(--hub-muted); font-size: 1.2rem; width: 36px; height: 36px;
         border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
         transition: 0.2s;
     }
-    .adv-modal-close:hover { background: rgba(255,77,94,0.15); color: #a62c48; }
+    .adv-modal-close:hover { background: rgba(255,77,94,0.15); color: var(--hub-danger); }
     .adv-modal-title { font-size: 1.7rem; font-weight: 800; margin-bottom: 6px; }
-    .adv-modal-subtitle { color: #52627a; font-size: 0.9rem; margin-bottom: 28px; }
+    .adv-modal-subtitle { color: var(--hub-muted); font-size: 0.9rem; margin-bottom: 28px; }
     .pkg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 28px; }
     .pkg-tile {
         background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.09);
@@ -1625,11 +1626,11 @@
         font-size: .8125rem; font-weight: 700; margin-bottom: 10px;
     }
     .pkg-tile-name { font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
-    .pkg-tile-price { font-size: 1.6rem; font-weight: 800; color: #09634f; margin-bottom: 4px; }
-    .pkg-tile-duration { font-size: .8125rem; color: #52627a; margin-bottom: 14px; }
+    .pkg-tile-price { font-size: 1.6rem; font-weight: 800; color: var(--hub-positive); margin-bottom: 4px; }
+    .pkg-tile-duration { font-size: .8125rem; color: var(--hub-muted); margin-bottom: 14px; }
     .pkg-tile-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
-    .pkg-tile-features li { font-size: 0.83rem; color: #52627a; display: flex; align-items: center; gap: 6px; }
-    .pkg-tile-features li::before { content: '✓'; color: #09634f; font-weight: 800; font-size: 0.8rem; flex-shrink: 0; }
+    .pkg-tile-features li { font-size: 0.83rem; color: var(--hub-muted); display: flex; align-items: center; gap: 6px; }
+    .pkg-tile-features li::before { content: '✓'; color: var(--hub-positive); font-weight: 800; font-size: 0.8rem; flex-shrink: 0; }
 
     /* Order Step */
     .adv-step { display: none; }
@@ -1638,15 +1639,15 @@
         background: rgba(23,214,111,0.07); border: 1px solid rgba(23,214,111,0.25);
         border-radius: 16px; padding: 20px; margin-bottom: 20px;
     }
-    .payment-instructions-box h4 { color: #09634f; font-size: 0.95rem; margin-bottom: 10px; }
+    .payment-instructions-box h4 { color: var(--hub-positive); font-size: 0.95rem; margin-bottom: 10px; }
     .payment-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .payment-detail { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; }
-    .payment-detail label { font-size: .8125rem; color: #52627a; display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .payment-detail label { font-size: .8125rem; color: var(--hub-muted); display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
     .payment-detail span { font-weight: 700; font-size: 0.92rem; word-break: break-all; }
     .adv-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
     .adv-field { margin-bottom:16px; }
     .adv-field.full { grid-column:1 / -1; }
-    .adv-field label { display:block; margin-bottom:7px; color:#52627a; font-size:.8rem; font-weight:700; }
+    .adv-field label { display:block; margin-bottom:7px; color: var(--hub-muted); font-size:.8rem; font-weight:700; }
     .adv-field input, .adv-field textarea, .adv-field select {
         width:100%; box-sizing:border-box; padding:12px 14px; color: var(--hub-ink);
         border:1px solid rgba(255,255,255,.13); border-radius:11px;
@@ -1654,30 +1655,30 @@
     }
     .adv-field textarea { min-height:88px; resize:vertical; }
     .adv-field input:focus, .adv-field textarea:focus, .adv-field select:focus { border-color:rgba(23,214,111,.65); }
-    .adv-field small { display:block; margin-top:6px; color:#52627a; font-size:.8125rem; line-height:1.45; }
+    .adv-field small { display:block; margin-top:6px; color: var(--hub-muted); font-size:.8125rem; line-height:1.45; }
     .adv-options { display:grid; gap:9px; }
     .adv-option { display:flex; align-items:flex-start; gap:10px; padding:12px; border:1px solid rgba(255,255,255,.1); border-radius:12px; background:rgba(255,255,255,.025); }
     .adv-option input { width:auto; margin-top:3px; accent-color:#17d66f; }
     .adv-option-copy { flex:1; }
     .adv-option-copy strong { display:block; font-size:.86rem; }
-    .adv-option-copy span { display:block; margin-top:3px; color:#52627a; font-size:.8125rem; line-height:1.4; }
+    .adv-option-copy span { display:block; margin-top:3px; color: var(--hub-muted); font-size:.8125rem; line-height:1.4; }
     .adv-summary { display:flex; justify-content:space-between; gap:16px; align-items:center; margin:18px 0; padding:15px; border:1px solid rgba(23,214,111,.24); border-radius:13px; background:rgba(23,214,111,.06); }
-    .adv-summary strong { color:#09634f; }
+    .adv-summary strong { color: var(--hub-positive); }
     .adv-alert { display:none; margin-bottom:16px; padding:13px 15px; border-radius:12px; font-size:.84rem; line-height:1.5; }
     .adv-alert.show { display:block; }
-    .adv-alert.error { color:#a62c48; border:1px solid rgba(255,77,94,.32); background:rgba(255,77,94,.09); }
-    .adv-alert.info { color:#225b89; border:1px solid rgba(91,156,246,.3); background:rgba(91,156,246,.09); }
-    .adv-alert.success { color:#09634f; border:1px solid rgba(23,214,111,.3); background:rgba(23,214,111,.09); }
+    .adv-alert.error { color: var(--hub-danger); border:1px solid rgba(255,77,94,.32); background:rgba(255,77,94,.09); }
+    .adv-alert.info { color: var(--hub-info); border:1px solid rgba(91,156,246,.3); background:rgba(91,156,246,.09); }
+    .adv-alert.success { color: var(--hub-positive); border:1px solid rgba(23,214,111,.3); background:rgba(23,214,111,.09); }
     .pkg-tile.unavailable { cursor:not-allowed; opacity:.62; }
     .pkg-tile.unavailable:hover { transform:none; box-shadow:none; border-color:rgba(255,255,255,.09); }
-    .pkg-unavailable { margin-top:13px; color:#76520d; font-size:.8125rem; line-height:1.4; }
+    .pkg-unavailable { margin-top:13px; color: var(--hub-warning); font-size:.8125rem; line-height:1.4; }
     #adv-next-btn:disabled { opacity:.42; cursor:not-allowed; box-shadow:none; }
     .adv-status { display:inline-flex; padding:4px 8px; border-radius:999px; font-size:.8125rem; font-weight:800; text-transform:capitalize; white-space:nowrap; }
-    .adv-status.pending_payment { color:#76520d; background:rgba(255,207,51,.12); }
-    .adv-status.payment_submitted { color:#225b89; background:rgba(91,156,246,.14); }
-    .adv-status.approved { color:#09634f; background:rgba(23,214,111,.13); }
-    .adv-status.rejected, .adv-status.cancelled { color:#a62c48; background:rgba(255,77,94,.12); }
-    .adv-status.paused, .adv-status.expired { color:#52627a; background:rgba(255,255,255,.08); }
+    .adv-status.pending_payment { color: var(--hub-warning); background:rgba(255,207,51,.12); }
+    .adv-status.payment_submitted { color: var(--hub-info); background:rgba(91,156,246,.14); }
+    .adv-status.approved { color: var(--hub-positive); background:rgba(23,214,111,.13); }
+    .adv-status.rejected, .adv-status.cancelled { color: var(--hub-danger); background:rgba(255,77,94,.12); }
+    .adv-status.paused, .adv-status.expired { color: var(--hub-muted); background:rgba(255,255,255,.08); }
     /* Tiles are fixed-width (never `1fr`) so one lone ad never stretches to
        fill the row — the exact "still too big" a client flagged came from a
        single promotion expanding across the full available width. */
@@ -1694,10 +1695,10 @@
     .delivered-ad.is-swapping { opacity:0; }
     .delivered-ad-media { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; background:#111623; }
     .delivered-ad-copy { padding:10px 11px 12px; }
-    .delivered-ad-label { display:block; margin-bottom:4px; color:#09634f; font-size:.8125rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
+    .delivered-ad-label { display:block; margin-bottom:4px; color: var(--hub-positive); font-size:.8125rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
     .delivered-ad h4 { margin:0; color: var(--hub-ink); font-size:.8rem; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
     .delivered-ad p { display:none; }
-    .delivered-ad-cta { display:block; margin-top:5px; color:#09634f; font-size:.8125rem; font-weight:800; }
+    .delivered-ad-cta { display:block; margin-top:5px; color: var(--hub-positive); font-size:.8125rem; font-weight:800; }
     .delivered-ad-house { grid-column:1 / -1; padding:16px; border-style:dashed; text-align:center; min-width:152px; }
     .delivered-ad-house button { margin-top:10px; }
     @media (prefers-reduced-motion: reduce) {
@@ -1714,11 +1715,12 @@
         #advertise-fab { left:14px; right:14px; bottom:16px; justify-content:center; }
     }
 </style>
-<link rel="stylesheet" href="assets/usse-design.css?v=20261025-text2">
+<link rel="stylesheet" href="assets/usse-design.css?v=20261026-theme">
+<link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
 <script defer src="assets/usse-workspace.js?v=20261025"></script>
 </head>
 
-<body class="hub-directory" data-hub-page="ajm-advertising-hub">
+<body class="hub-directory hub-ajm" data-hub-page="ajm-advertising-hub">
     <div class="page-noise"></div>
 
     <!-- Toast Notification -->
@@ -2005,7 +2007,7 @@
     ============================================= -->
     <section class="hero container" id="hero">
         <img src="aloe%20logo.png" alt="AJM Advertising Hub Logo" style="height: 160px; width: auto; margin-bottom: 24px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4));">
-        <div class="eyebrow" style="color:#b9dfeb">Aloe Jamaica · The business network</div><h1>Good businesses.<br>Great connections.</h1>
+        <div class="eyebrow" style="color: #b9dfeb">Aloe Jamaica · The business network</div><h1>Good businesses.<br>Great connections.</h1>
         <p>Find services, explore spaces and discover opportunities across Jamaica. Your next connection starts here.</p>
 
         <div class="search-bar" role="search">
@@ -2763,7 +2765,7 @@
                 renderMemberListingWorkflows(listings);
             } catch (error) {
                 console.error(error);
-                grid.innerHTML = '<div class="md-empty" style="color:#a62c48;"><strong>Listings could not be loaded</strong>Please refresh the dashboard or sign in again.</div>';
+                grid.innerHTML = '<div class="md-empty" style="color: var(--hub-danger);"><strong>Listings could not be loaded</strong>Please refresh the dashboard or sign in again.</div>';
             }
 
             const [orders] = await Promise.all([ordersPromise, performancePromise]);
@@ -3398,7 +3400,7 @@
                             ${l.status === 'pending' ? '<span class="listing-badge" style="background:rgba(255,207,51,0.15);color:var(--yellow);">⏳ Pending</span>' : ''}
                         </div>
                         <span style="font-size: 0.9rem; color: var(--muted);">${escHtml(formatLocation(l.location))}${l.category ? ' · <span style="color:var(--green);font-weight:600;">' + escHtml(formatCategory(l.category)) + '</span>' : ''}</span>
-                        <p style="margin: 4px 0 0 0; font-size: 0.95rem; line-height: 1.5; color: #52627a;">
+                        <p style="margin: 4px 0 0 0; font-size: 0.95rem; line-height: 1.5; color: var(--hub-muted);">
                             <strong>${escHtml(l.subcategory || '')}</strong> ${l.description ? ' - ' + escHtml(l.description.slice(0, 160)) + (l.description.length > 160 ? '…' : '') : ''}
                         </p>
                         ${l.contact_phone ? `<span style="font-size:0.95rem; font-weight:600; margin-bottom: 4px;">📞 ${escHtml(l.contact_phone)}</span>` : ''}
@@ -4040,7 +4042,7 @@
             <div class="adv-alert info show" id="adv-catalog-guidance" style="margin-bottom:18px;">Business webpage packages upgrade an existing directory listing. Display-ad packages create advertisements for the listed placements. Prices, durations and payment destinations are managed by AJM.</div>
             <div id="adv-package-message" class="adv-alert info" role="status"></div>
             <div class="pkg-grid" id="adv-pkg-grid">
-                <div style="color:#52627a;text-align:center;padding:40px;grid-column:1/-1;">Loading packages...</div>
+                <div style="color: var(--hub-muted);text-align:center;padding:40px;grid-column:1/-1;">Loading packages...</div>
             </div>
             <div style="display:flex;justify-content:flex-end;">
                 <button class="btn btn-primary" id="adv-next-btn" onclick="advGoToStep2()" style="padding:14px 32px;font-size:1rem;" disabled>
@@ -4052,7 +4054,7 @@
         <!-- Step 2: Configure the selected package -->
         <div id="adv-step-2" class="adv-step">
             <div style="margin-bottom:20px;">
-                <button onclick="advGoToStep1()" style="background:none;border:none;color:#52627a;cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:6px;">← Back to packages</button>
+                <button onclick="advGoToStep1()" style="background:none;border:none;color: var(--hub-muted);cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:6px;">← Back to packages</button>
             </div>
             <div class="adv-modal-title" style="font-size:1.3rem;">Configure Your Package</div>
             <div class="adv-modal-subtitle">Selected: <strong id="adv-selected-pkg-name"></strong> · <strong id="adv-selected-pkg-price"></strong></div>
@@ -4108,7 +4110,7 @@
         <!-- Step 3: Bank transfer and proof -->
         <div id="adv-step-payment" class="adv-step">
             <div style="margin-bottom:20px;">
-                <button onclick="advGoToStep1()" style="background:none;border:none;color:#52627a;cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:6px;">← Start another order</button>
+                <button onclick="advGoToStep1()" style="background:none;border:none;color: var(--hub-muted);cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:6px;">← Start another order</button>
             </div>
             <div class="adv-modal-title" style="font-size:1.35rem;">Bank Transfer &amp; Payment Proof</div>
             <div class="adv-modal-subtitle">Order <strong id="adv-order-number"></strong> · <strong id="adv-payment-package"></strong></div>
@@ -4117,8 +4119,8 @@
             <div class="payment-instructions-box">
                 <h4>🏦 Transfer Destination</h4>
                 <div class="payment-detail-grid" id="adv-payment-details"></div>
-                <div id="adv-payment-instructions-text" style="margin-top:14px;font-size:0.86rem;color:#52627a;line-height:1.6;white-space:pre-wrap;"></div>
-                <div style="margin-top:14px;padding:12px 14px;border-radius:12px;border:1px solid rgba(23,214,111,.24);background:rgba(23,214,111,.07);font-size:.8rem;color:#09634f;line-height:1.55;">
+                <div id="adv-payment-instructions-text" style="margin-top:14px;font-size:0.86rem;color: var(--hub-muted);line-height:1.6;white-space:pre-wrap;"></div>
+                <div style="margin-top:14px;padding:12px 14px;border-radius:12px;border:1px solid rgba(23,214,111,.24);background:rgba(23,214,111,.07);font-size:.8rem;color: var(--hub-positive);line-height:1.55;">
                     <strong>Payment safety:</strong> AJM only displays transfer instructions. This website will never ask for your online-banking password, PIN, card credentials or one-time verification code. Upload only the bank receipt after completing the transfer through your own bank.
                 </div>
             </div>
@@ -4139,7 +4141,7 @@
         <div id="adv-step-login" class="adv-step" style="text-align:center;padding:40px 24px;">
             <div style="font-size:3rem;margin-bottom:16px;">🔐</div>
             <h2 style="font-size:1.4rem;margin-bottom:8px;">Sign In to Advertise</h2>
-            <p style="color:#52627a;margin-bottom:24px;">You need a free account to place an advertising order and receive confirmation notifications.</p>
+            <p style="color: var(--hub-muted);margin-bottom:24px;">You need a free account to place an advertising order and receive confirmation notifications.</p>
             <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
                 <button class="btn btn-primary" onclick="triggerLoginFromModal()" style="padding:12px 28px;">Sign In / Register</button>
                 <button class="btn btn-ghost" onclick="closeAdvertiseModal()" style="padding:12px 24px;">Maybe Later</button>
@@ -4227,7 +4229,7 @@
             .map((pkg, index) => ({ pkg, index }))
             .filter(({ pkg }) => !advProductFilter || pkg.product_type === advProductFilter);
         if (!visiblePackages.length) {
-            grid.innerHTML = '<div style="color:#52627a;text-align:center;padding:40px;grid-column:1/-1;">No packages are available at this time.</div>';
+            grid.innerHTML = '<div style="color: var(--hub-muted);text-align:center;padding:40px;grid-column:1/-1;">No packages are available at this time.</div>';
             return;
         }
 
@@ -4242,8 +4244,8 @@
                 <span class="pkg-tile-name" style="display:block;">${advEscape(pkg.name)}</span>
                 <span class="pkg-tile-price" style="display:block;">${advEscape(price)}</span>
                 <span class="pkg-tile-duration" style="display:block;">${advEscape(pkg.duration_days)} days · ${advEscape(product)}</span>
-                ${pkg.description ? `<span style="display:block;font-size:.82rem;color:#52627a;margin-bottom:12px;">${advEscape(pkg.description)}</span>` : ''}
-                ${features.length ? `<span class="pkg-tile-features" style="display:flex;">${features.map((feature) => `<span style="font-size:.8rem;color:#52627a;">✓ ${advEscape(feature)}</span>`).join('')}</span>` : ''}
+                ${pkg.description ? `<span style="display:block;font-size:.82rem;color: var(--hub-muted);margin-bottom:12px;">${advEscape(pkg.description)}</span>` : ''}
+                ${features.length ? `<span class="pkg-tile-features" style="display:flex;">${features.map((feature) => `<span style="font-size:.8rem;color: var(--hub-muted);">✓ ${advEscape(feature)}</span>`).join('')}</span>` : ''}
                 ${orderable ? '' : '<span class="pkg-unavailable" style="display:block;">Pricing or bank-transfer details are not configured yet.</span>'}
             </button>`;
         }).join('');
@@ -4257,7 +4259,7 @@
         if (advPackages.length && !force) return advPackages;
         if (advCatalogPromise && !force) return advCatalogPromise;
         const grid = advEl('adv-pkg-grid');
-        grid.innerHTML = '<div style="color:#52627a;text-align:center;padding:40px;grid-column:1/-1;">Loading current packages…</div>';
+        grid.innerHTML = '<div style="color: var(--hub-muted);text-align:center;padding:40px;grid-column:1/-1;">Loading current packages…</div>';
         advCatalogPromise = (async () => {
             const { data, error } = await sb.rpc('get_ad_catalog');
             if (error) throw error;
@@ -4727,7 +4729,7 @@
         ].filter(([, value]) => value !== null && value !== undefined && value !== '');
         advEl('adv-payment-details').innerHTML = details.length
             ? details.map(([label, value]) => `<div class="payment-detail"><label>${advEscape(label)}</label><span>${advEscape(value)}</span></div>`).join('')
-            : '<div style="color:#a62c48;font-size:.86rem;grid-column:1/-1;">Bank-transfer details are unavailable. Please contact AJM and quote your order number.</div>';
+            : '<div style="color: var(--hub-danger);font-size:.86rem;grid-column:1/-1;">Bank-transfer details are unavailable. Please contact AJM and quote your order number.</div>';
         advEl('adv-payment-instructions-text').textContent = account.instructions || `Transfer the exact amount and include ${order.order_number} in the bank reference.`;
         advEl('adv-order-number').textContent = order.order_number || '—';
         advEl('adv-payment-package').textContent = `${order.package_name_snapshot || 'Advertising package'} · ${advMoney(order.total_price_snapshot, order.currency_snapshot)}`;
@@ -4905,7 +4907,7 @@
         if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted);">Loading orders…</td></tr>';
         const { data, error } = await sb.rpc('get_my_ad_orders');
         if (error) {
-            if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#a62c48;">${advEscape(advFriendlyError(error, 'Orders could not be loaded.'))}</td></tr>`;
+            if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color: var(--hub-danger);">${advEscape(advFriendlyError(error, 'Orders could not be loaded.'))}</td></tr>`;
             return [];
         }
         advMyOrders = Array.isArray(data?.orders) ? data.orders : [];
@@ -4960,7 +4962,7 @@
         if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="md-table-empty">Loading campaign performance…</td></tr>';
         const { data, error } = await sb.rpc('get_my_ad_performance', { p_days: days });
         if (error) {
-            if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="md-table-empty" style="color:#a62c48;">${advEscape(advFriendlyError(error, 'Ad performance could not be loaded.'))}</td></tr>`;
+            if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="md-table-empty" style="color: var(--hub-danger);">${advEscape(advFriendlyError(error, 'Ad performance could not be loaded.'))}</td></tr>`;
             return [];
         }
         const kpis = data?.kpis && typeof data.kpis === 'object' ? data.kpis : {};
