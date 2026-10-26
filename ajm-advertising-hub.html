@@ -4271,7 +4271,7 @@
             return await advCatalogPromise;
         } catch (error) {
             grid.textContent = advFriendlyError(error, 'Advertising packages could not be loaded. Please try again.');
-            grid.style.color = '#a62c48';
+            grid.style.color = 'var(--hub-danger)';
             grid.style.padding = '40px';
             grid.style.gridColumn = '1 / -1';
             advCatalogPromise = null;
