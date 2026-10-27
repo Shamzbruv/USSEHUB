@@ -1,5 +1,6 @@
 import { serve } from 'server'
 import { createClient } from '@supabase/supabase-js'
+import { businessNotification } from '../_shared/email.mjs'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,15 +12,6 @@ function handleCors(req: Request) {
     return new Response('ok', { headers: corsHeaders });
   }
   return null;
-}
-
-function escHtml(value: unknown) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
 }
 
 serve(async (req: Request) => {
@@ -78,15 +70,7 @@ serve(async (req: Request) => {
     const adminEmail = Deno.env.get('ADMIN_NOTIFICATION_EMAIL') || 'admin@ussehub.com'
     
     if (resendApiKey) {
-      const emailBody = `
-        <h2>New Consultation Request</h2>
-        <p><strong>Customer:</strong> ${escHtml(customer_name)}</p>
-        <p><strong>Phone:</strong> ${escHtml(phone)}</p>
-        <p><strong>Email:</strong> ${escHtml(email)}</p>
-        <p><strong>Source:</strong> ${escHtml(source)}</p>
-        <p><strong>Listing ID:</strong> ${escHtml(listing_id || 'N/A')}</p>
-        <p><strong>Message:</strong> ${escHtml(notes)}</p>
-      `
+      const emailContent = businessNotification({ title: 'Let’s make the next connection.', message: 'A new consultation request has arrived. Review the details below and follow up with the customer.', fields: [['Customer', customer_name], ['Phone', phone], ['Email', email], ['Source', source], ['Listing ID', listing_id || 'Not linked'], ['Message', notes]], admin: true })
       const emailRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -94,11 +78,11 @@ serve(async (req: Request) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: 'USSE Hub System <admin@ussehub.com>',
+          from: 'USSE Hub <admin@ussehub.com>',
           to: adminEmail,
           reply_to: email || undefined,
-          subject: `New Consultation from ${escHtml(customer_name)}`,
-          html: emailBody
+          subject: `USSE Hub | Consultation from ${customer_name}`,
+          ...emailContent
         })
       })
       

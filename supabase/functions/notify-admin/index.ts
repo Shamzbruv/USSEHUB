@@ -1,13 +1,5 @@
 import { serve } from 'server'
-
-function escHtml(value: unknown) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
+import { businessNotification } from '../_shared/email.mjs'
 
 serve(async (req: Request) => {
   try {
@@ -39,29 +31,17 @@ serve(async (req: Request) => {
     }
 
     let subject = ''
-    let html = ''
+    let emailContent = { html: '', text: '' }
 
     // Note: Consultations are explicitly NOT handled here.
     // Consultations are handled directly by the submit-consultation Edge Function,
     // which does its own specialized validation and emailing.
     if (table === 'profiles') {
-      subject = `New Account Signup: ${escHtml(record.email)}`
-      html = `
-        <h2>New Account Signup</h2>
-        <p><strong>Email:</strong> ${escHtml(record.email)}</p>
-        <p><strong>Role:</strong> ${escHtml(record.role)}</p>
-        <p><strong>User ID:</strong> ${escHtml(record.id)}</p>
-      `
+      subject = `USSE Hub | New account: ${record.email}`
+      emailContent = businessNotification({ title: 'A new connection has joined.', message: 'A new account has been created on USSE Hub. Review the account in your admin workspace.', fields: [['Email', record.email], ['Role', record.role], ['User ID', record.id]], admin: true })
     } else if (table === 'listings') {
-      subject = `New Listing Submitted: ${escHtml(record.business_name)}`
-      html = `
-        <h2>New Listing Submitted</h2>
-        <p><strong>Business Name:</strong> ${escHtml(record.business_name)}</p>
-        <p><strong>Category:</strong> ${escHtml(record.category)}</p>
-        <p><strong>Location:</strong> ${escHtml(record.location)}</p>
-        <p><strong>Status:</strong> ${escHtml(record.status)}</p>
-        <p><strong>Owner ID:</strong> ${escHtml(record.owner_user_id)}</p>
-      `
+      subject = `USSE Hub | New listing: ${record.business_name}`
+      emailContent = businessNotification({ title: 'A business is ready for review.', message: 'A new business listing has been submitted to Aloe Jamaica. Open your admin workspace to review its details.', fields: [['Business', record.business_name], ['Category', record.category], ['Location', record.location], ['Status', record.status], ['Owner ID', record.owner_user_id]], admin: true })
     } else {
       return new Response('Ignored Table', { status: 200 })
     }
@@ -73,10 +53,10 @@ serve(async (req: Request) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'USSE Hub System <admin@ussehub.com>',
+        from: 'USSE Hub <admin@ussehub.com>',
         to: adminEmail,
         subject: subject,
-        html: html
+        ...emailContent
       })
     })
 

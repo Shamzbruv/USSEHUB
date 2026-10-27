@@ -47,7 +47,8 @@ const migrations = [
     '20260824000001_listing_approval_expiry_trigger.sql',
     '20260827175628_paid_webpage_promotion_analytics.sql',
     '20260831000000_fix_starter_hero_image_zoom.sql',
-    '20261027160446_auth_registration_admin_reservations.sql'
+    '20261027160446_auth_registration_admin_reservations.sql',
+    '20261027180752_corporate_email_branding.sql'
 ];
 
 if (!databaseUrl) {
