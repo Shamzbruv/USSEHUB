@@ -1743,7 +1743,7 @@
 
             <!-- Login Panel -->
             <div id="auth-panel-login">
-                <div id="login-error" class="auth-error-box"></div>
+                <div id="login-error" class="auth-error-box" role="alert"></div>
                 <div class="form-group">
                     <label for="modal-login-email">Email Address</label>
                     <input type="email" id="modal-login-email" placeholder="you@example.com" autocomplete="email" />
@@ -1760,19 +1760,19 @@
 
             <!-- Register Panel -->
             <div id="auth-panel-register" style="display:none;">
-                <div id="register-error" class="auth-error-box"></div>
+                <div id="register-error" class="auth-error-box" role="alert"></div>
                 <div id="register-success" class="auth-success-box"></div>
                 <div class="form-group">
                     <label for="modal-reg-name">Full Name</label>
-                    <input type="text" id="modal-reg-name" placeholder="John Smith" autocomplete="name" />
+                    <input type="text" maxlength="120" id="modal-reg-name" placeholder="John Smith" autocomplete="name" />
                 </div>
                 <div class="form-group">
                     <label for="modal-reg-email">Email Address</label>
                     <input type="email" id="modal-reg-email" placeholder="you@example.com" autocomplete="email" />
                 </div>
                 <div class="form-group">
-                    <label for="modal-reg-password">Password</label>
-                    <input type="password" id="modal-reg-password" placeholder="Min. 6 characters" autocomplete="new-password" />
+                    <label for="modal-reg-password">Password</label><p id="register-guidance" style="font-size:13px;color:var(--muted);">Use 8+ characters with uppercase and lowercase letters, a number and a symbol.</p>
+                    <input type="password" id="modal-reg-password" placeholder="At least 8 characters" minlength="8" aria-describedby="register-guidance" autocomplete="new-password" />
                 </div>
                 <div class="form-group">
                     <label for="modal-reg-password-confirm">Confirm Password</label>
@@ -1786,7 +1786,7 @@
 
             <!-- Forgot Password Panel -->
             <div id="auth-panel-forgot" style="display:none;">
-                <div id="forgot-error" class="auth-error-box"></div>
+                <div id="forgot-error" class="auth-error-box" role="alert"></div>
                 <div id="forgot-success" class="auth-success-box"></div>
                 <p style="font-size:0.88rem;color:var(--muted);margin-bottom:20px;">Enter your email and we'll send you a password reset link.</p>
                 <div class="form-group">
@@ -1797,6 +1797,22 @@
                     <span id="forgot-btn-text">Send Reset Link</span>
                     <span id="forgot-spinner" class="spinner"></span>
                 </button>
+            </div>
+            <div id="auth-panel-reset" style="display:none;">
+                <h3>Choose a new password</h3>
+                <p id="reset-guidance" style="color:var(--muted);margin-bottom:18px;">Use at least 8 characters, including uppercase and lowercase letters, a number and a symbol.</p>
+                <div id="reset-error" class="auth-error-box" role="alert"></div>
+                <div id="reset-success" class="auth-success-box" role="status"></div>
+                <div class="form-group"><label for="modal-reset-password">New password</label><input type="password" id="modal-reset-password" autocomplete="new-password" minlength="8" aria-describedby="reset-guidance" /></div>
+                <div class="form-group"><label for="modal-reset-confirm">Confirm new password</label><input type="password" id="modal-reset-confirm" autocomplete="new-password" minlength="8" /></div>
+                <button type="button" class="btn btn-primary" id="reset-btn" onclick="handleResetPassword()">Update password <span id="reset-spinner" class="spinner"></span></button>
+            </div>
+            <div id="auth-confirmation-tools" hidden style="margin-top:20px;padding-top:20px;border-top:1px solid var(--line);">
+                <h3>Need another confirmation email?</h3>
+                <div id="confirmation-error" class="auth-error-box" role="alert"></div>
+                <div id="confirmation-success" class="auth-success-box" role="status"></div>
+                <div class="form-group"><label for="confirmation-email">Email address</label><input type="email" id="confirmation-email" autocomplete="email" /></div>
+                <button type="button" class="btn btn-ghost" id="confirmation-btn" onclick="resendConfirmationEmail()">Resend confirmation <span id="confirmation-spinner" class="spinner"></span></button>
             </div>
         </div>
     </div>
@@ -1828,7 +1844,7 @@
             <h2 class="modal-title" id="post-listing-title">Post a Listing</h2>
             <p class="modal-subtitle">Submit your business for review. It will appear publicly after admin approval.</p>
 
-            <div id="listing-form-error" class="auth-error-box"></div>
+            <div id="listing-form-error" class="auth-error-box" role="alert"></div>
             <div id="listing-form-success" class="auth-success-box"></div>
 
             <form id="listing-form" onsubmit="handleListingSubmit(event)" novalidate>
@@ -2332,14 +2348,14 @@
                     <div class="auth-widget">
                         <input type="email" id="sidebar-email" placeholder="Email" autocomplete="email" />
                         <input type="password" id="sidebar-password" placeholder="Password" autocomplete="current-password" />
-                        <div id="sidebar-login-error" class="auth-error-box"></div>
+                        <div id="sidebar-login-error" class="auth-error-box" role="alert"></div>
                         <button class="btn btn-ghost" id="sidebar-login-btn" style="width: 100%; border-radius: 12px;" onclick="handleSidebarLogin()">
                             <span id="sidebar-login-text">Login</span>
                             <span id="sidebar-login-spinner" class="spinner" style="border-top-color:white;border-color:rgba(255,255,255,0.2);border-top-color:white;"></span>
                         </button>
                         <div class="auth-links">
-                            <a onclick="openModal('auth-modal');switchAuthTab('register')" tabindex="0">Register</a>
-                            <a onclick="openModal('auth-modal');switchAuthTab('forgot')" tabindex="0">Forgot password?</a>
+                            <a href="#register" onclick="event.preventDefault();openModal('auth-modal');switchAuthTab('register')">Register</a>
+                            <a href="#forgot-password" onclick="event.preventDefault();openModal('auth-modal');switchAuthTab('forgot')">Forgot password?</a>
                         </div>
                     </div>
                 </div>
@@ -2414,12 +2430,14 @@
     ============================================= -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { createAuthUI } from './assets/usse-auth.mjs?v=20261027';
 
         const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
         const WHATSAPP_NUMBER = '18764271661';
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const authUI = createAuthUI({client:supabase, onSignedIn:onUserSignedIn, onSignedOut:onUserSignedOut, showToast, openModal, closeModal});
 
         // ==========================================
         // STATE
@@ -2880,18 +2898,7 @@
                 if (descLabel) descLabel.textContent = labels.desc;
             };
 
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
-                await onUserSignedIn(session.user);
-            }
-
-            supabase.auth.onAuthStateChange(async (_event, session) => {
-                if (session?.user) {
-                    await onUserSignedIn(session.user);
-                } else {
-                    onUserSignedOut();
-                }
-            });
+            await authUI.init();
 
             await loadListings();
         }
@@ -2940,30 +2947,26 @@
         // ==========================================
         // AUTH: SIGN IN
         // ==========================================
-        async function onUserSignedIn(user) {
+        async function onUserSignedIn(user, stillCurrent = () => true) {
             currentUser = user;
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single();
-
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles').select('*').eq('id', user.id).maybeSingle();
+            if (profileError) throw profileError;
+            if (!stillCurrent()) return;
             currentProfile = profile;
-
-            // If no profile row, create one
             if (!profile) {
-                const { data: newProfile } = await supabase
-                    .from('profiles')
-                    .insert({
-                        id: user.id,
-                        email: user.email,
-                        full_name: user.user_metadata?.full_name || '',
-                        role: 'member',
-                        subscription_status: 'inactive'
-                    })
-                    .select()
-                    .single();
-                currentProfile = newProfile;
+                // Repair a genuinely missing profile only; network errors are not
+                // treated as missing records. Server policies enforce the defaults.
+                const { data: newProfile, error: insertError } = await supabase.from('profiles')
+                    .insert({id:user.id,email:user.email,full_name:user.user_metadata?.full_name || '',role:'member',subscription_status:'inactive'})
+                    .select().single();
+                if (insertError && insertError.code !== '23505') throw insertError;
+                if (!stillCurrent()) return;
+                if (insertError) {
+                    const {data: existing, error} = await supabase.from('profiles').select('*').eq('id',user.id).single();
+                    if (error) throw error;
+                    currentProfile = existing;
+                } else currentProfile = newProfile;
             }
 
             updateSidebarLoggedIn();
@@ -3447,135 +3450,13 @@
         // ==========================================
         // AUTH HANDLERS
         // ==========================================
-        async function handleLogin() {
-            const email = document.getElementById('modal-login-email').value.trim();
-            const password = document.getElementById('modal-login-password').value;
-            const errBox = document.getElementById('login-error');
-
-            errBox.classList.remove('show');
-            setLoading('login-btn-text', 'login-spinner', true);
-
-            if (!email || !password) {
-                showErrBox(errBox, 'Please enter your email and password.');
-                setLoading('login-btn-text', 'login-spinner', false);
-                return;
-            }
-
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            setLoading('login-btn-text', 'login-spinner', false);
-
-            if (error) {
-                showErrBox(errBox, error.message || 'Login failed. Please check your credentials.');
-            } else {
-                showToast('Welcome back! You are now logged in.', 'success');
-            }
-        }
-
-        async function handleRegister() {
-            const name = document.getElementById('modal-reg-name').value.trim();
-            const email = document.getElementById('modal-reg-email').value.trim();
-            const password = document.getElementById('modal-reg-password').value;
-            const confirmPassword = document.getElementById('modal-reg-password-confirm').value;
-            const errBox = document.getElementById('register-error');
-            const successBox = document.getElementById('register-success');
-
-            errBox.classList.remove('show');
-            successBox.classList.remove('show');
-            setLoading('reg-btn-text', 'reg-spinner', true);
-
-            if (!name || !email || !password || !confirmPassword) {
-                showErrBox(errBox, 'Please fill in all fields.');
-                setLoading('reg-btn-text', 'reg-spinner', false);
-                return;
-            }
-            if (password !== confirmPassword) {
-                showErrBox(errBox, 'Passwords do not match.');
-                setLoading('reg-btn-text', 'reg-spinner', false);
-                return;
-            }
-            if (password.length < 6) {
-                showErrBox(errBox, 'Password must be at least 6 characters.');
-                setLoading('reg-btn-text', 'reg-spinner', false);
-                return;
-            }
-
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: { data: { full_name: name } }
-            });
-            setLoading('reg-btn-text', 'reg-spinner', false);
-
-            if (error) {
-                showErrBox(errBox, error.message || 'Registration failed. Please try again.');
-            } else {
-                successBox.textContent = 'Account created! Please check your email to confirm your address, then login.';
-                successBox.classList.add('show');
-                document.getElementById('modal-reg-name').value = '';
-                document.getElementById('modal-reg-email').value = '';
-                document.getElementById('modal-reg-password').value = '';
-            }
-        }
-
-        async function handleForgotPassword() {
-            const email = document.getElementById('modal-forgot-email').value.trim();
-            const errBox = document.getElementById('forgot-error');
-            const successBox = document.getElementById('forgot-success');
-
-            errBox.classList.remove('show');
-            successBox.classList.remove('show');
-            setLoading('forgot-btn-text', 'forgot-spinner', true);
-
-            if (!email) {
-                showErrBox(errBox, 'Please enter your email address.');
-                setLoading('forgot-btn-text', 'forgot-spinner', false);
-                return;
-            }
-
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + '/ajm-advertising-hub.html'
-            });
-            setLoading('forgot-btn-text', 'forgot-spinner', false);
-
-            if (error) {
-                showErrBox(errBox, error.message || 'Could not send reset email. Please try again.');
-            } else {
-                successBox.textContent = 'Reset link sent! Check your email inbox (and spam folder).';
-                successBox.classList.add('show');
-                document.getElementById('modal-forgot-email').value = '';
-            }
-        }
-
-        async function handleSidebarLogin() {
-            const email = document.getElementById('sidebar-email').value.trim();
-            const password = document.getElementById('sidebar-password').value;
-            const errBox = document.getElementById('sidebar-login-error');
-
-            errBox.classList.remove('show');
-            setLoading('sidebar-login-text', 'sidebar-login-spinner', true);
-
-            if (!email || !password) {
-                showErrBox(errBox, 'Enter your email and password.');
-                setLoading('sidebar-login-text', 'sidebar-login-spinner', false);
-                return;
-            }
-
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            setLoading('sidebar-login-text', 'sidebar-login-spinner', false);
-
-            if (error) {
-                showErrBox(errBox, error.message || 'Login failed.');
-            } else {
-                document.getElementById('sidebar-email').value = '';
-                document.getElementById('sidebar-password').value = '';
-                showToast('Welcome back! You are now logged in.', 'success');
-            }
-        }
-
-        async function handleLogout() {
-            await supabase.auth.signOut();
-            showToast('You have been signed out.', 'info');
-        }
+        function handleLogin() { return authUI.login(); }
+        function handleRegister() { return authUI.register(); }
+        function handleForgotPassword() { return authUI.forgot(); }
+        function handleSidebarLogin() { return authUI.sidebarLogin(); }
+        function handleLogout() { return authUI.logout(); }
+        window.resendConfirmationEmail = () => authUI.resend();
+        window.handleResetPassword = () => authUI.reset();
 
         // ==========================================
         // POST LISTING
@@ -3917,6 +3798,9 @@
         // AUTH TAB SWITCHER
         // ==========================================
         function switchAuthTab(tab) {
+            document.getElementById('auth-panel-reset').style.display = 'none';
+            document.querySelector('.auth-tabs').hidden = false;
+            document.getElementById('auth-confirmation-tools').hidden = true;
             ['login', 'register', 'forgot'].forEach(t => {
                 document.getElementById(`auth-panel-${t}`).style.display = t === tab ? 'block' : 'none';
                 const tabEl = document.getElementById(`tab-${t}`);
