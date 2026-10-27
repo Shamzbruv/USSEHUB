@@ -172,6 +172,8 @@ export function createAuthUI({client, onSignedIn, onSignedOut, showToast, openMo
         const linkError = initialLinkError || new URLSearchParams(loc.hash.slice(1)).get('error_code') || new URL(loc.href).searchParams.get('error_code');
         if (linkError || recoveryRequested && !data?.session) {
           doc.querySelector('.auth-tabs').hidden = false; el('auth-panel-forgot').style.display = 'block'; el('auth-panel-login').style.display = 'none';
+          el('tab-login').classList.remove('active'); el('tab-login').setAttribute('aria-selected','false');
+          el('tab-forgot').classList.add('active'); el('tab-forgot').setAttribute('aria-selected','true');
           show(el('forgot-error'),'This account link is invalid or has expired. Request a new email and open its latest link.'); openModal('auth-modal'); cleanLink();
         }
       } catch (error) { showToast(authErrorMessage(error,'Your session could not be restored. Please sign in again.'),'error'); }
