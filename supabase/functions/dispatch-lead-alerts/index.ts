@@ -22,14 +22,14 @@ Deno.serve(async req=>{
   // QA mailbox without changing who receives genuine customer enquiries.
   const recipients=secretAuthorized&&isEmail(body.test_recipient)?[body.test_recipient]:(settings?.recipients||[]);
   if(!recipients.length)return new Response(JSON.stringify({error:'Set at least one alert recipient first.'}),{status:400,headers});
-  let accepted=0;
+  let accepted=0;const failures: Array<{status:number;reason:string;detail:string}>=[];
   for(const recipient of recipients){
    const sample={id:'00000000-0000-4000-8000-000000000000',lead_reference:'USSE-DELIVERY-TEST',customer_name:'USSE alert delivery test',email:recipient,phone:'',notes:'TEST ONLY — your lead alert service is connected. No customer enquiry has been created by this test.',branch:'USSE',service:'Lead inbox delivery verification',source:'website',created_at:new Date().toISOString()};
    const mail=leadAlertEmail(sample,recipient);mail.subject='USSE Hub — lead alert delivery test';
    const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${Deno.env.get('RESEND_API_KEY')}`,'Content-Type':'application/json'},body:JSON.stringify(mail),signal:AbortSignal.timeout(12000)});
-   if(response.ok)accepted++;
+   if(response.ok)accepted++;else{const provider=await response.json().catch(()=>({}));failures.push({status:response.status,reason:String(provider.name||'provider_error'),detail:String(provider.message||'Email provider rejected the test.').replace(/re_[A-Za-z0-9_]+/g,'[redacted]').replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+/gi,'[address]').slice(0,250)});}
   }
-  return new Response(JSON.stringify({accepted,failed:recipients.length-accepted}),{status:accepted===recipients.length?200:502,headers});
+  return new Response(JSON.stringify({accepted,failed:recipients.length-accepted,failures}),{status:accepted===recipients.length?200:502,headers});
  }
  try{const result=await dispatchLeadAlerts(client,{apiKey:Deno.env.get('RESEND_API_KEY'),defaultRecipients:Deno.env.get('ADMIN_NOTIFICATION_EMAIL')});return new Response(JSON.stringify(result),{headers});}
  catch{return new Response(JSON.stringify({error:'Lead alerts remain queued. Please check delivery status in the lead inbox.'}),{status:503,headers});}

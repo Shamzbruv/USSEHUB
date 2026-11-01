@@ -32,7 +32,8 @@ console.log('Verified: all 13 Auth email templates and branded sender name are l
 for (const slug of slugs) {
   const form=new FormData();
   const entry=`supabase/functions/${slug}/index.ts`;
-  for (const relative of [entry,'supabase/functions/_shared/email.mjs','supabase/functions/email-import-map.json']) {
+  const dependencies = slug === 'submit-consultation' ? ['supabase/functions/capture-lead/index.ts','supabase/functions/_shared/lead-intake.mjs','supabase/functions/_shared/lead-dispatch.mjs','supabase/functions/_shared/lead-email.mjs','assets/usse-leads-core.mjs'] : [];
+  for (const relative of [entry,'supabase/functions/_shared/email.mjs','supabase/functions/email-import-map.json',...dependencies]) {
     form.append('file',new Blob([fs.readFileSync(path.join(root,relative))],{type:relative.endsWith('.json')?'application/json':'application/typescript'}),relative);
   }
   // Preserve the existing gateway JWT enforcement; webhook/CAPTCHA checks stay
