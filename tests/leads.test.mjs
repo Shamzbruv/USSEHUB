@@ -51,6 +51,48 @@ await call('public.admin_manage_leads',['retry_alerts',{id:receipt.lead_id}]);as
 await db.exec(`DELETE FROM public.listings WHERE id='${listing}'`);assert.equal((await call('public.admin_manage_leads',['detail',{id:receipt.lead_id}])).lead.listing_id,null,'Deleting a listing must retain its lead');
 for(let i=0;i<11;i++)await call('public.capture_usse_lead',[{...data,listing_id:null},crypto.randomUUID(),'fp-'+i,'ip-hash']);
 await assert.rejects(()=>call('public.capture_usse_lead',[{...data,listing_id:null},crypto.randomUUID(),'fp-overflow','ip-hash']),/Too many/);
+// Run the additive spam migration against the same schema, then exercise its real functions.
+await db.exec(fs.readFileSync('supabase/migrations/20261101020019_lead_spam_protection.sql','utf8'));
+const guarded={...data,listing_id:null,email:'guarded@example.com',phone:'8765550190',notes:'A fresh legitimate enquiry.'};
+const newRequest=crypto.randomUUID();const safe=await call('public.capture_usse_lead',[guarded,newRequest,'guarded-fp','fresh-ip']);assert(safe.created);
+const queueBefore=(await db.query('SELECT count(*) n FROM private.lead_alert_deliveries')).rows[0].n;
+assert.equal((await call('public.capture_usse_lead',[guarded,newRequest,'guarded-fp','fresh-ip'])).created,false);
+const duplicate=await call('public.capture_usse_lead',[guarded,crypto.randomUUID(),'retry-fp','fresh-ip']);assert(duplicate.duplicate);assert.equal(duplicate.lead_id,safe.lead_id);
+assert.equal((await db.query('SELECT count(*) n FROM private.lead_alert_deliveries')).rows[0].n,queueBefore);
+const limited=await call('public.capture_usse_lead',[{...guarded,notes:'Another enquiry.'},crypto.randomUUID(),'next-fp','fresh-ip']);assert.equal(limited.reason,'rate_limit');assert(limited.retry_after>0);
+await db.exec(`SELECT set_config('test.uid','${admin}',false)`);
+await db.query("UPDATE private.lead_alert_deliveries SET status='accepted' WHERE lead_id=$1 AND recipient_email='first@example.com'",[safe.lead_id]);
+await call('public.admin_manage_lead_spam',['block_contact',{id:safe.lead_id}]);assert.equal((await call('public.admin_manage_lead_spam',['detail',{id:safe.lead_id}])).contact_blocked,true);
+assert.equal((await db.query('SELECT lead_stage FROM public.consultations WHERE id=$1',[safe.lead_id])).rows[0].lead_stage,'spam');
+assert.deepEqual((await db.query('SELECT status FROM private.lead_alert_deliveries WHERE lead_id=$1 ORDER BY recipient_email',[safe.lead_id])).rows.map(r=>r.status),['accepted','cancelled']);
+assert.equal((await call('public.capture_usse_lead',[{...guarded,email:'changed@example.com',phone:'+1 (876) 555-0190'},crypto.randomUUID(),'blocked-phone','different-ip'])).reason,'blocked_contact');
+assert.equal((await call('public.capture_usse_lead',[{...guarded,phone:'8765550177'},crypto.randomUUID(),'blocked-email','another-ip'])).reason,'blocked_contact');
+await call('public.admin_manage_leads',['save_settings',{recipients:['first@example.com','second@example.com','third@example.com'],enabled:true}]);
+await call('public.admin_manage_leads',['retry_alerts',{id:safe.lead_id}]);
+assert.equal((await db.query("SELECT status FROM private.lead_alert_deliveries WHERE lead_id=$1 AND recipient_email='third@example.com'",[safe.lead_id])).rows[0].status,'cancelled','New recipients must not revive spam alerts');
+const blocks=await call('public.admin_manage_lead_spam',['list',{}]);assert.equal(blocks.total,2);assert(blocks.blocked_24h>=3);assert.equal(blocks.duplicates_24h,1);
+for(const b of blocks.rows)await call('public.admin_manage_lead_spam',['unblock',{block_id:b.id}]);
+await db.exec("DELETE FROM private.lead_rate_limits WHERE key_hash LIKE 'spam:%'");
+const restored=await call('public.capture_usse_lead',[{...guarded,notes:'Now submitting a genuine fresh enquiry.'},crypto.randomUUID(),'restored-fp','restored-ip']);assert(restored.created);
+await call('public.admin_manage_lead_spam',['block_connection',{id:restored.lead_id}]);
+assert.equal((await call('public.capture_usse_lead',[{...guarded,email:'other@example.com',phone:'8765550107'},crypto.randomUUID(),'network-block','restored-ip'])).reason,'blocked_connection');
+await db.exec("UPDATE private.lead_spam_blocks SET expires_at=now()-interval '1 second' WHERE kind='connection'");
+assert((await call('public.capture_usse_lead',[{...guarded,email:'fresh-other@example.com',phone:'8765550108'},crypto.randomUUID(),'expired-network','restored-ip'])).created,'Connection blocks expire automatically');
+for(let i=0;i<3;i++)assert((await call('public.capture_usse_lead',[{...guarded,email:`burst${i}@example.com`,phone:`876555012${i}`,notes:'Distinct burst '+i},crypto.randomUUID(),'burst-'+i,'burst-ip'])).created);
+assert.equal((await call('public.capture_usse_lead',[{...guarded,email:'burst4@example.com',phone:'8765550124'},crypto.randomUUID(),'burst-4','burst-ip'])).reason,'rate_limit');
+for(let i=0;i<6;i++){
+ await db.exec("DELETE FROM private.lead_rate_limits WHERE key_hash LIKE 'spam:minute:%'");
+ assert((await call('public.capture_usse_lead',[{...guarded,email:'hourly@example.com',phone:'8765550150',notes:'Separate hourly enquiry '+i},crypto.randomUUID(),'hour-'+i,'hour-ip-'+i])).created);
+}
+await db.exec("DELETE FROM private.lead_rate_limits WHERE key_hash LIKE 'spam:minute:%'");
+assert.equal((await call('public.capture_usse_lead',[{...guarded,email:'hourly@example.com',phone:'8765550150',notes:'Too many hourly enquiries'},crypto.randomUUID(),'hour-over','hour-ip-over'])).reason,'rate_limit');
+await db.exec(`SELECT set_config('test.uid','${member}',false);SET ROLE authenticated`);
+await assert.rejects(()=>call('public.admin_manage_lead_spam',['list',{}]),/Administrator/);await assert.rejects(()=>db.query('SELECT * FROM private.lead_spam_blocks'),/permission denied/);
+await db.exec(`RESET ROLE;SELECT set_config('test.uid','${admin}',false);UPDATE public.profiles SET account_status='suspended' WHERE id='${admin}'`);
+await assert.rejects(()=>call('public.admin_manage_lead_spam',['list',{}]),/Active administrator/);
+await db.exec(`UPDATE public.profiles SET account_status='active' WHERE id='${admin}';SET ROLE anon`);
+await assert.rejects(()=>call('public.admin_manage_lead_spam',['list',{}]),/permission denied/);await assert.rejects(()=>call('public.capture_usse_lead',[guarded,crypto.randomUUID(),'bypass','bypass']),/permission denied/);await db.exec('RESET ROLE');
+console.log('Spam protection passed: contact/phone normalization, 24-hour connection expiry, burst/hourly quotas, duplicate receipts, cancelled spam alerts and administrator-only unblock.');
 await db.close();
 // Real intake handler: consent, honeypot, CORS and validation remain enforced without external CAPTCHA.
 let saves=0,dispatches=0;const body={...data,listing_id:null,request_id:request};
@@ -59,6 +101,12 @@ const handler=createLeadHandler({client,dispatchSecret:'dispatch-secret',dispatc
 const req=(overrides={},origin='https://ussehub.com')=>new Request('https://example.com',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json','cf-connecting-ip':'192.0.2.1'},body:JSON.stringify({...body,...overrides})});
 assert.equal((await handler(req({},'https://evil.example'))).status,403);assert.equal((await handler(req({website_url:'spam.example'}))).status,400);assert.equal((await handler(req({request_id:'invalid'}))).status,400);assert.equal((await handler(req({consent:false}))).status,400);assert.equal(saves,0);
 assert.equal((await handler(req())).status,201);assert.equal(saves,1);assert.equal(dispatches,1);
+const blockedHandler=createLeadHandler({client:{rpc:async()=>({data:{blocked:true,reason:'rate_limit',retry_after:45}})},dispatchSecret:'secret',dispatch:async()=>{throw new Error('Blocked enquiries must not send mail');}});
+const blockedResponse=await blockedHandler(req());assert.equal(blockedResponse.status,429);assert.equal(blockedResponse.headers.get('Retry-After'),'45');assert(!(await blockedResponse.json()).saved);
+const contactBlocked=createLeadHandler({client:{rpc:async()=>({data:{blocked:true,reason:'blocked_contact'}})},dispatchSecret:'secret',dispatch:async()=>{throw new Error('Must not dispatch');}});assert.equal((await contactBlocked(req())).status,403);
+assert.equal((await handler(new Request('https://example.com',{method:'POST',headers:{Origin:'https://ussehub.com','Content-Type':'application/json'},body:JSON.stringify({...body,notes:'x'.repeat(21000)})}))).status,413);
+assert.equal((await handler(new Request('https://example.com',{method:'POST',headers:{Origin:'https://ussehub.com','Content-Type':'application/json'},body:'null'}))).status,400);
+assert.equal((await handler(new Request('https://example.com',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}))).status,403);
 const unavailable=createLeadHandler({client,dispatch:async()=>{}});assert.equal((await unavailable(req())).status,503);assert.equal(saves,1);
 const hostile={id:request,lead_reference:'USSE-TEST',customer_name:'<img src=x onerror=alert(1)>',email:'customer@example.com',phone:'8765550100',notes:'=HYPERLINK("bad")\nNeed advice',source:'email',branch:'USSE',created_at:'2026-10-31T17:00:00Z'};
 const mail=leadAlertEmail(hostile,'admin@example.com');assert(!mail.html.includes('<img'));assert(mail.html.includes('&lt;img'));assert(mail.html.includes('Reply by email')&&mail.html.includes('Call lead')&&mail.html.includes('WhatsApp lead'));assert.equal(mail.reply_to,'customer@example.com');assert.equal(mail.to.length,1);assert.equal(mail.attachments[0].content_type,'text/vcard');
