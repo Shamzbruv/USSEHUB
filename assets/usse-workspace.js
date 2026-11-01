@@ -35,7 +35,7 @@
   };
   const rail = document.createElement('aside');
   rail.className = 'hub-rail'; rail.id = 'hub-workspace-navigation'; rail.setAttribute('aria-label', 'USSE workspace');
-  rail.innerHTML = `<a class="hub-rail-brand" href="index.html"><img src="usse.png" alt=""><span><strong>USSEHub</strong><small>Operations suite</small></span></a><div class="hub-rail-label">Workspace</div><nav aria-label="Operations modules"></nav><div class="hub-rail-local"><div class="hub-rail-label">In this workspace</div><nav aria-label="Current workspace sections"></nav></div><div class="hub-rail-label">Explore</div><nav class="hub-rail-public" aria-label="Public pages"></nav><div class="hub-rail-note"><strong>One enterprise.<br>Connected possibilities.</strong>Strategy, creativity and execution.<br>Working together, across Jamaica.</div>`;
+  rail.innerHTML = `<a class="hub-rail-brand" href="index.html"><img class="hub-original-logo" src="assets/usse-original-logo.jpg" alt=""><span><strong>USSEHub</strong><small>Operations suite</small></span></a><div class="hub-rail-label">Workspace</div><nav aria-label="Operations modules"></nav><div class="hub-rail-local"><div class="hub-rail-label">In this workspace</div><nav aria-label="Current workspace sections"></nav></div><div class="hub-rail-label">Explore</div><nav class="hub-rail-public" aria-label="Public pages"></nav><div class="hub-rail-note"><strong>One enterprise.<br>Connected possibilities.</strong>Strategy, creativity and execution.<br>Working together, across Jamaica.</div>`;
   const isBuilder = page === 'ajm-webpage-builder';
   if (isBuilder) rail.querySelector('.hub-rail-brand small').textContent = 'Business studio';
   const links = isBuilder ? [
@@ -56,9 +56,9 @@
     if (page === path) a.setAttribute('aria-current', 'page'); moduleNav.append(a);
   }
   const publicNav = rail.querySelector('.hub-rail-public');
-  for (const [path, label, glyph] of [['index.html','Public website','globe'], ['ajm-advertising-hub','Business directory','arrow']]) {
+  for (const [path, label, glyph] of [['index.html','USSE Home','globe'], ['ajm-advertising-hub','Business directory','arrow']]) {
     const a = document.createElement('a'); a.className = 'hub-rail-link'; a.href = path;
-    a.innerHTML = icon(glyph); a.append(document.createTextNode(label)); publicNav.append(a);
+    a.innerHTML = path === 'index.html' ? '<img class="hub-home-logo" src="assets/usse-original-logo.jpg" width="348" height="185" alt="" aria-hidden="true">' : icon(glyph); a.append(document.createTextNode(label)); publicNav.append(a);
   }
   body.prepend(rail);
   const toggle = document.createElement('button'); toggle.className = 'hub-menu-toggle';
