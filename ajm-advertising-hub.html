@@ -10,7 +10,6 @@
     <link rel="apple-touch-icon" href="aloe%20logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
     <meta name="description"
         content="Browse the AJM Advertising Hub for Jamaica business listings, classifieds and promotions across general services, property management, financial services, NGOs, real estate, food and beverage, agriculture, construction, auto care and entertainment." />
     <meta name="keywords" content="AJM Advertising Hub, Jamaica business directory, classifieds, promotions, services, transport rentals, maintenance, auto repairs, construction, delivery, catering, health & wellness, medical clinics, gyms, educational services, communications, audio visual, graphic design, event planning, finances, banking, NGO, rooms, venue rentals, real estate sales, residential, commercial leasing, farming, agriculture, fisheries, poultry, horticulture, retail trade, wholesale, supermarkets, craft markets, purveyors, food & beverage, dining outlets, restaurants, cafes, events, entertainment, live shows, festivals, parties, clubs, Jamaica" />
@@ -1718,7 +1717,7 @@
 <link rel="stylesheet" href="assets/usse-design.css?v=20261101-brand">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
 <script defer src="assets/usse-workspace.js?v=20261101-brand"></script>
-<link rel="stylesheet" href="assets/usse-lead-capture.css?v=20261101-security">
+<link rel="stylesheet" href="assets/usse-lead-capture.css?v=20261101-direct">
 </head>
 
 <body class="hub-directory hub-ajm" data-hub-page="ajm-advertising-hub">
@@ -2282,8 +2281,7 @@
 
             <label class="usse-lead-consent"><input type="checkbox" id="cons-consent"><span>I agree that USSE may save my enquiry and contact me using the details provided.</span></label>
             <div id="cons-receipt" class="usse-lead-status" role="status" hidden></div>
-            <!-- Turnstile Widget Placeholder -->
-            <div id="turnstile-widget" style="margin-bottom: 16px;"></div>
+            <div class="usse-lead-trap" aria-hidden="true"><label>Leave this field blank<input id="cons-website-url" tabindex="-1" autocomplete="off"></label></div>
 
             <button id="cons-submit-btn" class="btn btn-primary" onclick="submitConsultation()" style="width:100%;margin-top:8px;">
                 <span id="cons-submit-text">Continue to Connect</span>
@@ -2451,11 +2449,6 @@
         let listingsOffset = 0;
         const LISTINGS_PER_PAGE = 10;
         let totalListingsCount = 0;
-        const TURNSTILE_SITE_KEY = '0x4AAAAAADny2ngXsIdv_AkO';
-        let consultationTurnstileWidgetId = null;
-        let consultationTurnstileToken = '';
-        let consultationTurnstileTimer = null;
-        let consultationTurnstileLoadFailed = false;
         const PUBLIC_LISTING_FIELDS = [
             'id', 'business_name', 'description', 'category', 'subcategory', 'location',
             'contact_phone', 'whatsapp', 'email', 'website', 'image_url', 'listing_type',
@@ -3598,6 +3591,7 @@
             document.getElementById('cons-receipt').dataset.saved = '';
             document.getElementById('cons-submit-btn').disabled = false;
             document.getElementById('cons-consent').checked = false;
+            document.getElementById('cons-website-url').value = '';
             document.getElementById('cons-listing-id').value = listingId;
             document.getElementById('cons-source').value = source;
             document.getElementById('cons-target').value = target;
@@ -3605,100 +3599,16 @@
             document.getElementById('cons-phone').value = '';
             document.getElementById('cons-email').value = '';
             document.getElementById('consultation-modal').classList.add('open');
-            ensureConsultationTurnstile();
         };
 
         window.closeConsultationModal = function() {
             document.getElementById('consultation-modal').classList.remove('open');
-            removeConsultationTurnstile();
         };
-
-        function renderConsultationTurnstile() {
-            const container = document.getElementById('turnstile-widget');
-            if (!container || !window.turnstile?.render) return false;
-
-            consultationTurnstileToken = '';
-            consultationTurnstileLoadFailed = false;
-
-            if (consultationTurnstileWidgetId !== null) {
-                window.turnstile.reset(consultationTurnstileWidgetId);
-                return true;
-            }
-
-            try {
-                consultationTurnstileWidgetId = window.turnstile.render(container, {
-                    sitekey: TURNSTILE_SITE_KEY,
-                    theme: 'dark',
-                    size: 'flexible',
-                    callback: (token) => {
-                        consultationTurnstileToken = token;
-                    },
-                    'expired-callback': () => {
-                        consultationTurnstileToken = '';
-                        if (consultationTurnstileWidgetId !== null && window.turnstile?.reset) {
-                            window.turnstile.reset(consultationTurnstileWidgetId);
-                        }
-                    },
-                    'error-callback': () => {
-                        consultationTurnstileToken = '';
-                        consultationTurnstileLoadFailed = true;
-                        return true;
-                    }
-                });
-            } catch (_) {
-                consultationTurnstileWidgetId = null;
-                consultationTurnstileLoadFailed = true;
-                return true;
-            }
-
-            return consultationTurnstileWidgetId !== null && consultationTurnstileWidgetId !== undefined;
-        }
-
-        function ensureConsultationTurnstile() {
-            if (renderConsultationTurnstile()) return;
-
-            clearInterval(consultationTurnstileTimer);
-            let attempts = 0;
-            consultationTurnstileTimer = setInterval(() => {
-                attempts += 1;
-                if (renderConsultationTurnstile() || attempts >= 60) {
-                    clearInterval(consultationTurnstileTimer);
-                    consultationTurnstileTimer = null;
-                    if (attempts >= 60 && consultationTurnstileWidgetId === null) {
-                        consultationTurnstileLoadFailed = true;
-                    }
-                }
-            }, 100);
-        }
-
-        function removeConsultationTurnstile() {
-            clearInterval(consultationTurnstileTimer);
-            consultationTurnstileTimer = null;
-            consultationTurnstileToken = '';
-            consultationTurnstileLoadFailed = false;
-
-            if (consultationTurnstileWidgetId !== null && window.turnstile?.remove) {
-                window.turnstile.remove(consultationTurnstileWidgetId);
-            }
-
-            consultationTurnstileWidgetId = null;
-            const container = document.getElementById('turnstile-widget');
-            if (container) container.innerHTML = '';
-        }
-
-        function getConsultationTurnstileToken() {
-            if (consultationTurnstileWidgetId !== null && window.turnstile?.getResponse) {
-                return window.turnstile.getResponse(consultationTurnstileWidgetId) || consultationTurnstileToken;
-            }
-            return consultationTurnstileToken;
-        }
 
         let consultationSaving = false;
         window.submitConsultation = async function() {
             const receiptBox = document.getElementById('cons-receipt');
             if (consultationSaving || receiptBox.dataset.saved === 'true') return;
-            const token = getConsultationTurnstileToken();
-            if (!token) { ensureConsultationTurnstile(); showToast('Please complete the security check.', 'error'); return; }
             const button = document.getElementById('cons-submit-btn');
             consultationSaving = true; button.disabled = true;
             document.getElementById('cons-spinner').style.display = 'inline-block';
@@ -3712,7 +3622,8 @@
                     phone: document.getElementById('cons-phone').value.trim(),
                     email: document.getElementById('cons-email').value.trim(),
                     query: document.getElementById('cons-query').value.trim(),
-                    consent: document.getElementById('cons-consent').checked, token
+                    consent: document.getElementById('cons-consent').checked,
+                    trap: document.getElementById('cons-website-url').value
                 });
                 receiptBox.textContent = `Your enquiry is saved (${receipt.reference}). The AJM team will follow up.`;
                 receiptBox.hidden = false; receiptBox.dataset.saved = 'true';
@@ -3720,7 +3631,6 @@
                 showToast('Your enquiry has been saved.', 'success');
             } catch (error) {
                 showToast(error.message || 'Could not confirm that the enquiry was saved. Please retry.', 'error');
-                if (consultationTurnstileWidgetId !== null) window.turnstile?.reset(consultationTurnstileWidgetId);
             } finally {
                 consultationSaving = false; button.disabled = receiptBox.dataset.saved === 'true';
                 document.getElementById('cons-spinner').style.display = 'none';
@@ -4998,6 +4908,6 @@
         console.error('Advertising checkout could not initialise:', error);
     });
 </script>
-<script type="module" src="assets/usse-lead-capture.mjs?v=20261101-security"></script>
+<script type="module" src="assets/usse-lead-capture.mjs?v=20261101-direct"></script>
 </body>
 </html>

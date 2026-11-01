@@ -1,6 +1,7 @@
 import {leadAlertEmail} from './lead-email.mjs';
 import {isEmail} from '../../../assets/usse-leads-core.mjs';
 export async function dispatchLeadAlerts(client,{apiKey,defaultRecipients='',fetchImpl=fetch}={}){
+ apiKey=String(apiKey||'').trim();
  const recipients=String(defaultRecipients).split(/[,;\n]+/).map(s=>s.trim().toLowerCase()).filter(isEmail).slice(0,10);
  const init=await client.rpc('process_lead_mail',{p_action:'initialize',p_payload:{recipients}});if(init.error)throw new Error('Lead alert setup unavailable.');
  if(!apiKey)return {accepted:0,failed:0,configured:false};

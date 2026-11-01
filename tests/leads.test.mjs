@@ -5,6 +5,7 @@ import {normalizeLead,contactLinks,leadVCard,leadsCSV} from '../assets/usse-lead
 import {createLeadHandler} from '../supabase/functions/_shared/lead-intake.mjs';
 import {dispatchLeadAlerts} from '../supabase/functions/_shared/lead-dispatch.mjs';
 import {leadAlertEmail} from '../supabase/functions/_shared/lead-email.mjs';
+import {testLeadAlerts} from '../supabase/functions/_shared/lead-test.mjs';
 const db=new PGlite();const admin='11111111-1111-4111-8111-111111111111',member='22222222-2222-4222-8222-222222222222',listing='33333333-3333-4333-8333-333333333333';
 await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;CREATE SCHEMA auth;CREATE SCHEMA private;CREATE SCHEMA vault;CREATE SCHEMA net;CREATE SCHEMA cron;
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$SELECT nullif(current_setting('test.uid',true),'')::uuid$$;
@@ -51,14 +52,14 @@ await db.exec(`DELETE FROM public.listings WHERE id='${listing}'`);assert.equal(
 for(let i=0;i<11;i++)await call('public.capture_usse_lead',[{...data,listing_id:null},crypto.randomUUID(),'fp-'+i,'ip-hash']);
 await assert.rejects(()=>call('public.capture_usse_lead',[{...data,listing_id:null},crypto.randomUUID(),'fp-overflow','ip-hash']),/Too many/);
 await db.close();
-// Real intake handler: no unverified, cross-origin, invalid or oversized request is stored.
-let saves=0,dispatches=0;const body={...data,listing_id:null,request_id:request,turnstile_token:'test-token'};
+// Real intake handler: consent, honeypot, CORS and validation remain enforced without external CAPTCHA.
+let saves=0,dispatches=0;const body={...data,listing_id:null,request_id:request};
 const client={rpc:async(name,args)=>{saves++;return{data:receipt,error:null};}};
-const handler=createLeadHandler({client,turnstileSecret:'test-secret',dispatchSecret:'dispatch-secret',dispatch:async()=>dispatches++,fetchImpl:async()=>Response.json({success:true,hostname:'ussehub.com'})});
+const handler=createLeadHandler({client,dispatchSecret:'dispatch-secret',dispatch:async()=>dispatches++});
 const req=(overrides={},origin='https://ussehub.com')=>new Request('https://example.com',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json','cf-connecting-ip':'192.0.2.1'},body:JSON.stringify({...body,...overrides})});
-assert.equal((await handler(req({},'https://evil.example'))).status,403);assert.equal((await handler(req({turnstile_token:''}))).status,400);assert.equal((await handler(req({consent:false}))).status,400);assert.equal(saves,0);
+assert.equal((await handler(req({},'https://evil.example'))).status,403);assert.equal((await handler(req({website_url:'spam.example'}))).status,400);assert.equal((await handler(req({request_id:'invalid'}))).status,400);assert.equal((await handler(req({consent:false}))).status,400);assert.equal(saves,0);
 assert.equal((await handler(req())).status,201);assert.equal(saves,1);assert.equal(dispatches,1);
-const mismatch=createLeadHandler({client,turnstileSecret:'s',dispatchSecret:'s',dispatch:async()=>{},fetchImpl:async()=>Response.json({success:true,hostname:'evil.example'})});assert.equal((await mismatch(req())).status,400);assert.equal(saves,1);
+const unavailable=createLeadHandler({client,dispatch:async()=>{}});assert.equal((await unavailable(req())).status,503);assert.equal(saves,1);
 const hostile={id:request,lead_reference:'USSE-TEST',customer_name:'<img src=x onerror=alert(1)>',email:'customer@example.com',phone:'8765550100',notes:'=HYPERLINK("bad")\nNeed advice',source:'email',branch:'USSE',created_at:'2026-10-31T17:00:00Z'};
 const mail=leadAlertEmail(hostile,'admin@example.com');assert(!mail.html.includes('<img'));assert(mail.html.includes('&lt;img'));assert(mail.html.includes('Reply by email')&&mail.html.includes('Call lead')&&mail.html.includes('WhatsApp lead'));assert.equal(mail.reply_to,'customer@example.com');assert.equal(mail.to.length,1);assert.equal(mail.attachments[0].content_type,'text/vcard');
 assert(contactLinks(hostile).whatsapp.startsWith('https://wa.me/18765550100'));assert(!contactLinks({...hostile,email:'evil@example.com\r\nBcc:bad@example.com'}).email);assert(leadVCard({...hostile,customer_name:'Bad\rTITLE:Injected'}).includes('Bad\\nTITLE:Injected'));assert(leadsCSV([hostile]).includes("\"'=HYPERLINK"));
@@ -66,4 +67,12 @@ let finished,posted;
 const dispatcherClient={rpc:async(name,{p_action,p_payload})=>p_action==='initialize'?{data:{configured:true}}:p_action==='claim'?{data:[{delivery:{id:request,recipient_email:'admin@example.com',claim_token:request},lead:hostile}]}:(finished=p_payload,{data:{ok:true}})};
 const sent=await dispatchLeadAlerts(dispatcherClient,{apiKey:'fake-key',defaultRecipients:'admin@example.com',fetchImpl:async(url,options)=>{posted=options;return Response.json({id:'provider-id'});}});assert.equal(sent.accepted,1);assert.equal(finished.accepted,true);assert.equal(posted.headers['Idempotency-Key'],'usse-lead-'+request);
 await dispatchLeadAlerts(dispatcherClient,{apiKey:'fake-key',fetchImpl:async()=>new Response('{}',{status:503})});assert.equal(finished.accepted,false);assert(finished.error.includes('503'));
+let testCalls=0;
+const diagnostic=await testLeadAlerts(['one@example.com','two@example.com','three@example.com'],{apiKey:' fake-key\n',fetchImpl:async(url,options)=>{
+ assert.equal(options.headers.Authorization,'Bearer fake-key');testCalls++;
+ if(testCalls===1)return Response.json({name:'validation_error',message:'API key is invalid'},{status:401});
+ if(testCalls===2)return Response.json({id:'accepted-test'});throw new Error('network timeout');
+}});
+assert.equal(testCalls,3);assert.equal(diagnostic.accepted,1);assert.equal(diagnostic.failed,2);assert.equal(diagnostic.results[1].recipient,'two@example.com');assert.equal(diagnostic.results[1].accepted,true);assert.equal(diagnostic.failures[0].status,401);assert.equal(diagnostic.failures[1].reason,'connection_error');
+const missingKey=await testLeadAlerts(['one@example.com'],{fetchImpl:async()=>{throw new Error('Must not send without a key');}});assert.equal(missingKey.failures[0].reason,'missing_api_key');
 console.log('Lead tests passed: permissions, validated/idempotent capture, rate limits, multi-recipient fenced queue/backoff, retention, workflow/audit, HTML/CSV/vCard safety and provider retries.');

@@ -36,7 +36,7 @@ for (const slug of slugs) {
   for (const relative of [entry,'supabase/functions/_shared/email.mjs','supabase/functions/email-import-map.json',...dependencies]) {
     form.append('file',new Blob([fs.readFileSync(path.join(root,relative))],{type:relative.endsWith('.json')?'application/json':'application/typescript'}),relative);
   }
-  // Preserve the existing gateway JWT enforcement; webhook/CAPTCHA checks stay
+  // Preserve the existing gateway JWT enforcement; webhook/intake validation stay
   // inside the handlers. Imports are pinned in the committed import map.
   form.append('metadata',JSON.stringify({name:slug,entrypoint_path:entry,import_map_path:'supabase/functions/email-import-map.json',verify_jwt:true}));
   const deployed=await api(`/functions/deploy?slug=${encodeURIComponent(slug)}`,{method:'POST',body:form});

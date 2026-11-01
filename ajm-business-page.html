@@ -11,7 +11,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet" />
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
     <style>
         :root {
             --bg: #070910;
@@ -130,7 +129,7 @@
 <link rel="stylesheet" href="assets/usse-design.css?v=20261101-brand">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
 <script defer src="assets/usse-workspace.js?v=20261101-brand"></script>
-<link rel="stylesheet" href="assets/usse-lead-capture.css?v=20261101-security">
+<link rel="stylesheet" href="assets/usse-lead-capture.css?v=20261101-direct">
 </head>
 <body class="hub-business" data-hub-page="ajm-business-page">
     <div id="loading" class="state"><div class="state-card"><h1>Loading business webpage…</h1><p>Please wait while AJM retrieves this listing.</p></div></div>
@@ -225,7 +224,6 @@
                         <div class="field"><label for="lead-phone">Phone *</label><input id="lead-phone" type="tel" maxlength="50" required /></div>
                         <div class="field"><label for="lead-email">Email</label><input id="lead-email" type="email" maxlength="255" /></div>
                         <div class="field"><label for="lead-message">How can the business help? *</label><textarea id="lead-message" maxlength="2000" required></textarea></div>
-                        <div id="turnstile-widget" style="margin-bottom:13px"></div>
                         <button class="btn btn-primary" id="lead-submit" type="submit">Send enquiry</button>
                     </form>
                 </div>
@@ -240,7 +238,6 @@
 
         const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
-        const TURNSTILE_SITE_KEY = '0x4AAAAAADny2ngXsIdv_AkO';
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const TIER_RANK = { silver: 1, gold: 2, platinum: 3 };
         const params = new URLSearchParams(location.search);
@@ -249,7 +246,6 @@
         const isPreview = params.get('preview') === '1';
         let listing = null;
         let webpage = null;
-        let turnstileWidgetId = null;
         let canManagePreview = false;
 
         const el = (id) => document.getElementById(id);
@@ -709,17 +705,6 @@
             renderPage();
         }
 
-        function setupTurnstile() {
-            let attempts = 0;
-            const timer = setInterval(() => {
-                attempts += 1;
-                if (window.turnstile?.render) {
-                    clearInterval(timer);
-                    turnstileWidgetId = window.turnstile.render('#turnstile-widget', { sitekey: TURNSTILE_SITE_KEY, theme: 'light', size: 'flexible' });
-                } else if (attempts > 80) clearInterval(timer);
-            }, 100);
-        }
-
         el('lead-form').addEventListener('usse-lead-saved', () => recordWebpageEvent('lead', { source: 'lead_form' }));
 
         loadPage().catch((error) => {
@@ -728,6 +713,6 @@
             show('unavailable');
         });
     </script>
-<script type="module" src="assets/usse-lead-capture.mjs?v=20261101-security"></script>
+<script type="module" src="assets/usse-lead-capture.mjs?v=20261101-direct"></script>
 </body>
 </html>

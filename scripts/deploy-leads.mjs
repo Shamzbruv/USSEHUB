@@ -12,7 +12,7 @@ if(installed.length){if(installed[0].checksum!==digest)throw new Error('The inst
 const secret=crypto.randomBytes(32).toString('hex');
 await api('/secrets',[{name:'LEAD_DISPATCH_SECRET',value:secret}]);
 await sql(`DO $secret$ DECLARE existing uuid; BEGIN SELECT id INTO existing FROM vault.secrets WHERE name='USSE_LEAD_DISPATCH_SECRET' LIMIT 1;IF existing IS NULL THEN PERFORM vault.create_secret('${secret}','USSE_LEAD_DISPATCH_SECRET','Restricted USSE lead queue dispatcher');ELSE PERFORM vault.update_secret(existing,'${secret}','USSE_LEAD_DISPATCH_SECRET','Restricted USSE lead queue dispatcher');END IF;END $secret$;`);
-const shared=['supabase/functions/_shared/lead-intake.mjs','supabase/functions/_shared/lead-dispatch.mjs','supabase/functions/_shared/lead-email.mjs','supabase/functions/_shared/email.mjs','assets/usse-leads-core.mjs','supabase/functions/email-import-map.json','supabase/functions/capture-lead/index.ts'];
+const shared=['supabase/functions/_shared/lead-intake.mjs','supabase/functions/_shared/lead-test.mjs','supabase/functions/_shared/lead-dispatch.mjs','supabase/functions/_shared/lead-email.mjs','supabase/functions/_shared/email.mjs','assets/usse-leads-core.mjs','supabase/functions/email-import-map.json','supabase/functions/capture-lead/index.ts'];
 for(const [slug,verifyJwt] of [['capture-lead',false],['dispatch-lead-alerts',false],['submit-consultation',true]]){
  const entry=`supabase/functions/${slug}/index.ts`,form=new FormData();
  for(const relative of [...new Set([entry,...shared])])form.append('file',new Blob([fs.readFileSync(path.join(root,relative))],{type:relative.endsWith('.json')?'application/json':'application/typescript'}),relative);

@@ -1,3 +1,7 @@
+# Superseded: Cloudflare verification removed
+
+On October 31 (Jamaica time), the owner requested removal of Cloudflare verification. The public enquiry forms and shared backend no longer use Turnstile. The former hostname repair below is historical and is not a required setup step.
+
 # Enquiry form: Cloudflare hostname authorization
 
 On 1 November 2026, the live `https://ussehub.com/index.html#booking` form emitted Cloudflare Turnstile error **110200**. Cloudflare defines this as **Domain not authorized**. The public widget key used by the enquiry and directory forms is `0x4AAAAAADny2ngXsIdv_AkO`.
