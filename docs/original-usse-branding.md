@@ -1,7 +1,7 @@
-# Original USSE identity
+# Approved USSE branding
 
-`assets/usse-original-logo.jpg` is the original red U / blue SS / pink E artwork with the green and purple wreath, restored at Gary's request. It was extracted unchanged with `pdfimages -j` from the first embedded image of the supplied **USSE -Draft InfoFacts- Sum & Details- 2026.pdf** (348 × 185 pixels). The same mark appears in the supplied 2011 USSE brochure. No AI redraw, recolouring or upscaling was used.
+Gary clarified on November 1, 2026 that he meant the initial **new** USSE logo, rather than the historical logo from the older company documents. The approved visible logo is the existing `usse.png`: the red, blue and gold USSE crest. It is used in the home-page header, USSE workspace branding and smaller Home navigation marks. Subsidiary logos remain in their own page headers.
 
-The home-page header spells out **Unique Services and Supplies Enterprise**, including on small screens. The original mark also identifies Home links in subsidiary navigation, directory pages, the partner signing page and the operations navigation. Subsidiary logos remain in their own page headers. Small Home marks are decorative within links whose accessible names identify USSE Home.
+The home-page header follows the supplied example: **USSE** and **Unique Services and Supplies Enterprise** share the first row, with **The Central Hub for Excellence** underneath. The full name and tagline remain readable on narrow screens. On small phones the Day/Night control is available in the expanded navigation menu so the brand lockup has enough space.
 
-The existing `usse.png` and favicon assets remain for existing external references and bookmarks; visible USSE header and Home navigation marks use the restored artwork.
+`assets/usse-original-logo.jpg` is retained as an unused historical asset. It was extracted unchanged from the supplied company PDF; it is no longer the approved site logo.
