@@ -14,6 +14,7 @@
 
   const page = body.dataset.hubPage;
   const config = {
+    'admin-app': ['App & alerts', 'Your office. Wherever you are.', 'USSE Hub on your device.', 'Install the app and choose which platform updates reach your devices.'],
     'lead-inbox': ['Lead inbox', 'Turn enquiries into opportunities.', 'Keep every enquiry, contact detail and next step in one place.', 'New enquiries appear automatically. Open a lead to call, email, send WhatsApp, assign an owner, set a follow-up date or add a private note. Configure alert recipients and download the filtered lead register.'],
     'master-admin': ['Enterprise overview', 'See the whole picture.', 'Review consultations, members, subscriptions and listing activity across USSEHub.', 'Begin with the overview, then use Consultations to follow up enquiries. Review pending listings before approval and use Members to manage existing accounts.'],
     'ajm-admin-panel': ['Directory & reporting', 'Keep your network moving.', 'Manage business listings, review members and turn directory activity into useful reports.', 'Review the pending queue, open a listing to check its details, then approve or return it for correction. Reports contains the directory, registration register, call list, performance, invoices and statements.'],
@@ -43,6 +44,7 @@
     ['ajm-webpage-builder', 'Your webpage studio', 'grid'],
     ['ajm-advertising-hub?advertise=1&product=webpage', 'Webpage packages', 'list']
   ] : [
+    ['admin-app', 'App & alerts', 'grid'],
     ['master-admin', 'Enterprise overview', 'grid'],
     ['lead-inbox', 'Lead inbox', 'people'],
     ['ajm-admin-panel', 'Directory & reports', 'list'],
@@ -108,6 +110,7 @@
   for (const container of document.querySelectorAll('#admin-content,#app,#workspace')) observer.observe(container, {attributes:true,attributeFilter:['style','hidden','class']});
   body.classList.add('hub-enhanced');
 
+  if (page === 'admin-app') return;
   const host = document.querySelector('#admin-content, #app, body > main');
   if (host) {
     const intro = document.createElement('div'); intro.className = 'hub-work-intro';

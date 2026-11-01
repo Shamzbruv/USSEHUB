@@ -1,0 +1,21 @@
+{
+  "id": "/admin-app",
+  "name": "USSE Hub · Operations",
+  "short_name": "USSE Hub",
+  "description": "Your USSE administration, enquiries and activity alerts in one workspace.",
+  "start_url": "/admin-app?source=installed",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1b2339",
+  "theme_color": "#302358",
+  "lang": "en-JM",
+  "icons": [
+    {"src": "/assets/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/assets/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "/assets/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Lead inbox", "url": "/lead-inbox", "icons": [{"src": "/assets/app/icon-192.png", "sizes": "192x192"}]},
+    {"name": "Enterprise overview", "url": "/master-admin", "icons": [{"src": "/assets/app/icon-192.png", "sizes": "192x192"}]}
+  ]
+}

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "npm run validate && npm run test:text && npm run test:renewal && npm run test:auth && npm run test:leads && npm run test:emails && npm run test:referrals && npm run test:routing",
+    "test": "npm run validate && npm run test:text && npm run test:renewal && npm run test:auth && npm run test:leads && npm run test:app && npm run test:emails && npm run test:referrals && npm run test:routing",
     "test:rls": "node test-rls.mjs",
     "test:commerce": "node test-advertising-workflow.mjs",
     "test:routing": "node test-routing.mjs",
@@ -18,7 +18,9 @@
     "deploy:emails": "node scripts/deploy-email-branding.mjs",
     "test:emails": "node scripts/build-email-templates.mjs --check && node tests/email-branding.test.mjs",
     "test:leads": "node tests/leads.test.mjs",
-    "deploy:leads": "node scripts/deploy-leads.mjs"
+    "deploy:leads": "node scripts/deploy-leads.mjs",
+    "test:app": "node tests/admin-app.test.mjs",
+    "deploy:app": "node scripts/deploy-admin-app.mjs"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +33,7 @@
     "ws": "^8.21.0"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "0.3.14"
+    "@electric-sql/pglite": "0.3.14",
+    "web-push": "3.6.7"
   }
 }

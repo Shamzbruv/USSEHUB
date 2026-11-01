@@ -56,6 +56,38 @@
     {
       "source": "/lead-inbox",
       "destination": "/lead-inbox.html"
+    },
+    {
+      "source": "/admin-app",
+      "destination": "/admin-app.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "admin-sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
+      ]
+    },
+    {
+      "source": "admin-app.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
     }
   ]
 }

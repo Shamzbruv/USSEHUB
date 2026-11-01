@@ -4,6 +4,8 @@ import { execFileSync } from 'child_process';
 
 const htmlFiles = [
     'index.html',
+    'admin-app.html',
+    'admin-offline.html',
     'lead-inbox.html',
     'referral-agreements.html',
     'sign-referral-agreement.html',

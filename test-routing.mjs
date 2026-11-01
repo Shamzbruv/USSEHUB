@@ -85,6 +85,7 @@ async function stopServer() {
 }
 
 const pages = [
+    { route: 'admin-app', title: 'USSE Hub · Your operations app' },
     { route: 'referral-agreements', title: 'Referral Agreements — USSE Admin' },
     { route: 'sign-referral-agreement', title: 'Review &amp; Sign Referral Agreement — USSE' },
     { route: 'ajm-webpage-builder', title: 'AJM Webpage Builder | Advertising Hub' },
