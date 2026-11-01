@@ -1989,7 +1989,8 @@
 </script>
 <link rel="stylesheet" href="assets/usse-design.css?v=20261026-theme">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
-<script defer src="assets/usse-workspace.js?v=20261025"></script>
+<script defer src="assets/usse-workspace.js?v=20261101-leads"></script>
+<link rel="stylesheet" href="assets/usse-lead-capture.css?v=20261101">
 </head>
 
 <body class="hub-public" data-hub-page="index">
@@ -2447,7 +2448,7 @@
                         </a>
                     </div>
 
-                    <form class="form-card reveal" id="bookingForm">
+                    <form onsubmit="return false" class="form-card reveal" id="bookingForm">
                         <div class="form-grid">
                             <div class="field">
                                 <label for="name">Full Name</label>
@@ -2499,7 +2500,7 @@
                             Hitting send opens WhatsApp with your details already filled in — quick and direct.
                         </p>
                         <p class="form-note">
-                            Choose WhatsApp or email. Both open with your details already filled in.
+                            Your enquiry is saved securely before you continue to WhatsApp or receive a follow-up by email.
                         </p>
                     </form>
                 </div>
@@ -2719,47 +2720,7 @@
 
         loadBranch("consultancy");
 
-        const bookingForm = document.getElementById("bookingForm");
-        const bookingEmailBtn = document.getElementById("bookingEmailBtn");
-
-        function buildBookingEnquiry() {
-            const name = document.getElementById("name").value.trim();
-            const phone = document.getElementById("phone").value.trim();
-            const email = document.getElementById("email").value.trim();
-            const branch = document.getElementById("branch").value;
-            const service = document.getElementById("service").value.trim();
-            const message = document.getElementById("message").value.trim();
-
-            const whatsappNumber = "18764271661";
-            const subject = encodeURIComponent("USSE Hub Enquiry");
-
-            const body =
-                "Hello USSE,%0A%0A" +
-                "I would like to make an enquiry.%0A%0A" +
-                "Name: " + encodeURIComponent(name) + "%0A" +
-                "Phone: " + encodeURIComponent(phone) + "%0A" +
-                "Email: " + encodeURIComponent(email || "Not provided") + "%0A" +
-                "Preferred Subsidiary: " + encodeURIComponent(branch) + "%0A" +
-                "Service Needed: " + encodeURIComponent(service) + "%0A%0A" +
-                "Project Brief:%0A" + encodeURIComponent(message);
-
-            return { whatsappNumber, subject, body };
-        }
-
-        bookingForm.addEventListener("submit", function (event) {
-            event.preventDefault();
-            const enquiry = buildBookingEnquiry();
-            window.open("https://wa.me/" + enquiry.whatsappNumber + "?text=" + enquiry.body, "_blank");
-        });
-
-        bookingEmailBtn.addEventListener("click", function () {
-            if (!bookingForm.reportValidity()) {
-                return;
-            }
-
-            const enquiry = buildBookingEnquiry();
-            window.location.href = "mailto:info@ussehub.com?subject=" + enquiry.subject + "&body=" + enquiry.body;
-        });
+        // Enquiry capture is managed by assets/usse-lead-capture.mjs.
     </script>
 
 <!-- ═══ HOMEPAGE LIVE ADS + ADMIN-CONFIGURED PACKAGE CATALOGUE ═══ -->
@@ -2998,6 +2959,7 @@
 
     await Promise.allSettled([renderHomePackagePricing(), renderLiveHomepageAds()]);
 </script>
+<script type="module" src="assets/usse-lead-capture.mjs?v=20261101"></script>
 </body>
 
 </html>

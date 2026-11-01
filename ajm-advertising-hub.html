@@ -1717,7 +1717,8 @@
 </style>
 <link rel="stylesheet" href="assets/usse-design.css?v=20261026-theme">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
-<script defer src="assets/usse-workspace.js?v=20261025"></script>
+<script defer src="assets/usse-workspace.js?v=20261101-leads"></script>
+<link rel="stylesheet" href="assets/usse-lead-capture.css?v=20261101">
 </head>
 
 <body class="hub-directory hub-ajm" data-hub-page="ajm-advertising-hub">
@@ -2279,10 +2280,12 @@
                 <textarea id="cons-query" placeholder="How can the business help you?" style="min-height: 80px;" required></textarea>
             </div>
 
+            <label class="usse-lead-consent"><input type="checkbox" id="cons-consent"><span>I agree that USSE may save my enquiry and contact me using the details provided.</span></label>
+            <div id="cons-receipt" class="usse-lead-status" role="status" hidden></div>
             <!-- Turnstile Widget Placeholder -->
             <div id="turnstile-widget" style="margin-bottom: 16px;"></div>
 
-            <button class="btn btn-primary" onclick="submitConsultation()" style="width:100%;margin-top:8px;">
+            <button id="cons-submit-btn" class="btn btn-primary" onclick="submitConsultation()" style="width:100%;margin-top:8px;">
                 <span id="cons-submit-text">Continue to Connect</span>
                 <span id="cons-spinner" class="spinner" style="display:none;"></span>
             </button>
@@ -3591,6 +3594,10 @@
 
         // CONSULTATION TRACKING
         window.openConsultationModal = function(listingId, source, target) {
+            document.getElementById('cons-receipt').hidden = true;
+            document.getElementById('cons-receipt').dataset.saved = '';
+            document.getElementById('cons-submit-btn').disabled = false;
+            document.getElementById('cons-consent').checked = false;
             document.getElementById('cons-listing-id').value = listingId;
             document.getElementById('cons-source').value = source;
             document.getElementById('cons-target').value = target;
@@ -3686,78 +3693,37 @@
             return consultationTurnstileToken;
         }
 
+        let consultationSaving = false;
         window.submitConsultation = async function() {
-            const listingId = document.getElementById('cons-listing-id').value;
-            const source = document.getElementById('cons-source').value;
-            const target = document.getElementById('cons-target').value;
-            const name = document.getElementById('cons-name').value.trim();
-            const phone = document.getElementById('cons-phone').value.trim();
-            const email = document.getElementById('cons-email').value.trim();
-            const query = document.getElementById('cons-query').value.trim();
-
-            if (!name || !phone || !query) {
-                showToast('Please provide your name, phone number, and a message.', 'error');
-                return;
-            }
-
-            const lastSub = localStorage.getItem('last_consultation_time');
-            if (lastSub && Date.now() - parseInt(lastSub) < 60000) {
-                showToast('Please wait a minute before submitting another query.', 'error');
-                return;
-            }
-
-            const turnstileResponse = getConsultationTurnstileToken();
-            if (!turnstileResponse) {
-                ensureConsultationTurnstile();
-                showToast(
-                    consultationTurnstileLoadFailed
-                        ? 'Security check could not load. Please refresh and try again.'
-                        : 'Please complete the security check.',
-                    'error'
-                );
-                return;
-            }
-
-            const btnText = document.getElementById('cons-submit-text');
-            const spinner = document.getElementById('cons-spinner');
-            btnText.style.display = 'none';
-            spinner.style.display = 'inline-block';
-
-            // Invoke Edge Function
-            const { data, error } = await supabase.functions.invoke('submit-consultation', {
-                body: {
-                    listing_id: listingId === 'subscription' ? null : listingId,
-                    customer_name: name,
-                    phone: phone,
-                    email: email,
-                    source: source,
-                    notes: query,
-                    turnstile_token: turnstileResponse
-                }
-            });
-
-            if (!error) {
-                localStorage.setItem('last_consultation_time', Date.now().toString());
-            }
-
-            btnText.style.display = 'inline-block';
-            spinner.style.display = 'none';
-
-            if (error) {
-                console.error('Error saving consultation:', error);
-                showToast('Connection error. Please try again.', 'error');
-                return;
-            }
-
-            closeConsultationModal();
-            showToast('Redirecting...', 'success');
-
-            // Redirect
-            if (source === 'whatsapp') {
-                window.open(`https://wa.me/${target}?text=Hi, I found your listing on AJM Advertising Hub! My name is ${encodeURIComponent(name)}.`, '_blank');
-            } else {
-                const bodyText = `Listing ID: ${listingId}\nTarget Email: ${target}\n\nNotes:\n${query}`;
-                window.location.href = `mailto:info@ussehub.com?subject=Inquiry from AJM Hub - ${encodeURIComponent(name)}&body=${encodeURIComponent(bodyText)}`;
+            const receiptBox = document.getElementById('cons-receipt');
+            if (consultationSaving || receiptBox.dataset.saved === 'true') return;
+            const token = getConsultationTurnstileToken();
+            if (!token) { ensureConsultationTurnstile(); showToast('Please complete the security check.', 'error'); return; }
+            const button = document.getElementById('cons-submit-btn');
+            consultationSaving = true; button.disabled = true;
+            document.getElementById('cons-spinner').style.display = 'inline-block';
+            try {
+                if (!window.USSELeadCapture) throw new Error('The contact form is still loading. Please try again shortly.');
+                const {receipt, next} = await window.USSELeadCapture.submitListing({
+                    listingId: document.getElementById('cons-listing-id').value,
+                    source: document.getElementById('cons-source').value,
+                    target: document.getElementById('cons-target').value,
+                    name: document.getElementById('cons-name').value.trim(),
+                    phone: document.getElementById('cons-phone').value.trim(),
+                    email: document.getElementById('cons-email').value.trim(),
+                    query: document.getElementById('cons-query').value.trim(),
+                    consent: document.getElementById('cons-consent').checked, token
+                });
+                receiptBox.textContent = `Your enquiry is saved (${receipt.reference}). The AJM team will follow up.`;
+                receiptBox.hidden = false; receiptBox.dataset.saved = 'true';
+                if (next) { const link = document.createElement('a'); link.href = next.href; link.className = 'usse-lead-continue'; link.target = '_blank'; link.rel = 'noopener'; link.textContent = next.label; receiptBox.append(document.createElement('br'),link); }
+                showToast('Your enquiry has been saved.', 'success');
+            } catch (error) {
+                showToast(error.message || 'Could not confirm that the enquiry was saved. Please retry.', 'error');
+                if (consultationTurnstileWidgetId !== null) window.turnstile?.reset(consultationTurnstileWidgetId);
+            } finally {
+                consultationSaving = false; button.disabled = receiptBox.dataset.saved === 'true';
+                document.getElementById('cons-spinner').style.display = 'none';
             }
         };
 
@@ -5032,5 +4998,6 @@
         console.error('Advertising checkout could not initialise:', error);
     });
 </script>
+<script type="module" src="assets/usse-lead-capture.mjs?v=20261101"></script>
 </body>
 </html>

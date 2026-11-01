@@ -1146,7 +1146,8 @@
 </script>
 <link rel="stylesheet" href="assets/usse-design.css?v=20261026-theme">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
-<script defer src="assets/usse-workspace.js?v=20261025"></script>
+<script defer src="assets/usse-workspace.js?v=20261101-leads"></script>
+<link rel="stylesheet" href="assets/usse-lead-capture.css?v=20261101">
 </head>
 
 <body class="hub-public hub-pistol" data-hub-page="pistol-operations-logistics">
@@ -1426,7 +1427,7 @@
                         </a>
                     </div>
 
-                    <form class="contact-form reveal" id="pistolForm">
+                    <form onsubmit="return false" class="contact-form reveal" id="pistolForm">
                         <h3>Tell us what needs fixing</h3>
                         <p>
                             Fill this in and choose email or WhatsApp. Both options open with your details pre-filled so PISTOL can respond with a clear operational scope.
@@ -1480,7 +1481,7 @@
                         </div>
 
                         <div class="form-actions">
-                            <button class="btn btn-primary" type="submit">Prepare PISTOL Email Enquiry</button>
+                            <button class="btn btn-primary" type="submit">Send PISTOL Enquiry</button>
                             <button class="btn btn-ghost" type="button" id="pistolWhatsappBtn">Send on WhatsApp</button>
                         </div>
 
@@ -1554,47 +1555,9 @@
 
         revealItems.forEach(item => observer.observe(item));
 
-        const pistolForm = document.getElementById("pistolForm");
-        const pistolWhatsappBtn = document.getElementById("pistolWhatsappBtn");
-
-        function buildPistolEnquiry() {
-            const name = document.getElementById("name").value.trim();
-            const company = document.getElementById("company").value.trim();
-            const email = document.getElementById("email").value.trim();
-            const sector = document.getElementById("sector").value;
-            const service = document.getElementById("service").value;
-            const message = document.getElementById("message").value.trim();
-
-            const whatsappNumber = "18764271661";
-            const subject = encodeURIComponent("PISTOL Enquiry");
-            const body =
-                "Hello PISTOL,%0A%0A" +
-                "I would like to make an operations enquiry.%0A%0A" +
-                "Name: " + encodeURIComponent(name) + "%0A" +
-                "Company / Operation: " + encodeURIComponent(company || "Not provided") + "%0A" +
-                "Email: " + encodeURIComponent(email) + "%0A" +
-                "Sector: " + encodeURIComponent(sector) + "%0A" +
-                "Service Focus: " + encodeURIComponent(service) + "%0A%0A" +
-                "Operational Brief:%0A" + encodeURIComponent(message);
-
-            return { whatsappNumber, subject, body };
-        }
-
-        pistolForm.addEventListener("submit", event => {
-            event.preventDefault();
-            const enquiry = buildPistolEnquiry();
-            window.location.href = "mailto:info@ussehub.com?subject=" + enquiry.subject + "&body=" + enquiry.body;
-        });
-
-        pistolWhatsappBtn.addEventListener("click", () => {
-            if (!pistolForm.reportValidity()) {
-                return;
-            }
-
-            const enquiry = buildPistolEnquiry();
-            window.open("https://wa.me/" + enquiry.whatsappNumber + "?text=" + enquiry.body, "_blank");
-        });
+        // Enquiry capture is managed by assets/usse-lead-capture.mjs.
     </script>
+<script type="module" src="assets/usse-lead-capture.mjs?v=20261101"></script>
 </body>
 
 </html>

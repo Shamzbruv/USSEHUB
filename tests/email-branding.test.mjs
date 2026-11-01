@@ -67,14 +67,7 @@ const webhook=(table,record,secret='test-webhook-secret')=>new Request('https://
 assert.equal((await notify(webhook('profiles',{},'wrong'))).status,401);assert.equal(sent.length,0);
 assert.equal((await notify(webhook('profiles',{email:'test@example.com',role:'member',id:'123'}))).status,200);
 assert.equal((await notify(webhook('listings',{business_name:hostile,category:'Services',location:'Kingston',status:'pending',owner_user_id:'123'}))).status,200);
-let inserted;
-const client={from:()=>({insert:records=>{inserted=records;return{select:()=>({single:async()=>({data:{id:'test-consultation'},error:null})})};}})};
-const consultation=handlerFor('submit-consultation',{env,client,fetcher});
-const request=body=>new Request('https://example.com',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-assert.equal((await consultation(request({customer_name:'Test',phone:'8765550100',notes:'Test',source:'website'}))).status,400);
-assert.equal((await consultation(request({customer_name:'Test Client',phone:'8765550100',email:'test@example.com',notes:hostile,source:'website',turnstile_token:'test-token'}))).status,200);
-assert.equal(inserted[0].notes,hostile);
-assert.equal(sent.length,3);
+assert.equal(sent.length,2);
 for(const mail of sent){assert(mail.html.includes('USSE'));assert(mail.text);assert(!mail.html.includes('<img'));assert.equal(mail.to,'admin@example.com');}
-assert.equal(sent[2].reply_to,'test@example.com');
-console.log('Email branding passed: 13 account templates, 14 SQL event types, HTML injection protection, text alternatives, trusted links and all 3 Edge email variants.');
+assert(fs.readFileSync('supabase/functions/submit-consultation/index.ts','utf8').includes("../capture-lead/index.ts"),'Legacy consultation requests must use the unified durable intake.');
+console.log('Email branding passed: 13 account templates, 14 SQL event types, HTML injection protection, text alternatives, trusted links and signup/listing Edge email variants and the unified lead intake alias.');

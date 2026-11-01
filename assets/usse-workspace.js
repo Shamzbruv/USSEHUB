@@ -14,6 +14,7 @@
 
   const page = body.dataset.hubPage;
   const config = {
+    'lead-inbox': ['Lead inbox', 'Turn enquiries into opportunities.', 'Keep every enquiry, contact detail and next step in one place.', 'New enquiries appear automatically. Open a lead to call, email, send WhatsApp, assign an owner, set a follow-up date or add a private note. Configure alert recipients and download the filtered lead register.'],
     'master-admin': ['Enterprise overview', 'See the whole picture.', 'Review consultations, members, subscriptions and listing activity across USSEHub.', 'Begin with the overview, then use Consultations to follow up enquiries. Review pending listings before approval and use Members to manage existing accounts.'],
     'ajm-admin-panel': ['Directory & reporting', 'Keep your network moving.', 'Manage business listings, review members and turn directory activity into useful reports.', 'Review the pending queue, open a listing to check its details, then approve or return it for correction. Reports contains the directory, registration register, call list, performance, invoices and statements.'],
     'ajm-ad-management': ['Advertising & accounts', 'Make every placement count.', 'Follow orders from payment review to active advertising, with packages and performance in one workspace.', 'Set payment destinations and package prices first. Review the payment queue before confirming receipts. Active ads and Overview show delivery and commercial performance.'],
@@ -43,6 +44,7 @@
     ['ajm-advertising-hub?advertise=1&product=webpage', 'Webpage packages', 'list']
   ] : [
     ['master-admin', 'Enterprise overview', 'grid'],
+    ['lead-inbox', 'Lead inbox', 'people'],
     ['ajm-admin-panel', 'Directory & reports', 'list'],
     ['ajm-ad-management', 'Advertising & accounts', 'chart'],
     ['referral-agreements', 'Partners & referrals', 'people']

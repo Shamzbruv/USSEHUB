@@ -1,0 +1,26 @@
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),ref='zcptuqrlovflcpqszery',migration='20261101001638_lead_inbox_and_alerts.sql';
+const apply=process.argv.includes('--apply'),validate=process.argv.includes('--validate');
+if(!apply&&!validate){console.log('Dry run: lead inbox migration, validated public intake, protected alert worker and legacy consultation alias. Use --validate or --apply with a JSON management credential on stdin.');process.exit(0);}
+const input=JSON.parse(fs.readFileSync(0,'utf8'));if(!input.token)throw new Error('A Supabase management credential is required on stdin.');
+async function api(endpoint,body,method){const response=await fetch(`https://api.supabase.com/v1/projects/${ref}${endpoint}`,{method:method||(body?'POST':'GET'),headers:{Authorization:`Bearer ${input.token}`,...body&&! (body instanceof FormData)?{'Content-Type':'application/json'}:{}},body:body instanceof FormData?body:body?JSON.stringify(body):undefined});if(!response.ok){const error=await response.json().catch(()=>({}));throw new Error(`Supabase ${endpoint}: HTTP ${response.status}${endpoint==='/database/query'?' '+String(error.message||'').slice(0,180):''}`);}return response.json();}
+const sql=(query,read_only=false)=>api('/database/query',{query,read_only});
+const source=fs.readFileSync(path.join(root,'supabase/migrations',migration),'utf8'),digest=crypto.createHash('sha256').update(source).digest('hex');
+if(validate){await sql(`BEGIN;${source} DO $check$ BEGIN IF has_function_privilege('anon','public.capture_usse_lead(jsonb,uuid,text,text)','EXECUTE') THEN RAISE EXCEPTION 'Public write bypass';END IF;END $check$;ROLLBACK;`);console.log('Live-schema migration trial passed and was rolled back.');process.exit(0);}
+const installed=await sql(`SELECT checksum FROM private.ajm_schema_migrations WHERE filename='${migration}'`,true);
+if(installed.length){if(installed[0].checksum!==digest)throw new Error('The installed lead migration differs from this source.');console.log('Lead migration already installed.');}else{await sql(`BEGIN;${source} INSERT INTO private.ajm_schema_migrations(filename,checksum) VALUES('${migration}','${digest}');COMMIT;`);console.log('Lead schema and retry schedule installed.');}
+const secret=crypto.randomBytes(32).toString('hex');
+await api('/secrets',[{name:'LEAD_DISPATCH_SECRET',value:secret}]);
+await sql(`DO $secret$ DECLARE existing uuid; BEGIN SELECT id INTO existing FROM vault.secrets WHERE name='USSE_LEAD_DISPATCH_SECRET' LIMIT 1;IF existing IS NULL THEN PERFORM vault.create_secret('${secret}','USSE_LEAD_DISPATCH_SECRET','Restricted USSE lead queue dispatcher');ELSE PERFORM vault.update_secret(existing,'${secret}','USSE_LEAD_DISPATCH_SECRET','Restricted USSE lead queue dispatcher');END IF;END $secret$;`);
+const shared=['supabase/functions/_shared/lead-intake.mjs','supabase/functions/_shared/lead-dispatch.mjs','supabase/functions/_shared/lead-email.mjs','supabase/functions/_shared/email.mjs','assets/usse-leads-core.mjs','supabase/functions/email-import-map.json','supabase/functions/capture-lead/index.ts'];
+for(const [slug,verifyJwt] of [['capture-lead',false],['dispatch-lead-alerts',false],['submit-consultation',true]]){
+ const entry=`supabase/functions/${slug}/index.ts`,form=new FormData();
+ for(const relative of [...new Set([entry,...shared])])form.append('file',new Blob([fs.readFileSync(path.join(root,relative))],{type:relative.endsWith('.json')?'application/json':'application/typescript'}),relative);
+ form.append('metadata',JSON.stringify({name:slug,entrypoint_path:entry,import_map_path:'supabase/functions/email-import-map.json',verify_jwt:verifyJwt}));
+ const result=await api(`/functions/deploy?slug=${slug}`,form);if(result.status!=='ACTIVE')throw new Error(`${slug} is not active.`);console.log(`${slug} active (version ${result.version}).`);
+}
+async function dispatch(body){const response=await fetch(`https://${ref}.supabase.co/functions/v1/dispatch-lead-alerts`,{method:'POST',headers:{'Content-Type':'application/json','X-Lead-Dispatch-Secret':secret},body:JSON.stringify(body)});const result=await response.json().catch(()=>({}));if(!response.ok)throw new Error('Live lead alert dispatch failed: HTTP '+response.status);return result;}
+const initial=await dispatch({});console.log('Lead recipient configuration:',initial.configured?'ready':'requires setup in the lead inbox');
+if(input.qaRecipient){const qa=await dispatch({action:'test',test_recipient:input.qaRecipient});if(qa.accepted!==1||qa.failed)throw new Error('Owned-mailbox alert delivery test failed.');console.log('Synthetic lead alert accepted by the email provider for the owned QA mailbox. No customer record was created.');}
+const checks=await sql(`SELECT (SELECT count(*) FROM cron.job WHERE jobname='usse-lead-alert-retry')=1 as retry_schedule,has_function_privilege('anon','public.capture_usse_lead(jsonb,uuid,text,text)','execute') as anonymous_write_bypass,has_function_privilege('authenticated','public.process_lead_mail(text,jsonb)','execute') as member_can_dispatch`);
+console.log('Backend verification:',JSON.stringify(checks));

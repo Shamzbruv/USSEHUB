@@ -1165,7 +1165,8 @@
 </script>
 <link rel="stylesheet" href="assets/usse-design.css?v=20261026-theme">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
-<script defer src="assets/usse-workspace.js?v=20261025"></script>
+<script defer src="assets/usse-workspace.js?v=20261101-leads"></script>
+<link rel="stylesheet" href="assets/usse-lead-capture.css?v=20261101">
 </head>
 
 <body class="hub-public" data-hub-page="usse-consultancy">
@@ -1495,7 +1496,7 @@
                         </a>
                     </div>
 
-                    <form class="contact-form reveal" id="consultancyForm">
+                    <form onsubmit="return false" class="contact-form reveal" id="consultancyForm">
                         <h3>Tell us what you're working through</h3>
                         <p>
                             Fill this in and choose WhatsApp or email. Both options open with your details pre-filled so the conversation can start quickly.
@@ -1551,7 +1552,7 @@
                             Hitting send opens WhatsApp with your details already filled in — quick and direct.
                         </p>
                         <p class="form-note">
-                            Choose WhatsApp or email. Both open with your details already filled in.
+                            Your enquiry is saved securely before you continue to WhatsApp or receive a follow-up by email.
                         </p>
                     </form>
                 </div>
@@ -1618,48 +1619,9 @@
 
         revealItems.forEach(item => observer.observe(item));
 
-        const consultancyForm = document.getElementById("consultancyForm");
-        const consultancyEmailBtn = document.getElementById("consultancyEmailBtn");
-
-        function buildConsultancyEnquiry() {
-            const name = document.getElementById("name").value.trim();
-            const company = document.getElementById("company").value.trim();
-            const phone = document.getElementById("phone").value.trim();
-            const email = document.getElementById("email").value.trim();
-            const service = document.getElementById("service").value;
-            const message = document.getElementById("message").value.trim();
-
-            const whatsappNumber = "18764271661";
-            const subject = encodeURIComponent("USSE Consultancy Enquiry");
-
-            const body =
-                "Hello USSE Consultancy,%0A%0A" +
-                "I would like to make a consultancy enquiry.%0A%0A" +
-                "Name: " + encodeURIComponent(name) + "%0A" +
-                "Company: " + encodeURIComponent(company || "Not provided") + "%0A" +
-                "Phone: " + encodeURIComponent(phone) + "%0A" +
-                "Email: " + encodeURIComponent(email || "Not provided") + "%0A" +
-                "Consultancy Need: " + encodeURIComponent(service) + "%0A%0A" +
-                "Project Brief:%0A" + encodeURIComponent(message);
-
-            return { whatsappNumber, subject, body };
-        }
-
-        consultancyForm.addEventListener("submit", event => {
-            event.preventDefault();
-            const enquiry = buildConsultancyEnquiry();
-            window.open("https://wa.me/" + enquiry.whatsappNumber + "?text=" + enquiry.body, "_blank");
-        });
-
-        consultancyEmailBtn.addEventListener("click", () => {
-            if (!consultancyForm.reportValidity()) {
-                return;
-            }
-
-            const enquiry = buildConsultancyEnquiry();
-            window.location.href = "mailto:info@ussehub.com?subject=" + enquiry.subject + "&body=" + enquiry.body;
-        });
+        // Enquiry capture is managed by assets/usse-lead-capture.mjs.
     </script>
+<script type="module" src="assets/usse-lead-capture.mjs?v=20261101"></script>
 </body>
 
 </html>

@@ -303,7 +303,7 @@
 
 <link rel="stylesheet" href="assets/usse-design.css?v=20261026-theme">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
-<script defer src="assets/usse-workspace.js?v=20261025"></script>
+<script defer src="assets/usse-workspace.js?v=20261101-leads"></script>
 </head>
 <body class="hub-admin" data-hub-page="master-admin">
 
@@ -448,6 +448,7 @@
             <h1>Enterprise overview</h1>
             <p>Complete system oversight, analytics, and CRM management.</p>
         </div>
+        <a href="lead-inbox" class="btn btn-primary">Lead Inbox &amp; Alerts</a>
         <a href="referral-agreements" class="btn btn-ghost">Referral Agreements &amp; Commissions</a>
         <a href="ajm-admin-panel.html" class="btn btn-ghost">← Switch to Standard Admin</a>
     </div>
@@ -492,6 +493,7 @@
 
     <!-- Consultations Panel -->
     <div class="admin-table-wrap" id="consultations-panel" style="display:none;">
+        <p style="padding:20px;"><a href="lead-inbox" class="btn btn-primary">Open Lead Inbox — follow-ups, alert settings &amp; exports →</a></p>
         <table class="admin-table">
             <thead>
                 <tr>
@@ -808,7 +810,7 @@
                 <td><small>${new Date(c.created_at).toLocaleDateString()}</small></td>
                 <td><span class="badge badge-pending">${escHtml(c.status)}</span></td>
                 <td>
-                    <button class="btn btn-danger btn-sm" style="padding: 4px 8px;" onclick="deleteConsultation('${c.id}')" title="Delete">🗑</button>
+                    <button class="btn btn-danger btn-sm" style="padding: 4px 8px;" onclick="location.href='lead-inbox?lead=${c.id}'" title="View lead">View lead</button>
                 </td>
             </tr>
         `).join('');
