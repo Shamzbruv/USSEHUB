@@ -305,7 +305,7 @@
     </style>
 <link rel="stylesheet" href="assets/usse-design.css?v=20261101-identity">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
-<script defer src="assets/usse-workspace.js?v=20261101-app"></script>
+<script defer src="assets/usse-workspace.js?v=20261102-market"></script>
 <link rel="manifest" href="admin-app.webmanifest">
 <meta name="theme-color" content="#302358">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -313,7 +313,7 @@
 <link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/usse-admin-app.css?v=20261101-app">
 <script type="module" src="assets/usse-admin-app.mjs?v=20261101-app2"></script>
-</head>
+<link rel="stylesheet" href="assets/usse-market.css?v=20261102"><script type="module" src="assets/usse-banner-checkout.mjs?v=20261102"></script></head>
 <body class="hub-admin" data-hub-page="ajm-ad-management">
     <header class="topbar">
         <nav class="nav" aria-label="Admin navigation">
@@ -471,7 +471,7 @@
                 <div class="field"><label for="package-currency">Currency *</label><select id="package-currency"><option value="JMD">JMD</option><option value="USD">USD</option></select></div>
                 <div class="field"><label for="package-duration">Base duration in days *</label><input id="package-duration" type="number" min="1" max="3650" required /></div>
                 <div class="field"><label for="package-sort">Display order</label><input id="package-sort" type="number" min="0" step="1" value="0" /></div>
-                <div class="field full"><label for="package-placements">Placements <small>Comma-separated keys, e.g. home-hero, hub-sidebar</small></label><input id="package-placements" placeholder="home-featured, hub-sidebar" /></div>
+                <div class="field full"><label for="package-placements">Placements <small>Comma-separated keys, e.g. home-hero, hub-sidebar</small></label><input id="package-placements" placeholder="home-top, hub-right" /><small>Use the placement picker below or retain existing placement keys.</small><div class="market-actions"><select id="banner-package-page" aria-label="Banner page"></select><select id="banner-package-position" aria-label="Banner position"></select><button type="button" id="banner-add-placement">Add placement</button></div><small>Top/bottom placements suit wide banners. Left/right rails suit vertical artwork. Mobile rails move into the page flow.</small></div>
                 <div class="field full"><label for="package-features">Features <small>One customer-facing feature per line</small></label><textarea id="package-features"></textarea></div>
                 <div class="field"><label for="package-bank">Accounts Receivable destination *</label><select id="package-bank"><option value="">Use the active default destination</option></select></div>
                 <div class="field"><div class="check-row"><input id="package-active" type="checkbox" checked /><label for="package-active">Package is available for purchase</label></div></div>

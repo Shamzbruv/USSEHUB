@@ -230,8 +230,8 @@ function injectStyles() {
         .ajm-ad-network-mount:not([hidden]){display:flex;justify-content:flex-start;width:min(1180px,calc(100% - 32px));margin:26px auto 42px}
         .ajm-network-ad{position:relative;isolation:isolate;overflow:hidden;display:block;width:220px;text-decoration:none;color:#f8f9ff;background:linear-gradient(145deg,#101625,#090d17);border:1px solid rgba(255,255,255,.14);border-radius:18px;box-shadow:0 16px 44px rgba(0,0,0,.24);font-family:"Space Grotesk",system-ui,sans-serif;transition:transform .2s ease,box-shadow .2s ease}
         a.ajm-network-ad:hover{transform:translateY(-3px);box-shadow:0 22px 54px rgba(0,0,0,.32)}
-        .ajm-network-ad--banner{width:320px;display:grid;grid-template-columns:112px 1fr;border-color:rgba(255,207,51,.3)}
-        .ajm-network-ad--banner .ajm-network-ad__media{aspect-ratio:1/1}
+        .ajm-network-ad--banner{width:100%;max-width:970px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(160px,1fr);border-color:rgba(255,207,51,.3)}
+        .ajm-network-ad--banner .ajm-network-ad__media{aspect-ratio:728/180;object-fit:contain}
         .ajm-network-ad__media{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#070a11}
         video.ajm-network-ad__media{object-fit:cover}
         .ajm-network-ad__copy{display:flex;min-width:0;flex-direction:column;align-items:flex-start;padding:12px 13px 14px}
@@ -248,7 +248,7 @@ function injectStyles() {
         .ajm-network-ad--spotlight .ajm-network-ad__body{display:block;max-width:100%;margin:8px 0 0;color:#c1c9db;font-size:.85rem;line-height:1.5}
         .ajm-network-ad__dismiss{position:absolute;top:10px;right:10px;z-index:2;width:32px;height:32px;display:grid;place-items:center;padding:0;color:#fff;background:rgba(5,7,13,.86);border:1px solid rgba(255,255,255,.25);border-radius:50%;font:700 1.15rem/1 system-ui;cursor:pointer}
         @keyframes ajm-ad-arrive{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-        @media (max-width:480px){.ajm-network-ad{width:100%;max-width:220px}.ajm-network-ad--banner{width:100%;max-width:320px}}
+        @media (max-width:480px){.ajm-network-ad{width:100%;max-width:220px}.ajm-network-ad--banner{width:100%;max-width:970px;grid-template-columns:1fr}}
         @media (prefers-reduced-motion:reduce){.ajm-network-ad--spotlight{animation:none}.ajm-network-ad,a.ajm-network-ad:hover{transition:none;transform:none}}
     `;
     document.head.appendChild(style);
@@ -305,10 +305,10 @@ export async function mountAjmAdDelivery({
 
     try {
         const sessionToken = stableSessionToken();
-        const { data, error } = await supabase.rpc('get_active_advertisements', {
-            p_placement: String(placement || DEFAULT_PLACEMENT),
-            p_limit: Math.max(1, Math.min(Number(limit) || 50, 50))
-        });
+        const placements = Array.isArray(placement) ? placement : [placement || DEFAULT_PLACEMENT];
+        const responses = await Promise.all(placements.map(value => supabase.rpc('get_active_advertisements', {p_placement: String(value), p_limit: Math.max(1, Math.min(Number(limit) || 50, 50))})));
+        const data = {advertisements: [...new Map(responses.flatMap(r => r.data?.advertisements || []).map(a => [a.id,a])).values()]};
+        const error = responses.every(r => r.error) ? responses[0].error : null;
         if (error) return null;
 
         const ads = Array.isArray(data?.advertisements)

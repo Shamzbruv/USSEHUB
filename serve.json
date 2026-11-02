@@ -60,6 +60,22 @@
     {
       "source": "/admin-app",
       "destination": "/admin-app.html"
+    },
+    {
+      "source": "/ajm-marketplace-admin",
+      "destination": "/ajm-marketplace-admin.html"
+    },
+    {
+      "source": "/ajm-jobzone",
+      "destination": "/ajm-jobzone.html"
+    },
+    {
+      "source": "/ajm-jobzone-employer",
+      "destination": "/ajm-jobzone-employer.html"
+    },
+    {
+      "source": "/ajm-jobzone-admin",
+      "destination": "/ajm-jobzone-admin.html"
     }
   ],
   "headers": [

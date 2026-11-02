@@ -150,6 +150,15 @@ const TAXONOMY = {
     }
 };
 
+// Client additions, 2 November 2026. Existing category keys and saved paths are retained.
+const OPERATION_DEPARTMENTS = ["HUMAN RESOURCES", "MAINTENANCE", "OPERATIONS", "ACCOUNTING", "HOUSEKEEPING", "PROMOTIONS", "MARKETING", "SALES", "PUBLIC RELATIONS", "DUTY OPERATIONS"];
+for (const sector of ["BUSINESS OPERATORS", "TOURISM INDUSTRY", "HOTEL OPERATIONS", "RETAIL OPERATIONS / INDUSTRY", "RESTAURANT SERVICES"]) {
+    TAXONOMY[sector] = Object.fromEntries(OPERATION_DEPARTMENTS.map(department => [department, {tertiary: ["SERVICES & SUPPORT", "SUPPLIES & EQUIPMENT", "TRAINING & DEVELOPMENT"], specific: []}]));
+    TAXONOMY[sector]["OTHER DEPARTMENTS"] = {tertiary: ["GENERAL SERVICES & SUPPORT"], specific: []};
+}
+window.USSE_OPERATION_DEPARTMENTS = Object.freeze([...OPERATION_DEPARTMENTS, "OTHER"]);
+window.USSE_BUSINESS_SECTORS = Object.freeze(["BUSINESS OPERATORS", "TOURISM INDUSTRY", "HOTEL OPERATIONS", "RETAIL OPERATIONS / INDUSTRY", "RESTAURANT SERVICES"]);
+
 /*
  * Historical data is retained for existing listings only. Hidden legacy
  * primary options allow an old listing to load without blanking its saved
@@ -205,7 +214,7 @@ window.TAXONOMY = TAXONOMY;
 window.TAXONOMY_LEGACY = LEGACY_TAXONOMY;
 window.TAXONOMY_LEGACY_TO_CURRENT = LEGACY_TO_CURRENT_CATEGORY;
 window.TAXONOMY_SOURCE = Object.freeze({
-    version: "2026-client-recategorization",
+    version: "2026-client-recategorization-november-additions",
     revisedDocument: "CATEGORIES & SUBS-2026-UsseHub - Listing.docx",
     regroupedDocument: "ver2 -CATEGORIES & SUBS-2026-UsseHub - Listing.docx",
     interactionPrototype: "Test 3b - Categorize -Untitled.html",

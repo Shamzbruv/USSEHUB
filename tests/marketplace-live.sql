@@ -1,0 +1,37 @@
+-- Execute only inside BEGIN/ROLLBACK. No synthetic records or messages are committed.
+DO $checks$ DECLARE admin_id uuid;employer uuid;candidate uuid;jid uuid;aid uuid;lid uuid;r jsonb;n int;
+BEGIN
+ SELECT id INTO admin_id FROM public.profiles WHERE role='admin' AND account_status='active' ORDER BY id LIMIT 1;
+ SELECT p.id INTO employer FROM public.profiles p JOIN auth.users u ON u.id=p.id WHERE p.account_status='active' AND p.role<>'admin' AND u.email_confirmed_at IS NOT NULL ORDER BY p.id LIMIT 1;
+ SELECT p.id INTO candidate FROM public.profiles p JOIN auth.users u ON u.id=p.id WHERE p.account_status='active' AND p.id<>employer AND u.email_confirmed_at IS NOT NULL ORDER BY p.id LIMIT 1;
+ IF admin_id IS NULL OR employer IS NULL OR candidate IS NULL THEN RAISE EXCEPTION 'Verification requires an active administrator and a verified member.'; END IF;
+ IF has_table_privilege('anon','public.jobzone_posts','INSERT') OR has_table_privilege('authenticated','private.jobzone_applications','SELECT') OR has_function_privilege('anon','public.manage_jobzone(text,jsonb)','EXECUTE') THEN RAISE EXCEPTION 'JobZone privilege boundary failed'; END IF;
+ IF (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relrowsecurity AND ((n.nspname='public' AND c.relname='jobzone_posts') OR (n.nspname='private' AND c.relname IN('jobzone_applications','jobzone_events'))))<>3 THEN RAISE EXCEPTION 'JobZone RLS missing'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',employer::text,true);
+ r:=public.manage_jobzone('save_post',jsonb_build_object('company_name','USSE rolled-back employer verification','title','Verification operations role','industry','HOTEL OPERATIONS','department','OPERATIONS','location','Kingston, Jamaica','employment_type','Contract','work_mode','On-site','description','Synthetic workflow verification. This vacancy must never be committed or published outside this transaction.','requirements','Synthetic verification only; not a real vacancy.','closes_at',now()+interval '30 days','submit',true));jid:=(r->>'id')::uuid;
+ IF r->>'status'<>'pending' THEN RAISE EXCEPTION 'Vacancy bypassed moderation'; END IF;
+ BEGIN PERFORM public.manage_jobzone('review',jsonb_build_object('id',jid,'status','published'));RAISE EXCEPTION 'Member moderated vacancy';EXCEPTION WHEN insufficient_privilege THEN NULL;END;
+ PERFORM set_config('request.jwt.claim.sub',admin_id::text,true);
+ PERFORM public.manage_jobzone('review',jsonb_build_object('id',jid,'status','published'));
+ r:=public.jobzone_public('detail',jsonb_build_object('id',jid));IF jsonb_array_length(r->'rows')<>1 THEN RAISE EXCEPTION 'Published vacancy missing'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',candidate::text,true);
+ r:=public.manage_jobzone('apply',jsonb_build_object('id',jid,'name','USSE verification candidate','statement','Synthetic application used for an isolated, rolled-back verification of the private employer workflow.','consent',true));aid:=(r->>'id')::uuid;
+ IF (public.manage_jobzone('apply',jsonb_build_object('id',jid,'name','USSE verification candidate','statement','Synthetic duplicate application verification.','consent',true))->>'duplicate')<>'true' THEN RAISE EXCEPTION 'Duplicate application not detected'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',admin_id::text,true);
+ BEGIN PERFORM public.manage_jobzone('applications',jsonb_build_object('id',jid));RAISE EXCEPTION 'Administrator read employer applications';EXCEPTION WHEN insufficient_privilege THEN NULL;END;
+ r:=public.manage_jobzone('monitor');IF r::text LIKE '%USSE verification candidate%' THEN RAISE EXCEPTION 'Candidate detail leaked into monitoring'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',employer::text,true);
+ r:=public.manage_jobzone('applications',jsonb_build_object('id',jid));IF jsonb_array_length(r->'rows')<>1 THEN RAISE EXCEPTION 'Employer did not receive application'; END IF;
+ PERFORM public.manage_jobzone('application_stage',jsonb_build_object('id',aid,'stage','reviewing'));
+ PERFORM set_config('request.jwt.claim.sub',candidate::text,true);
+ PERFORM public.manage_jobzone('withdraw',jsonb_build_object('id',aid));
+ PERFORM set_config('request.jwt.claim.sub',employer::text,true);
+ r:=public.manage_jobzone('applications',jsonb_build_object('id',jid));IF r->'rows'->0->>'email'<>'' THEN RAISE EXCEPTION 'Withdrawn contact not redacted'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',admin_id::text,true);
+ r:=public.admin_manage_leads('create','{"customer_name":"USSE archive verification","email":"verification@example.test","source":"phone","notes":"Rolled-back lead removal verification."}');lid:=(r->>'lead_id')::uuid;
+ PERFORM public.admin_manage_leads('archive',jsonb_build_object('id',lid,'reason','Synthetic duplicate'));
+ IF NOT EXISTS(SELECT 1 FROM public.consultations WHERE id=lid AND archived_at IS NOT NULL) OR EXISTS(SELECT 1 FROM private.lead_alert_deliveries WHERE lead_id=lid AND status IN('pending','failed','processing')) THEN RAISE EXCEPTION 'Lead archive or alert cancellation failed'; END IF;
+ PERFORM public.admin_manage_leads('restore',jsonb_build_object('id',lid));IF EXISTS(SELECT 1 FROM public.consultations WHERE id=lid AND archived_at IS NOT NULL) THEN RAISE EXCEPTION 'Lead restore failed'; END IF;
+ PERFORM set_config('request.jwt.claim.sub',employer::text,true);
+ BEGIN PERFORM public.admin_manage_leads('archive',jsonb_build_object('id',lid));RAISE EXCEPTION 'Member removed lead';EXCEPTION WHEN insufficient_privilege THEN NULL;END;
+END $checks$;

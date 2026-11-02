@@ -16,7 +16,7 @@ export function leadVCard(lead){
 }
 export function csvCell(value){const s=String(value??'');return '"'+(/^[\s]*[=+@\-\t\r]/.test(s)?"'"+s:s).replaceAll('"','""')+'"';}
 export function leadsCSV(rows){
- const fields=[['Reference','lead_reference'],['Received (UTC)','created_at'],['Name','customer_name'],['Company','company'],['Phone','phone'],['Email','email'],['Channel','source'],['Branch','branch'],['Service','service'],['Source page','source_page'],['Business listing','listing_name'],['Listing ID','listing_id'],['Capture origin','capture_origin'],['Campaign source','utm_source'],['Campaign','utm_campaign'],['Referring website','referrer_host'],['Stage','lead_stage'],['Priority','priority'],['Assigned admin ID','assigned_to'],['Follow-up (UTC)','follow_up_at'],['Enquiry','notes']];
+ const fields=[['Reference','lead_reference'],['Received (UTC)','created_at'],['Name','customer_name'],['Company','company'],['Phone','phone'],['Email','email'],['Channel','source'],['Branch','branch'],['Service','service'],['Source page','source_page'],['Business listing','listing_name'],['Listing ID','listing_id'],['Capture origin','capture_origin'],['Campaign source','utm_source'],['Campaign','utm_campaign'],['Referring website','referrer_host'],['Stage','lead_stage'],['Priority','priority'],['Assigned admin ID','assigned_to'],['Follow-up (UTC)','follow_up_at'],['Enquiry','notes'],['Removed UTC','archived_at'],['Removal reason','archive_reason']];
  return '\ufeff'+[fields.map(([label])=>csvCell(label)).join(','),...rows.map(row=>fields.map(([,key])=>csvCell(row[key]??row.attribution?.[key])).join(','))].join('\r\n');
 }
 export function normalizeLead(input){

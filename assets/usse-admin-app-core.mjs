@@ -1,7 +1,7 @@
-export const APP_CATEGORIES={enquiries:'Enquiries & follow-ups',members:'Members & account access',listings:'Directory listings',commerce:'Orders, payments & advertising',referrals:'Partners & referrals',system:'App notices'};
+export const APP_CATEGORIES={enquiries:'Enquiries & follow-ups',members:'Members & account access',listings:'Directory listings',commerce:'Orders, payments & advertising',referrals:'Partners & referrals',system:'JobZone & app notices'};
 export function safeAdminPath(value){
  const url=new URL(String(value||'/admin-app'),'https://ussehub.com');
- const paths=['/admin-app','/master-admin','/lead-inbox','/ajm-admin-panel','/ajm-ad-management','/referral-agreements'];
+ const paths=['/admin-app','/master-admin','/lead-inbox','/ajm-admin-panel','/ajm-ad-management','/referral-agreements','/ajm-marketplace-admin','/ajm-jobzone-admin'];
  return url.origin==='https://ussehub.com'&&paths.some(p=>url.pathname===p||url.pathname===p+'.html')?url.pathname+url.search+url.hash:'/admin-app';
 }
 export function allowedPushEndpoint(value){

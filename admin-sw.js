@@ -4,12 +4,12 @@ self.addEventListener('install',event=>event.waitUntil(caches.open(OFFLINE_CACHE
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names=>Promise.all(names.filter(n=>n.startsWith('usse-admin-offline-')&&n!==OFFLINE_CACHE).map(n=>caches.delete(n)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
  const url=new URL(event.request.url);
- if(event.request.mode==='navigate'&&url.origin===self.location.origin&&/^\/(admin-app|master-admin|lead-inbox|ajm-admin-panel|ajm-ad-management|referral-agreements)(\.html)?$/.test(url.pathname)){
+ if(event.request.mode==='navigate'&&url.origin===self.location.origin&&/^\/(admin-app|master-admin|lead-inbox|ajm-admin-panel|ajm-ad-management|referral-agreements|ajm-marketplace-admin|ajm-jobzone-admin)(\.html)?$/.test(url.pathname)){
   event.respondWith(fetch(event.request).catch(()=>caches.match('/admin-offline.html')));
  }
 });
 function safeTarget(value){
- try{const u=new URL(value,self.location.origin);return u.origin===self.location.origin&&/^\/(admin-app|master-admin|lead-inbox|ajm-admin-panel|ajm-ad-management|referral-agreements)(\.html)?$/.test(u.pathname)?u.href:new URL('/admin-app',self.location.origin).href;}catch{return new URL('/admin-app',self.location.origin).href;}
+ try{const u=new URL(value,self.location.origin);return u.origin===self.location.origin&&/^\/(admin-app|master-admin|lead-inbox|ajm-admin-panel|ajm-ad-management|referral-agreements|ajm-marketplace-admin|ajm-jobzone-admin)(\.html)?$/.test(u.pathname)?u.href:new URL('/admin-app',self.location.origin).href;}catch{return new URL('/admin-app',self.location.origin).href;}
 }
 self.addEventListener('push',event=>{
  let data={};try{data=event.data?.json()||{};}catch{}
@@ -22,7 +22,7 @@ self.addEventListener('notificationclick',event=>{
  event.notification.close();const url=safeTarget(event.notification.data?.url);
  event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async windows=>{
   const tab=windows.find(c=>c.url===url);if(tab)return tab.focus();
-  const admin=windows.find(c=>/^\/(admin-app|master-admin|lead-inbox|ajm-admin-panel|ajm-ad-management|referral-agreements)(\.html)?$/.test(new URL(c.url).pathname));
+  const admin=windows.find(c=>/^\/(admin-app|master-admin|lead-inbox|ajm-admin-panel|ajm-ad-management|referral-agreements|ajm-marketplace-admin|ajm-jobzone-admin)(\.html)?$/.test(new URL(c.url).pathname));
   if(admin){await admin.navigate(url);return admin.focus();}return self.clients.openWindow(url);
  }));
 });

@@ -14,6 +14,8 @@
 
   const page = body.dataset.hubPage;
   const config = {
+    'ajm-marketplace-admin': ['Marketplace offerings', 'Three offerings. Clearly in view.', 'Separate listings, webpages and banners.', 'Switch between registers and use the banner size and placement preview before configuring a campaign.'],
+    'ajm-jobzone-admin': ['JobZone monitoring', 'Opportunity, in view.', 'Moderate employer vacancies and monitor activity.', 'Review vacancy content, publish or return it, and monitor aggregate activity. Applicant details stay with each posting employer.'],
     'admin-app': ['App & alerts', 'Your office. Wherever you are.', 'USSE Hub on your device.', 'Install the app and choose which platform updates reach your devices.'],
     'lead-inbox': ['Lead inbox', 'Turn enquiries into opportunities.', 'Keep every enquiry, contact detail and next step in one place.', 'New enquiries appear automatically. Open a lead to call, email, send WhatsApp, assign an owner, set a follow-up date or add a private note. Configure alert recipients and download the filtered lead register.'],
     'master-admin': ['Enterprise overview', 'See the whole picture.', 'Review consultations, members, subscriptions and listing activity across USSEHub.', 'Begin with the overview, then use Consultations to follow up enquiries. Review pending listings before approval and use Members to manage existing accounts.'],
@@ -47,6 +49,8 @@
     ['admin-app', 'App & alerts', 'grid'],
     ['master-admin', 'Enterprise overview', 'grid'],
     ['lead-inbox', 'Lead inbox', 'people'],
+    ['ajm-marketplace-admin', 'Marketplace offerings', 'list'],
+    ['ajm-jobzone-admin', 'JobZone monitoring', 'people'],
     ['ajm-admin-panel', 'Directory & reports', 'list'],
     ['ajm-ad-management', 'Advertising & accounts', 'chart'],
     ['referral-agreements', 'Partners & referrals', 'people']
@@ -110,7 +114,7 @@
   for (const container of document.querySelectorAll('#admin-content,#app,#workspace')) observer.observe(container, {attributes:true,attributeFilter:['style','hidden','class']});
   body.classList.add('hub-enhanced');
 
-  if (page === 'admin-app') return;
+  if (['admin-app','ajm-marketplace-admin','ajm-jobzone-admin'].includes(page)) return;
   const host = document.querySelector('#admin-content, #app, body > main');
   if (host) {
     const intro = document.createElement('div'); intro.className = 'hub-work-intro';

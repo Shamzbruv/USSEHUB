@@ -4,6 +4,10 @@ import { execFileSync } from 'child_process';
 
 const htmlFiles = [
     'index.html',
+    'ajm-marketplace-admin.html',
+    'ajm-jobzone.html',
+    'ajm-jobzone-employer.html',
+    'ajm-jobzone-admin.html',
     'admin-app.html',
     'admin-offline.html',
     'lead-inbox.html',
@@ -118,7 +122,7 @@ const networkModule = fs.readFileSync('assets/ajm-ad-delivery.mjs', 'utf8');
 assert(networkModule.includes("const DEFAULT_PLACEMENT = 'webpage-network'"), 'Shared ad delivery does not use the paid webpage network placement.');
 for (const filename of ['ajm-aloe-jamaica.html', 'usse-consultancy.html', 'pistol-operations-logistics.html']) {
     const source = fs.readFileSync(filename, 'utf8');
-    assert(source.includes("from './assets/ajm-ad-delivery.mjs'"), `${filename} is missing shared paid webpage ad delivery.`);
+    assert(/from ['"]\.\/assets\/ajm-ad-delivery\.mjs(?:\?[^'"]*)?['"]/.test(source), `${filename} is missing shared paid webpage ad delivery.`);
 }
 
 try {

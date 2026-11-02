@@ -362,11 +362,11 @@
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <script src="taxonomy.js"></script>
+    <script src="taxonomy.js?v=20261102"></script>
 
 <link rel="stylesheet" href="assets/usse-design.css?v=20261101-identity">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
-<script defer src="assets/usse-workspace.js?v=20261101-app"></script>
+<script defer src="assets/usse-workspace.js?v=20261102-market"></script>
 <link rel="manifest" href="admin-app.webmanifest">
 <meta name="theme-color" content="#302358">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -374,10 +374,10 @@
 <link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/usse-admin-app.css?v=20261101-app">
 <script type="module" src="assets/usse-admin-app.mjs?v=20261101-app2"></script>
-</head>
+<link rel="stylesheet" href="assets/usse-market.css?v=20261102"></head>
 <body class="hub-admin" data-hub-page="ajm-admin-panel">
 
-<div id="toast" class="toast" role="alert"></div>
+<div class="market-section-links" style="padding:16px 28px;"><a href="ajm-marketplace-admin">Listings · Webpages · Banners →</a><a href="ajm-jobzone-admin">JobZone monitoring →</a></div><div id="toast" class="toast" role="alert"></div>
 
 <!-- Edit Listing Modal -->
 <div id="edit-modal" class="modal-overlay" role="dialog" aria-modal="true">
@@ -1206,6 +1206,7 @@
         showAdmin();
         await loadStats();
         await reloadListings();
+        await openRequestedListing();
         // Pre-load payment accounts for package editor dropdown
         loadPaymentAccountsIntoSelects().catch(() => {});
     }
@@ -1747,6 +1748,13 @@
     }
 
     // ── EDIT MODAL ──
+    async function openRequestedListing() {
+        const id = new URLSearchParams(location.search).get('listing');
+        if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return;
+        const {data,error} = await supabase.from('listings').select('*').eq('id',id).maybeSingle();
+        if (!error && data) await openEditModal(data);
+    }
+
     async function openEditModal(listing) {
         document.getElementById('edit-listing-id').value = listing.id;
         document.getElementById('edit-business-name').value = listing.business_name || '';

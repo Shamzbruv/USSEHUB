@@ -1562,7 +1562,7 @@
             .listing-type-grid { grid-template-columns: 1fr; }
         }
     </style>
-    <script src="taxonomy.js"></script>
+    <script src="taxonomy.js?v=20261102"></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LSFXN90KHS"></script>
 <script>
@@ -1716,9 +1716,9 @@
 </style>
 <link rel="stylesheet" href="assets/usse-design.css?v=20261101-identity">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
-<script defer src="assets/usse-workspace.js?v=20261101-app"></script>
+<script defer src="assets/usse-workspace.js?v=20261102-market"></script>
 <link rel="stylesheet" href="assets/usse-lead-capture.css?v=20261101-direct">
-</head>
+<link rel="stylesheet" href="assets/usse-market.css?v=20261102"><script type="module" src="assets/usse-banner-delivery.mjs?v=20261102"></script><script type="module" src="assets/usse-banner-checkout.mjs?v=20261102"></script></head>
 
 <body class="hub-directory hub-ajm" data-hub-page="ajm-advertising-hub">
     <div class="page-noise"></div>
@@ -2008,7 +2008,7 @@
                 <a class="hub-home-link" href="index.html" aria-label="USSE Home"><img class="hub-home-logo" src="usse.png" width="1254" height="1254" alt="" aria-hidden="true"><span>Home</span></a>
                 <a href="ajm-aloe-jamaica.html">Agency</a>
                 <a href="?advertise=1&amp;product=webpage" onclick="event.preventDefault(); openWebpagePackages();">Webpages</a>
-                <a href="#services" class="active">Directory</a>
+                <a href="#services" class="active">Directory</a><a href="ajm-jobzone">JobZone</a>
             </div>
 
             <div class="nav-actions">
@@ -2106,6 +2106,7 @@
         </div>
     </section>
 
+<section class="market-offering-strip" aria-label="Three AJM web offerings"><article><small>01 · DIRECTORY LISTING</small><h2>Be found.</h2><p>A searchable business record with your details and contact options.</p><button type="button" onclick="handlePostListingClick()">Post a directory listing →</button></article><article><small>02 · BUSINESS WEBPAGE</small><h2>Your own space.</h2><p>A dedicated Silver, Gold or Platinum webpage connected to your listing.</p><button type="button" onclick="openAdvertiseModal({productType:'webpage'})">View webpage packages →</button></article><article><small>03 · WEB BANNER</small><h2>Put your brand in view.</h2><p>A separate campaign with banner artwork, page placements and performance tracking.</p><button type="button" onclick="openAdvertiseModal({productType:'display_ad'})">View banner packages →</button></article></section>
     <!-- Webpage Packages Modal (Hidden by default, opened by Advertise Here FAB) -->
     <div id="webpage-packages-modal" class="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-box" style="max-width: 1100px; padding: 40px; background: var(--panel); border: 1px solid var(--glass-border);">
@@ -2188,7 +2189,7 @@
                         <section class="md-panel" aria-labelledby="md-listings-heading">
                             <div class="md-panel-header">
                                 <div>
-                                    <h4 id="md-listings-heading">Listings &amp; webpages</h4>
+                                    <h4 id="md-listings-heading">Directory listings</h4>
                                     <p>See each listing’s approval, package, draft and publishing progress.</p>
                                 </div>
                                 <button class="btn btn-ghost" type="button" onclick="closeModal('member-dashboard-modal'); handlePostListingClick();">＋ Add listing</button>
@@ -3852,7 +3853,7 @@
                     <div class="adv-field full"><label for="adv-body-text">Advertisement message *</label><textarea id="adv-body-text" maxlength="800" placeholder="What should customers know about this offer?"></textarea></div>
                     <div class="adv-field"><label for="adv-cta-label">Button label *</label><input id="adv-cta-label" maxlength="40" placeholder="Learn More" /></div>
                     <div class="adv-field"><label for="adv-cta-url">Destination URL *</label><input id="adv-cta-url" type="url" placeholder="https://yourbusiness.com/offer" /></div>
-                    <div class="adv-field full"><label for="adv-creative-file">Advertisement image or video *</label><input id="adv-creative-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" /><small>JPG, PNG, WebP, GIF, MP4 or WebM. Maximum 20 MB.</small></div>
+                    <div class="adv-field full"><label for="adv-banner-size">Banner format / artwork size</label><select id="adv-banner-size"><option value="leaderboard">Leaderboard · 728 × 90</option><option value="wide">Wide banner · 970 × 250</option><option value="rectangle">Medium rectangle · 300 × 250</option><option value="skyscraper">Vertical skyscraper · 160 × 600</option><option value="mobile">Mobile banner · 320 × 100</option></select><small>The selected package determines the live placement. These sizes help prepare your artwork.</small></div><div class="adv-field full"><label for="adv-creative-file">Advertisement image or video *</label><input id="adv-creative-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" /><small>JPG, PNG, WebP, GIF, MP4 or WebM. Maximum 20 MB. Upload finished banner artwork rather than only a logo.</small></div><div class="adv-field full adv-banner-live-preview"><strong>Artwork preview</strong><div id="adv-banner-preview" class="banner-preview-frame"><span class="banner-placeholder">Choose artwork to preview your banner.</span></div><small id="adv-banner-preview-note">The live banner adapts to its purchased placement and screen size.</small></div>
                 </div>
             </div>
 
@@ -4245,6 +4246,10 @@
         const destination = advHttpUrl(ad.cta_url);
         const article = document.createElement(destination ? 'a' : 'article');
         article.className = 'delivered-ad';
+        if (ad.creative_metadata?.format === 'banner' || String(ad.package_name || '').toLowerCase().includes('banner')) {
+            article.classList.add('delivered-ad--banner');
+            article.style.setProperty('--banner-aspect', ({leaderboard:'728/90',wide:'970/250',rectangle:'300/250',skyscraper:'160/600',mobile:'320/100'})[ad.creative_metadata?.banner_size] || '728/180');
+        }
         if (destination) {
             article.href = destination;
             article.target = '_blank';
@@ -4278,7 +4283,7 @@
         copy.className = 'delivered-ad-copy';
         const label = document.createElement('span');
         label.className = 'delivered-ad-label';
-        label.textContent = 'Sponsored';
+        label.textContent = ad.placement === 'webpage-network' ? 'Sponsored webpage' : 'Web banner';
         const heading = document.createElement('h4');
         heading.textContent = ad.headline || ad.business_name || ad.package_name || 'Featured advertisement';
         copy.append(label, heading);
@@ -4433,7 +4438,9 @@
             media_type: creativeFile.type,
             metadata: {
                 original_filename: creativeFile.name,
-                media_type: creativeFile.type
+                media_type: creativeFile.type,
+                format: 'banner',
+                banner_size: advEl('adv-banner-size').value
             }
         };
         return configuration;
@@ -4783,13 +4790,14 @@
         advShowStep('adv-step-1');
         advShowAlert('adv-package-message', '');
         const webpageOnly = advProductFilter === 'webpage';
-        advEl('adv-modal-heading').textContent = webpageOnly ? '🌐 Upgrade to a Business Webpage' : '📢 Advertise Your Business';
+        const bannerOnly = advProductFilter === 'display_ad';
+        advEl('adv-modal-heading').textContent = webpageOnly ? '🌐 Upgrade to a Business Webpage' : bannerOnly ? 'Web Banner Campaigns' : 'AJM Web Offerings';
         advEl('adv-modal-subtitle').textContent = webpageOnly
             ? 'Step 1 of 4: choose the Silver, Gold or Platinum package for an existing directory listing.'
-            : 'Choose an advertising package to get your business in front of thousands of Jamaicans.';
+            : bannerOnly ? 'Choose a banner package for its page placements, run dates and artwork.' : 'Choose a webpage or a web banner campaign. Directory listings are managed separately.';
         advEl('adv-catalog-guidance').textContent = webpageOnly
             ? 'The price, duration and AJM bank-transfer destination shown here come from the current admin settings. Your builder unlocks only after AJM confirms payment.'
-            : 'Business webpage packages upgrade an existing directory listing. Display-ad packages create advertisements for the listed placements. Prices, durations and payment destinations are managed by AJM.';
+            : bannerOnly ? 'Banner campaigns are separate from directory listings and webpages. A featured listing logo is a thumbnail; your campaign uses the artwork you upload. Prices and placements come from the current AJM package configuration.' : 'Business webpage packages upgrade an existing directory listing. Display-ad packages create advertisements for the listed placements. Prices, durations and payment destinations are managed by AJM.';
         if (!preserveSelection) {
             advSelectedPkg = null;
             advCurrentOrder = null;

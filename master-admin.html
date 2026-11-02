@@ -299,11 +299,11 @@
             .filter-bar { flex-direction: column; }
         }
     </style>
-    <script src="taxonomy.js"></script>
+    <script src="taxonomy.js?v=20261102"></script>
 
 <link rel="stylesheet" href="assets/usse-design.css?v=20261101-identity">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
-<script defer src="assets/usse-workspace.js?v=20261101-app"></script>
+<script defer src="assets/usse-workspace.js?v=20261102-market"></script>
 <link rel="manifest" href="admin-app.webmanifest">
 <meta name="theme-color" content="#302358">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -769,7 +769,7 @@
 
     async function loadDashboard() {
         const [consultations, subscriptions] = await Promise.all([
-            supabase.from('consultations').select('*', { count: 'exact', head: true }),
+            supabase.from('consultations').select('*', { count: 'exact', head: true }).is('archived_at', null),
             supabase.from('ad_subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active')
         ]);
         const pending = Number(document.getElementById('stat-pending').textContent) || 0;
@@ -797,7 +797,7 @@
     async function loadConsultations() {
         const tbody = document.getElementById('admin-consultations-tbody');
         tbody.innerHTML = '<tr class="loading-row"><td colspan="8">Loading...</td></tr>';
-        const { data, error } = await supabase.from('consultations').select('*, listings(business_name)').order('created_at', { ascending: false }).limit(50);
+        const { data, error } = await supabase.from('consultations').select('*, listings(business_name)').is('archived_at', null).order('created_at', { ascending: false }).limit(50);
 
         if (error) {
             tbody.innerHTML = `<tr><td colspan="8" style="color:var(--red);">Error: ${error.message}</td></tr>`;
