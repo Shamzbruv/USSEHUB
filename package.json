@@ -21,7 +21,7 @@
     "deploy:leads": "node scripts/deploy-leads.mjs",
     "test:app": "node tests/admin-app.test.mjs",
     "deploy:app": "node scripts/deploy-admin-app.mjs",
-    "test:marketplace": "node tests/marketplace-jobzone.test.mjs && node tests/jobzone-documents.test.mjs"
+    "test:marketplace": "node tests/marketplace-jobzone.test.mjs && node tests/jobzone-documents.test.mjs && node tests/jobzone-flyers.test.mjs"
   },
   "keywords": [],
   "author": "",
