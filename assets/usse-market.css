@@ -9,3 +9,5 @@
 .delivered-ad--banner .delivered-ad-media{aspect-ratio:var(--banner-aspect,728/180);height:auto;max-height:360px;object-fit:contain;background:#17243a}
 
 .job-flyer-drop{padding:22px;border:2px dashed var(--hub-line);border-radius:12px;background:var(--hub-soft);outline-offset:4px}.job-flyer-drop:focus-visible,.job-flyer-drop[data-drag=true]{border-color:var(--hub-sea);outline:2px solid var(--hub-sea)}.job-flyer-preview{display:block;max-width:100%;max-height:440px;object-fit:contain;margin:16px auto}.job-flyer-image{display:block;padding:10px;background:var(--hub-soft);border:1px solid var(--hub-line);border-radius:10px;margin:16px 0}.job-flyer-image img{display:block;width:100%;max-height:480px;object-fit:contain}.job-flyer-image--full img{max-height:none}.job-flyer-share{padding-top:12px;border-top:1px solid var(--hub-line);margin-top:18px}.job-share-result{overflow-wrap:anywhere}
+
+.job-flyer-drop textarea{min-height:64px;margin:8px 0}
