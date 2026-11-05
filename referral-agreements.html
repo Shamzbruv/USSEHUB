@@ -4,12 +4,12 @@
     <script src="assets/usse-theme.js?v=20261026"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="robots" content="noindex,nofollow" />
+    <meta name="robots" content="noindex,nofollow">
     <meta name="referrer" content="no-referrer" />
     <title>Referral Agreements — USSE Admin</title>
     <link rel="icon" href="usse%20favicon.png" />
     <link rel="stylesheet" href="assets/usse-referrals.css" />
-  <link rel="stylesheet" href="assets/usse-design.css?v=20261101-identity">
+  <link rel="stylesheet" href="assets/usse-design.css?v=20261105-seo-mobile">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
 <script defer src="assets/usse-workspace.js?v=20261102-market"></script>
 <link rel="manifest" href="admin-app.webmanifest">
@@ -23,7 +23,7 @@
   <body class="hub-admin" data-hub-page="referral-agreements">
     <header>
       <div class="brand">
-        <img class="hub-identity-logo" src="usse.png" alt="USSE" />
+        <img class="hub-identity-logo" src="assets/seo/usse-logo-256.webp" alt="USSE" />
         <div>
           <strong>USSE Partner Programme</strong
           ><small>Referral agreements &amp; commissions</small>
@@ -117,7 +117,7 @@
             These details are copied into new agreements. Issued and signed
             agreements retain their original details.
           </p>
-          <form id="settings-form" class="grid">
+          <form data-nosnippet id="settings-form" class="grid">
             <div>
               <label for="company-name">Contracting company name</label
               ><input
@@ -177,7 +177,7 @@
         </section>
       </div>
     </main>
-    <dialog id="editor">
+    <dialog data-nosnippet id="editor">
       <div class="head">
         <h2 id="editor-title">New referral agreement</h2>
         <button
@@ -188,7 +188,7 @@
           Close
         </button>
       </div>
-      <form id="agreement-form" class="grid">
+      <form data-nosnippet id="agreement-form" class="grid">
         <input id="agreement-id" type="hidden" />
         <div>
           <label for="partner-name">Partner’s full name</label
@@ -312,7 +312,7 @@
       </form>
       <p id="editor-error" role="alert"></p>
     </dialog>
-    <dialog id="viewer">
+    <dialog data-nosnippet id="viewer">
       <div class="head no-print">
         <h2>Agreement</h2>
         <div class="actions">
@@ -324,7 +324,7 @@
       <div id="agreement-document" class="document"></div>
       <div id="agreement-audit" class="no-print"></div>
     </dialog>
-    <dialog id="link-dialog">
+    <dialog data-nosnippet id="link-dialog">
       <div class="head">
         <h2>Partner signing link</h2>
         <button data-close="link-dialog">Close</button>
@@ -350,12 +350,12 @@
         and invalidates the old link.
       </p>
     </dialog>
-    <dialog id="referral-editor">
+    <dialog data-nosnippet id="referral-editor">
       <div class="head">
         <h2>Register referral</h2>
         <button data-close="referral-editor">Close</button>
       </div>
-      <form id="referral-form" class="grid">
+      <form data-nosnippet id="referral-form" class="grid">
         <input type="hidden" id="referral-id" />
         <div class="full">
           <label for="referral-agreement">Signed partner agreement</label

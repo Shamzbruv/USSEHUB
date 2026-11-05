@@ -9,5 +9,5 @@ export async function validateFlyer(file){
  if(!format||file.type&&!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('Use a JPG, PNG or WebP picture of the vacancy flyer.');
  return {...format,size:file.size};
 }
-export function sharedVacancyLink(origin,id){const url=new URL('/ajm-jobzone',origin);url.searchParams.set('job',id);return url.href;}
+export function sharedVacancyLink(origin,id){return new URL('/jobs/'+encodeURIComponent(id),origin).href;}
 export function flyerImageMarkup(job,escape,{detail=false}={}){return job.flyer_url?`<a class="job-flyer-image ${detail?'job-flyer-image--full':''}" href="${escape(job.flyer_url)}" target="_blank" rel="noopener noreferrer" aria-label="Open vacancy flyer for ${escape(job.title)}"><img data-flyer-image="${escape(job.id)}" src="${escape(job.flyer_url)}" alt="Vacancy flyer: ${escape(job.title)} at ${escape(job.company_name)}. Open the image to read the full advert." loading="lazy"></a>`:job.post_kind==='flyer'?'<p class="market-note">The flyer preview is unavailable. Refresh this page to try again, or use the advertiser’s details below.</p>':'';}

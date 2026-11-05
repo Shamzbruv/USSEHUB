@@ -1,3 +1,8 @@
 User-agent: *
 Allow: /
-Sitemap: https://www.usse-hub.com/sitemap.xml
+Disallow: /node_modules/
+Disallow: /server/
+Disallow: /scripts/
+Disallow: /tests/
+Disallow: /supabase/
+Sitemap: https://ussehub.com/sitemap.xml

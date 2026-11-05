@@ -1,0 +1,1 @@
+export function jobPath(job){const slug=String(job.title||'vacancy').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,72).replace(/-$/,'')||'vacancy';return '/jobs/'+encodeURIComponent(job.id)+'/'+slug;}

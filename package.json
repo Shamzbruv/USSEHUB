@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "npm run validate && npm run test:text && npm run test:renewal && npm run test:auth && npm run test:leads && npm run test:app && npm run test:marketplace && npm run test:emails && npm run test:referrals && npm run test:routing",
+    "test": "npm run validate && npm run test:text && npm run test:renewal && npm run test:auth && npm run test:leads && npm run test:app && npm run test:marketplace && npm run test:emails && npm run test:referrals && npm run test:routing && npm run test:seo",
     "test:rls": "node test-rls.mjs",
     "test:commerce": "node test-advertising-workflow.mjs",
     "test:routing": "node test-routing.mjs",
     "validate": "node --experimental-vm-modules validate-static.mjs",
     "lint": "npm run validate",
-    "start": "serve -l tcp://0.0.0.0:${PORT:-3000} .",
+    "start": "node server.mjs",
     "test:referrals": "node tests/referral-agreements.test.mjs",
     "test:text": "node tests/text-contrast.test.mjs",
     "test:renewal": "node tests/listing-renewal.test.mjs",
@@ -21,7 +21,8 @@
     "deploy:leads": "node scripts/deploy-leads.mjs",
     "test:app": "node tests/admin-app.test.mjs",
     "deploy:app": "node scripts/deploy-admin-app.mjs",
-    "test:marketplace": "node tests/marketplace-jobzone.test.mjs && node tests/jobzone-documents.test.mjs && node tests/jobzone-flyers.test.mjs"
+    "test:marketplace": "node tests/marketplace-jobzone.test.mjs && node tests/jobzone-documents.test.mjs && node tests/jobzone-flyers.test.mjs",
+    "test:seo": "node tests/seo.test.mjs"
   },
   "keywords": [],
   "author": "",
@@ -31,10 +32,15 @@
     "@supabase/supabase-js": "^2.108.2",
     "pg": "^8.21.0",
     "serve": "^14.2.6",
+    "serve-handler": "6.1.7",
     "ws": "^8.21.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14",
     "web-push": "3.6.7"
-  }
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "packageManager": "npm@10.9.3"
 }

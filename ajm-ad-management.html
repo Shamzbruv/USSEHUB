@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Advertising Management — AJM Admin</title>
-    <meta name="robots" content="noindex,nofollow" />
+    <meta name="robots" content="noindex,nofollow">
     <link rel="icon" href="aloe%20favicon.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -303,7 +303,7 @@
             .brand small, #admin-email { display: none; }
         }
     </style>
-<link rel="stylesheet" href="assets/usse-design.css?v=20261101-identity">
+<link rel="stylesheet" href="assets/usse-design.css?v=20261105-seo-mobile">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
 <script defer src="assets/usse-workspace.js?v=20261102-market"></script>
 <link rel="manifest" href="admin-app.webmanifest">
@@ -459,7 +459,7 @@
     </main>
 
     <div class="modal-backdrop" id="package-modal" role="dialog" aria-modal="true" aria-labelledby="package-modal-title">
-        <form class="modal wide" id="package-form">
+        <form data-nosnippet class="modal wide" id="package-form">
             <div class="modal-head"><div><h2 id="package-modal-title">Add advertising package</h2><p>Set the public price, duration, product type, eligible placements and payment destination.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
             <div class="modal-body"><div class="notice" id="package-form-notice"></div><input id="package-id" type="hidden" /><div class="form-grid">
                 <div class="field"><label for="package-name">Package name *</label><input id="package-name" required maxlength="120" /></div>
@@ -481,7 +481,7 @@
     </div>
 
     <div class="modal-backdrop" id="option-modal" role="dialog" aria-modal="true" aria-labelledby="option-modal-title">
-        <form class="modal" id="option-form">
+        <form data-nosnippet class="modal" id="option-form">
             <div class="modal-head"><div><h2 id="option-modal-title">Add package option</h2><p>Offer optional upgrades, longer durations or extra placements.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
             <div class="modal-body"><div class="notice" id="option-form-notice"></div><input id="option-id" type="hidden" /><input id="option-package-id" type="hidden" /><div class="form-grid">
                 <div class="field"><label for="option-name">Option name *</label><input id="option-name" required maxlength="120" /></div>
@@ -499,7 +499,7 @@
     </div>
 
     <div class="modal-backdrop" id="bank-modal" role="dialog" aria-modal="true" aria-labelledby="bank-modal-title">
-        <form class="modal" id="bank-form">
+        <form data-nosnippet class="modal" id="bank-form">
             <div class="modal-head"><div><h2 id="bank-modal-title">Add bank-transfer payment destination</h2><p>Authorized admins manage these details; the ordering customer receives the selected snapshot only after creating an order.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
             <div class="modal-body"><div class="notice show"><strong>Do not enter banking credentials.</strong> This form is only for information needed to send a transfer. Never enter an online-banking login or username, password, PIN, one-time code, card number or card security code.</div><div class="notice" id="bank-form-notice"></div><input id="bank-id" type="hidden" /><div class="form-grid">
                 <div class="field"><label for="bank-label">Internal label *</label><input id="bank-label" required maxlength="120" placeholder="JMD business account" /></div>
@@ -529,7 +529,7 @@
     </div>
 
     <div class="modal-backdrop" id="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
-        <form class="modal" id="confirm-form">
+        <form data-nosnippet class="modal" id="confirm-form">
             <div class="modal-head"><div><h2 id="confirm-title">Confirm action</h2><p>Administrative changes are written to the audit trail.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
             <div class="modal-body"><div class="danger-copy" id="confirm-copy"></div><div class="form-grid" style="margin-top:15px;">
                 <div class="field full" id="confirm-reason-field"><label for="confirm-reason">Reason *</label><input id="confirm-reason" maxlength="500" /></div>
