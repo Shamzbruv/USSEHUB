@@ -252,15 +252,15 @@
         .notice.error { color: var(--hub-danger); border-color: rgba(255,93,112,.32); background: rgba(255,93,112,.08); }
         .notice.success { color: var(--hub-positive); border-color: rgba(45,214,164,.3); background: rgba(45,214,164,.08); }
 
-        .modal-backdrop { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; padding: 22px; background: rgba(0,0,0,.76); backdrop-filter: blur(10px); }
+        .modal-backdrop { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,.76); backdrop-filter: blur(10px); }
         .modal-backdrop.open { display: flex; }
-        .modal { width: min(720px, 100%); max-height: min(90vh, 900px); overflow-y: auto; border: 1px solid rgba(255,255,255,.13); border-radius: 22px; background: #090e17; box-shadow: var(--shadow); }
+        .modal { display:flex; flex-direction:column; min-width:0; width: min(720px, 100%); max-height: min(calc(100dvh - 32px), 900px); overflow:hidden; border: 1px solid rgba(255,255,255,.13); border-radius: 22px; background: #090e17; box-shadow: var(--shadow); }
         .modal.wide { width: min(940px, 100%); }
-        .modal-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 20px 22px; border-bottom: 1px solid var(--line); background: rgba(9,14,23,.96); backdrop-filter: blur(16px); }
+        .modal-head { position: relative; flex-shrink:0; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 20px 22px; border-bottom: 1px solid var(--line); background: rgba(9,14,23,.96); backdrop-filter: blur(16px); }
         .modal-head h2 { margin-bottom: 4px; font-size: 1.18rem; }
         .modal-head p { margin: 0; color: var(--muted); font-size: .8125rem; }
-        .modal-body { padding: 22px; }
-        .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 17px 22px; border-top: 1px solid var(--line); }
+        .modal-body { padding: 22px; min-height:0; overflow-y:auto; overscroll-behavior:contain; }
+        .modal-foot { flex-shrink:0; background:var(--hub-card); display: flex; justify-content: flex-end; gap: 8px; padding: 17px 22px; border-top: 1px solid var(--line); }
         .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
         .field.full { grid-column: 1 / -1; }
         .check-row { display: flex; align-items: center; gap: 9px; min-height: 42px; }
@@ -273,7 +273,7 @@
         .proof-link { display: inline-flex; margin-top: 12px; color: var(--blue); font-size: .8125rem; }
         .danger-copy { padding: 12px; color: var(--hub-danger); border: 1px solid rgba(255,93,112,.24); border-radius: 11px; background: rgba(255,93,112,.07); font-size: .8125rem; line-height: 1.55; }
 
-        .toast-stack { position: fixed; right: 20px; bottom: 20px; z-index: 180; display: grid; gap: 8px; width: min(390px, calc(100% - 40px)); }
+        .toast-stack { position: fixed; right: 20px; bottom: 20px; z-index: 1100; display: grid; gap: 8px; width: min(390px, calc(100% - 40px)); }
         .toast { padding: 13px 15px; border: 1px solid var(--line); border-radius: 12px; background: #111824; box-shadow: 0 18px 45px rgba(0,0,0,.34); font-size: .8125rem; animation: toastIn .2s ease; }
         .toast.success { border-color: rgba(45,214,164,.35); }
         .toast.error { border-color: rgba(255,93,112,.4); }
@@ -302,6 +302,16 @@
             .kpi-grid { grid-template-columns: 1fr; }
             .brand small, #admin-email { display: none; }
         }
+        .banner-planner{padding:24px;border:1px solid var(--hub-line);border-radius:14px;background:var(--hub-card);max-width:1050px}
+        .banner-planner .planner-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:20px 0}
+        .banner-position-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;border:0;padding:0;margin:12px 0 20px;min-width:0}
+        .banner-position-grid legend{font-weight:700;margin-bottom:12px}.banner-position-choice{display:grid;gap:10px;padding:16px;border:1px solid var(--hub-line);border-radius:12px;cursor:pointer;color:var(--hub-ink)}
+        .banner-position-choice:has(input:checked){border:2px solid var(--hub-sea);background:var(--hub-soft)}.banner-position-choice input{width:18px;height:18px;min-height:0;margin:0}.banner-position-choice span{font-size:12px;color:var(--hub-muted)}
+        .banner-position-sketch{position:relative;height:84px;border:1px solid var(--hub-line);border-radius:6px;background:repeating-linear-gradient(0deg,var(--hub-soft) 0 12px,var(--hub-line) 12px 13px)}
+        .banner-position-sketch::after{content:'';position:absolute;background:var(--hub-sea);border-radius:3px}.banner-position-sketch[data-position=top]::after{inset:6px 6px auto;height:13px}.banner-position-sketch[data-position=bottom]::after{inset:auto 6px 6px;height:13px}.banner-position-sketch[data-position=left]::after{inset:6px auto 6px 6px;width:16px}.banner-position-sketch[data-position=right]::after{inset:6px 6px 6px auto;width:16px}
+        #banner-placement-summary{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.banner-placement-chip{padding:6px 10px;border-radius:8px;background:var(--hub-soft);color:var(--hub-ink);font-size:12px}.banner-position-fields{border:1px solid var(--hub-line);border-radius:12px;padding:16px;background:var(--hub-soft)}
+        .banner-position-fields .market-actions{display:grid;grid-template-columns:1fr 1fr auto;gap:12px}.banner-position-fields details{margin-top:12px}.banner-position-fields details input{margin-top:8px}.banner-package-note{padding:16px;background:var(--hub-soft);border-radius:12px}
+        @media(max-width:760px){.banner-planner{padding:18px}.banner-planner .planner-fields{grid-template-columns:1fr}.banner-position-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.banner-position-fields .market-actions{grid-template-columns:1fr}.modal-backdrop{padding:8px}.modal{max-height:calc(100dvh - 16px);border-radius:14px}.modal-head,.modal-body,.modal-foot{padding:16px}.modal-head p{font-size:12px}.modal-foot .btn{min-height:44px}}
     </style>
 <link rel="stylesheet" href="assets/usse-design.css?v=20261105-seo-mobile">
 <link rel="stylesheet" href="assets/usse-theme.css?v=20261026">
@@ -313,7 +323,7 @@
 <link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/usse-admin-app.css?v=20261101-app">
 <script type="module" src="assets/usse-admin-app.mjs?v=20261101-app2"></script>
-<link rel="stylesheet" href="assets/usse-market.css?v=20261102"><script type="module" src="assets/usse-banner-checkout.mjs?v=20261102"></script></head>
+<link rel="stylesheet" href="assets/usse-market.css?v=20261102"><script type="module" src="assets/usse-banner-checkout.mjs?v=20261110-placements"></script></head>
 <body class="hub-admin" data-hub-page="ajm-ad-management">
     <header class="topbar">
         <nav class="nav" aria-label="Admin navigation">
@@ -404,6 +414,7 @@
             <div class="tabs" role="tablist" aria-label="Advertising management areas">
                 <button class="tab active" type="button" role="tab" data-panel="overview">Overview</button>
                 <button class="tab" type="button" role="tab" data-panel="banks">Accounts Receivable &amp; payment destinations</button>
+                <button class="tab" type="button" role="tab" data-panel="placements">Banner positions</button>
                 <button class="tab" type="button" role="tab" data-panel="packages">Packages, prices &amp; options</button>
                 <button class="tab" type="button" role="tab" data-panel="payments">Payment queue <span class="tab-count" id="payment-tab-count">0</span></button>
                 <button class="tab" type="button" role="tab" data-panel="ads">Active ads</button>
@@ -443,12 +454,21 @@
                 <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Advertisement</th><th>Customer / package</th><th>Placements</th><th>Delivery</th><th>Run dates</th><th>Status</th><th>Actions</th></tr></thead><tbody id="ads-body"><tr class="empty-row"><td colspan="7">Loading advertisements…</td></tr></tbody></table></div></div>
             </section>
 
+            <section class="panel" id="panel-placements" role="tabpanel">
+                <div class="panel-toolbar"><div><h2>Banner positions</h2><p>Choose the page and exact advertising space, then review and save the package.</p></div></div>
+                <form id="banner-placement-planner" class="banner-planner">
+                    <p>These controls configure dedicated display-ad campaigns. Silver, Gold and Platinum business webpage promotions use automatic network placement.</p>
+                    <div class="planner-fields"><div class="field"><label for="banner-planner-package">1. Display-ad package</label><select id="banner-planner-package"><option value="">Create a new display-ad package</option></select></div><div class="field"><label for="banner-planner-page">2. Website page</label><select id="banner-planner-page"></select></div></div>
+                    <fieldset class="banner-position-grid"><legend>3. Position on that page</legend><label class="banner-position-choice"><input type="radio" name="position" value="top" ><div class="banner-position-sketch" data-position="top" aria-hidden="true"></div><strong>Top of page</strong><span>Wide banner above the content</span></label><label class="banner-position-choice"><input type="radio" name="position" value="bottom" ><div class="banner-position-sketch" data-position="bottom" aria-hidden="true"></div><strong>Bottom of page</strong><span>Wide banner after the content</span></label><label class="banner-position-choice"><input type="radio" name="position" value="left" ><div class="banner-position-sketch" data-position="left" aria-hidden="true"></div><strong>Left rail</strong><span>Vertical banner beside the content</span></label><label class="banner-position-choice"><input type="radio" name="position" value="right" checked><div class="banner-position-sketch" data-position="right" aria-hidden="true"></div><strong>Right rail</strong><span>Vertical banner beside the content</span></label></fieldset><p id="banner-planner-summary" role="status"></p><button class="btn btn-primary" type="submit">Review package with this position →</button><p class="help" style="margin-top:14px;">No changes go live until you save. Package positions apply to new campaign orders; existing approved campaigns keep their purchased positions. Keep a small number of placements active to avoid crowding. On smaller screens, rail adverts move into the page flow.</p><div class="notice" id="banner-planner-notice" role="status"></div>
+                </form>
+            </section>
+
             <section class="panel" id="panel-packages" role="tabpanel">
                 <div class="panel-toolbar">
                     <div><h2>Packages, prices, durations and optional upgrades</h2><p>Edit a package to set its payment destination. Add package options for extra duration, placements, features or price adjustments. Changes flow into the public catalogue without editing the website.</p></div>
                     <div class="toolbar-actions"><button class="btn btn-primary" type="button" id="new-package">＋ Add package</button></div>
                 </div>
-                <div class="notice show" id="banner-position-guide"><strong>Choose banner pages and positions</strong><p>Edit a <strong>Display advertisement</strong> package below. In <strong>Banner placements</strong>, choose the page and Top, Bottom, Left rail or Right rail, click <strong>Add placement</strong>, then save the package.</p><p>Use a small number of positions to keep the site uncluttered. These settings define placements for new campaign orders; existing approved campaigns retain their purchased placements. Webpage-builder promotions use automatic network placement separately.</p></div>
+                <div class="notice show" id="banner-position-guide"><strong>Choose banner pages and positions</strong><p><button class="btn btn-blue" type="button" data-open-panel="placements">Open Banner positions →</button></p><p>Edit a <strong>Display advertisement</strong> package below. In <strong>Banner placements</strong>, choose the page and Top, Bottom, Left rail or Right rail, click <strong>Add placement</strong>, then save the package.</p><p>Use a small number of positions to keep the site uncluttered. These settings define placements for new campaign orders; existing approved campaigns retain their purchased placements. Webpage-builder promotions use automatic network placement separately.</p></div>
                 <div class="notice" id="packages-notice"></div>
                 <div class="package-grid" id="package-grid"><div class="state-card" style="grid-column:1/-1;margin:0;">Loading package catalogue…</div></div>
             </section>
@@ -467,7 +487,7 @@
     <div class="modal-backdrop" id="package-modal" role="dialog" aria-modal="true" aria-labelledby="package-modal-title">
         <form data-nosnippet class="modal wide" id="package-form">
             <div class="modal-head"><div><h2 id="package-modal-title">Add advertising package</h2><p>Set the public price, duration, product type, eligible placements and payment destination.</p></div><button class="btn icon-btn modal-close" type="button" aria-label="Close">×</button></div>
-            <div class="modal-body"><div class="notice" id="package-form-notice"></div><input id="package-id" type="hidden" /><div class="form-grid">
+            <div class="modal-body"><div class="notice" id="package-form-notice"></div><input id="package-id" type="hidden" /><div class="form-grid"><div class="field full banner-position-fields" id="banner-position-fields"><h3>Banner page and position</h3><div class="market-actions"><label for="banner-package-page">Website page<select id="banner-package-page" aria-label="Banner page"></select></label><label for="banner-package-position">Position on that page<select id="banner-package-position" aria-label="Banner position"></select></label><button type="button" id="banner-add-placement">Add position</button></div><div id="banner-placement-summary" role="status"></div><small>Top and bottom suit wide artwork. Left and right rails suit vertical artwork.</small></div><div class="field full banner-package-note" id="webpage-placement-note" hidden><strong>This is a business webpage package.</strong><p>Its promotion uses automatic network placement. To configure top, bottom or side banners, use a Display advertisement package from Banner positions.</p></div><div class="field full"><details><summary>Advanced placement keys</summary><label for="package-placements">Saved placement keys</label><input id="package-placements" placeholder="home-top, hub-right" /></details></div>
                 <div class="field"><label for="package-name">Package name *</label><input id="package-name" required maxlength="120" /></div>
                 <div class="field"><label for="package-code">Unique code *</label><input id="package-code" required maxlength="80" pattern="[a-z0-9-]+" placeholder="homepage-banner" /></div>
                 <div class="field full"><label for="package-description">Customer-facing description</label><textarea id="package-description" maxlength="1000"></textarea></div>
@@ -477,7 +497,7 @@
                 <div class="field"><label for="package-currency">Currency *</label><select id="package-currency"><option value="JMD">JMD</option><option value="USD">USD</option></select></div>
                 <div class="field"><label for="package-duration">Base duration in days *</label><input id="package-duration" type="number" min="1" max="3650" required /></div>
                 <div class="field"><label for="package-sort">Display order</label><input id="package-sort" type="number" min="0" step="1" value="0" /></div>
-                <div class="field full"><label for="package-placements">Banner placements <small>Choose the page and position below</small></label><input id="package-placements" placeholder="home-top, hub-right" /><small>Use the placement picker below or retain existing placement keys.</small><div class="market-actions" style="align-items:end;"><label for="banner-package-page">Website page<select id="banner-package-page" aria-label="Banner page"></select></label><label for="banner-package-position">Position on that page<select id="banner-package-position" aria-label="Banner position"></select></label><button type="button" id="banner-add-placement">Add placement</button></div><small>Top/bottom placements suit wide banners. Left/right rails suit vertical artwork. Mobile rails move into the page flow.</small></div>
+
                 <div class="field full"><label for="package-features">Features <small>One customer-facing feature per line</small></label><textarea id="package-features"></textarea></div>
                 <div class="field"><label for="package-bank">Accounts Receivable destination *</label><select id="package-bank"><option value="">Use the active default destination</option></select></div>
                 <div class="field"><div class="check-row"><input id="package-active" type="checkbox" checked /><label for="package-active">Package is available for purchase</label></div></div>
@@ -551,7 +571,8 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         import {advertisingPeriod, createAdvertisingReportLoader} from './assets/usse-ad-reporting.mjs?v=20261110';
-        import {placementLabel} from './assets/usse-banner-core.mjs';
+        import {placementLabel, BANNER_PAGES, BANNER_POSITIONS} from './assets/usse-banner-core.mjs';
+        import {bannerPlacementDraft} from './assets/usse-banner-placement-core.mjs?v=20261110';
 
         const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
@@ -617,15 +638,28 @@
             node.className = `notice${message ? ' show' : ''}${type !== 'info' ? ` ${type}` : ''}`;
         }
 
+        const modalReturnFocus = new Map();
+        let modalOriginalOverflow = '';
         function openModal(id) {
-            el(id)?.classList.add('open');
+            const modal = el(id);
+            if (!modal) return;
+            if (!document.querySelector('.modal-backdrop.open')) modalOriginalOverflow = document.body.style.overflow;
+            modalReturnFocus.set(modal, document.activeElement);
+            modal.classList.add('open');
             document.body.style.overflow = 'hidden';
+            const body = modal.querySelector('.modal-body');
+            if (body) body.scrollTop = 0;
+            modal.querySelector('.modal-close, button, input, select')?.focus({preventScroll:true});
         }
 
         function closeModal(target) {
             const modal = typeof target === 'string' ? el(target) : target?.closest('.modal-backdrop');
-            modal?.classList.remove('open');
-            if (!document.querySelector('.modal-backdrop.open')) document.body.style.overflow = '';
+            if (!modal) return;
+            modal.classList.remove('open');
+            if (!document.querySelector('.modal-backdrop.open')) document.body.style.overflow = modalOriginalOverflow;
+            const previous = modalReturnFocus.get(modal);
+            if (previous?.isConnected) previous.focus({preventScroll:true});
+            modalReturnFocus.delete(modal);
         }
 
         async function adminCommand(action, payload = {}) {
@@ -734,6 +768,7 @@
             renderOrders();
             renderAdvertisements();
             renderPackages();
+            renderBannerPlanner();
             renderAccounts();
             renderAnalytics();
             populateAccountSelect();
@@ -1035,6 +1070,34 @@
             }).join('');
         }
 
+        function renderBannerPlanner() {
+            const select = el('banner-planner-package'), selected = select.value;
+            select.innerHTML = '<option value="">Create a new display-ad package</option>' + state.packages.filter(pkg => pkg.product_type === 'display_ad').map(pkg => `<option value="${safe(pkg.id)}">${safe(pkg.name)}${pkg.is_active === false ? ' (archived)' : ''}</option>`).join('');
+            if ([...select.options].some(option => option.value === selected)) select.value = selected;
+            updateBannerPlannerSummary();
+        }
+        function updateBannerPlannerSummary() {
+            const page = el('banner-planner-page').value;
+            const position = el('banner-placement-planner').elements.position.value;
+            el('banner-planner-summary').textContent = (BANNER_PAGES[page] || 'Choose a page') + ' · ' + (BANNER_POSITIONS[position] || 'Choose a position');
+        }
+        function prepareBannerPlacement(event) {
+            event.preventDefault();
+            try {
+                const id = el('banner-planner-package').value;
+                const pkg = id ? state.packages.find(item => item.id === id) : null;
+                if (id && !pkg) throw new Error('Refresh the package list and choose a display-ad package.');
+                const page = el('banner-planner-page').value, position = el('banner-placement-planner').elements.position.value;
+                const placements = bannerPlacementDraft(pkg, page, position);
+                openPackageForm(pkg);
+                el('package-placements').value = placements.join(', ');
+                el('banner-package-page').value = page;
+                el('banner-package-position').value = position;
+                document.dispatchEvent(new Event('usse:package-form-open'));
+                showNotice('package-form-notice', 'Position added to this draft. Review the package details and select Save package to apply it.');
+            } catch (error) { showNotice('banner-planner-notice', error.message, 'error'); }
+        }
+
         function populateAccountSelect(selectedValue = null) {
             const select = el('package-bank');
             const current = selectedValue ?? select.value;
@@ -1078,6 +1141,7 @@
             el('package-bank').value = pkg?.payment_account_id || '';
             el('package-active').checked = pkg?.is_active !== false;
             openModal('package-modal');
+            document.dispatchEvent(new Event('usse:package-form-open'));
         }
 
         function openOptionForm(packageId, option = null) {
@@ -1378,7 +1442,7 @@
         }
 
         function activatePanel(requestedPanel, updateHash = true) {
-            const allowed = new Set(['overview', 'banks', 'packages', 'payments', 'ads']);
+            const allowed = new Set(['overview', 'banks', 'placements', 'packages', 'payments', 'ads']);
             const panelName = allowed.has(requestedPanel) ? requestedPanel : 'overview';
             document.querySelectorAll('.tab').forEach((item) => {
                 const active = item.dataset.panel === panelName;
@@ -1393,7 +1457,17 @@
         window.addEventListener('hashchange', () => activatePanel(location.hash.slice(1), false));
         document.querySelectorAll('.modal-close').forEach((button) => button.addEventListener('click', () => closeModal(button)));
         document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.addEventListener('click', (event) => { if (event.target === backdrop) closeModal(backdrop); }));
-        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') document.querySelectorAll('.modal-backdrop.open').forEach((modal) => closeModal(modal)); });
+        document.addEventListener('keydown', (event) => {
+            const modal = [...document.querySelectorAll('.modal-backdrop.open')].at(-1);
+            if (!modal) return;
+            if (event.key === 'Escape') { event.preventDefault(); closeModal(modal); return; }
+            if (event.key !== 'Tab') return;
+            const controls = [...modal.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]')].filter(node => node.offsetParent !== null);
+            if (!controls.length) return;
+            const first = controls[0], last = controls.at(-1);
+            if (event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
+        });
         document.addEventListener('click', async (event) => {
             const button = event.target.closest('button');
             if (!button) return;
@@ -1443,6 +1517,10 @@
         el('order-search').addEventListener('input', renderOrders);
         el('ad-search').addEventListener('input', renderAdvertisements);
         el('ad-status').addEventListener('change', renderAdvertisements);
+        for (const [key,label] of Object.entries(BANNER_PAGES)) el('banner-planner-page').append(new Option(label,key));
+        el('banner-planner-page').value = 'hub';
+        el('banner-placement-planner').addEventListener('submit', prepareBannerPlacement);
+        el('banner-placement-planner').addEventListener('change', updateBannerPlannerSummary);
         el('new-package').addEventListener('click', () => openPackageForm());
         el('new-bank').addEventListener('click', () => openBankForm());
         el('package-form').addEventListener('submit', savePackage);
