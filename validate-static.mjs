@@ -102,8 +102,9 @@ for (const category of [
 assert(!hub.includes('data-category="jobs"'), 'Hub still presents Jobs & Careers as a current 2026 category.');
 
 const manager = fs.readFileSync('ajm-ad-management.html', 'utf8');
+const reporting = fs.readFileSync('assets/usse-ad-reporting.mjs', 'utf8');
 for (const rpc of ['admin_get_ad_configuration', 'admin_get_ad_orders', 'admin_manage_advertising', 'get_admin_advertising_analytics']) {
-    assert(manager.includes(rpc), `Dedicated admin manager does not call ${rpc}.`);
+    assert((manager + reporting).includes(rpc), `Dedicated admin manager does not call ${rpc}.`);
 }
 
 const adminPanel = fs.readFileSync('ajm-admin-panel.html', 'utf8');

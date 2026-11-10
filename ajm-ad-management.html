@@ -361,15 +361,17 @@
                 </div>
                 <div class="head-controls">
                     <select id="analytics-range" aria-label="Analytics range" style="width:auto;min-width:145px;">
+                        <option value="1">Today (UTC)</option>
                         <option value="7">Last 7 days</option>
                         <option value="30" selected>Last 30 days</option>
                         <option value="90">Last 90 days</option>
-                        <option value="365">Last 12 months</option>
+                        <option value="365">Last 365 days</option>
                     </select>
                     <button class="btn btn-blue" id="refresh-btn" type="button">↻ Refresh data</button>
                 </div>
             </div>
 
+            <p id="reporting-period-summary" role="status" style="color:var(--muted);">Loading the reporting period…</p>
             <div class="notice" id="global-notice" role="status"></div>
 
             <section class="setup-guide" aria-labelledby="revenue-setup-title">
@@ -416,7 +418,10 @@
                     <article class="chart-card" id="card-placements"><div class="chart-head"><div><h3>Placement performance</h3><p>Impressions and clicks by site location</p></div></div><div class="chart-wrap"><div class="chart-empty">No placement activity yet.</div><canvas id="chart-placements"></canvas></div></article>
                     <article class="chart-card" id="card-expirations"><div class="chart-head"><div><h3>Upcoming expirations</h3><p>Active campaigns ending over the next eight weeks</p></div></div><div class="chart-wrap"><div class="chart-empty">No upcoming expirations.</div><canvas id="chart-expirations"></canvas></div></article>
                 </div>
-                <div class="panel-toolbar" style="margin-top:22px;"><div><h2>Top advertisements</h2><p>Best-performing creatives in the selected reporting window.</p></div></div>
+                <div class="panel-toolbar" style="margin-top:22px;align-items:flex-start;">
+                    <div><h2>Top advertisements</h2><p>Sponsored webpage promotions and web-banner campaigns in the selected period.</p><p id="top-ads-period" role="status" style="margin-top:10px;font-weight:700;color:var(--hub-ink);">Loading the reporting period…</p><p id="top-ads-updated" style="margin-top:4px;"></p><p style="margin-top:4px;">Reporting uses UTC calendar days; the current day includes activity recorded so far.</p></div>
+                    <div class="toolbar-actions"><label for="top-ads-range">Report period<select id="top-ads-range" style="display:block;margin-top:6px;"><option value="1">Today (UTC)</option><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 365 days</option></select></label></div>
+                </div>
                 <div class="table-card"><div class="table-scroll"><table><thead><tr><th>Advertisement</th><th>Placement</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Leads</th></tr></thead><tbody id="top-ads-body"><tr class="empty-row"><td colspan="6">Loading performance data…</td></tr></tbody></table></div></div>
             </section>
 
@@ -544,6 +549,8 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        import {advertisingPeriod, createAdvertisingReportLoader} from './assets/usse-ad-reporting.mjs?v=20261110';
+        import {placementLabel} from './assets/usse-banner-core.mjs';
 
         const SUPABASE_URL = 'https://zcptuqrlovflcpqszery.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjcHR1cXJsb3ZmbGNwcXN6ZXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDMxMzcsImV4cCI6MjA5NTU3OTEzN30.kl9BwGqwWEVWYtxYWrG7xigK_EOGZxLQBNbZZp7tfPw';
@@ -663,19 +670,21 @@
         }
 
         async function refreshAll() {
-            if (state.loading) return;
+            if (state.loading || reportingBusy) return;
             state.loading = true;
+            setReportingBusy(true);
             el('refresh-btn').disabled = true;
             el('refresh-btn').textContent = 'Refreshing…';
             showNotice('global-notice', 'Refreshing the advertising workspace…');
             try {
-                const tasks = await Promise.allSettled([loadConfiguration(), loadOrders(), loadAdvertisements(), loadAnalytics()]);
+                const tasks = await Promise.allSettled([loadConfiguration(), loadOrders(), loadAnalytics()]);
                 const failures = tasks.filter((item) => item.status === 'rejected').map((item) => item.reason?.message || 'Unknown data error');
                 renderAll();
                 if (failures.length) showNotice('global-notice', `Some advertising data could not be loaded: ${[...new Set(failures)].join(' · ')}`, 'error');
                 else showNotice('global-notice', '');
             } finally {
                 state.loading = false;
+                setReportingBusy(false);
                 el('refresh-btn').disabled = false;
                 el('refresh-btn').textContent = '↻ Refresh data';
             }
@@ -697,18 +706,26 @@
             state.orders = Array.isArray(data) ? data : (data?.orders || data?.data || []);
         }
 
-        async function loadAdvertisements() {
-            const days = Number(el('analytics-range')?.value || 30);
-            const { data, error } = await supabase.rpc('get_admin_advertisement_delivery', { p_days: days });
-            if (error) throw new Error(`Advertisements: ${error.message}`);
-            state.advertisements = Array.isArray(data?.advertisements) ? data.advertisements : [];
+        let reportingBusy = false;
+        const loadReport = createAdvertisingReportLoader({
+            rpc: (name, payload) => supabase.rpc(name, payload),
+            commit: ({analytics, advertisements}) => { state.analytics = analytics; state.advertisements = advertisements; }
+        });
+        function setReportingBusy(busy) {
+            reportingBusy = busy;
+            for (const id of ['analytics-range', 'top-ads-range', 'refresh-btn']) el(id).disabled = busy;
+            el('top-ads-body').setAttribute('aria-busy', String(busy));
         }
-
         async function loadAnalytics() {
-            const days = Number(el('analytics-range')?.value || 30);
-            const { data, error } = await supabase.rpc('get_admin_advertising_analytics', { p_days: days });
-            if (error) throw new Error(`Advertising analytics: ${error.message}`);
-            state.analytics = data || {};
+            await loadReport(Number(el('analytics-range').value || 30));
+        }
+        function renderReportingPeriod() {
+            const period = advertisingPeriod(state.analytics);
+            const label = period?.label || 'Reporting period unavailable — refresh to load the report.';
+            el('reporting-period-summary').textContent = label;
+            el('top-ads-period').textContent = label;
+            el('top-ads-updated').textContent = period?.updated || '';
+            if (period) for (const id of ['analytics-range', 'top-ads-range']) el(id).value = String(period.days);
         }
 
         function renderAll() {
@@ -776,7 +793,7 @@
             el('kpi-ctr').textContent = fmtPercent(ctr);
             el('kpi-expiring').textContent = number(expiring).toLocaleString();
             el('payment-tab-count').textContent = number(queue).toLocaleString();
-            el('kpi-revenue-note').textContent = `Last ${el('analytics-range').value} days`;
+            el('kpi-revenue-note').textContent = advertisingPeriod(state.analytics)?.label || 'Reporting period unavailable';
         }
 
         function orderCustomer(order) {
@@ -971,6 +988,8 @@
         }
 
         function renderAnalytics() {
+            renderReportingPeriod();
+            renderTopAds();
             if (!window.Chart) {
                 showNotice('global-notice', 'Chart.js could not load. Management tables remain available.', 'error');
                 return;
@@ -1000,7 +1019,6 @@
             drawChart('placements', 'card-placements', 'chart-placements', { type: 'bar', data: { labels: placementRows.map((row) => rowLabel(row)), datasets: [{ label: 'Impressions', data: placementRows.map((row) => number(metric(row, 'impressions', 'views'))), backgroundColor: 'rgba(102,168,255,.5)', borderRadius: 5 }, { label: 'Clicks', data: placementRows.map((row) => number(metric(row, 'clicks'))), backgroundColor: 'rgba(45,214,164,.58)', borderRadius: 5 }] }, options: chartBase() }, placementRows.length > 0);
 
             drawChart('expirations', 'card-expirations', 'chart-expirations', { type: 'bar', data: { labels: expirations.map((row) => row.label), datasets: [{ label: 'Expiring ads', data: expirations.map((row) => row.count), backgroundColor: expirations.map((row, index) => index < 2 ? 'rgba(255,93,112,.62)' : 'rgba(255,207,51,.5)'), borderRadius: 5 }] }, options: chartBase() }, expirations.some((row) => row.count));
-            renderTopAds();
         }
 
         function renderTopAds() {
@@ -1012,7 +1030,7 @@
             el('top-ads-body').innerHTML = rows.slice(0, 10).map((row) => {
                 const impressions = number(metric(row, 'impressions', 'views'));
                 const clicks = number(metric(row, 'clicks'));
-                return `<tr><td><span class="cell-title">${safe(first(row.title, row.ad_name, row.headline, 'Advertisement'))}</span><span class="cell-sub">${safe(first(row.business_name, row.advertiser, ''))}</span></td><td>${safe(first(row.placement, (row.placements || []).join(', '), '—'))}</td><td>${impressions.toLocaleString()}</td><td>${clicks.toLocaleString()}</td><td>${fmtPercent(first(row.ctr, impressions ? clicks / impressions * 100 : 0))}</td><td>${number(metric(row, 'leads', 'conversions')).toLocaleString()}</td></tr>`;
+                return `<tr><td><span class="cell-title">${safe(first(row.title, row.ad_name, row.headline, 'Advertisement'))}</span><span class="cell-sub">${safe(first(row.business_name, row.advertiser, ''))}</span></td><td>${safe(row.placement ? placementLabel(row.placement) : (row.placements || []).map(placementLabel).join(', ') || '—')}</td><td>${impressions.toLocaleString()}</td><td>${clicks.toLocaleString()}</td><td>${fmtPercent(first(row.ctr, impressions ? clicks / impressions * 100 : 0))}</td><td>${number(metric(row, 'leads', 'conversions')).toLocaleString()}</td></tr>`;
             }).join('');
         }
 
@@ -1257,7 +1275,7 @@
                 if (pending.kind === 'order') {
                     await adminCommand(pending.action, { order_id: pending.orderId, reason: el('confirm-reason').value.trim() || null, admin_note: el('confirm-note').value.trim() || null, duration_days: pending.action === 'renew_subscription' ? number(el('confirm-duration').value) : null });
                     toast('Advertising order updated and audit entry recorded.', 'success');
-                    await Promise.all([loadOrders(), loadAdvertisements(), loadAnalytics()]);
+                    await Promise.all([loadOrders(), loadAnalytics()]);
                 } else {
                     const crudAction = pending.action === 'default' ? 'set_default' : pending.action;
                     await lowerCrud(pending.entity, crudAction, { id: pending.id, admin_note: el('confirm-note').value.trim() || null });
@@ -1401,16 +1419,25 @@
             if (button.dataset.deleteBank) queueEntityAction('bank', button.dataset.deleteBank, 'delete', 'Delete bank account', true);
         });
         el('refresh-btn').addEventListener('click', refreshAll);
-        el('analytics-range').addEventListener('change', async () => {
+        async function changeReportingRange(event) {
+            if (reportingBusy) return;
+            const days = Number(event.currentTarget.value);
+            for (const id of ['analytics-range', 'top-ads-range']) el(id).value = String(days);
+            setReportingBusy(true);
             try {
-                await Promise.all([loadAdvertisements(), loadAnalytics()]);
+                await loadReport(days);
                 renderAdvertisements();
                 renderKpis();
                 renderAnalytics();
             } catch (error) {
-                toast(error.message, 'error');
+                renderReportingPeriod();
+                toast('The new reporting period could not be loaded. The previous report is still shown. ' + error.message, 'error');
+            } finally {
+                setReportingBusy(false);
             }
-        });
+        }
+        el('analytics-range').addEventListener('change', changeReportingRange);
+        el('top-ads-range').addEventListener('change', changeReportingRange);
         el('order-status').addEventListener('change', async () => { try { await loadOrders(); renderOrders(); renderKpis(); } catch (error) { showNotice('orders-notice', error.message, 'error'); } });
         el('order-search').addEventListener('input', renderOrders);
         el('ad-search').addEventListener('input', renderAdvertisements);

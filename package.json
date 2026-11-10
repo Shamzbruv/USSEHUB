@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "npm run validate && npm run test:text && npm run test:renewal && npm run test:auth && npm run test:leads && npm run test:app && npm run test:marketplace && npm run test:emails && npm run test:referrals && npm run test:routing && npm run test:seo",
+    "test": "npm run validate && npm run test:text && npm run test:renewal && npm run test:auth && npm run test:leads && npm run test:app && npm run test:marketplace && npm run test:emails && npm run test:referrals && npm run test:routing && npm run test:seo && npm run test:reports",
     "test:rls": "node test-rls.mjs",
     "test:commerce": "node test-advertising-workflow.mjs",
     "test:routing": "node test-routing.mjs",
@@ -22,7 +22,8 @@
     "test:app": "node tests/admin-app.test.mjs",
     "deploy:app": "node scripts/deploy-admin-app.mjs",
     "test:marketplace": "node tests/marketplace-jobzone.test.mjs && node tests/jobzone-documents.test.mjs && node tests/jobzone-flyers.test.mjs",
-    "test:seo": "node tests/seo.test.mjs"
+    "test:seo": "node tests/seo.test.mjs",
+    "test:reports": "node tests/ad-reporting.test.mjs"
   },
   "keywords": [],
   "author": "",
