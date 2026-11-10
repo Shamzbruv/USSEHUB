@@ -352,7 +352,7 @@
                         </div>
                         <div class="grid-2">
                             <div class="field">
-                                <label for="promotion-style">Advertisement format</label>
+                                <label for="promotion-style">Advertisement format <small>Appearance only</small></label>
                                 <select id="promotion-style">
                                     <option value="native">Native card — balanced and unobtrusive</option>
                                     <option value="banner">Banner — compact horizontal feature</option>
@@ -365,6 +365,12 @@
                             </div>
                         </div>
                         <div class="segment-note" id="promotion-style-note">Native cards blend into public pages without interrupting visitors.</div>
+                        <div class="segment-note" style="margin-top:12px;">
+                            <strong>Position: automatic network placement.</strong>
+                            <p>This webpage promotion is delivered into available network spaces. Native card, Banner and Spotlight change its appearance; they do not select a page or a left, right, top or bottom position.</p>
+                            <p>Dedicated banner campaigns have separate page and position settings in Advertising &amp; Accounts. A banner campaign needs its own approved package order and artwork.</p>
+                            <a id="promotion-placement-admin" class="btn" href="ajm-ad-management#packages" hidden>Open banner page &amp; position settings →</a>
+                        </div>
                         <div class="grid-2" style="margin-top:18px;">
                             <div class="field"><label for="promotion-headline">Ad headline <small>(uses the business name if blank)</small></label><input id="promotion-headline" type="text" maxlength="120" placeholder="A clear reason to visit your business" /></div>
                             <div class="field"><label for="promotion-cta">Button label</label><input id="promotion-cta" type="text" maxlength="40" value="View business" placeholder="View business" /></div>
@@ -520,7 +526,7 @@
         function updatePromotionNote() {
             const notes = {
                 native: 'Native cards blend into public pages without interrupting visitors.',
-                banner: 'Banners use a compact horizontal layout in available network placements.',
+                banner: 'This format displays the webpage promotion as a compact horizontal network advert. It does not assign a top, bottom, left or right banner position.',
                 spotlight: 'Spotlights are dismissible, delayed and limited to once per advertisement per visitor every seven days.'
             };
             el('promotion-style-note').textContent = notes[el('promotion-style').value] || notes.native;
@@ -617,6 +623,7 @@
             upgrade.classList.add('hidden');
             dashboardLink.href = isAdmin ? 'ajm-admin-panel.html' : 'ajm-advertising-hub.html';
             dashboardLink.textContent = isAdmin ? 'Return to Admin Panel' : 'Return to Advertising Hub';
+            el('promotion-placement-admin').hidden = !isAdmin;
             if (isAdmin && !activeSubscription) {
                 help.textContent = 'Administrator step 1: return to the listing in Admin and activate Silver, Gold or Platinum. You may prepare and save a draft here, but publishing and the public page stay unavailable until a package is active. Step 2: complete the content and publish. Step 3: use View Page.';
             } else if (isAdmin) {
