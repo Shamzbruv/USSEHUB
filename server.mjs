@@ -1,9 +1,10 @@
+import {renderMarketplace,marketplaceImage} from './server/marketplace.mjs';
 import http from 'node:http';import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';import {gzipSync,brotliCompressSync} from 'node:zlib';
 import serveHandler from 'serve-handler';
 import {SUPABASE_URL,SUPABASE_ANON_KEY} from './assets/usse-public-config.mjs';
 import {ORIGIN,esc,jsonLd,active,head,replaceHead,shell,listCard,renderJob,sitemap,breadcrumbs,jobPath,staticPaths} from './server/seo-core.mjs';
 const ROOT=path.dirname(fileURLToPath(import.meta.url)),config=JSON.parse(fs.readFileSync(path.join(ROOT,'serve.json'),'utf8')),uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const privateRoutes=new Set(['admin-app','admin-offline','lead-inbox','master-admin','ajm-admin-panel','ajm-ad-management','ajm-marketplace-admin','ajm-jobzone-admin','ajm-jobzone-employer','ajm-webpage-builder','referral-agreements','sign-referral-agreement']);
+const privateRoutes=new Set(['admin-app','admin-offline','lead-inbox','master-admin','ajm-admin-panel','ajm-ad-management','ajm-marketplace-admin','ajm-marketplace-manage','ajm-jobzone-admin','ajm-jobzone-employer','ajm-webpage-builder','referral-agreements','sign-referral-agreement']);
 export function publicJobClient(fetchImpl=fetch){
  const inFlight=new Map();
  async function rpc(action,payload){const key=JSON.stringify([action,payload]);if(inFlight.has(key))return inFlight.get(key);const promise=(async()=>{const response=await fetchImpl(SUPABASE_URL+'/rest/v1/rpc/jobzone_public',{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_action:action,p_payload:payload}),signal:AbortSignal.timeout(7000)});if(!response.ok)throw new Error('Public vacancy service is unavailable.');const data=await response.json();if(!Array.isArray(data?.rows)||!Number.isFinite(Number(data.total)))throw new Error('Invalid public vacancy response.');return{rows:data.rows.filter(j=>uuid.test(j.id)&&active(j)).map(j=>Object.fromEntries(['id','company_name','title','industry','department','location','employment_type','work_mode','description','requirements','salary_text','closes_at','created_at','updated_at','promoted','application_email','application_url','post_kind','flyer_path','flyer_deadline_known'].filter(k=>j[k]!==undefined).map(k=>[k,j[k]]))),total:Math.max(0,Number(data.total))};})();inFlight.set(key,promise);try{return await promise;}finally{inFlight.delete(key);}}
@@ -23,6 +24,11 @@ export function createSiteServer({jobs=publicJobClient(),fetchImpl=fetch,root=RO
   if(String(req.headers.host||'').toLowerCase().replace(/:\d+$/,'')==='www.ussehub.com')return redirect(req,res,ORIGIN+url.pathname+url.search);
   if(/^\/(?:node_modules|server|scripts|tests|supabase)(?:\/|$)/.test(pathname)||/\.(?:sql|toml|pdf|lock)$/.test(pathname)||/\/(?:package(?:-lock)?\.json|serve\.json|server\.mjs)$/.test(pathname)||/\.mjs$/.test(pathname)&&!pathname.startsWith('/assets/'))return send(req,res,404,'Not found','text/plain; charset=utf-8');
   try{
+   if(['/marketplace','/ajm-marketplace','/ajm-marketplace.html'].includes(pathname)){
+    if(pathname!=='/marketplace')return redirect(req,res,'/marketplace'+url.search);
+    const page=await renderMarketplace(url,root,fetchImpl);return send(req,res,page.status,page.body,'text/html; charset=utf-8',{'Cache-Control':'no-store','X-Robots-Tag':page.status!==200||page.noindex?'noindex,follow':'index,follow'});
+   }
+   const flyerMatch=pathname.match(/^\/marketplace\/flyers\/([^/]+)$/);if(flyerMatch){const image=await marketplaceImage(flyerMatch[1],fetchImpl);return image?send(req,res,200,image.body,image.type,{'Cache-Control':'no-store'}):send(req,res,404,'Flyer no longer available','text/plain; charset=utf-8');}
    if(pathname==='/post-a-job')return send(req,res,200,postJobPage());
    if(['/jobs','/ajm-jobzone','/ajm-jobzone.html'].includes(pathname)){
     if(url.searchParams.has('job')){const id=url.searchParams.get('job');if(!uuid.test(id))return send(req,res,404,errorPage('Vacancy not found','This vacancy link is not valid.'));const job=await jobs.detail(id);if(!job)return send(req,res,404,errorPage('Vacancy no longer available','This vacancy may have closed or expired. Explore the current opportunities.'));return redirect(req,res,jobPath(job));}

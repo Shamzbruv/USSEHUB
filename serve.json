@@ -76,6 +76,18 @@
     {
       "source": "/ajm-jobzone-admin",
       "destination": "/ajm-jobzone-admin.html"
+    },
+    {
+      "source": "/marketplace",
+      "destination": "/ajm-marketplace.html"
+    },
+    {
+      "source": "/ajm-marketplace",
+      "destination": "/ajm-marketplace.html"
+    },
+    {
+      "source": "/ajm-marketplace-manage",
+      "destination": "/ajm-marketplace-manage.html"
     }
   ],
   "headers": [

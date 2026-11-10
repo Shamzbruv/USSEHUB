@@ -227,7 +227,7 @@
                 <div class="intro-card">
                     <div class="eyebrow">AJM Business Webpage</div>
                     <h1 id="business-name">Your business</h1>
-                    <p>Build the page included with this listing’s paid package. Fields unlock automatically according to the active Silver, Gold or Platinum subscription.</p>
+                    <p>Build the page included with this listing’s active package or complimentary trial. Fields unlock automatically according to the active Silver, Gold or Platinum subscription.</p>
                 </div>
                 <aside class="access-card">
                     <small>Current access</small>
@@ -748,7 +748,7 @@
             const [{ data: page, error: pageError }, { data: subscriptions, error: subscriptionError }] = await Promise.all([
                 supabase.from('listing_webpages').select('*').eq('listing_id', listingId).maybeSingle(),
                 supabase.from('ad_subscriptions')
-                    .select('status, expires_at, ad_packages(code, name, webpage_enabled, webpage_tier)')
+                    .select('status, expires_at, trial_id, ad_packages(code, name, webpage_enabled, webpage_tier)')
                     .eq('listing_id', listingId)
                     .eq('user_id', listing.owner_user_id)
                     .eq('status', 'active')
@@ -788,6 +788,10 @@
                 showNotice('This free directory listing is unaffected. Choose a webpage package and submit payment proof; editing unlocks after AJM confirms payment.', 'info');
             }
 
+            if (activeSubscription?.trial_id) {
+                el('access-label').textContent = `${maxTier} complimentary trial`;
+                el('access-detail').textContent = `Temporary access ends ${new Date(activeSubscription.expires_at).toLocaleDateString('en-JM', {timeZone:'America/Jamaica'})}. No automatic billing. Saved content is retained; public features return to the current paid tier when the trial ends.`;
+            }
             populateForm(existingPage);
             updateWorkflowHelp();
 

@@ -21,10 +21,11 @@
     "deploy:leads": "node scripts/deploy-leads.mjs",
     "test:app": "node tests/admin-app.test.mjs",
     "deploy:app": "node scripts/deploy-admin-app.mjs",
-    "test:marketplace": "node tests/marketplace-jobzone.test.mjs && node tests/jobzone-documents.test.mjs && node tests/jobzone-flyers.test.mjs",
+    "test:marketplace": "node tests/marketplace-jobzone.test.mjs && node tests/jobzone-documents.test.mjs && node tests/jobzone-flyers.test.mjs && node tests/marketplace-flyer-trials.test.mjs",
     "test:seo": "node tests/seo.test.mjs",
     "test:reports": "node tests/ad-reporting.test.mjs",
-    "test:banner-controls": "node tests/banner-position-controls.test.mjs"
+    "test:banner-controls": "node tests/banner-position-controls.test.mjs",
+    "deploy:marketplace-trials": "node scripts/deploy-marketplace-trials.mjs"
   },
   "keywords": [],
   "author": "",

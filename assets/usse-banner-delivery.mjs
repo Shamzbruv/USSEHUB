@@ -1,6 +1,6 @@
 import {mountAjmAdDelivery} from './ajm-ad-delivery.mjs';
 import {BANNER_FORMATS,bannerFormat} from './usse-banner-core.mjs';
-const page=document.body.dataset.hubPage,prefix={index:'home','ajm-advertising-hub':'hub','ajm-aloe-jamaica':'aloe','usse-consultancy':'consultancy','pistol-operations-logistics':'pistol','ajm-business-page':'business','ajm-jobzone':'jobs'}[page];
+const page=document.body.dataset.hubPage,prefix={index:'home','ajm-advertising-hub':'hub','ajm-aloe-jamaica':'aloe','usse-consultancy':'consultancy','pistol-operations-logistics':'pistol','ajm-business-page':'business','ajm-jobzone':'jobs','ajm-marketplace':'marketplace'}[page];
 if(prefix){
  const main=document.querySelector('main')||document.querySelector('.hub-layout'),header=document.querySelector('header,.topbar'),footer=document.querySelector('footer');
  if(main){let stage;const jobs=['top','bottom','left','right'].map(async position=>{const mount=document.createElement('aside');mount.hidden=true;mount.className='ajm-ad-network-mount usse-banner-slot';mount.dataset.position=position;mount.setAttribute('aria-label','Sponsored banner · '+position);if(position==='top'){if(header)header.after(mount);else main.before(mount);}else if(position==='bottom'){if(footer)footer.before(mount);else main.after(mount);}else main.after(mount);

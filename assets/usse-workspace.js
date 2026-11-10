@@ -50,6 +50,7 @@
     ['master-admin', 'Enterprise overview', 'grid'],
     ['lead-inbox', 'Lead inbox', 'people'],
     ['ajm-marketplace-admin', 'Marketplace offerings', 'list'],
+    ['ajm-marketplace-manage', 'Marketplace flyers & trials', 'globe'],
     ['ajm-jobzone-admin', 'JobZone monitoring', 'people'],
     ['ajm-admin-panel', 'Directory & reports', 'list'],
     ['ajm-ad-management', 'Advertising & accounts', 'chart'],
@@ -62,7 +63,7 @@
     if (page === path) a.setAttribute('aria-current', 'page'); moduleNav.append(a);
   }
   const publicNav = rail.querySelector('.hub-rail-public');
-  for (const [path, label, glyph] of [['index.html','USSE Home','globe'], ['ajm-advertising-hub','Business directory','arrow']]) {
+  for (const [path, label, glyph] of [['index.html','USSE Home','globe'], ['ajm-advertising-hub','Business directory','arrow'], ['/marketplace','Public Marketplace','arrow']]) {
     const a = document.createElement('a'); a.className = 'hub-rail-link'; a.href = path;
     a.innerHTML = path === 'index.html' ? '<img class="hub-home-logo" src="usse.png" width="1254" height="1254" alt="" aria-hidden="true">' : icon(glyph); a.append(document.createTextNode(label)); publicNav.append(a);
   }

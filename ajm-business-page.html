@@ -678,7 +678,9 @@
                 builderLink.classList.remove('hidden');
             }
 
-            const { data: pageData, error: pageError } = await supabase.from('listing_webpages').select('*').eq('listing_id', listing.id).maybeSingle();
+            const { data: pageData, error: pageError } = isPreview
+                ? await supabase.from('listing_webpages').select('*').eq('listing_id', listing.id).maybeSingle()
+                : await supabase.rpc('public_entitled_webpage', { p_listing_id: listing.id });
             if (pageError) throw new Error(`The business webpage could not be loaded: ${pageError.message}`);
             if (!pageData) {
                 throw new Error(isPreview
