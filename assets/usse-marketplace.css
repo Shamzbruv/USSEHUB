@@ -187,3 +187,54 @@
     max-height: calc(100dvh - 24px);
     overflow-y: auto;
 }
+
+#marketplace-share {
+    margin-top: 22px;
+    padding-top: 17px;
+    border-top: 1px solid #b6d9dd55;
+    max-width: 730px;
+}
+
+#marketplace-share-title {
+    margin: 0 0 10px;
+    color: #fff;
+    font: 600 15px/1.4 system-ui, sans-serif;
+}
+
+#marketplace-share .market-actions {
+    gap: 8px;
+}
+
+#marketplace-share .button {
+    border-color: #a9d3dc77;
+    background: #0f273460;
+    color: #f3fafc;
+}
+
+#marketplace-share .button:hover {
+    background: #254d58;
+}
+
+#marketplace-share .button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+#marketplace-share .marketplace-share-status {
+    margin: 0;
+}
+
+#marketplace-share .marketplace-share-status:not(:empty) {
+    margin-top: 10px;
+}
+
+#marketplace-share .marketplace-share-fallback {
+    margin-top: 10px;
+    color: #fff;
+    max-width: 440px;
+}
+
+#marketplace-share noscript a {
+    color: #d6f6ff;
+    overflow-wrap: anywhere;
+}

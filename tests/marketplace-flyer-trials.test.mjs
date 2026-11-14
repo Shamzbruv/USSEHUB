@@ -165,6 +165,23 @@ assert.deepEqual(Object.keys(previewPool[0]), ['id', 'title']);
 assert.equal((await browsePage('/marketplace?offset=18')).status, 404);
 assert.equal(visibleCards(rendered.body), 0);
 assert.match(rendered.body, /class="market-grid flyer-grid marketplace-detail"/);
+assert.doesNotMatch(firstPage.body, /id="marketplace-share"/);
+assert.match(firstPage.body, /View &amp; share/);
+const sharePage = await browsePage('/marketplace?id=' + sampleFlyers[0].id + '&ref=directory#marketplace-results');
+const expectedShareUrl = 'https://ussehub.com/marketplace?id=' + sampleFlyers[0].id;
+assert.match(sharePage.body, /id="marketplace-share"/);
+assert.match(sharePage.body, /data-copy-flyer hidden>Copy link/);
+assert.match(sharePage.body, /data-share-flyer hidden>More apps/);
+const shareLinks = Object.fromEntries(
+    [...sharePage.body.matchAll(/<a class="button" href="([^"]+)"(?: target="_blank" rel="noopener noreferrer")?>(WhatsApp|Facebook|X|LinkedIn|Telegram|Email)<\/a>/g)]
+        .map(([, href, name]) => [name, new URL(href.replaceAll('&amp;', '&'))])
+);
+assert.equal(shareLinks.WhatsApp.searchParams.get('text'), 'Test flyer 1 | AJM Marketplace\n' + expectedShareUrl);
+assert.equal(shareLinks.Facebook.searchParams.get('u'), expectedShareUrl);
+for (const name of ['X', 'LinkedIn', 'Telegram']) {
+    assert.equal(shareLinks[name].searchParams.get('url'), expectedShareUrl);
+}
+assert.equal(shareLinks.Email.searchParams.get('body'), 'Test flyer 1 | AJM Marketplace\n' + expectedShareUrl);
 
 for (const size of [0, 1, 2, 3, 4, 6, 13]) {
     const pool = sampleFlyers.slice(0, size);

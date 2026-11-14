@@ -1,4 +1,4 @@
-import { marketplacePreviewOrder, marketplacePreviewTile } from './usse-marketplace-core.mjs?v=20261114-edit';
+import { marketplacePreviewOrder, marketplacePreviewTile } from './usse-marketplace-core.mjs?v=share1';
 
 const previewData = document.getElementById('marketplace-previews');
 const showcase = document.getElementById('marketplace-showcase');
@@ -21,6 +21,44 @@ if (previewData && showcase) {
         } catch {
             // Rotation falls back to a randomly selected starting point.
         }
+    }
+}
+
+const sharePanel = document.getElementById('marketplace-share');
+if (sharePanel) {
+    const { url, title } = sharePanel.dataset;
+    const copyButton = sharePanel.querySelector('[data-copy-flyer]');
+    const shareButton = sharePanel.querySelector('[data-share-flyer]');
+    const status = sharePanel.querySelector('[role="status"]');
+    const fallback = sharePanel.querySelector('.marketplace-share-fallback');
+    const linkInput = fallback.querySelector('input');
+
+    copyButton.hidden = false;
+    copyButton.addEventListener('click', async () => {
+        status.textContent = '';
+        try {
+            await navigator.clipboard.writeText(url);
+            status.textContent = 'Flyer link copied.';
+        } catch {
+            fallback.hidden = false;
+            linkInput.focus();
+            linkInput.select();
+            status.textContent = 'Select and copy the flyer link below.';
+        }
+    });
+
+    if (typeof navigator.share === 'function') {
+        shareButton.hidden = false;
+        shareButton.addEventListener('click', async () => {
+            status.textContent = '';
+            try {
+                await navigator.share({ title, url });
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    status.textContent = 'Choose a sharing option above or copy the link.';
+                }
+            }
+        });
     }
 }
 

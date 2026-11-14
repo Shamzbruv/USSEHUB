@@ -43,6 +43,40 @@ function marketplacePagination(filters, total, visibleCount) {
     </nav>`;
 }
 
+function marketplaceShare(flyer, canonical) {
+    const url = ORIGIN + canonical;
+    const title = flyer.title + ' | AJM Marketplace';
+    const link = encodeURIComponent(url);
+    const text = encodeURIComponent(title);
+    const message = encodeURIComponent(title + '\n' + url);
+    const destinations = [
+        ['WhatsApp', 'https://wa.me/?text=' + message],
+        ['Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + link],
+        ['X', 'https://twitter.com/intent/tweet?url=' + link + '&text=' + text],
+        ['LinkedIn', 'https://www.linkedin.com/sharing/share-offsite/?url=' + link],
+        ['Telegram', 'https://t.me/share/url?url=' + link + '&text=' + text]
+    ];
+    const socialLinks = destinations.map(([label, href]) =>
+        `<a class="button" href="${e(href)}" target="_blank" rel="noopener noreferrer">${label}</a>`
+    ).join('');
+
+    return `<section id="marketplace-share" aria-labelledby="marketplace-share-title" data-url="${e(url)}" data-title="${e(title)}">
+        <h2 id="marketplace-share-title">Share this flyer</h2>
+        <div class="market-actions">
+            ${socialLinks}
+            <a class="button" href="mailto:?subject=${e(text)}&amp;body=${e(message)}">Email</a>
+            <button class="button" type="button" data-copy-flyer hidden>Copy link</button>
+            <button class="button" type="button" data-share-flyer hidden>More apps</button>
+        </div>
+        <p class="marketplace-share-status" role="status" aria-atomic="true"></p>
+        <label class="marketplace-share-fallback" hidden>
+            Flyer link
+            <input type="url" value="${e(url)}" readonly>
+        </label>
+        <noscript><p>Share the flyer link <a href="${e(url)}">${e(url)}</a>.</p></noscript>
+    </section>`;
+}
+
 export async function renderMarketplace(url, root, fetchImpl = fetch) {
     const id = url.searchParams.get('id');
     if (id && !uuid.test(id)) return { status: 404, body: 'Flyer not found.' };
@@ -92,6 +126,8 @@ export async function renderMarketplace(url, root, fetchImpl = fetch) {
             .replace('Explore products, services and events from businesses across Jamaica. A flyer, a brief introduction and a direct connection to the advertiser.', () => e(flyer.tagline))
             .replace('class="market-grid flyer-grid"', 'class="market-grid flyer-grid marketplace-detail"')
             .replace('href="#marketplace-results">Explore the Marketplace ↓', 'href="/marketplace#marketplace-results">← All Marketplace flyers')
+            .replace('<a class="button" href="/ajm-marketplace-manage#flyer-editor">Post a flyer →</a>', '')
+            .replace('<!-- marketplace share -->', () => marketplaceShare(flyer, canonical))
             .replace(/<meta property="og:image:(width|height)" content="[^"]*">/g, '');
     } else {
         const pool = (isFirstPage ? data.rows : separatePreviews?.rows || []);
