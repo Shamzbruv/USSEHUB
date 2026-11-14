@@ -39,7 +39,74 @@ const second={...payload,id:crypto.randomUUID(),request_id:crypto.randomUUID()},
 await as('','anon');assert.equal((await browse()).total,0);assert.equal((await db.query("SELECT * FROM storage.objects WHERE name=$1",[reserved.path])).rows.length,0);
 await as(admin);await manage('review',{id:payload.id,status:'published'});await as('','anon');assert.equal((await browse()).total,1);assert.equal((await db.query("SELECT * FROM storage.objects WHERE name=$1",[reserved.path])).rows.length,1);assert(!JSON.stringify(await browse()).includes(member));
 await as(member);await manage('withdraw',{id:payload.id});await as('','anon');assert.equal((await browse()).total,0);assert.equal((await db.query("SELECT * FROM storage.objects WHERE name=$1",[reserved.path])).rows.length,0);
-await as(admin);const ap={...payload,id:crypto.randomUUID(),request_id:crypto.randomUUID(),ajm_sponsored:true},ar=await manage('reserve',ap);await db.query('INSERT INTO storage.objects(bucket_id,name,metadata) VALUES($1,$2,$3)',['marketplace-flyers',ar.path,{mimetype:'image/png',size:50}]);assert.equal((await manage('submit',{id:ap.id})).status,'published');await db.exec(`RESET ROLE;UPDATE public.marketplace_flyers SET expires_at=now()-interval '1 second' WHERE id='${ap.id}'`);await as('','anon');assert.equal((await browse()).total,0);assert.equal((await db.query('SELECT * FROM storage.objects')).rows.length,0);
+await db.exec('RESET ROLE');
+await db.exec(fs.readFileSync('supabase/migrations/20261114190000_marketplace_quick_publish_edit.sql', 'utf8'));
+await as(admin);
+const quickPoster = {
+    ...payload,
+    id: crypto.randomUUID(),
+    request_id: crypto.randomUUID(),
+    title: 'Marketplace flyer',
+    business_name: 'Business details on flyer',
+    tagline: 'See the flyer for details.',
+    category: 'General',
+    contact_url: '',
+    ajm_sponsored: true
+};
+const posterPath = (await manage('reserve', quickPoster)).path;
+await db.query('INSERT INTO storage.objects(bucket_id,name,metadata) VALUES($1,$2,$3)', [
+    'marketplace-flyers', posterPath, { mimetype: 'image/png', size: 50 }
+]);
+assert.equal((await manage('submit', { id: quickPoster.id })).status, 'published');
+const original = (await manage('list')).rows.find(row => row.id === quickPoster.id);
+const edit = {
+    id: quickPoster.id,
+    expected_updated_at: original.updated_at,
+    title: 'New Marketplace title',
+    business_name: 'Verified business name',
+    tagline: 'Updated description for customers',
+    category: 'Business Services',
+    contact_url: 'https://example.test/contact',
+    image_path: 'ignored.png',
+    status: 'withdrawn'
+};
+await as(member);
+await assert.rejects(manage('edit', edit), /own flyers/);
+await as(admin);
+await assert.rejects(manage('edit', { ...edit, contact_url: 'javascript:alert(1)' }), /secure/);
+const saved = await manage('edit', edit);
+assert.equal((await manage('edit', edit)).updated_at, saved.updated_at, 'Retrying cannot change the revision');
+await assert.rejects(manage('edit', { ...edit, title: 'Stale edit' }), /changed since you opened/);
+const updated = (await manage('list')).rows.find(row => row.id === quickPoster.id);
+for (const name of ['image_path', 'published_at', 'expires_at', 'submitted_at', 'owner_id', 'status', 'ajm_sponsored']) {
+    assert.equal(updated[name], original[name], name + ' must survive text edits');
+}
+await as('', 'anon');
+await assert.rejects(manage('edit', edit), /permission denied/);
+assert.equal((await browse({ id: quickPoster.id })).rows[0].title, edit.title);
+assert.equal((await browse({ category: 'Business Services', search: 'Updated description' })).rows[0].contact_url, edit.contact_url);
+
+await as(member);
+const memberPoster = { ...payload, id: crypto.randomUUID(), request_id: crypto.randomUUID() };
+const memberPath = (await manage('reserve', memberPoster)).path;
+await db.exec("RESET ROLE;UPDATE public.marketplace_flyers SET submitted_at=now()-interval '8 days' WHERE status='withdrawn'");
+await as(member);
+await db.query('INSERT INTO storage.objects(bucket_id,name,metadata) VALUES($1,$2,$3)', [
+    'marketplace-flyers', memberPath, { mimetype: 'image/png', size: 50 }
+]);
+assert.equal((await manage('submit', { id: memberPoster.id })).status, 'pending');
+await as(admin);
+await manage('review', { id: memberPoster.id, status: 'published' });
+await as(member);
+await assert.rejects(manage('edit', { ...edit, id: memberPoster.id }), /administrators/);
+await as(admin);
+await manage('withdraw', { id: memberPoster.id });
+await db.query("RESET ROLE");
+await db.query("UPDATE public.marketplace_flyers SET expires_at=now()-interval '1 second' WHERE id=$1", [quickPoster.id]);
+await as('', 'anon');
+assert.equal((await browse()).total, 0);
+assert.equal((await db.query('SELECT * FROM storage.objects')).rows.length, 0);
+console.log('Quick poster workflow passed: direct admin publish, live edits, revision conflicts, stable publication dates and artwork, and member/anonymous access checks.');
 await db.exec(`RESET ROLE;INSERT INTO public.ad_subscriptions(id,user_id,listing_id,package_id,status,payment_method,expires_at) VALUES(gen_random_uuid(),'${member}','${lid}','${silver}','active','bank',now()+interval '60 days');INSERT INTO public.listing_webpages(listing_id,tier,page_status,gallery_urls,booking_url,created_by) VALUES('${lid}','silver','published',ARRAY['1','2','3'],'https://book.example.test','${member}');`);
 await as(admin);const tp={id:crypto.randomUUID(),listing_id:lid,package_id:platinum,cohort:'internal',duration_days:30,consent:true};const before=(await db.query('SELECT * FROM public.listing_webpages')).rows[0];assert.equal((await trial('activate',tp)).complimentary,true);assert.equal((await trial('activate',tp)).duplicate,true);assert.deepEqual((await db.query('SELECT * FROM public.listing_webpages')).rows[0],before);await assert.rejects(trial('activate',{...tp,id:crypto.randomUUID()}),/already has/);
 await db.exec(`RESET ROLE;UPDATE public.listing_webpages SET tier='platinum' WHERE listing_id='${lid}'`);await as('','anon');let page=(await db.query('SELECT public.public_entitled_webpage($1) r',[lid])).rows[0].r;assert.equal(page.tier,'platinum');assert.equal(page.booking_url,'https://book.example.test');assert.equal(page.created_by,undefined);

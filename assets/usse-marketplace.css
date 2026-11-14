@@ -169,3 +169,21 @@
         font-size: 12px;
     }
 }
+
+.marketplace-flyer-details {
+    padding: 12px 15px;
+    border: 1px solid var(--hub-line);
+    border-radius: 10px;
+}
+.marketplace-flyer-details summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+.marketplace-flyer-details[open] > .market-form {
+    margin-top: 14px;
+}
+.marketplace-edit-flyer {
+    width: min(640px, calc(100% - 24px));
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+}

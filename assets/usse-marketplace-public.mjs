@@ -1,4 +1,4 @@
-import { marketplacePreviewOrder, marketplacePreviewTile } from './usse-marketplace-core.mjs?v=20261114';
+import { marketplacePreviewOrder, marketplacePreviewTile } from './usse-marketplace-core.mjs?v=20261114-edit';
 
 const previewData = document.getElementById('marketplace-previews');
 const showcase = document.getElementById('marketplace-showcase');

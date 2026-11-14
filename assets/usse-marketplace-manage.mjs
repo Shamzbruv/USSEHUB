@@ -1,24 +1,324 @@
-import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.2/+esm';
-import{SUPABASE_URL,SUPABASE_ANON_KEY}from'./usse-public-config.mjs';
-import{MARKET_CATEGORIES,escapeHtml as e,marketCard,validateMarketImage}from'./usse-marketplace-core.mjs';
-import{placementLabel}from'./usse-banner-core.mjs';
-const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY),$=id=>document.getElementById(id),form=$('market-flyer-form');let admin=false,user=null,file=null,format=null,preview=null,attempt=null,offset=0,packages=[],trials=[],trialAttempt=null,busy=false,imageSequence=0;
-const date=v=>v?new Date(v).toLocaleString('en-JM',{timeZone:'America/Jamaica',dateStyle:'medium',timeStyle:'short'}):'Not active';
-const note=(s,error=false)=>{$('manage-notice').textContent=s;$('manage-notice').dataset.error=String(error);};
-async function rpc(fn,action,payload={}){const{data,error}=await sb.rpc(fn,{p_action:action,p_payload:payload});if(error)throw new Error(error.message);return data;}
-form.elements.category.innerHTML=MARKET_CATEGORIES.map(c=>`<option>${e(c)}</option>`).join('');
-function clearFile(){file=null;format=null;attempt=null;form.elements.image.value='';if(preview)URL.revokeObjectURL(preview);preview=null;$('market-preview').hidden=true;$('market-preview').removeAttribute('src');}
-async function pick(next){const seq=++imageSequence;clearFile();try{const valid=await validateMarketImage(next);if(typeof createImageBitmap==='function'){const bitmap=await createImageBitmap(next);const allowed=bitmap.width>0&&bitmap.height>0&&bitmap.width*bitmap.height<=24000000;bitmap.close();if(!allowed)throw new Error('Choose an image under 24 megapixels.');}if(seq!==imageSequence)return;file=next;format=valid;preview=URL.createObjectURL(file);$('market-preview').src=preview;$('market-preview').hidden=false;$('market-flyer-result').textContent='Image ready. Complete the business details below.';}catch(error){if(seq!==imageSequence)return;clearFile();$('market-flyer-result').textContent=error.message;}}
-form.elements.image.onchange=()=>pick(form.elements.image.files[0]);const drop=$('market-drop');drop.addEventListener('dragover',ev=>{ev.preventDefault();drop.dataset.drag='true';});drop.addEventListener('dragleave',()=>delete drop.dataset.drag);drop.addEventListener('drop',ev=>{ev.preventDefault();delete drop.dataset.drag;pick(ev.dataTransfer.files[0]);});drop.addEventListener('paste',ev=>{const item=[...ev.clipboardData.items].find(i=>i.kind==='file'&&i.type.startsWith('image/'));if(item){ev.preventDefault();pick(item.getAsFile());}});
-form.onsubmit=async ev=>{ev.preventDefault();if(busy||!user)return;const button=$('market-flyer-save');try{if(!file||!format)throw new Error('Choose or paste a flyer image first.');const payload=Object.fromEntries(new FormData(form));delete payload.image;payload.permission_confirmed=form.elements.permission_confirmed.checked;payload.ajm_sponsored=admin&&form.elements.ajm_sponsored.checked;Object.assign(payload,format);const key=JSON.stringify(payload);if(!attempt||attempt.key!==key)attempt={key,payload:{...payload,id:crypto.randomUUID(),request_id:crypto.randomUUID()},uploaded:false};busy=true;button.disabled=true;$('market-flyer-result').textContent='Uploading and checking your flyer…';const reserved=await rpc('manage_marketplace','reserve',attempt.payload);if(!attempt.uploaded){const{error}=await sb.storage.from('marketplace-flyers').upload(reserved.path,file,{contentType:format.mime,upsert:false});if(error&&!['409','Duplicate'].includes(String(error.statusCode||error.error)))throw new Error('The upload did not finish. Keep this image selected and submit again to retry.');attempt.uploaded=true;}const result=await rpc('manage_marketplace','submit',{id:attempt.payload.id});$('market-flyer-result').textContent=result.status==='published'?'Your flyer is now live on the Marketplace.':'Your flyer is awaiting AJM review. Its display period starts on approval.';form.reset();clearFile();await loadFlyers();}catch(error){$('market-flyer-result').textContent=error.message;if(attempt?.uploaded)await loadFlyers().catch(()=>{});}finally{busy=false;button.disabled=false;}};
-async function loadFlyers(){const data=await rpc('manage_marketplace','list',{offset});const rows=data.rows,paths=rows.map(r=>r.image_path);let urls=new Map();if(paths.length){const{data:signed}=await sb.storage.from('marketplace-flyers').createSignedUrls(paths,300);urls=new Map((signed||[]).map(s=>[s.path,s.signedUrl]));}$('manage-flyers').innerHTML=rows.length?rows.map(f=>`<div>${marketCard(f,{manage:true,imageUrl:urls.get(f.image_path)||''})}<div class="review-actions" data-flyer="${e(f.id)}">${f.review_note?`<p>${e(f.review_note)}</p>`:''}<p>${f.status==='published'?`Live: ${e(date(f.published_at))} – ${e(date(f.expires_at))}`:f.status==='draft'?'Draft: image upload must finish before submission.':'Display period: '+e(f.display_days)+' days from approval'}</p>${admin&&f.status==='pending'?'<label>Review note<textarea data-review-note maxlength="1000" placeholder="Required when returning a flyer"></textarea></label><div class="market-actions"><button data-action="publish">Approve &amp; publish</button><button data-action="reject">Return flyer</button></div>':''}${f.status==='draft'?'<button data-action="submit">Submit saved draft</button>':''}${!['withdrawn','rejected'].includes(f.status)?'<button data-action="withdraw">Withdraw flyer</button>':''}${f.status==='published'?`<a href="/marketplace?id=${encodeURIComponent(f.id)}">Open public share page ↗</a>`:''}</div></div>`).join(''):'<div class="market-empty"><h3>No flyers yet.</h3><p>Upload a real business flyer above to begin.</p></div>';$('manage-prev').disabled=offset===0;$('manage-next').disabled=rows.length<100;$('manage-count').textContent=rows.length?`${offset+1}–${offset+rows.length}`:'0 flyers';}
-$('manage-flyers').onclick=async ev=>{const b=ev.target.closest('[data-action]'),row=b?.closest('[data-flyer]');if(!row)return;b.disabled=true;try{const a=b.dataset.action;await rpc('manage_marketplace',a==='publish'||a==='reject'?'review':a,{id:row.dataset.flyer,status:a==='publish'?'published':'rejected',note:row.querySelector('[data-review-note]')?.value||''});note('Flyer updated.');await loadFlyers();}catch(error){note(error.message,true);}finally{b.disabled=false;}};
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.2/+esm';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './usse-public-config.mjs';
+import { MARKET_CATEGORIES, escapeHtml as e, marketCard, validateMarketImage } from './usse-marketplace-core.mjs?v=20261114-edit';
+import { placementLabel } from './usse-banner-core.mjs';
+
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const form = $('market-flyer-form');
+const editForm = $('market-edit-form');
+const editDialog = $('market-edit-flyer');
+const flyerFields = ['business_name', 'title', 'tagline', 'category', 'contact_url'];
+const quickDefaults = {
+    business_name: 'Business details on flyer',
+    title: 'Marketplace flyer',
+    tagline: 'See the flyer for details.',
+    category: 'General'
+};
+
+let admin = false, user = null, file = null, format = null, preview = null, attempt = null;
+let offset = 0, packages = [], trials = [], trialAttempt = null, busy = false, imageSequence = 0;
+let flyers = new Map(), editFlyer = null, savingEdit = false;
+
+const date = value => value
+    ? new Date(value).toLocaleString('en-JM', { timeZone: 'America/Jamaica', dateStyle: 'medium', timeStyle: 'short' })
+    : 'Not active';
+
+function note(message, error = false) {
+    $('manage-notice').textContent = message;
+    $('manage-notice').dataset.error = String(error);
+}
+
+async function rpc(fn, action, payload = {}) {
+    const { data, error } = await sb.rpc(fn, { p_action: action, p_payload: payload });
+    if (error) throw new Error(error.message);
+    return data;
+}
+
+const categoryOptions = MARKET_CATEGORIES.map(category => `<option>${e(category)}</option>`).join('');
+form.elements.category.innerHTML = '<option value="">Choose a category</option>' + categoryOptions;
+editForm.elements.category.innerHTML = categoryOptions;
+
+function readFlyerFields(source) {
+    return Object.fromEntries(flyerFields.map(name => [name, source.elements[name].value.trim()]));
+}
+
+function configureFlyerForm() {
+    const details = $('market-flyer-details');
+    details.open = !admin;
+    $('market-details-summary').textContent = admin ? 'Flyer details (optional)' : 'Flyer details';
+    for (const name of Object.keys(quickDefaults)) form.elements[name].required = !admin;
+    if (admin) form.elements.category.value = quickDefaults.category;
+}
+
+function clearFile() {
+    file = null;
+    format = null;
+    attempt = null;
+    form.elements.image.value = '';
+    if (preview) URL.revokeObjectURL(preview);
+    preview = null;
+    $('market-preview').hidden = true;
+    $('market-preview').removeAttribute('src');
+}
+
+async function pick(next) {
+    if (busy) return;
+    const sequence = ++imageSequence;
+    clearFile();
+    $('market-new-flyer-link').hidden = true;
+    try {
+        const valid = await validateMarketImage(next);
+        if (typeof createImageBitmap === 'function') {
+            const bitmap = await createImageBitmap(next);
+            const allowed = bitmap.width > 0 && bitmap.height > 0 && bitmap.width * bitmap.height <= 24000000;
+            bitmap.close();
+            if (!allowed) throw new Error('Choose an image under 24 megapixels.');
+        }
+        if (sequence !== imageSequence) return;
+        file = next;
+        format = valid;
+        preview = URL.createObjectURL(file);
+        $('market-preview').src = preview;
+        $('market-preview').hidden = false;
+        $('market-flyer-result').textContent = admin
+            ? 'Poster ready. Confirm permission and click Publish poster.'
+            : 'Poster ready. Complete the business details below.';
+    } catch (error) {
+        if (sequence !== imageSequence) return;
+        clearFile();
+        $('market-flyer-result').textContent = error.message;
+    }
+}
+
+form.elements.image.onchange = () => pick(form.elements.image.files[0]);
+const drop = $('market-drop');
+drop.addEventListener('dragover', event => {
+    event.preventDefault();
+    if (!busy) drop.dataset.drag = 'true';
+});
+drop.addEventListener('dragleave', () => delete drop.dataset.drag);
+drop.addEventListener('drop', event => {
+    event.preventDefault();
+    delete drop.dataset.drag;
+    pick(event.dataTransfer.files[0]);
+});
+drop.addEventListener('paste', event => {
+    const item = [...event.clipboardData.items].find(entry => entry.kind === 'file' && entry.type.startsWith('image/'));
+    if (item) {
+        event.preventDefault();
+        pick(item.getAsFile());
+    }
+});
+
+form.addEventListener('invalid', event => {
+    const details = $('market-flyer-details');
+    if (details.contains(event.target)) details.open = true;
+}, true);
+
+form.onsubmit = async event => {
+    event.preventDefault();
+    if (busy || !user) return;
+    const button = $('market-flyer-save');
+    const notice = $('market-flyer-result');
+    const liveLink = $('market-new-flyer-link');
+
+    try {
+        if (!file || !format) throw new Error('Choose or paste a flyer image first.');
+        const fields = readFlyerFields(form);
+        if (admin) {
+            for (const [name, fallback] of Object.entries(quickDefaults)) {
+                if (!fields[name]) fields[name] = fallback;
+            }
+        }
+
+        const payload = {
+            ...fields,
+            display_days: form.elements.display_days.value,
+            permission_confirmed: form.elements.permission_confirmed.checked,
+            ajm_sponsored: admin && form.elements.ajm_sponsored.checked,
+            ...format
+        };
+        const key = JSON.stringify(payload);
+        if (!attempt || attempt.key !== key) {
+            attempt = {
+                key,
+                payload: { ...payload, id: crypto.randomUUID(), request_id: crypto.randomUUID() },
+                uploaded: false
+            };
+        }
+
+        busy = true;
+        button.disabled = true;
+        form.elements.image.disabled = true;
+        liveLink.hidden = true;
+        notice.textContent = 'Uploading and checking your flyer…';
+        const upload = attempt;
+        const artwork = file;
+        const reserved = await rpc('manage_marketplace', 'reserve', upload.payload);
+        if (!upload.uploaded) {
+            const { error } = await sb.storage.from('marketplace-flyers').upload(reserved.path, artwork, {
+                contentType: upload.payload.mime,
+                upsert: false
+            });
+            if (error && !['409', 'Duplicate'].includes(String(error.statusCode || error.error))) {
+                throw new Error('The upload did not finish. Keep this image selected and submit again to retry.');
+            }
+            upload.uploaded = true;
+        }
+        const result = await rpc('manage_marketplace', 'submit', { id: upload.payload.id });
+        notice.textContent = result.status === 'published'
+            ? 'Your poster is live. Use Edit flyer details in the register to add or update the text.'
+            : 'Your flyer is awaiting AJM review. Its display period starts on approval.';
+        if (result.status === 'published') {
+            liveLink.href = '/marketplace?id=' + encodeURIComponent(result.id);
+            liveLink.hidden = false;
+        }
+
+        form.reset();
+        clearFile();
+        configureFlyerForm();
+        offset = 0;
+        await loadFlyers().catch(() => note('Flyer saved. Use Refresh to update the register.', true));
+    } catch (error) {
+        notice.textContent = error.message;
+        if (attempt?.uploaded) await loadFlyers().catch(() => {});
+    } finally {
+        busy = false;
+        button.disabled = false;
+        form.elements.image.disabled = false;
+    }
+};
+
+function registerCard(flyer, imageUrl) {
+    const status = flyer.status;
+    let schedule = 'Display period: ' + e(flyer.display_days) + ' days from approval';
+    if (status === 'draft') schedule = 'Draft: image upload must finish before submission.';
+    if (status === 'published') schedule = e(date(flyer.published_at)) + ' – ' + e(date(flyer.expires_at));
+
+    const review = admin && status === 'pending' ? `
+        <label>Review note<textarea data-review-note maxlength="1000" placeholder="Required when returning a flyer"></textarea></label>
+        <div class="market-actions">
+            <button data-action="publish">Approve &amp; publish</button>
+            <button data-action="reject">Return flyer</button>
+        </div>` : '';
+    const published = status === 'published' ? `
+        ${admin ? '<button class="primary" data-action="edit">Edit flyer details</button>' : ''}
+        ${Date.parse(flyer.expires_at) > Date.now() ? `<a href="/marketplace?id=${encodeURIComponent(flyer.id)}">Open public share page ↗</a>` : ''}` : '';
+
+    return `<div>
+        ${marketCard(flyer, { manage: true, imageUrl })}
+        <div class="review-actions" data-flyer="${e(flyer.id)}">
+            ${flyer.review_note ? `<p>${e(flyer.review_note)}</p>` : ''}
+            <p>${schedule}</p>
+            ${review}
+            ${published}
+            ${status === 'draft' ? '<button data-action="submit">Submit saved draft</button>' : ''}
+            ${!['withdrawn', 'rejected'].includes(status) ? '<button data-action="withdraw">Withdraw flyer</button>' : ''}
+        </div>
+    </div>`;
+}
+
+async function loadFlyers() {
+    const activeUser = user;
+    const { rows } = await rpc('manage_marketplace', 'list', { offset });
+    let urls = new Map();
+    if (rows.length) {
+        const { data: signed } = await sb.storage.from('marketplace-flyers').createSignedUrls(rows.map(row => row.image_path), 300);
+        urls = new Map((signed || []).map(entry => [entry.path, entry.signedUrl]));
+    }
+    if (activeUser !== user) return;
+
+    flyers = new Map(rows.map(flyer => [flyer.id, flyer]));
+    $('manage-flyers').innerHTML = rows.length
+        ? rows.map(row => registerCard(row, urls.get(row.image_path) || '')).join('')
+        : '<div class="market-empty"><h3>No flyers yet.</h3><p>Upload a real business flyer above to begin.</p></div>';
+    $('manage-prev').disabled = offset === 0;
+    $('manage-next').disabled = rows.length < 100;
+    $('manage-count').textContent = rows.length ? `${offset + 1}–${offset + rows.length}` : '0 flyers';
+}
+
+function openFlyerEditor(flyer) {
+    if (!admin || !flyer || flyer.status !== 'published' || editDialog.open) return;
+    editFlyer = flyer;
+    for (const name of flyerFields) editForm.elements[name].value = flyer[name] || '';
+    $('market-edit-result').textContent = '';
+    editDialog.showModal();
+}
+
+$('market-edit-cancel').onclick = () => editDialog.close();
+editDialog.addEventListener('cancel', event => {
+    if (savingEdit) event.preventDefault();
+});
+editDialog.addEventListener('close', () => {
+    editFlyer = null;
+    editForm.reset();
+});
+editForm.onsubmit = async event => {
+    event.preventDefault();
+    if (!admin || !editFlyer || savingEdit) return;
+    const id = editFlyer.id;
+    const controls = editForm.querySelectorAll('button');
+    const notice = $('market-edit-result');
+    savingEdit = true;
+    controls.forEach(button => { button.disabled = true; });
+    notice.textContent = 'Saving changes…';
+
+    try {
+        await rpc('manage_marketplace', 'edit', {
+            ...readFlyerFields(editForm),
+            id,
+            expected_updated_at: editFlyer.updated_at
+        });
+        editDialog.close();
+        note('Flyer details saved.');
+        try {
+            await loadFlyers();
+            $('manage-flyers').querySelector(`[data-flyer="${CSS.escape(id)}"] [data-action="edit"]`)?.focus();
+        } catch {
+            note('Flyer details saved. Use Refresh to update the register.', true);
+        }
+    } catch (error) {
+        notice.textContent = error.message;
+    } finally {
+        savingEdit = false;
+        controls.forEach(button => { button.disabled = false; });
+    }
+};
+
+$('manage-flyers').onclick = async event => {
+    const button = event.target.closest('[data-action]');
+    const row = button?.closest('[data-flyer]');
+    if (!row) return;
+    const action = button.dataset.action;
+    if (action === 'edit') {
+        openFlyerEditor(flyers.get(row.dataset.flyer));
+        return;
+    }
+
+    button.disabled = true;
+    try {
+        const review = action === 'publish' || action === 'reject';
+        await rpc('manage_marketplace', review ? 'review' : action, {
+            id: row.dataset.flyer,
+            status: action === 'publish' ? 'published' : 'rejected',
+            note: row.querySelector('[data-review-note]')?.value || ''
+        });
+        note('Flyer updated.');
+        await loadFlyers();
+    } catch (error) {
+        note(error.message, true);
+    } finally {
+        button.disabled = false;
+    }
+};
+
 function trialFields(){const f=$('trial-form'),p=packages.find(p=>p.id===f.elements.package_id.value),display=p?.type==='display_ad';$('trial-creative').hidden=!display;for(const name of['headline','body_text','media_url','cta_url','banner_size']){f.elements[name].disabled=!display;f.elements[name].required=display;}f.elements.duration_days.querySelector('[value="15"]').disabled=display;if(display)f.elements.duration_days.value='30';$('trial-placements').textContent='Current package positions: '+(p?.placements||[]).map(placementLabel).join(' · ')+'. These positions are snapshotted when the trial starts.';}
 async function loadTrials(){const data=await rpc('manage_ajm_trials','list');trials=data.rows;$('trial-report-period').textContent=`Activity: ${data.report_from} through ${data.report_to} (UTC, last 30 days). Run dates below use Jamaica time. Complimentary trials generate no sales revenue.`;$('trial-list').innerHTML=trials.length?trials.map(t=>`<article class="market-card trial-card"><span class="market-tag">Complimentary · ${e(t.status)}</span><span class="market-tag">${e(t.cohort)}</span><h3>${e(t.business_name)}</h3><p>${e(t.package_snapshot.name)}</p><p>${e(date(t.starts_at))} – ${e(date(t.expires_at))}</p><p>${Number(t.impressions)} views · ${Number(t.clicks)} clicks · ${Number(t.leads)} actions</p><div class="market-actions"><a class="button" href="/ajm-webpage-builder?listing=${encodeURIComponent(t.listing_id)}">Open webpage studio</a>${t.status==='active'?`<button data-end-trial="${e(t.id)}">End this trial</button>`:''}</div></article>`).join(''):'<div class="market-empty"><h3>No trials activated.</h3><p>Choose confirmed businesses and package details above. No customers have been enrolled automatically.</p></div>';$('trial-coverage').innerHTML=packages.map(p=>{const active=trials.filter(t=>t.status==='active'&&t.package_snapshot.name===p.name);return`<article><strong>${e(p.name)}</strong><span>${active.length?'Live demonstration: '+active.map(t=>e(t.business_name)).join(', '):'Awaiting a confirmed candidate'}</span></article>`;}).join('');}
 $('trial-form').elements.package_id.onchange=trialFields;
 $('trial-form').onsubmit=async ev=>{ev.preventDefault();const f=ev.currentTarget,b=f.querySelector('button');if(b.disabled)return;try{b.disabled=true;const payload=Object.fromEntries(new FormData(f));payload.consent=f.elements.consent.checked;const key=JSON.stringify(payload);if(!trialAttempt||trialAttempt.key!==key)trialAttempt={key,payload:{...payload,id:crypto.randomUUID()}};const result=await rpc('manage_ajm_trials','activate',trialAttempt.payload);$('trial-result').textContent='Complimentary trial active until '+date(result.expires_at)+'. No payment or automatic renewal.';trialAttempt=null;f.elements.consent.checked=false;await loadTrials();}catch(error){$('trial-result').textContent=error.message;}finally{b.disabled=false;}};
 $('trial-list').onclick=async ev=>{const b=ev.target.closest('[data-end-trial]');if(!b)return;b.disabled=true;try{await rpc('manage_ajm_trials','end',{id:b.dataset.endTrial});await loadTrials();note('Trial ended. Existing paid subscriptions remain in place.');}catch(error){note(error.message,true);b.disabled=false;}};
-async function init(){try{const{data:{user:current},error}=await sb.auth.getUser();if(error||!current){user=null;$('market-login').hidden=false;$('market-workspace').hidden=true;$('market-signout').hidden=true;note('Sign in with a verified account to submit flyers.');return;}const{data:p,error:profileError}=await sb.from('profiles').select('role,account_status').eq('id',current.id).maybeSingle();if(profileError)throw profileError;if(p?.account_status!=='active'||!current.email_confirmed_at)throw new Error('An active account and confirmed email are required.');user=current;admin=p.role==='admin';$('market-login').hidden=true;$('market-workspace').hidden=false;$('market-signout').hidden=false;$('trial-workspace').hidden=!admin;$('trial-nav').hidden=!admin;$('sponsored-option').hidden=!admin;$('market-flyer-save').textContent=admin?'Publish flyer':'Submit for review';$('flyer-register-title').textContent=admin?'All Marketplace flyers':'Your flyers';if(admin)$('flyer-rule').textContent='Administrators can publish authorised flyers directly, including introductions for non-member businesses. Member submissions remain subject to review.';await loadFlyers();if(admin){const c=await rpc('manage_ajm_trials','catalog');packages=c.packages;const f=$('trial-form');f.elements.listing_id.innerHTML='<option value="">Choose a confirmed business</option>'+c.listings.map(l=>`<option value="${e(l.id)}">${e(l.name)}</option>`).join('');f.elements.package_id.innerHTML='<option value="">Choose a package</option>'+packages.map(p=>`<option value="${e(p.id)}">${e(p.name)} · ${e(p.type)}</option>`).join('');trialFields();await loadTrials();}note(admin?'Administrator workspace ready. Review flyers or activate agreed complimentary trials.':'Your Marketplace workspace is ready.');}catch(error){note(error.message,true);}}
+async function init(){try{const{data:{user:current},error}=await sb.auth.getUser();if(error||!current){user=null;$('market-login').hidden=false;$('market-workspace').hidden=true;$('market-signout').hidden=true;note('Sign in with a verified account to submit flyers.');return;}const{data:p,error:profileError}=await sb.from('profiles').select('role,account_status').eq('id',current.id).maybeSingle();if(profileError)throw profileError;if(p?.account_status!=='active'||!current.email_confirmed_at)throw new Error('An active account and confirmed email are required.');user=current;admin=p.role==='admin';$('market-login').hidden=true;$('market-workspace').hidden=false;$('market-signout').hidden=false;$('trial-workspace').hidden=!admin;$('trial-nav').hidden=!admin;$('sponsored-option').hidden=!admin;$('market-flyer-save').textContent=admin?'Publish poster':'Submit for review';configureFlyerForm();$('flyer-register-title').textContent=admin?'All Marketplace flyers':'Your flyers';if(admin)$('flyer-rule').textContent='Upload or paste a poster and publish it directly. Add the text now or return to the flyer register to edit it later.';if(location.hash==='#flyer-editor')$('market-flyer-heading').focus();await loadFlyers();if(admin){const c=await rpc('manage_ajm_trials','catalog');packages=c.packages;const f=$('trial-form');f.elements.listing_id.innerHTML='<option value="">Choose a confirmed business</option>'+c.listings.map(l=>`<option value="${e(l.id)}">${e(l.name)}</option>`).join('');f.elements.package_id.innerHTML='<option value="">Choose a package</option>'+packages.map(p=>`<option value="${e(p.id)}">${e(p.name)} · ${e(p.type)}</option>`).join('');trialFields();await loadTrials();}note(admin?'Administrator workspace ready. Review flyers or activate agreed complimentary trials.':'Your Marketplace workspace is ready.');}catch(error){note(error.message,true);}}
 $('market-login-form').onsubmit=async ev=>{ev.preventDefault();const f=ev.currentTarget,b=f.querySelector('button');b.disabled=true;try{const{error}=await sb.auth.signInWithPassword({email:f.elements.email.value.trim(),password:f.elements.password.value});if(error)throw error;f.elements.password.value='';await init();}catch(error){note(error.message,true);}finally{b.disabled=false;}};
-$('market-signout').onclick=async()=>{await sb.auth.signOut();};sb.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){user=null;admin=false;packages=[];trials=[];clearFile();$('manage-flyers').replaceChildren();$('trial-list').replaceChildren();$('market-workspace').hidden=true;$('market-login').hidden=false;$('market-signout').hidden=true;note('Signed out.');}});
+$('market-signout').onclick=async()=>{await sb.auth.signOut();};sb.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){user=null;admin=false;packages=[];trials=[];flyers.clear();if(editDialog.open)editDialog.close();imageSequence++;clearFile();$('manage-flyers').replaceChildren();$('trial-list').replaceChildren();$('market-workspace').hidden=true;$('market-login').hidden=false;$('market-signout').hidden=true;note('Signed out.');}});
 $('manage-refresh').onclick=async()=>{try{await loadFlyers();if(admin)await loadTrials();note('Workspace refreshed.');}catch(error){note(error.message,true);}};$('manage-prev').onclick=()=>{offset=Math.max(0,offset-100);loadFlyers().catch(err=>note(err.message,true));};$('manage-next').onclick=()=>{offset+=100;loadFlyers().catch(err=>note(err.message,true));};window.addEventListener('pagehide',()=>{if(preview)URL.revokeObjectURL(preview);});await init();
