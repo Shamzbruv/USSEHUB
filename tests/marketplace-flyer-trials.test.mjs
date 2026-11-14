@@ -1,6 +1,6 @@
 process.on('uncaughtException',e=>{console.error(e.message,e.where||'',e.query||'');process.exit(1)});process.on('unhandledRejection',e=>{console.error(e.message,e.where||'',e.query||'');process.exit(1)});
 import assert from'node:assert/strict';import fs from'node:fs';import{PGlite}from'@electric-sql/pglite';
-import{MARKET_CATEGORIES,marketCard,secureUrl,validateMarketImage}from'../assets/usse-marketplace-core.mjs';
+import{MARKET_CATEGORIES,marketCard,marketplacePreviewOrder,marketplacePreviewTile,secureUrl,validateMarketImage}from'../assets/usse-marketplace-core.mjs';
 import{renderMarketplace,marketplaceImage}from'../server/marketplace.mjs';
 const db=new PGlite(),admin=crypto.randomUUID(),member=crypto.randomUUID(),other=crypto.randomUUID(),lid=crypto.randomUUID(),silver=crypto.randomUUID(),platinum=crypto.randomUUID(),banner=crypto.randomUUID();
 await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE SCHEMA auth;CREATE SCHEMA private;CREATE SCHEMA storage;
@@ -49,3 +49,63 @@ const dp={id:crypto.randomUUID(),listing_id:lid,package_id:banner,cohort:'public
 assert.equal(secureUrl('javascript:alert(1)'), '');assert.equal(secureUrl('https://user:secret@example.test'),'');const card=marketCard({...payload,title:'<script>alert(1)</script>'});assert(!card.includes('<script>'));assert(card.includes('&lt;script&gt;'));const png=new File([new Uint8Array([137,80,78,71,13,10,26,10,0,0,0,0])],'flyer.png',{type:'image/png'});assert.equal((await validateMarketImage(png)).mime,'image/png');await assert.rejects(validateMarketImage(new File(['<svg/>'],'bad.svg')),/JPG/);
 const fake=async()=>new Response(JSON.stringify({rows:[{...payload,image_path:payload.id+'/'+crypto.randomUUID()+'.png'}],total:1}),{status:200});const rendered=await renderMarketplace(new URL('https://ussehub.com/marketplace?id='+payload.id),process.cwd(),fake);assert.equal(rendered.status,200);assert(rendered.body.includes('application/ld+json'));assert(rendered.body.includes('/marketplace/flyers/'+payload.id));assert.equal((await renderMarketplace(new URL('https://ussehub.com/marketplace?id=invalid'),process.cwd(),fake)).status,404);assert.equal(await marketplaceImage('invalid',fake),null);
 console.log('Marketplace passed: role isolation, private uploads, moderation, permission checks, weekly limits, retries, withdrawal/expiry, real-business trials, paid preservation, automatic entitlement fallback, accurate trial event attribution, safe images/links and server-rendered share pages.');
+
+// The public browse route uses six records per page, while the showcase pools
+// approved flyers across categories and keeps the full detail route intact.
+const sampleFlyers = Array.from({ length: 13 }, (_, index) => ({
+    ...payload,
+    id: crypto.randomUUID(),
+    title: `Test flyer ${index + 1}`,
+    category: index % 2 ? 'Hardware' : 'Suppliers'
+}));
+
+const fixture = async (_url, options) => {
+    const { p_payload: filter } = JSON.parse(options.body);
+    const matching = sampleFlyers.filter(item =>
+        (!filter.id || item.id === filter.id) &&
+        (!filter.category || item.category === filter.category) &&
+        (!filter.search || item.title.includes(filter.search))
+    );
+    const offset = filter.offset || 0;
+    return Response.json({ rows: matching.slice(offset, offset + 24), total: matching.length });
+};
+
+const browsePage = path => renderMarketplace(new URL(path, 'https://ussehub.com'), process.cwd(), fixture);
+const visibleCards = html => [...html.matchAll(/class="market-card flyer-card flyer-card-compact"/g)].length;
+const firstPage = await browsePage('/marketplace');
+assert.equal(visibleCards(firstPage.body), 6);
+assert.match(firstPage.body, /1–6 of 13 flyers/);
+assert.match(firstPage.body, /href="\/marketplace\?offset=6#marketplace-results"/);
+
+const secondPage = await browsePage('/marketplace?offset=6');
+assert.equal(visibleCards(secondPage.body), 6);
+assert.match(secondPage.body, /7–12 of 13 flyers/);
+assert.match(secondPage.body, /href="\/marketplace\?offset=12#marketplace-results"/);
+assert.equal(secondPage.noindex, true);
+
+const lastPage = await browsePage('/marketplace?offset=12');
+assert.equal(visibleCards(lastPage.body), 1);
+assert.match(lastPage.body, /13–13 of 13 flyers/);
+assert.doesNotMatch(lastPage.body, /Next →/);
+
+const filtered = await browsePage('/marketplace?category=Suppliers');
+assert.equal(visibleCards(filtered.body), 6);
+assert.match(filtered.body, /category=Suppliers&amp;offset=6/);
+const previewPool = JSON.parse(filtered.body.match(/id="marketplace-previews" type="application\/json">(.*?)<\/script>/)[1]);
+assert.equal(previewPool.length, 13);
+assert.deepEqual(Object.keys(previewPool[0]), ['id', 'title']);
+
+assert.equal((await browsePage('/marketplace?offset=18')).status, 404);
+assert.equal(visibleCards(rendered.body), 0);
+assert.match(rendered.body, /class="market-grid flyer-grid marketplace-detail"/);
+
+for (const size of [0, 1, 2, 3, 4, 6, 13]) {
+    const pool = sampleFlyers.slice(0, size);
+    const before = marketplacePreviewOrder(pool);
+    assert.equal(new Set(before.map(item => item.id)).size, Math.min(size, 3));
+    const after = marketplacePreviewOrder(pool, before[0]?.id);
+    if (size > 1) assert(after.every((item, index) => item.id !== before[index].id));
+    if (size >= 6) assert(after.every(item => !before.includes(item)));
+}
+assert.match(marketplacePreviewTile(sampleFlyers[0]), /href="\/marketplace\?id=/);
+console.log('Marketplace browse passed: six flyers per page, retained filters, full detail artwork, and previews rotating without fixed slots.');
