@@ -238,3 +238,33 @@
     color: #d6f6ff;
     overflow-wrap: anywhere;
 }
+
+#marketplace-search {
+    grid-template-columns: minmax(180px, 1.5fr) repeat(3, minmax(120px, 1fr)) auto;
+}
+.flyer-art-video video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 140px;
+    max-height: min(70vh, 520px);
+    object-fit: contain;
+    background: #0d1824;
+    border-radius: 10px;
+}
+.flyer-card-compact .flyer-art-video video {
+    min-height: 0;
+}
+.marketplace-showcase-tile .marketplace-showcase-video {
+    display: grid;
+    place-items: center;
+    min-height: 55px;
+    color: #e4faff;
+    font-size: 15px;
+}
+@media (max-width: 900px) {
+    #marketplace-search { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+    #marketplace-search { grid-template-columns: 1fr; }
+}

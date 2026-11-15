@@ -156,6 +156,90 @@ for (const sector of ["BUSINESS OPERATORS", "TOURISM INDUSTRY", "HOTEL OPERATION
     TAXONOMY[sector] = Object.fromEntries(OPERATION_DEPARTMENTS.map(department => [department, {tertiary: ["SERVICES & SUPPORT", "SUPPLIES & EQUIPMENT", "TRAINING & DEVELOPMENT"], specific: []}]));
     TAXONOMY[sector]["OTHER DEPARTMENTS"] = {tertiary: ["GENERAL SERVICES & SUPPORT"], specific: []};
 }
+// Business classification options requested for Marketplace and Web Listings.
+for (const [category, group, segments] of [
+    [
+        "RETAIL OPERATIONS / INDUSTRY",
+        "FASHION & CLOTHING",
+        [
+            "FASHION INDUSTRY",
+            "RETAIL CLOTHING"
+        ]
+    ],
+    [
+        "TOURISM INDUSTRY",
+        "VISITOR EXPERIENCES",
+        [
+            "ATTRACTIONS"
+        ]
+    ],
+    [
+        "ENTERTAINMENT",
+        "MUSIC PRODUCTION",
+        [
+            "MUSICAL STUDIO SERVICES"
+        ]
+    ],
+    [
+        "FOOD & BEVERAGE",
+        "CATERING & FOOD SERVICES",
+        [
+            "CATERING SERVICES",
+            "COOKING SERVICES"
+        ]
+    ],
+    [
+        "FOOD & BEVERAGE",
+        "FOOD PRODUCTION & SUPPLY",
+        [
+            "BAKERY SUPPLIER",
+            "ICE PRODUCTION SERVICES"
+        ]
+    ],
+    [
+        "BUSINESS OPERATORS",
+        "CLEANING & FACILITY SERVICES",
+        [
+            "CLEANING SERVICES"
+        ]
+    ],
+    [
+        "GENERAL",
+        "BEAUTY & PERSONAL CARE",
+        [
+            "HAIR GROOMING SERVICES",
+            "COSMETIC SERVICES",
+            "NAIL TECHNICIANS",
+            "HAIR STYLISTS"
+        ]
+    ],
+    [
+        "GENERAL",
+        "TRANSPORT & LOGISTICS",
+        [
+            "DELIVERY SERVICES",
+            "HAULAGE SERVICES",
+            "IMPORT & EXPORT SERVICES"
+        ]
+    ],
+    [
+        "FINANCIAL SERVICES",
+        "LENDING",
+        [
+            "MICRO LOAN SERVICES"
+        ]
+    ],
+    [
+        "GENERAL",
+        "EDUCATION & COACHING",
+        [
+            "EDUCATIONAL SERVICES",
+            "COACHING SERVICES"
+        ]
+    ]
+]) {
+    TAXONOMY[category][group] = { tertiary: segments, specific: [] };
+}
 window.USSE_OPERATION_DEPARTMENTS = Object.freeze([...OPERATION_DEPARTMENTS, "OTHER"]);
 window.USSE_BUSINESS_SECTORS = Object.freeze(["BUSINESS OPERATORS", "TOURISM INDUSTRY", "HOTEL OPERATIONS", "RETAIL OPERATIONS / INDUSTRY", "RESTAURANT SERVICES"]);
 

@@ -152,6 +152,7 @@
                     <span class="tier-badge" id="tier-badge">AJM Silver Member</span>
                     <h1 id="business-name">AJM Business</h1>
                     <p class="tagline" id="tagline"></p>
+                    <p class="kicker hidden" id="business-classification"></p>
                 </div>
                 <div class="logo-card" id="logo-card"><img id="business-logo" class="hidden" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="" /><div id="logo-fallback" class="logo-fallback">A</div></div>
             </div>
@@ -471,6 +472,9 @@
             document.title = `${listing.business_name} | AJM ${tier[0].toUpperCase() + tier.slice(1)} Webpage`;
             document.querySelector('meta[name="description"]').content = (webpage.about_text || listing.description || '').slice(0, 155);
             setText('business-name', listing.business_name);
+            const classification = [listing.category, listing.subcategory].filter(Boolean).join(' › ');
+            setText('business-classification', classification);
+            if (classification) show('business-classification');
             setText('tagline', webpage.tagline || listing.description || 'Discover this Jamaican business on AJM Advertising Hub.');
             setText('about-text', webpage.about_text || listing.description || 'Business information coming soon.');
             setText('address', webpage.address || listing.location || 'Jamaica');

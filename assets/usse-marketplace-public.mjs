@@ -1,4 +1,4 @@
-import { marketplacePreviewOrder, marketplacePreviewTile } from './usse-marketplace-core.mjs?v=share1';
+import { MARKET_SEGMENTS, marketplacePreviewOrder, marketplacePreviewTile } from './usse-marketplace-core.mjs?v=segments1';
 
 const previewData = document.getElementById('marketplace-previews');
 const showcase = document.getElementById('marketplace-showcase');
@@ -22,6 +22,17 @@ if (previewData && showcase) {
             // Rotation falls back to a randomly selected starting point.
         }
     }
+}
+
+const search = document.getElementById('marketplace-search');
+if (search) {
+    const { category, segment } = search.elements;
+    category.addEventListener('change', () => {
+        const current = segment.value;
+        const allowed = category.value ? MARKET_SEGMENTS[category.value] || [] : Object.values(MARKET_SEGMENTS).flat();
+        segment.replaceChildren(new Option('All subsegments', ''), ...allowed.map(name => new Option(name, name)));
+        segment.value = allowed.includes(current) ? current : '';
+    });
 }
 
 const sharePanel = document.getElementById('marketplace-share');

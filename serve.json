@@ -92,6 +92,15 @@
   ],
   "headers": [
     {
+      "source": "taxonomy.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
       "source": "admin-sw.js",
       "headers": [
         {

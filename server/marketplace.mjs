@@ -1,30 +1,38 @@
 import fs from'node:fs';import path from'node:path';
 import{SUPABASE_URL,SUPABASE_ANON_KEY}from'../assets/usse-public-config.mjs';
-import{marketCard,escapeHtml as e,MARKET_CATEGORIES,MARKETPLACE_PAGE_SIZE}from'../assets/usse-marketplace-core.mjs';
+import{marketCard,escapeHtml as e,MARKET_CATEGORIES,MARKET_SEGMENTS,MARKETPLACE_PAGE_SIZE}from'../assets/usse-marketplace-core.mjs';
 import{head,replaceHead,jsonLd,ORIGIN,breadcrumbs}from'./seo-core.mjs';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export async function marketplaceData(payload,fetchImpl=fetch){const r=await fetchImpl(SUPABASE_URL+'/rest/v1/rpc/marketplace_public',{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_payload:payload}),signal:AbortSignal.timeout(7000)});if(!r.ok)throw new Error('Marketplace service unavailable');const data=await r.json();if(!Array.isArray(data?.rows)||!Number.isFinite(Number(data.total)))throw new Error('Invalid Marketplace response');return{rows:data.rows.filter(f=>uuid.test(f.id)),total:Number(data.total)};}
-function marketplaceBrowseUrl({ category, search, offset }) {
+function marketplaceBrowseUrl({ category, segment, search, offset, format }) {
     const query = new URLSearchParams();
     if (category) query.set('category', category);
     if (search) query.set('search', search);
+    if (segment) query.set('segment', segment);
+    if (format) query.set('format', format);
     if (offset) query.set('offset', String(offset));
     return '/marketplace' + (query.size ? '?' + query : '');
 }
 
-function marketplaceFilters({ category, search }) {
+function marketplaceFilters({ category, segment, search, format }) {
     const categories = ['', ...MARKET_CATEGORIES];
     const links = categories.map(value => {
-        const href = marketplaceBrowseUrl({ category: value, search }) + '#marketplace-results';
+        const href = marketplaceBrowseUrl({ category: value, search, format }) + '#marketplace-results';
         return `<a class="button" href="${e(href)}"${value === category ? ' aria-current="true"' : ''}>${e(value || 'All opportunities')}</a>`;
     }).join('');
     const options = categories.map(value => (
         `<option value="${e(value)}"${value === category ? ' selected' : ''}>${e(value || 'All categories')}</option>`
     )).join('');
+    const segments = category ? MARKET_SEGMENTS[category] || [] : Object.values(MARKET_SEGMENTS).flat();
+    const segmentOptions = segments.map(value =>
+        `<option value="${e(value)}"${value === segment ? ' selected' : ''}>${e(value)}</option>`
+    ).join('');
     return `<nav class="market-category-bar" aria-label="Marketplace categories">${links}</nav>
         <form id="marketplace-search" class="market-filters" action="/marketplace#marketplace-results" method="get">
             <label>Search businesses and flyers<input name="search" value="${e(search)}" maxlength="100" placeholder="A business, product or service"></label>
             <label>Category<select name="category">${options}</select></label>
+            <label>Subsegment<select name="segment"><option value="">All subsegments</option>${segmentOptions}</select></label>
+            <label>Post type<select name="format"><option value="">All posts</option><option value="mini-ad"${format ? ' selected' : ''}>Mini-Ads only</option></select></label>
             <button type="submit" class="primary">Search</button>
         </form>`;
 }
@@ -38,7 +46,7 @@ function marketplacePagination(filters, total, visibleCount) {
     };
     return `<nav class="market-pagination marketplace-pagination" aria-label="Marketplace pages">
         ${offset ? link(offset - MARKETPLACE_PAGE_SIZE, '← Previous') : '<span></span>'}
-        <span>${offset + 1}–${offset + visibleCount} of ${total} flyers</span>
+        <span>${offset + 1}–${offset + visibleCount} of ${total} posts</span>
         ${offset + MARKETPLACE_PAGE_SIZE < total ? link(offset + MARKETPLACE_PAGE_SIZE, 'Next →') : '<span></span>'}
     </nav>`;
 }
@@ -81,14 +89,19 @@ export async function renderMarketplace(url, root, fetchImpl = fetch) {
     const id = url.searchParams.get('id');
     if (id && !uuid.test(id)) return { status: 404, body: 'Flyer not found.' };
 
-    const category = url.searchParams.get('category') || '';
+    const requestedCategory = url.searchParams.get('category');
+    const category = MARKET_CATEGORIES.includes(requestedCategory) ? requestedCategory : '';
+    const validSegments = category ? MARKET_SEGMENTS[category] || [] : Object.values(MARKET_SEGMENTS).flat();
+    const requestedSegment = url.searchParams.get('segment');
+    const segment = validSegments.includes(requestedSegment) ? requestedSegment : '';
+    const format = url.searchParams.get('format') === 'mini-ad' ? 'mini-ad' : '';
     const requestedOffset = Number(url.searchParams.get('offset')) || 0;
     const payload = id ? { id } : {
         offset: Math.floor(Math.max(0, Math.min(requestedOffset, 100000)) / MARKETPLACE_PAGE_SIZE) * MARKETPLACE_PAGE_SIZE,
-        category: MARKET_CATEGORIES.includes(category) ? category : '',
+        category, segment, format,
         search: (url.searchParams.get('search') || '').trim().slice(0, 100)
     };
-    const isFirstPage = !id && !payload.category && !payload.search && !payload.offset;
+    const isFirstPage = !id && !payload.category && !payload.segment && !payload.format && !payload.search && !payload.offset;
     const [data, separatePreviews] = await Promise.all([
         marketplaceData(payload, fetchImpl),
         id || isFirstPage ? null : marketplaceData({}, fetchImpl).catch(() => null)
@@ -103,19 +116,21 @@ export async function renderMarketplace(url, root, fetchImpl = fetch) {
 
     const rows = data.rows.slice(0, id ? 1 : MARKETPLACE_PAGE_SIZE);
     const flyer = id ? rows[0] : null;
+    const isVideo = flyer?.mime === 'video/mp4';
     const title = flyer ? `${flyer.title} — ${flyer.business_name} | AJM Marketplace` : 'AJM Marketplace | Jamaican Business Flyers & Opportunities';
     const description = flyer ? flyer.tagline : 'Explore Jamaican business flyers, farm products, vehicles, hardware, suppliers, events and services on AJM Marketplace.';
     const canonical = flyer ? '/marketplace?id=' + id : '/marketplace';
     const schema = flyer
         ? { '@context': 'https://schema.org', '@type': 'WebPage', name: flyer.title, description: flyer.tagline,
-            url: ORIGIN + canonical, primaryImageOfPage: ORIGIN + '/marketplace/flyers/' + id }
+            url: ORIGIN + canonical,
+            ...(isVideo ? {} : { primaryImageOfPage: ORIGIN + '/marketplace/flyers/' + id }) }
         : { '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'AJM Marketplace', url: ORIGIN + canonical,
             mainEntity: { '@type': 'ItemList', itemListElement: rows.map((item, index) => ({
                 '@type': 'ListItem', position: payload.offset + index + 1, name: item.title, url: ORIGIN + '/marketplace?id=' + item.id
             })) } };
 
     const metadata = head({
-        title, description, image: flyer ? '/marketplace/flyers/' + id : '/assets/seo/usse-hub-share.png',
+        title, description, image: flyer && !isVideo ? '/marketplace/flyers/' + id : '/assets/seo/usse-hub-share.png',
         path: canonical, noindex: !flyer && !isFirstPage,
         schemas: [schema, breadcrumbs([['USSE Hub', '/'], ['AJM Marketplace', '/marketplace']])]
     });
@@ -129,18 +144,64 @@ export async function renderMarketplace(url, root, fetchImpl = fetch) {
             .replace('<a class="button" href="/ajm-marketplace-manage#flyer-editor">Post a flyer →</a>', '')
             .replace('<!-- marketplace share -->', () => marketplaceShare(flyer, canonical))
             .replace(/<meta property="og:image:(width|height)" content="[^"]*">/g, '');
+        if (isVideo) {
+            html = html.replace('Share this flyer</h2>', 'Share this mini-ad</h2>')
+                .replace('</head>', `<meta property="og:video" content="${ORIGIN}/marketplace/videos/${id}">
+<meta property="og:video:type" content="video/mp4"></head>`);
+        }
     } else {
         const pool = (isFirstPage ? data.rows : separatePreviews?.rows || []);
-        const previews = pool.map(({ id, title }) => ({ id, title }));
+        const previews = pool.map(({ id, title, mime }) => ({ id, title, mime }));
         html = html
             .replace('<!-- marketplace filters -->', () => marketplaceFilters(payload))
             .replace('<!-- marketplace pagination -->', () => marketplacePagination(payload, data.total, rows.length))
             .replace('</main>', () => `<script id="marketplace-previews" type="application/json">${jsonLd(previews)}</script></main>`);
     }
 
-    const empty = '<div class="market-empty"><h3>No flyers match this view.</h3><p>Browse all approved flyers or explore the business directory.</p><a href="/marketplace#marketplace-results">All Marketplace flyers →</a></div>';
+    const empty = '<div class="market-empty"><h3>No posts match this view.</h3><p>Browse all approved posts or explore the business directory.</p><a href="/marketplace#marketplace-results">All Marketplace flyers →</a></div>';
     html = html.replace('<!-- marketplace rows -->', () => rows.length ? rows.map(item => marketCard(item, { compact: !flyer })).join('') : empty);
     return { status: 200, body: html, noindex: !flyer && !isFirstPage };
 }
 
-export async function marketplaceImage(id,fetchImpl=fetch){if(!uuid.test(id))return null;const data=await marketplaceData({id},fetchImpl),f=data.rows[0];if(!f||!uuid.test(f.id)||!/^[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp)$/i.test(f.image_path))return null;const signed=await fetchImpl(SUPABASE_URL+'/storage/v1/object/sign/marketplace-flyers/'+f.image_path,{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({expiresIn:60}),signal:AbortSignal.timeout(7000)});if(!signed.ok)throw new Error('Marketplace image unavailable');const value=await signed.json();if(!value.signedURL?.startsWith('/object/sign/marketplace-flyers/'))throw new Error('Invalid image target');const target=new URL('/storage/v1'+value.signedURL,SUPABASE_URL);if(target.origin!==SUPABASE_URL||!target.pathname.startsWith('/storage/v1/object/sign/marketplace-flyers/'))throw new Error('Invalid image target');const image=await fetchImpl(target,{redirect:'error',signal:AbortSignal.timeout(7000)}),type=(image.headers.get('content-type')||'').split(';')[0];if(!image.ok||!['image/jpeg','image/png','image/webp'].includes(type)||Number(image.headers.get('content-length'))>5242880)throw new Error('Invalid image');const body=Buffer.from(await image.arrayBuffer());if(body.length>5242880)throw new Error('Image too large');return{body,type};}
+async function signedMarketplaceMedia(id, kind, fetchImpl) {
+    if (!uuid.test(id)) return null;
+    const data = await marketplaceData({ id }, fetchImpl);
+    const flyer = data.rows[0];
+    if (!flyer || !uuid.test(flyer.id)) return null;
+    const pathPattern = kind === 'video'
+        ? /^[a-f0-9-]{36}\/[a-f0-9-]{36}\.mp4$/i
+        : /^[a-f0-9-]{36}\/[a-f0-9-]{36}\.(png|jpg|webp)$/i;
+    if (!pathPattern.test(flyer.image_path)) return null;
+    if (kind === 'video' && (flyer.mime !== 'video/mp4' || !(flyer.video_duration_ms > 0 && flyer.video_duration_ms <= 15000))) return null;
+
+    const signed = await fetchImpl(SUPABASE_URL + '/storage/v1/object/sign/marketplace-flyers/' + flyer.image_path, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expiresIn: kind === 'video' ? 600 : 60 }),
+        signal: AbortSignal.timeout(7000)
+    });
+    if (!signed.ok) throw new Error('Marketplace media unavailable');
+    const { signedURL } = await signed.json();
+    if (!signedURL?.startsWith('/object/sign/marketplace-flyers/')) throw new Error('Invalid media target');
+    const target = new URL('/storage/v1' + signedURL, SUPABASE_URL);
+    if (target.origin !== SUPABASE_URL || target.pathname !== '/storage/v1/object/sign/marketplace-flyers/' + flyer.image_path) {
+        throw new Error('Invalid media target');
+    }
+    return target.href;
+}
+
+export async function marketplaceImage(id, fetchImpl = fetch) {
+    const target = await signedMarketplaceMedia(id, 'image', fetchImpl);
+    if (!target) return null;
+    const image = await fetchImpl(target, { redirect: 'error', signal: AbortSignal.timeout(7000) });
+    const type = (image.headers.get('content-type') || '').split(';')[0];
+    if (!image.ok || !['image/jpeg', 'image/png', 'image/webp'].includes(type) ||
+        Number(image.headers.get('content-length')) > 5242880) throw new Error('Invalid image');
+    const body = Buffer.from(await image.arrayBuffer());
+    if (body.length > 5242880) throw new Error('Image too large');
+    return { body, type };
+}
+
+export function marketplaceVideo(id, fetchImpl = fetch) {
+    return signedMarketplaceMedia(id, 'video', fetchImpl);
+}

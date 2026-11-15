@@ -1,4 +1,4 @@
-import {renderMarketplace,marketplaceImage} from './server/marketplace.mjs';
+import {renderMarketplace,marketplaceImage,marketplaceVideo} from './server/marketplace.mjs';
 import http from 'node:http';import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';import {gzipSync,brotliCompressSync} from 'node:zlib';
 import serveHandler from 'serve-handler';
 import {SUPABASE_URL,SUPABASE_ANON_KEY} from './assets/usse-public-config.mjs';
@@ -29,6 +29,13 @@ export function createSiteServer({jobs=publicJobClient(),fetchImpl=fetch,root=RO
     const page=await renderMarketplace(url,root,fetchImpl);return send(req,res,page.status,page.body,'text/html; charset=utf-8',{'Cache-Control':'no-store','X-Robots-Tag':page.status!==200||page.noindex?'noindex,follow':'index,follow'});
    }
    const flyerMatch=pathname.match(/^\/marketplace\/flyers\/([^/]+)$/);if(flyerMatch){const image=await marketplaceImage(flyerMatch[1],fetchImpl);return image?send(req,res,200,image.body,image.type,{'Cache-Control':'no-store'}):send(req,res,404,'Flyer no longer available','text/plain; charset=utf-8');}
+   const miniAdMatch = pathname.match(/^\/marketplace\/videos\/([^/]+)$/);
+   if (miniAdMatch) {
+    const videoUrl = await marketplaceVideo(miniAdMatch[1], fetchImpl);
+    return videoUrl
+     ? send(req, res, 307, '', 'text/plain', { Location: videoUrl, 'Cache-Control': 'no-store' })
+     : send(req, res, 404, 'Mini-ad no longer available', 'text/plain');
+   }
    if(pathname==='/post-a-job')return send(req,res,200,postJobPage());
    if(['/jobs','/ajm-jobzone','/ajm-jobzone.html'].includes(pathname)){
     if(url.searchParams.has('job')){const id=url.searchParams.get('job');if(!uuid.test(id))return send(req,res,404,errorPage('Vacancy not found','This vacancy link is not valid.'));const job=await jobs.detail(id);if(!job)return send(req,res,404,errorPage('Vacancy no longer available','This vacancy may have closed or expired. Explore the current opportunities.'));return redirect(req,res,jobPath(job));}

@@ -1,9 +1,9 @@
 process.on('uncaughtException',e=>{console.error(e.message,e.where||'',e.query||'');process.exit(1)});process.on('unhandledRejection',e=>{console.error(e.message,e.where||'',e.query||'');process.exit(1)});
 import assert from'node:assert/strict';import fs from'node:fs';import{PGlite}from'@electric-sql/pglite';
 import{MARKET_CATEGORIES,marketCard,marketplacePreviewOrder,marketplacePreviewTile,secureUrl,validateMarketImage}from'../assets/usse-marketplace-core.mjs';
-import{renderMarketplace,marketplaceImage}from'../server/marketplace.mjs';
+import{renderMarketplace,marketplaceImage,marketplaceVideo}from'../server/marketplace.mjs';
 const db=new PGlite(),admin=crypto.randomUUID(),member=crypto.randomUUID(),other=crypto.randomUUID(),lid=crypto.randomUUID(),silver=crypto.randomUUID(),platinum=crypto.randomUUID(),banner=crypto.randomUUID();
-await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE SCHEMA auth;CREATE SCHEMA private;CREATE SCHEMA storage;
+await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role BYPASSRLS;CREATE SCHEMA auth;CREATE SCHEMA private;CREATE SCHEMA storage;
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$SELECT nullif(current_setting('test.uid',true),'')::uuid$$;
 CREATE TABLE public.profiles(id uuid PRIMARY KEY,role text,account_status text);CREATE TABLE auth.users(id uuid PRIMARY KEY,email_confirmed_at timestamptz);
 CREATE FUNCTION private.app_is_admin(uid uuid) RETURNS boolean LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$SELECT EXISTS(SELECT 1 FROM public.profiles WHERE id=uid AND role='admin' AND account_status='active')$$;
@@ -99,8 +99,62 @@ await as(admin);
 await manage('review', { id: memberPoster.id, status: 'published' });
 await as(member);
 await assert.rejects(manage('edit', { ...edit, id: memberPoster.id }), /administrators/);
+await db.exec('RESET ROLE');
+await db.exec(fs.readFileSync('supabase/migrations/20261115010000_marketplace_segments_mini_ads.sql', 'utf8'));
+await as(member);
+const memberOriginal = (await manage('list')).rows.find(row => row.id === memberPoster.id);
+const corrected = {
+    ...edit, id: memberPoster.id, expected_updated_at: memberOriginal.updated_at,
+    category: 'Fashion & Retail', segment: 'Retail Clothing'
+};
+assert.equal((await manage('edit', corrected)).status, 'pending');
+assert.equal((await browse({ id: memberPoster.id })).total, 0);
+await as(other);
+await assert.rejects(manage('edit', corrected), /own flyers/);
 await as(admin);
+await manage('review', { id: memberPoster.id, status: 'published' });
+const memberUpdated = (await manage('list')).rows.find(row => row.id === memberPoster.id);
+assert.equal(memberUpdated.expires_at, memberOriginal.expires_at);
+assert.equal(memberUpdated.published_at, memberOriginal.published_at);
+assert.equal((await browse({ category: 'Fashion & Retail', segment: 'Retail Clothing' })).total, 1);
+await assert.rejects(manage('edit', { ...corrected, segment: 'Haulage Services' }), /selected category/);
 await manage('withdraw', { id: memberPoster.id });
+
+const video = {
+    ...quickPoster, id: crypto.randomUUID(), request_id: crypto.randomUUID(),
+    mime: 'video/mp4', file_size: 150, category: 'Fashion & Retail', segment: 'Fashion Industry'
+};
+const videoPath = (await manage('reserve', video)).path;
+assert.match(videoPath, /\.mp4$/);
+await db.query('INSERT INTO storage.objects(bucket_id,name,metadata) VALUES($1,$2,$3)', [
+    'marketplace-flyers', videoPath, { mimetype: 'video/mp4', size: 150 }
+]);
+await assert.rejects(manage('submit', { id: video.id }), /pass video validation/);
+await assert.rejects(db.query('SELECT public.mark_marketplace_video_verified($1,$2,12000)', [video.id, videoPath]), /permission denied/);
+await db.exec('RESET ROLE');
+assert.equal((await db.query('SELECT public.mark_marketplace_video_verified($1,$2,15001) verified', [video.id, videoPath])).rows[0].verified, false);
+assert.equal((await db.query('SELECT public.mark_marketplace_video_verified($1,$2,12000) verified', [video.id, videoPath])).rows[0].verified, true);
+await as(admin);
+assert.equal((await manage('submit', { id: video.id })).status, 'published');
+assert.equal((await browse({format:'mini-ad'})).rows[0].video_duration_ms, 12000);
+assert.match(marketCard({ ...video, video_duration_ms: 12000 }), /<video controls playsinline/);
+
+const signedPath = '/object/sign/marketplace-flyers/' + videoPath;
+const verifiedVideo = { ...video, video_duration_ms: 12000, image_path: videoPath };
+const videoFetch = async url => {
+    if (url.includes('/rpc/marketplace_public')) return Response.json({ rows: [verifiedVideo], total: 1 });
+    assert(url.endsWith('/marketplace-flyers/' + videoPath));
+    return Response.json({ signedURL: signedPath + '?token=test' });
+};
+assert.match(await marketplaceVideo(video.id, videoFetch), /\.mp4\?token=test$/);
+const unverifiedVideoFetch = async () => Response.json({ rows: [{ ...verifiedVideo, video_duration_ms: null }], total: 1 });
+assert.equal(await marketplaceVideo(video.id, unverifiedVideoFetch), null);
+const miniAdPage = await renderMarketplace(new URL('https://ussehub.com/marketplace?id=' + video.id), process.cwd(), videoFetch);
+assert.match(miniAdPage.body, /Share this mini-ad/);
+assert.match(miniAdPage.body, /<video controls playsinline/);
+
+await manage('withdraw', { id: video.id });
+
 await db.query("RESET ROLE");
 await db.query("UPDATE public.marketplace_flyers SET expires_at=now()-interval '1 second' WHERE id=$1", [quickPoster.id]);
 await as('', 'anon');
@@ -141,18 +195,18 @@ const browsePage = path => renderMarketplace(new URL(path, 'https://ussehub.com'
 const visibleCards = html => [...html.matchAll(/class="market-card flyer-card flyer-card-compact"/g)].length;
 const firstPage = await browsePage('/marketplace');
 assert.equal(visibleCards(firstPage.body), 6);
-assert.match(firstPage.body, /1–6 of 13 flyers/);
+assert.match(firstPage.body, /1–6 of 13 posts/);
 assert.match(firstPage.body, /href="\/marketplace\?offset=6#marketplace-results"/);
 
 const secondPage = await browsePage('/marketplace?offset=6');
 assert.equal(visibleCards(secondPage.body), 6);
-assert.match(secondPage.body, /7–12 of 13 flyers/);
+assert.match(secondPage.body, /7–12 of 13 posts/);
 assert.match(secondPage.body, /href="\/marketplace\?offset=12#marketplace-results"/);
 assert.equal(secondPage.noindex, true);
 
 const lastPage = await browsePage('/marketplace?offset=12');
 assert.equal(visibleCards(lastPage.body), 1);
-assert.match(lastPage.body, /13–13 of 13 flyers/);
+assert.match(lastPage.body, /13–13 of 13 posts/);
 assert.doesNotMatch(lastPage.body, /Next →/);
 
 const filtered = await browsePage('/marketplace?category=Suppliers');
@@ -160,7 +214,7 @@ assert.equal(visibleCards(filtered.body), 6);
 assert.match(filtered.body, /category=Suppliers&amp;offset=6/);
 const previewPool = JSON.parse(filtered.body.match(/id="marketplace-previews" type="application\/json">(.*?)<\/script>/)[1]);
 assert.equal(previewPool.length, 13);
-assert.deepEqual(Object.keys(previewPool[0]), ['id', 'title']);
+assert.deepEqual(Object.keys(previewPool[0]), ['id', 'title', 'mime']);
 
 assert.equal((await browsePage('/marketplace?offset=18')).status, 404);
 assert.equal(visibleCards(rendered.body), 0);
