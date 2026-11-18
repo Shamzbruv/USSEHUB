@@ -5,7 +5,9 @@ export const MARKET_SEGMENTS = {
     ],
     "Events & Entertainment": [
         "Attractions",
-        "Musical Studio Services"
+        "Musical Studio Services",
+        "Religious Events / Activities",
+        "Gospel Concerts"
     ],
     "Food & Catering": [
         "Catering Services",
@@ -25,7 +27,8 @@ export const MARKET_SEGMENTS = {
     "Transport & Logistics": [
         "Delivery Services",
         "Haulage Services",
-        "Import & Export Services"
+        "Import & Export Services",
+        "Car Rental Services"
     ],
     "Financial Services": [
         "Micro Loan Services"

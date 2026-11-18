@@ -14,6 +14,7 @@
 
   const page = body.dataset.hubPage;
   const config = {
+    'ajm-categories': ['Categories & subsegments', 'Keep your choices current.', 'Manage categories used in Marketplace and business listings.', 'Choose a catalogue and a parent, then add the missing category or subsegment.'],
     'ajm-marketplace-admin': ['Marketplace offerings', 'Three offerings. Clearly in view.', 'Separate listings, webpages and banners.', 'Switch between registers and use the banner size and placement preview before configuring a campaign.'],
     'ajm-jobzone-admin': ['JobZone monitoring', 'Opportunity, in view.', 'Moderate employer vacancies and monitor activity.', 'Review vacancy content, publish or return it, and monitor aggregate activity. Applicant details stay with each posting employer.'],
     'admin-app': ['App & alerts', 'Your office. Wherever you are.', 'USSE Hub on your device.', 'Install the app and choose which platform updates reach your devices.'],
@@ -53,6 +54,7 @@
     ['ajm-marketplace-manage', 'Marketplace flyers & trials', 'globe'],
     ['ajm-jobzone-admin', 'JobZone monitoring', 'people'],
     ['ajm-admin-panel', 'Directory & reports', 'list'],
+    ['ajm-categories', 'Categories & subsegments', 'list'],
     ['ajm-ad-management', 'Advertising & accounts', 'chart'],
     ['referral-agreements', 'Partners & referrals', 'people']
   ];

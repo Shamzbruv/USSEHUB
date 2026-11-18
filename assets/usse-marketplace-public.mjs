@@ -1,4 +1,4 @@
-import { MARKET_SEGMENTS, marketplacePreviewOrder, marketplacePreviewTile } from './usse-marketplace-core.mjs?v=segments1';
+import { MARKET_SEGMENTS, marketplacePreviewOrder, marketplacePreviewTile } from './usse-marketplace-core.mjs?v=taxonomy2';
 
 const previewData = document.getElementById('marketplace-previews');
 const showcase = document.getElementById('marketplace-showcase');
@@ -27,9 +27,10 @@ if (previewData && showcase) {
 const search = document.getElementById('marketplace-search');
 if (search) {
     const { category, segment } = search.elements;
+    const taxonomy = JSON.parse(document.getElementById('marketplace-taxonomy')?.textContent || JSON.stringify(MARKET_SEGMENTS));
     category.addEventListener('change', () => {
         const current = segment.value;
-        const allowed = category.value ? MARKET_SEGMENTS[category.value] || [] : Object.values(MARKET_SEGMENTS).flat();
+        const allowed = category.value ? taxonomy[category.value] || [] : Object.values(taxonomy).flat();
         segment.replaceChildren(new Option('All subsegments', ''), ...allowed.map(name => new Option(name, name)));
         segment.value = allowed.includes(current) ? current : '';
     });

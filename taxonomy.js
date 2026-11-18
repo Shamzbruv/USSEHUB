@@ -240,6 +240,12 @@ for (const [category, group, segments] of [
 ]) {
     TAXONOMY[category][group] = { tertiary: segments, specific: [] };
 }
+// Additional classifications requested on 18 November 2026.
+TAXONOMY.GENERAL['TRANSPORT & LOGISTICS'].tertiary.push('CAR RENTAL SERVICES');
+TAXONOMY.ENTERTAINMENT['RELIGIOUS EVENTS & ACTIVITIES'] = {
+    tertiary: ['RELIGIOUS EVENTS / ACTIVITIES', 'GOSPEL CONCERTS'], specific: []
+};
+// live taxonomy additions
 window.USSE_OPERATION_DEPARTMENTS = Object.freeze([...OPERATION_DEPARTMENTS, "OTHER"]);
 window.USSE_BUSINESS_SECTORS = Object.freeze(["BUSINESS OPERATORS", "TOURISM INDUSTRY", "HOTEL OPERATIONS", "RETAIL OPERATIONS / INDUSTRY", "RESTAURANT SERVICES"]);
 

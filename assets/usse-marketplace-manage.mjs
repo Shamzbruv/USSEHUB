@@ -1,6 +1,6 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.2/+esm';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './usse-public-config.mjs';
-import { MARKET_CATEGORIES, MARKET_SEGMENTS, MINI_AD_MAX_SECONDS, MINI_AD_MAX_BYTES, escapeHtml as e, marketCard, validateMarketImage } from './usse-marketplace-core.mjs?v=segments1';
+import { MARKET_CATEGORIES, MARKET_SEGMENTS, MINI_AD_MAX_SECONDS, MINI_AD_MAX_BYTES, escapeHtml as e, marketCard, validateMarketImage } from './usse-marketplace-core.mjs?v=taxonomy2';
 import { placementLabel } from './usse-banner-core.mjs';
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -43,12 +43,26 @@ async function validateVideoDraft(id) {
     }
 }
 
-const categoryOptions = MARKET_CATEGORIES.map(category => `<option>${e(category)}</option>`).join('');
+let marketSegments = MARKET_SEGMENTS;
+let marketCategories = MARKET_CATEGORIES;
+try {
+    const response = await fetch('/business-taxonomy.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Category service unavailable');
+    const data = await response.json();
+    if (data.marketplace && !Array.isArray(data.marketplace)) {
+        marketSegments = data.marketplace;
+        marketCategories = Object.keys(marketSegments);
+    }
+} catch {
+    note('Using the saved category list. Refresh to check for newly added choices.');
+}
+
+const categoryOptions = marketCategories.map(category => `<option>${e(category)}</option>`).join('');
 form.elements.category.innerHTML = '<option value="">Choose a category</option>' + categoryOptions;
 editForm.elements.category.innerHTML = categoryOptions;
 
 function updateSegments(target, value = '') {
-    const segments = MARKET_SEGMENTS[target.elements.category.value] || [];
+    const segments = marketSegments[target.elements.category.value] || [];
     const select = target.elements.segment;
     select.innerHTML = '<option value="">No subsegment</option>' +
         segments.map(segment => `<option>${e(segment)}</option>`).join('');
@@ -383,7 +397,7 @@ async function loadTrials(){const data=await rpc('manage_ajm_trials','list');tri
 $('trial-form').elements.package_id.onchange=trialFields;
 $('trial-form').onsubmit=async ev=>{ev.preventDefault();const f=ev.currentTarget,b=f.querySelector('button');if(b.disabled)return;try{b.disabled=true;const payload=Object.fromEntries(new FormData(f));payload.consent=f.elements.consent.checked;const key=JSON.stringify(payload);if(!trialAttempt||trialAttempt.key!==key)trialAttempt={key,payload:{...payload,id:crypto.randomUUID()}};const result=await rpc('manage_ajm_trials','activate',trialAttempt.payload);$('trial-result').textContent='Complimentary trial active until '+date(result.expires_at)+'. No payment or automatic renewal.';trialAttempt=null;f.elements.consent.checked=false;await loadTrials();}catch(error){$('trial-result').textContent=error.message;}finally{b.disabled=false;}};
 $('trial-list').onclick=async ev=>{const b=ev.target.closest('[data-end-trial]');if(!b)return;b.disabled=true;try{await rpc('manage_ajm_trials','end',{id:b.dataset.endTrial});await loadTrials();note('Trial ended. Existing paid subscriptions remain in place.');}catch(error){note(error.message,true);b.disabled=false;}};
-async function init(){try{const{data:{user:current},error}=await sb.auth.getUser();if(error||!current){user=null;$('market-login').hidden=false;$('market-workspace').hidden=true;$('market-signout').hidden=true;note('Sign in with a verified account to submit flyers.');return;}const{data:p,error:profileError}=await sb.from('profiles').select('role,account_status').eq('id',current.id).maybeSingle();if(profileError)throw profileError;if(p?.account_status!=='active'||!current.email_confirmed_at)throw new Error('An active account and confirmed email are required.');user=current;admin=p.role==='admin';$('market-login').hidden=true;$('market-workspace').hidden=false;$('market-signout').hidden=false;$('trial-workspace').hidden=!admin;$('trial-nav').hidden=!admin;$('sponsored-option').hidden=!admin;$('market-flyer-save').textContent=admin?'Publish poster':'Submit for review';configureFlyerForm();$('flyer-register-title').textContent=admin?'All Marketplace flyers':'Your flyers';if(admin)$('flyer-rule').textContent='Publish a poster or mini-ad directly. Select a category and subsegment now, or edit the post later from the register.';if(location.hash==='#flyer-editor')$('market-flyer-heading').focus();await loadFlyers();if(admin){const c=await rpc('manage_ajm_trials','catalog');packages=c.packages;const f=$('trial-form');f.elements.listing_id.innerHTML='<option value="">Choose a confirmed business</option>'+c.listings.map(l=>`<option value="${e(l.id)}">${e(l.name)}</option>`).join('');f.elements.package_id.innerHTML='<option value="">Choose a package</option>'+packages.map(p=>`<option value="${e(p.id)}">${e(p.name)} · ${e(p.type)}</option>`).join('');trialFields();await loadTrials();}note(admin?'Administrator workspace ready. Review flyers or activate agreed complimentary trials.':'Your Marketplace workspace is ready.');}catch(error){note(error.message,true);}}
+async function init(){try{const{data:{user:current},error}=await sb.auth.getUser();if(error||!current){user=null;$('market-login').hidden=false;$('market-workspace').hidden=true;$('market-signout').hidden=true;note('Sign in with a verified account to submit flyers.');return;}const{data:p,error:profileError}=await sb.from('profiles').select('role,account_status').eq('id',current.id).maybeSingle();if(profileError)throw profileError;if(p?.account_status!=='active'||!current.email_confirmed_at)throw new Error('An active account and confirmed email are required.');user=current;admin=p.role==='admin';$('market-login').hidden=true;$('market-workspace').hidden=false;$('market-signout').hidden=false;$('trial-workspace').hidden=!admin;$('trial-nav').hidden=!admin;$('category-nav').hidden=!admin;$('sponsored-option').hidden=!admin;$('market-flyer-save').textContent=admin?'Publish poster':'Submit for review';configureFlyerForm();$('flyer-register-title').textContent=admin?'All Marketplace flyers':'Your flyers';if(admin)$('flyer-rule').textContent='Publish a poster or mini-ad directly. Select a category and subsegment now, or edit the post later from the register.';if(location.hash==='#flyer-editor')$('market-flyer-heading').focus();await loadFlyers();if(admin){const c=await rpc('manage_ajm_trials','catalog');packages=c.packages;const f=$('trial-form');f.elements.listing_id.innerHTML='<option value="">Choose a confirmed business</option>'+c.listings.map(l=>`<option value="${e(l.id)}">${e(l.name)}</option>`).join('');f.elements.package_id.innerHTML='<option value="">Choose a package</option>'+packages.map(p=>`<option value="${e(p.id)}">${e(p.name)} · ${e(p.type)}</option>`).join('');trialFields();await loadTrials();}note(admin?'Administrator workspace ready. Review flyers or activate agreed complimentary trials.':'Your Marketplace workspace is ready.');}catch(error){note(error.message,true);}}
 $('market-login-form').onsubmit=async ev=>{ev.preventDefault();const f=ev.currentTarget,b=f.querySelector('button');b.disabled=true;try{const{error}=await sb.auth.signInWithPassword({email:f.elements.email.value.trim(),password:f.elements.password.value});if(error)throw error;f.elements.password.value='';await init();}catch(error){note(error.message,true);}finally{b.disabled=false;}};
 $('market-signout').onclick=async()=>{await sb.auth.signOut();};sb.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){user=null;admin=false;packages=[];trials=[];flyers.clear();if(editDialog.open)editDialog.close();imageSequence++;clearFile();$('manage-flyers').replaceChildren();$('trial-list').replaceChildren();$('market-workspace').hidden=true;$('market-login').hidden=false;$('market-signout').hidden=true;note('Signed out.');}});
 $('manage-refresh').onclick=async()=>{try{await loadFlyers();if(admin)await loadTrials();note('Workspace refreshed.');}catch(error){note(error.message,true);}};$('manage-prev').onclick=()=>{offset=Math.max(0,offset-100);loadFlyers().catch(err=>note(err.message,true));};$('manage-next').onclick=()=>{offset+=100;loadFlyers().catch(err=>note(err.message,true));};window.addEventListener('pagehide',()=>{if(preview)URL.revokeObjectURL(preview);});await init();

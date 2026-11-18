@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en-JM">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Categories &amp; Subsegments | USSE Hub</title>
+    <link rel="icon" href="/assets/seo/favicon-96.png">
+    <script defer src="/assets/usse-theme.js"></script>
+    <link rel="stylesheet" href="/assets/usse-design.css?v=20261105-seo-mobile">
+    <link rel="stylesheet" href="/assets/usse-theme.css">
+    <link rel="stylesheet" href="/assets/usse-market.css">
+    <script defer src="/assets/usse-workspace.js?v=20261118-categories"></script>
+    <style>
+        .taxonomy-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:start }
+        .taxonomy-layout > * { min-width:0 }
+        .taxonomy-layout label { display:grid; gap:8px; margin-bottom:18px }
+        .taxonomy-layout input,.taxonomy-layout select { width:100%; min-width:0; min-height:48px; padding:12px; border:1px solid var(--hub-line); border-radius:10px; color:var(--hub-ink); background:var(--hub-paper) }
+        #taxonomy-list details { padding:12px 0; border-bottom:1px solid var(--hub-line); overflow-wrap:anywhere }
+        #taxonomy-list summary { cursor:pointer; font-weight:700; padding:8px 0 }
+        #taxonomy-list li { margin:8px 0 }
+        #taxonomy-parent-fields [hidden] { display:none }
+        @media(max-width:800px) { .taxonomy-layout { grid-template-columns:minmax(0,1fr) } }
+    </style>
+    <script type="module" src="/assets/usse-taxonomy-admin.mjs?v=20261118"></script>
+</head>
+<body class="hub-admin" data-hub-page="ajm-categories">
+    <header class="market-site-header">
+        <a class="market-site-brand" href="/admin-app"><img src="/aloe logo.png" alt="Aloe Jamaica" width="46" height="46"><span><strong>USSE Hub</strong><small>ADMINISTRATOR WORKSPACE</small></span></a>
+        <nav aria-label="Main navigation"><a href="/ajm-admin-panel">Directory &amp; reports</a><a href="/ajm-marketplace-manage">Post / manage flyers</a><a href="/admin-app">Admin app</a></nav>
+    </header>
+    <main class="market-shell">
+        <h1>Categories &amp; subsegments</h1>
+        <p>Add choices for Marketplace posts or Web Listings and their business webpages. Refresh an open posting form after saving to load the latest choices.</p>
+        <p id="taxonomy-notice" class="market-notice" role="status" aria-live="polite">Checking your administrator account…</p>
+        <section id="taxonomy-login" class="market-card" hidden>
+            <h2>Sign in with your administrator account</h2>
+            <form id="taxonomy-login-form" class="market-form">
+                <label>Email<input name="email" type="email" autocomplete="username" required></label>
+                <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+                <button class="primary">Sign in</button>
+            </form>
+        </section>
+        <div id="taxonomy-workspace" hidden>
+            <div class="taxonomy-layout">
+                <section class="market-card">
+                    <h2>Add a choice</h2>
+                    <form id="taxonomy-add-form">
+                        <label>Catalogue<select name="scope"><option value="marketplace">Marketplace</option><option value="directory">Web Listings &amp; business webpages</option></select></label>
+                        <label>What are you adding?<select name="level"></select></label>
+                        <div id="taxonomy-parent-fields">
+                            <label id="taxonomy-category-field">Parent category<select name="category"></select></label>
+                            <label id="taxonomy-secondary-field">Parent subcategory<select name="secondary"></select></label>
+                            <label id="taxonomy-tertiary-field">Parent specialization<select name="tertiary"></select></label>
+                        </div>
+                        <label>Name<input name="name" required minlength="2" maxlength="100" placeholder="e.g. Car Rental Services"></label>
+                        <p id="taxonomy-placement"></p>
+                        <button id="taxonomy-save" class="primary" type="submit">Add choice</button>
+                        <p id="taxonomy-result" role="status" aria-live="polite"></p>
+                    </form>
+                </section>
+                <section class="market-card">
+                    <div class="market-top"><h2>Current choices</h2><button id="taxonomy-refresh" type="button">Refresh</button></div>
+                    <label>Find a category or service<input id="taxonomy-search" type="search" placeholder="Search choices"></label>
+                    <div id="taxonomy-list"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
