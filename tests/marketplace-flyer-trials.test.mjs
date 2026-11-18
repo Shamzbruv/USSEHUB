@@ -101,6 +101,38 @@ await as(member);
 await assert.rejects(manage('edit', { ...edit, id: memberPoster.id }), /administrators/);
 await db.exec('RESET ROLE');
 await db.exec(fs.readFileSync('supabase/migrations/20261115010000_marketplace_segments_mini_ads.sql', 'utf8'));
+await db.exec(fs.readFileSync('supabase/migrations/20261118203534_admin_business_taxonomy.sql', 'utf8'));
+const catalog = async () => (await db.query('SELECT public.business_taxonomy() result')).rows[0].result;
+const addChoice = async (scope, parent, name) => (await db.query(
+    'SELECT public.add_business_taxonomy_entry($1,$2,$3) result', [scope, parent, name]
+)).rows[0].result;
+await as('', 'anon');
+assert.ok((await catalog()).marketplace['Transport & Logistics'].includes('Car Rental Services'));
+assert.ok((await catalog()).marketplace['Events & Entertainment'].includes('Gospel Concerts'));
+await assert.rejects(db.query('SELECT * FROM private.business_taxonomies'), /permission denied/);
+await assert.rejects(addChoice('marketplace', [], 'Unauthorized category'), /permission denied/);
+await as(member);
+await assert.rejects(addChoice('marketplace', [], 'Unauthorized category'), /administrator/);
+await as(admin);
+await assert.rejects(addChoice('marketplace', ['Missing parent'], 'New service'), /parent category/);
+await assert.rejects(addChoice('marketplace', [], '__proto__'), /name between/);
+await assert.rejects(addChoice('marketplace', ['General', 'Missing level'], 'New service'), /valid parent/);
+await addChoice('marketplace', [], 'New market category');
+const expanded = await addChoice('marketplace', ['New market category'], 'New service');
+assert.deepEqual(expanded['New market category'], ['New service']);
+assert.deepEqual(await addChoice('marketplace', ['New market category'], 'NEW SERVICE'), expanded, 'Retries and case variants do not create duplicates');
+await addChoice('directory', [], 'NEW DIRECTORY CATEGORY');
+await addChoice('directory', ['NEW DIRECTORY CATEGORY'], 'NEW SUBCATEGORY');
+await addChoice('directory', ['NEW DIRECTORY CATEGORY', 'NEW SUBCATEGORY'], 'NEW SPECIALIZATION');
+await addChoice('directory', ['NEW DIRECTORY CATEGORY', 'NEW SUBCATEGORY', 'NEW SPECIALIZATION'], 'NEW TYPE');
+assert.deepEqual((await catalog()).directory['NEW DIRECTORY CATEGORY']['NEW SUBCATEGORY'], {
+    tertiary: ['NEW SPECIALIZATION'], specific: ['NEW TYPE']
+});
+await assert.rejects(addChoice('directory', ['NEW DIRECTORY CATEGORY', 'MISSING'], 'Invalid specialization'), /selected category/);
+const newCategoryDraft = { ...quickPoster, id: crypto.randomUUID(), request_id: crypto.randomUUID(), category: 'New market category', segment: 'New service' };
+assert.match((await manage('reserve', newCategoryDraft)).path, /\.png$/);
+await assert.rejects(manage('reserve', { ...newCategoryDraft, id: crypto.randomUUID(), segment: 'Gospel Concerts' }), /selected category/);
+
 await as(member);
 const memberOriginal = (await manage('list')).rows.find(row => row.id === memberPoster.id);
 const corrected = {
@@ -166,7 +198,7 @@ await as(admin);const tp={id:crypto.randomUUID(),listing_id:lid,package_id:plati
 await db.exec(`RESET ROLE;UPDATE public.listing_webpages SET tier='platinum' WHERE listing_id='${lid}'`);await as('','anon');let page=(await db.query('SELECT public.public_entitled_webpage($1) r',[lid])).rows[0].r;assert.equal(page.tier,'platinum');assert.equal(page.booking_url,'https://book.example.test');assert.equal(page.created_by,undefined);
 await db.exec(`RESET ROLE;UPDATE public.ad_subscriptions SET expires_at=now()-interval '1 second' WHERE trial_id='${tp.id}'`);await as('','anon');page=(await db.query('SELECT public.public_entitled_webpage($1) r',[lid])).rows[0].r;assert.equal(page.tier,'silver');assert.equal(page.booking_url,null);await db.exec('RESET ROLE');assert.equal((await db.query('SELECT booking_url FROM public.listing_webpages')).rows[0].booking_url,'https://book.example.test');
 await as(admin);await trial('end',{id:tp.id});assert.equal((await db.query("SELECT count(*)::int n FROM public.ad_subscriptions WHERE trial_id IS NULL AND status='active'")).rows[0].n,1);
-const dp={id:crypto.randomUUID(),listing_id:lid,package_id:banner,cohort:'public',duration_days:30,consent:true,headline:'Real advertiser headline',body_text:'Actual products for local customers',cta_url:'https://example.test',media_url:'https://example.test/art.png',banner_size:'rectangle'};await assert.rejects(trial('activate',{...dp,duration_days:15}),/30 days/);await trial('activate',dp);const ad=(await db.query("SELECT * FROM public.advertisements WHERE placement='marketplace-top'")).rows[0];assert.equal(ad.creative_metadata.source,'complimentary_trial');await db.query('INSERT INTO public.ad_events(advertisement_id,event_type,metadata) VALUES($1,$2,$3)',[ad.id,'click',{trial_id:'forged'}]);assert.equal((await trial('list')).rows.find(t=>t.id===dp.id).clicks,1);await trial('end',{id:dp.id});assert.equal((await db.query('SELECT status FROM public.advertisements WHERE id=$1',[ad.id])).rows[0].status,'cancelled');await db.close();
+const dp={id:crypto.randomUUID(),listing_id:lid,package_id:banner,cohort:'public',duration_days:30,consent:true,headline:'Real advertiser headline',body_text:'Actual products for local customers',cta_url:'https://example.test',media_url:'https://example.test/art.png',banner_size:'rectangle'};await assert.rejects(trial('activate',{...dp,duration_days:15}),/30 days/);await trial('activate',dp);const ad=(await db.query("SELECT * FROM public.advertisements WHERE placement='marketplace-top'")).rows[0];assert.equal(ad.creative_metadata.source,'complimentary_trial');await db.query('INSERT INTO public.ad_events(advertisement_id,event_type,metadata) VALUES($1,$2,$3)',[ad.id,'click',{trial_id:'forged'}]);assert.equal((await trial('list')).rows.find(t=>t.id===dp.id).clicks,1);await trial('end',{id:dp.id});assert.equal((await db.query('SELECT status FROM public.advertisements WHERE id=$1',[ad.id])).rows[0].status,'cancelled');const publicCatalogSnapshot = await catalog();await db.close();
 assert.equal(secureUrl('javascript:alert(1)'), '');assert.equal(secureUrl('https://user:secret@example.test'),'');const card=marketCard({...payload,title:'<script>alert(1)</script>'});assert(!card.includes('<script>'));assert(card.includes('&lt;script&gt;'));const png=new File([new Uint8Array([137,80,78,71,13,10,26,10,0,0,0,0])],'flyer.png',{type:'image/png'});assert.equal((await validateMarketImage(png)).mime,'image/png');await assert.rejects(validateMarketImage(new File(['<svg/>'],'bad.svg')),/JPG/);
 const fake=async()=>new Response(JSON.stringify({rows:[{...payload,image_path:payload.id+'/'+crypto.randomUUID()+'.png'}],total:1}),{status:200});const rendered=await renderMarketplace(new URL('https://ussehub.com/marketplace?id='+payload.id),process.cwd(),fake);assert.equal(rendered.status,200);assert(rendered.body.includes('application/ld+json'));assert(rendered.body.includes('/marketplace/flyers/'+payload.id));assert.equal((await renderMarketplace(new URL('https://ussehub.com/marketplace?id=invalid'),process.cwd(),fake)).status,404);assert.equal(await marketplaceImage('invalid',fake),null);
 console.log('Marketplace passed: role isolation, private uploads, moderation, permission checks, weekly limits, retries, withdrawal/expiry, real-business trials, paid preservation, automatic entitlement fallback, accurate trial event attribution, safe images/links and server-rendered share pages.');
@@ -181,6 +213,7 @@ const sampleFlyers = Array.from({ length: 13 }, (_, index) => ({
 }));
 
 const fixture = async (_url, options) => {
+    if (String(_url).endsWith('/business_taxonomy')) return Response.json(publicCatalogSnapshot);
     const { p_payload: filter } = JSON.parse(options.body);
     const matching = sampleFlyers.filter(item =>
         (!filter.id || item.id === filter.id) &&
@@ -195,6 +228,8 @@ const browsePage = path => renderMarketplace(new URL(path, 'https://ussehub.com'
 const visibleCards = html => [...html.matchAll(/class="market-card flyer-card flyer-card-compact"/g)].length;
 const firstPage = await browsePage('/marketplace');
 assert.equal(visibleCards(firstPage.body), 6);
+assert.match(firstPage.body, /New market category/);
+assert.match(firstPage.body, /Gospel Concerts/);
 assert.match(firstPage.body, /1–6 of 13 posts/);
 assert.match(firstPage.body, /href="\/marketplace\?offset=6#marketplace-results"/);
 

@@ -5,6 +5,7 @@ import { execFileSync } from 'child_process';
 const htmlFiles = [
     'index.html',
     'ajm-marketplace-admin.html',
+    'ajm-categories.html',
     'ajm-marketplace.html',
     'ajm-marketplace-manage.html',
     'ajm-jobzone.html',
@@ -53,7 +54,7 @@ for (const filename of htmlFiles) {
     assert(!duplicates.length, `${filename} contains duplicate DOM ids: ${duplicates.join(', ')}`);
 }
 
-for (const name of fs.readdirSync('assets').filter(name => (name.startsWith('usse-referral') || name.startsWith('usse-marketplace')) && name.endsWith('.mjs'))) {
+for (const name of fs.readdirSync('assets').filter(name => (name.startsWith('usse-referral') || name.startsWith('usse-marketplace') || name.startsWith('usse-taxonomy')) && name.endsWith('.mjs'))) {
     try { new vm.SourceTextModule(fs.readFileSync(`assets/${name}`, 'utf8'), {identifier: name}); }
     catch(error) { errors.push(`${name}: ${error.message}`); }
 }

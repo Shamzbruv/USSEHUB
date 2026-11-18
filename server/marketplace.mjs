@@ -1,6 +1,7 @@
+import {businessTaxonomy} from './business-taxonomy.mjs';
 import fs from'node:fs';import path from'node:path';
 import{SUPABASE_URL,SUPABASE_ANON_KEY}from'../assets/usse-public-config.mjs';
-import{marketCard,escapeHtml as e,MARKET_CATEGORIES,MARKET_SEGMENTS,MARKETPLACE_PAGE_SIZE}from'../assets/usse-marketplace-core.mjs';
+import{marketCard,escapeHtml as e,MARKETPLACE_PAGE_SIZE}from'../assets/usse-marketplace-core.mjs';
 import{head,replaceHead,jsonLd,ORIGIN,breadcrumbs}from'./seo-core.mjs';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export async function marketplaceData(payload,fetchImpl=fetch){const r=await fetchImpl(SUPABASE_URL+'/rest/v1/rpc/marketplace_public',{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_payload:payload}),signal:AbortSignal.timeout(7000)});if(!r.ok)throw new Error('Marketplace service unavailable');const data=await r.json();if(!Array.isArray(data?.rows)||!Number.isFinite(Number(data.total)))throw new Error('Invalid Marketplace response');return{rows:data.rows.filter(f=>uuid.test(f.id)),total:Number(data.total)};}
@@ -14,8 +15,8 @@ function marketplaceBrowseUrl({ category, segment, search, offset, format }) {
     return '/marketplace' + (query.size ? '?' + query : '');
 }
 
-function marketplaceFilters({ category, segment, search, format }) {
-    const categories = ['', ...MARKET_CATEGORIES];
+function marketplaceFilters({ category, segment, search, format }, taxonomy) {
+    const categories = ['', ...Object.keys(taxonomy)];
     const links = categories.map(value => {
         const href = marketplaceBrowseUrl({ category: value, search, format }) + '#marketplace-results';
         return `<a class="button" href="${e(href)}"${value === category ? ' aria-current="true"' : ''}>${e(value || 'All opportunities')}</a>`;
@@ -23,7 +24,7 @@ function marketplaceFilters({ category, segment, search, format }) {
     const options = categories.map(value => (
         `<option value="${e(value)}"${value === category ? ' selected' : ''}>${e(value || 'All categories')}</option>`
     )).join('');
-    const segments = category ? MARKET_SEGMENTS[category] || [] : Object.values(MARKET_SEGMENTS).flat();
+    const segments = category ? taxonomy[category] || [] : Object.values(taxonomy).flat();
     const segmentOptions = segments.map(value =>
         `<option value="${e(value)}"${value === segment ? ' selected' : ''}>${e(value)}</option>`
     ).join('');
@@ -89,9 +90,10 @@ export async function renderMarketplace(url, root, fetchImpl = fetch) {
     const id = url.searchParams.get('id');
     if (id && !uuid.test(id)) return { status: 404, body: 'Flyer not found.' };
 
+    const { marketplace: taxonomy } = await businessTaxonomy(fetchImpl);
     const requestedCategory = url.searchParams.get('category');
-    const category = MARKET_CATEGORIES.includes(requestedCategory) ? requestedCategory : '';
-    const validSegments = category ? MARKET_SEGMENTS[category] || [] : Object.values(MARKET_SEGMENTS).flat();
+    const category = Object.hasOwn(taxonomy, requestedCategory) ? requestedCategory : '';
+    const validSegments = category ? taxonomy[category] || [] : Object.values(taxonomy).flat();
     const requestedSegment = url.searchParams.get('segment');
     const segment = validSegments.includes(requestedSegment) ? requestedSegment : '';
     const format = url.searchParams.get('format') === 'mini-ad' ? 'mini-ad' : '';
@@ -153,7 +155,8 @@ export async function renderMarketplace(url, root, fetchImpl = fetch) {
         const pool = (isFirstPage ? data.rows : separatePreviews?.rows || []);
         const previews = pool.map(({ id, title, mime }) => ({ id, title, mime }));
         html = html
-            .replace('<!-- marketplace filters -->', () => marketplaceFilters(payload))
+            .replace('<!-- marketplace filters -->', () => marketplaceFilters(payload, taxonomy))
+            .replace('</main>', () => `<script id="marketplace-taxonomy" type="application/json">${jsonLd(taxonomy)}</script></main>`)
             .replace('<!-- marketplace pagination -->', () => marketplacePagination(payload, data.total, rows.length))
             .replace('</main>', () => `<script id="marketplace-previews" type="application/json">${jsonLd(previews)}</script></main>`);
     }

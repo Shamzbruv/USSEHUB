@@ -88,6 +88,10 @@
     {
       "source": "/ajm-marketplace-manage",
       "destination": "/ajm-marketplace-manage.html"
+    },
+    {
+      "source": "/ajm-categories",
+      "destination": "/ajm-categories.html"
     }
   ],
   "headers": [
