@@ -117,7 +117,7 @@
   for (const container of document.querySelectorAll('#admin-content,#app,#workspace')) observer.observe(container, {attributes:true,attributeFilter:['style','hidden','class']});
   body.classList.add('hub-enhanced');
 
-  if (['admin-app','ajm-marketplace-admin','ajm-jobzone-admin'].includes(page)) return;
+  if (['admin-app','ajm-marketplace-admin','ajm-jobzone-admin','ajm-categories'].includes(page)) return;
   const host = document.querySelector('#admin-content, #app, body > main');
   if (host) {
     const intro = document.createElement('div'); intro.className = 'hub-work-intro';
