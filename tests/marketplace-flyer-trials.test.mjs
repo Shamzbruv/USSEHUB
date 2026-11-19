@@ -102,6 +102,7 @@ await assert.rejects(manage('edit', { ...edit, id: memberPoster.id }), /administ
 await db.exec('RESET ROLE');
 await db.exec(fs.readFileSync('supabase/migrations/20261115010000_marketplace_segments_mini_ads.sql', 'utf8'));
 await db.exec(fs.readFileSync('supabase/migrations/20261118203534_admin_business_taxonomy.sql', 'utf8'));
+await db.exec(fs.readFileSync('supabase/migrations/20261119133032_taxonomy_removal_restore.sql', 'utf8'));
 const catalog = async () => (await db.query('SELECT public.business_taxonomy() result')).rows[0].result;
 const addChoice = async (scope, parent, name) => (await db.query(
     'SELECT public.add_business_taxonomy_entry($1,$2,$3) result', [scope, parent, name]
@@ -132,6 +133,50 @@ await assert.rejects(addChoice('directory', ['NEW DIRECTORY CATEGORY', 'MISSING'
 const newCategoryDraft = { ...quickPoster, id: crypto.randomUUID(), request_id: crypto.randomUUID(), category: 'New market category', segment: 'New service' };
 assert.match((await manage('reserve', newCategoryDraft)).path, /\.png$/);
 await assert.rejects(manage('reserve', { ...newCategoryDraft, id: crypto.randomUUID(), segment: 'Gospel Concerts' }), /selected category/);
+
+const manageTaxonomy = async (action, scope, path = [], expected = null) => (await db.query(
+    'SELECT public.manage_business_taxonomy($1,$2,$3,$4::jsonb) result', [action, scope, path, JSON.stringify(expected)]
+)).rows[0].result;
+await as('', 'anon');
+await assert.rejects(manageTaxonomy('list', 'marketplace'), /permission denied/);
+await as(member);
+await assert.rejects(manageTaxonomy('remove', 'marketplace', ['General'], []), /administrator/);
+await as(admin);
+await assert.rejects(manageTaxonomy('remove', 'marketplace', ['New market category'], ['Stale choice']), /changed/);
+const beforeRemoval = (await manage('list')).rows.find(row => row.id === newCategoryDraft.id);
+await manageTaxonomy('remove', 'marketplace', ['New market category', 'New service'], 'New service');
+await manageTaxonomy('remove', 'marketplace', ['New market category', 'New service'], 'New service');
+assert.deepEqual((await catalog()).marketplace['New market category'], []);
+await assert.rejects(manage('reserve', { ...newCategoryDraft, id: crypto.randomUUID(), request_id: crypto.randomUUID() }), /selected category/);
+await manage('edit', { ...newCategoryDraft, title: 'Edited after category removal', expected_updated_at: beforeRemoval.updated_at });
+assert.equal((await manage('list')).rows.find(row => row.id === newCategoryDraft.id).segment, 'New service');
+await addChoice('marketplace', ['New market category'], 'NEW SERVICE');
+assert.deepEqual((await catalog()).marketplace['New market category'], ['New service']);
+await manageTaxonomy('remove', 'marketplace', ['New market category'], ['New service']);
+assert.equal((await catalog()).marketplace['New market category'], undefined);
+await assert.rejects(addChoice('marketplace', ['New market category'], 'Child of removed parent'), /parent category/);
+await addChoice('marketplace', [], 'NEW MARKET CATEGORY');
+assert.deepEqual((await catalog()).marketplace['New market category'], ['New service']);
+for (const [path, expected] of [
+    [['NEW DIRECTORY CATEGORY', 'NEW SUBCATEGORY', 'specific', 'NEW TYPE'], 'NEW TYPE'],
+    [['NEW DIRECTORY CATEGORY', 'NEW SUBCATEGORY', 'tertiary', 'NEW SPECIALIZATION'], 'NEW SPECIALIZATION'],
+    [['NEW DIRECTORY CATEGORY', 'NEW SUBCATEGORY'], {tertiary:['NEW SPECIALIZATION'],specific:['NEW TYPE']}],
+    [['NEW DIRECTORY CATEGORY'], {'NEW SUBCATEGORY':{tertiary:['NEW SPECIALIZATION'],specific:['NEW TYPE']}}]
+]) {
+    const removed = await manageTaxonomy('remove', 'directory', path, expected);
+    assert.ok(removed.hidden.some(choice => JSON.stringify(choice.path) === JSON.stringify(path)));
+    const activeParent = path.slice(0,-1).reduce((value,key) => value?.[key], removed.catalogue.directory);
+    assert.ok(Array.isArray(activeParent) ? !activeParent.includes(path.at(-1)) : activeParent?.[path.at(-1)] === undefined, 'The same response must contain the updated active choices');
+    const restored = await manageTaxonomy('restore', 'directory', path);
+    assert.ok(!restored.hidden.some(choice => JSON.stringify(choice.path) === JSON.stringify(path)));
+    await manageTaxonomy('restore', 'directory', path);
+}
+await assert.rejects(manageTaxonomy('remove', 'directory', ['NEW DIRECTORY CATEGORY','NEW SUBCATEGORY','notes','anything'], 'anything'), /current list/);
+await db.exec('RESET ROLE');
+assert.equal((await db.query('SELECT count(*)::integer n FROM private.business_taxonomy_hidden')).rows[0].n, 0);
+await as(admin);
+console.log('Category removal passed: admin permissions, reversible removal, retained descendants, add-to-restore, stale requests, duplicate retries and existing post edits.');
+
 
 await as(member);
 const memberOriginal = (await manage('list')).rows.find(row => row.id === memberPoster.id);

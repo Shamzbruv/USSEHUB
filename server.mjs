@@ -31,7 +31,7 @@ export function createSiteServer({jobs=publicJobClient(),fetchImpl=fetch,root=RO
    if (pathname === '/taxonomy.js') {
     const taxonomy = await businessTaxonomy(fetchImpl);
     const source = fs.readFileSync(path.join(root, 'taxonomy.js'), 'utf8')
-     .replace('// live taxonomy additions', () => 'Object.assign(TAXONOMY, ' + jsonLd(taxonomy.directory) + ');');
+     .replace('// live taxonomy additions', () => 'for (const key of Object.keys(TAXONOMY)) delete TAXONOMY[key]; Object.assign(TAXONOMY, ' + jsonLd(taxonomy.directory) + ');');
     return send(req, res, 200, source, 'text/javascript; charset=utf-8', {'Cache-Control': 'no-store'});
    }
    if(['/marketplace','/ajm-marketplace','/ajm-marketplace.html'].includes(pathname)){

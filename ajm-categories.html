@@ -18,11 +18,18 @@
         .taxonomy-layout input,.taxonomy-layout select { width:100%; min-width:0; min-height:48px; padding:12px; border:1px solid var(--hub-line); border-radius:10px; color:var(--hub-ink); background:var(--hub-paper) }
         #taxonomy-list details { padding:12px 0; border-bottom:1px solid var(--hub-line); overflow-wrap:anywhere }
         #taxonomy-list summary { cursor:pointer; font-weight:700; padding:8px 0 }
-        #taxonomy-list li { margin:8px 0 }
+        .taxonomy-choice { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:9px 0; overflow-wrap:anywhere }
+        .taxonomy-choice > span { min-width:0 }
+        .taxonomy-choice button { flex-shrink:0; min-height:44px; padding:8px 14px }
+        .taxonomy-removed > span { color:var(--hub-muted) }
+        .taxonomy-removed small { display:block }
+        .taxonomy-subgroup { border-top:1px solid var(--hub-line); margin-top:10px; padding-top:10px }
+        .taxonomy-subgroup > .taxonomy-choice { font-weight:700 }
+        .taxonomy-subchoices { padding-left:16px }
         #taxonomy-parent-fields [hidden] { display:none }
         @media(max-width:800px) { .taxonomy-layout { grid-template-columns:minmax(0,1fr) } }
     </style>
-    <script type="module" src="/assets/usse-taxonomy-admin.mjs?v=20261118"></script>
+    <script type="module" src="/assets/usse-taxonomy-admin.mjs?v=20261119-remove"></script>
 </head>
 <body class="hub-admin" data-hub-page="ajm-categories">
     <header class="market-site-header">
@@ -31,7 +38,7 @@
     </header>
     <main class="market-shell">
         <h1>Categories &amp; subsegments</h1>
-        <p>Add choices for Marketplace posts or Web Listings and their business webpages. Refresh an open posting form after saving to load the latest choices.</p>
+        <p>Add, remove or restore choices for Marketplace posts or Web Listings and their business webpages. Refresh an open posting form after saving to load the latest choices.</p>
         <p id="taxonomy-notice" class="market-notice" role="status" aria-live="polite">Checking your administrator account…</p>
         <section id="taxonomy-login" class="market-card" hidden>
             <h2>Sign in with your administrator account</h2>
@@ -61,11 +68,18 @@
                 </section>
                 <section class="market-card">
                     <div class="market-top"><h2>Current choices</h2><button id="taxonomy-refresh" type="button">Refresh</button></div>
+                    <p>Open a category to remove individual choices or restore removed ones.</p>
                     <label>Find a category or service<input id="taxonomy-search" type="search" placeholder="Search choices"></label>
                     <div id="taxonomy-list"></div>
                 </section>
             </div>
         </div>
     </main>
+<dialog id="taxonomy-remove-dialog" class="market-modal" aria-labelledby="taxonomy-remove-title">
+    <h2 id="taxonomy-remove-title">Remove choice?</h2>
+    <p id="taxonomy-remove-description"></p>
+    <div class="market-actions"><button id="taxonomy-remove-cancel" type="button">Cancel</button><button id="taxonomy-remove-confirm" type="button" class="primary">Remove choice</button></div>
+    <p id="taxonomy-remove-result" role="status" aria-live="polite"></p>
+</dialog>
 </body>
 </html>

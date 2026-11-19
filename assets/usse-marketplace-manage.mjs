@@ -61,13 +61,14 @@ const categoryOptions = marketCategories.map(category => `<option>${e(category)}
 form.elements.category.innerHTML = '<option value="">Choose a category</option>' + categoryOptions;
 editForm.elements.category.innerHTML = categoryOptions;
 
-function updateSegments(target, value = '') {
+function updateSegments(target, value = '', preserveExisting = false) {
     const segments = marketSegments[target.elements.category.value] || [];
     const select = target.elements.segment;
     select.innerHTML = '<option value="">No subsegment</option>' +
         segments.map(segment => `<option>${e(segment)}</option>`).join('');
-    select.disabled = segments.length === 0;
-    select.value = segments.includes(value) ? value : '';
+    if (preserveExisting && value && !segments.includes(value)) select.append(new Option(value + ' (existing choice)', value));
+    select.disabled = segments.length === 0 && !(preserveExisting && value);
+    select.value = segments.includes(value) || preserveExisting ? value : '';
 }
 
 for (const target of [form, editForm]) {
@@ -313,8 +314,12 @@ function canEditPost(flyer) {
 function openFlyerEditor(flyer) {
     if (!canEditPost(flyer) || editDialog.open) return;
     editFlyer = flyer;
+    editForm.elements.category.innerHTML = categoryOptions;
+    if (flyer.category && !marketCategories.includes(flyer.category)) {
+        editForm.elements.category.append(new Option(flyer.category + ' (existing choice)', flyer.category));
+    }
     for (const name of flyerFields) editForm.elements[name].value = flyer[name] || '';
-    updateSegments(editForm, flyer.segment);
+    updateSegments(editForm, flyer.segment, true);
     $('market-edit-help').textContent = !admin && flyer.status === 'published'
         ? 'Saving changes sends this post back to AJM for review. It will return to the same link once approved.'
         : 'Update the text, classification or contact link for this post.';
